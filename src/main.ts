@@ -79,6 +79,15 @@ interface AjandaKaydi {
   anaEvrakIsmi?: string;
 }
 
+type BildirimTur = 'success' | 'error' | 'info';
+
+interface UygulamaBildirimi {
+  id: number;
+  tur: BildirimTur;
+  baslik: string;
+  mesaj?: string;
+}
+
 type SayfaTipi = 'dashboard' | 'davalar' | 'icralar' | 'arabuluculuk' | 'sablonlar' | 'muhasebe' | 'iliskiler' | 'ajanda' | 'detay' | 'icraDetay' | 'arabuluculukDetay';
 type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
 
@@ -988,6 +997,66 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                     </div>
                   </div>
 
+                  <div [class]="getAktifDosyaKapakKartiClass()" class="rounded-[1.75rem] border p-6 shadow-sm overflow-hidden relative">
+                    <div class="absolute -right-10 -top-12 h-40 w-40 rounded-full bg-white/35 blur-2xl"></div>
+                    <div class="absolute -bottom-10 left-0 h-28 w-28 rounded-full bg-white/25 blur-2xl"></div>
+                    <div class="relative grid grid-cols-1 xl:grid-cols-12 gap-6">
+                      <div class="xl:col-span-8">
+                        <div class="flex flex-wrap items-center gap-2 mb-4">
+                          <span [class]="getAktifDosyaTemaRozetClass()" class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-[0.18em] border">{{ getAktifDosyaTurEtiketi() }}</span>
+                          <span [class]="getAktifDosyaDurumSinifi()" class="px-3 py-1 rounded-full text-[11px] font-bold">{{ aktifDosya.durum }}</span>
+                        </div>
+                        <h3 class="text-3xl font-black text-slate-900 tracking-tight">{{ getAktifDosyaReferansMetni() }}</h3>
+                        <p class="mt-3 text-sm font-medium leading-relaxed text-slate-700">{{ getAktifDosyaTarafOzeti() }}</p>
+
+                        <div class="grid gap-3 sm:grid-cols-3 mt-5">
+                          <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ getAktifDosyaBirincilEtiket() }}</p>
+                            <p class="mt-1 text-sm font-bold text-slate-800">{{ getAktifDosyaBirincilDeger() }}</p>
+                          </div>
+                          <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ getAktifDosyaIkincilEtiket() }}</p>
+                            <p class="mt-1 text-sm font-bold text-slate-800">{{ getAktifDosyaIkincilDeger() }}</p>
+                          </div>
+                          <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Arşiv Yeri</p>
+                            <p class="mt-1 text-sm font-bold text-slate-800">{{ aktifDosya.arsivYeri || 'Belirtilmedi' }}</p>
+                          </div>
+                        </div>
+
+                        @if (getAktifDosyaBaglantiOzeti()) {
+                          <div class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2 text-xs font-bold text-slate-700 shadow-sm">
+                            <svg class="h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            {{ getAktifDosyaBaglantiOzeti() }}
+                          </div>
+                        }
+                      </div>
+
+                      <div class="xl:col-span-4 grid grid-cols-2 gap-3">
+                        <div class="rounded-2xl border border-white/70 bg-white/90 px-4 py-4 shadow-sm">
+                          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ getAktifDosyaKritikTarihEtiketi() }}</p>
+                          <p class="mt-2 text-base font-black text-slate-900">{{ getAktifDosyaKritikTarihMetni() }}</p>
+                          <p class="mt-2 inline-flex rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">{{ getAktifDosyaKritikTarihDurumu() }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/70 bg-white/90 px-4 py-4 shadow-sm">
+                          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kalan Ücret</p>
+                          <p class="mt-2 text-base font-black text-slate-900">{{ formatPara(getDosyaFinans(aktifDosya).kalanVekalet) }}</p>
+                          <p class="mt-2 text-[10px] font-bold text-emerald-600">Tahsil edilen: {{ formatPara(getDosyaFinans(aktifDosya).toplamTahsilat) }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/70 bg-white/90 px-4 py-4 shadow-sm">
+                          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Toplam Evrak</p>
+                          <p class="mt-2 text-2xl font-black text-slate-900">{{ getAktifDosyaToplamEvrakSayisi() }}</p>
+                          <p class="mt-2 text-[10px] font-bold text-slate-500">Ana evrak ve alt ekler dahil</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/70 bg-white/90 px-4 py-4 shadow-sm">
+                          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Süreli İş</p>
+                          <p class="mt-2 text-2xl font-black text-slate-900">{{ aktifDosyaSureliIsleri.length }}</p>
+                          <p class="mt-2 text-[10px] font-bold text-rose-600">{{ aktifDosyaSureliIsleri.length > 0 ? 'Takip gerektiriyor' : 'Şu an temiz' }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div class="lg:col-span-7 space-y-6">
                       <div [class]="getAktifDosyaBilgiKartiClass()" class="p-6 rounded-xl shadow-sm grid grid-cols-2 gap-4">
@@ -1295,6 +1364,35 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
           </div>
         </main>
       </div>
+
+      @if (bildirimler.length > 0) {
+        <div class="fixed bottom-4 right-4 z-[60] flex w-full max-w-sm flex-col gap-3 pointer-events-none">
+          @for (bildirim of bildirimler; track bildirim.id) {
+            <div [class]="getBildirimClass(bildirim.tur)" class="pointer-events-auto rounded-2xl border p-4 shadow-2xl backdrop-blur-sm">
+              <div class="flex items-start gap-3">
+                <div [class]="getBildirimIkonClass(bildirim.tur)" class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
+                  @if (bildirim.tur === 'success') {
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7"></path></svg>
+                  } @else if (bildirim.tur === 'error') {
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  } @else {
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  }
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-black text-slate-900">{{ bildirim.baslik }}</p>
+                  @if (bildirim.mesaj) {
+                    <p class="mt-1 text-xs font-medium text-slate-600 leading-relaxed">{{ bildirim.mesaj }}</p>
+                  }
+                </div>
+                <button type="button" (click)="bildirimKapat(bildirim.id)" class="rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/70 hover:text-slate-600">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
 
       <!-- BUTUN FORMLAR VE MODALLAR (HER ZAMAN VE HER SAYFADA CALISABILMESI ICIN DISARIYA ALINDI) -->
       @if (davaFormAcik) {
@@ -1633,6 +1731,8 @@ export class App implements OnInit {
   authInitialized = false; yukleniyor = false; islemYapiyor = false; sistemHatasi = '';
   
   emailGiris = ''; sifreGiris = ''; authModu: 'giris' | 'kayit' = 'giris'; authHata = ''; authYukleniyor = false;
+  bildirimler: UygulamaBildirimi[] = [];
+  bildirimSayaci = 0;
 
   davalar: DavaDosyasi[] = []; icralar: IcraDosyasi[] = []; arabuluculukDosyalar: ArabuluculukDosyasi[] = []; muvekkiller: Muvekkil[] = [];
   aktifSayfa: SayfaTipi = 'dashboard'; seciliDava: DavaDosyasi | null = null; seciliIcra: IcraDosyasi | null = null; seciliArabuluculuk: ArabuluculukDosyasi | null = null;
@@ -1735,15 +1835,92 @@ export class App implements OnInit {
     });
   }
 
-  async davaKaydetCloud(d: DavaDosyasi) { if (!this.user) return; this.islemYapiyor=true; try { await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'davalar', d.id.toString()), JSON.parse(JSON.stringify(d))); } catch(e){} finally{this.islemYapiyor=false;} }
-  async davaSilCloud(id: number) { if (!this.user) return; try { await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'davalar', id.toString())); } catch (e) {} }
-  async icraKaydetCloud(i: IcraDosyasi) { if (!this.user) return; this.islemYapiyor=true; try { await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'icralar', i.id.toString()), JSON.parse(JSON.stringify(i))); } catch(e){} finally{this.islemYapiyor=false;} }
-  async icraSilCloud(id: number) { if (!this.user) return; try { await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'icralar', id.toString())); } catch (e) {} }
-  async arabuluculukKaydetCloud(a: ArabuluculukDosyasi) { if (!this.user) return; this.islemYapiyor=true; try { await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk', a.id.toString()), JSON.parse(JSON.stringify(a))); } catch(e){} finally{this.islemYapiyor=false;} }
-  async arabuluculukSilCloud(id: number) { if (!this.user) return; try { await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk', id.toString())); } catch (e) {} }
-  async muvekkilKaydetCloud(m: Muvekkil) { if (!this.user) return; this.islemYapiyor=true; try { await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'muvekkiller', m.id.toString()), JSON.parse(JSON.stringify(m))); } catch(e){ console.error(e); } finally{ this.islemYapiyor=false; } }
-  async muvekkilSilCloud(id: number) { if (!this.user) return; try { await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'muvekkiller', id.toString())); } catch (e) {} }
-  async sablonlariKaydetCloud() { if (!this.user) return; try { await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'sablonlar'), JSON.parse(JSON.stringify(this.sablonlar))); } catch (e) {} }
+  async davaKaydetCloud(d: DavaDosyasi, basariMesaji?: string) {
+    if (!this.user) return;
+    this.islemYapiyor = true;
+    try {
+      await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'davalar', d.id.toString()), JSON.parse(JSON.stringify(d)));
+      if (basariMesaji) this.bildirimGoster('success', 'Dava dosyası kaydedildi', basariMesaji);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Dava dosyası kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+    } finally { this.islemYapiyor = false; }
+  }
+  async davaSilCloud(id: number, basariMesaji?: string) {
+    if (!this.user) return;
+    try {
+      await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'davalar', id.toString()));
+      if (basariMesaji) this.bildirimGoster('success', 'Dava dosyası silindi', basariMesaji);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Dava dosyası silinemedi', e?.message || 'Silme işlemi tamamlanamadı.');
+    }
+  }
+  async icraKaydetCloud(i: IcraDosyasi, basariMesaji?: string) {
+    if (!this.user) return;
+    this.islemYapiyor = true;
+    try {
+      await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'icralar', i.id.toString()), JSON.parse(JSON.stringify(i)));
+      if (basariMesaji) this.bildirimGoster('success', 'İcra dosyası kaydedildi', basariMesaji);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'İcra dosyası kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+    } finally { this.islemYapiyor = false; }
+  }
+  async icraSilCloud(id: number, basariMesaji?: string) {
+    if (!this.user) return;
+    try {
+      await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'icralar', id.toString()));
+      if (basariMesaji) this.bildirimGoster('success', 'İcra dosyası silindi', basariMesaji);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'İcra dosyası silinemedi', e?.message || 'Silme işlemi tamamlanamadı.');
+    }
+  }
+  async arabuluculukKaydetCloud(a: ArabuluculukDosyasi, basariMesaji?: string) {
+    if (!this.user) return;
+    this.islemYapiyor = true;
+    try {
+      await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk', a.id.toString()), JSON.parse(JSON.stringify(a)));
+      if (basariMesaji) this.bildirimGoster('success', 'Arabuluculuk dosyası kaydedildi', basariMesaji);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Arabuluculuk dosyası kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+    } finally { this.islemYapiyor = false; }
+  }
+  async arabuluculukSilCloud(id: number, basariMesaji?: string) {
+    if (!this.user) return;
+    try {
+      await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk', id.toString()));
+      if (basariMesaji) this.bildirimGoster('success', 'Arabuluculuk dosyası silindi', basariMesaji);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Arabuluculuk dosyası silinemedi', e?.message || 'Silme işlemi tamamlanamadı.');
+    }
+  }
+  async muvekkilKaydetCloud(m: Muvekkil, basariMesaji?: string) {
+    if (!this.user) return;
+    this.islemYapiyor = true;
+    try {
+      await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'muvekkiller', m.id.toString()), JSON.parse(JSON.stringify(m)));
+      if (basariMesaji) this.bildirimGoster('success', 'Kişi kaydı kaydedildi', basariMesaji);
+    } catch (e: any) {
+      console.error(e);
+      this.bildirimGoster('error', 'Kişi kaydı kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+    } finally { this.islemYapiyor = false; }
+  }
+  async muvekkilSilCloud(id: number, basariMesaji?: string) {
+    if (!this.user) return;
+    try {
+      await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'muvekkiller', id.toString()));
+      if (basariMesaji) this.bildirimGoster('success', 'Kişi kaydı silindi', basariMesaji);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Kişi kaydı silinemedi', e?.message || 'Silme işlemi tamamlanamadı.');
+    }
+  }
+  async sablonlariKaydetCloud(basariMesaji?: string) {
+    if (!this.user) return;
+    try {
+      await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'sablonlar'), JSON.parse(JSON.stringify(this.sablonlar)));
+      if (basariMesaji) this.bildirimGoster('success', 'Şablonlar kaydedildi', basariMesaji);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Şablonlar kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+    }
+  }
 
   sayfaDegistir(s: SayfaTipi) { this.aktifSayfa = s; if (s !== 'detay') this.seciliDava = null; if (s !== 'icraDetay') this.seciliIcra = null; if (s !== 'arabuluculukDetay') this.seciliArabuluculuk = null; this.aramaMetni = ''; }
 
@@ -2160,12 +2337,12 @@ export class App implements OnInit {
     const noStr = num.map(n => `${n.tur}: ${n.no}`).join(' | ');
     if (this.formModu === 'ekle') {
       const y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: m?.id || Number(this.islemGorenDava.muvekkilId), muvekkil: m?.adSoyad || 'Bilinmiyor', muvekkilPozisyonu: this.islemGorenDava.muvekkilPozisyonu, karsiTaraf: this.islemGorenDava.karsiTaraf || '-', mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: this.islemGorenDava.baglantiliIcraId, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', finansalIslemler: [], evraklar: [] };
-      this.davaKaydetCloud(y);
-    } else { const g = { ...this.islemGorenDava, dosyaNo: noStr, dosyaNumaralari: num, muvekkil: m?.adSoyad || this.islemGorenDava.muvekkil } as DavaDosyasi; this.davaKaydetCloud(g); }
+      this.davaKaydetCloud(y, 'Yeni dava dosyası buluta eklendi.');
+    } else { const g = { ...this.islemGorenDava, dosyaNo: noStr, dosyaNumaralari: num, muvekkil: m?.adSoyad || this.islemGorenDava.muvekkil } as DavaDosyasi; this.davaKaydetCloud(g, 'Dava dosyasındaki bilgiler güncellendi.'); }
     this.davaFormKapat();
   }
-  durumGuncelle(d: DavaDosyasi, yD: string) { const k = {...d}; k.durum = yD as any; if (k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = ''; this.davaKaydetCloud(k); }
-  dosyaSil(id: number) { this.davaSilCloud(id); this.silinecekDavaId = null; }
+  durumGuncelle(d: DavaDosyasi, yD: string) { const k = {...d}; k.durum = yD as any; if (k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = ''; this.davaKaydetCloud(k, 'Dava durum etiketi güncellendi.'); }
+  dosyaSil(id: number) { this.davaSilCloud(id, 'Dava dosyası kayıttan kaldırıldı.'); this.silinecekDavaId = null; }
 
   icraFormunuAc(i?: IcraDosyasi) {
     this.formHata = '';
@@ -2186,12 +2363,12 @@ export class App implements OnInit {
     const m = this.muvekkiller.find(x => x.id == this.islemGorenIcra.muvekkilId);
     if (this.formModu === 'ekle') {
       const y: IcraDosyasi = { id: Date.now(), icraDairesi: this.islemGorenIcra.icraDairesi || '', dosyaNo: this.islemGorenIcra.dosyaNo || '', muvekkilId: m?.id, muvekkil: m?.adSoyad || 'Bilinmiyor', alacakli: this.islemGorenIcra.alacakli || '-', borclu: this.islemGorenIcra.borclu || '-', takipTipi: this.islemGorenIcra.takipTipi || '', takipTarihi: this.islemGorenIcra.takipTarihi || '', durum: this.islemGorenIcra.durum as any, baglantiliDavaId: this.islemGorenIcra.baglantiliDavaId, arsivYeri: this.islemGorenIcra.arsivYeri || '', vekaletUcreti: this.islemGorenIcra.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [] };
-      this.icraKaydetCloud(y);
-    } else { const g = { ...this.islemGorenIcra, muvekkil: m?.adSoyad || this.islemGorenIcra.muvekkil } as IcraDosyasi; this.icraKaydetCloud(g); }
+      this.icraKaydetCloud(y, 'Yeni icra dosyası buluta eklendi.');
+    } else { const g = { ...this.islemGorenIcra, muvekkil: m?.adSoyad || this.islemGorenIcra.muvekkil } as IcraDosyasi; this.icraKaydetCloud(g, 'İcra dosyasındaki bilgiler güncellendi.'); }
     this.icraFormKapat();
   }
-  icraDurumGuncelle(i: IcraDosyasi, yD: string) { const k = {...i}; k.durum = yD as any; this.icraKaydetCloud(k); }
-  icraSil(id: number) { this.icraSilCloud(id); this.silinecekIcraId = null; }
+  icraDurumGuncelle(i: IcraDosyasi, yD: string) { const k = {...i}; k.durum = yD as any; this.icraKaydetCloud(k, 'İcra dosyasının durumu güncellendi.'); }
+  icraSil(id: number) { this.icraSilCloud(id, 'İcra dosyası kayıttan kaldırıldı.'); this.silinecekIcraId = null; }
 
   arabuluculukFormAc(a?: ArabuluculukDosyasi) {
     this.formHata = '';
@@ -2216,12 +2393,12 @@ export class App implements OnInit {
 
     if (this.formModu === 'ekle') {
       const y: ArabuluculukDosyasi = { id: Date.now(), buroNo: this.islemGorenArabuluculuk.buroNo || '', arabuluculukNo: this.islemGorenArabuluculuk.arabuluculukNo || '', buro: this.islemGorenArabuluculuk.buro || '', basvuruTuru: this.islemGorenArabuluculuk.basvuruTuru as any, uyusmazlikTuru: this.islemGorenArabuluculuk.uyusmazlikTuru as any, taraflar: t, muvekkilId: this.islemGorenArabuluculuk.muvekkilId, toplantiTarihi: this.islemGorenArabuluculuk.toplantiTarihi, toplantiYontemi: this.islemGorenArabuluculuk.toplantiYontemi, durum: this.islemGorenArabuluculuk.durum as any, arsivYeri: this.islemGorenArabuluculuk.arsivYeri || '', vekaletUcreti: this.islemGorenArabuluculuk.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [] };
-      this.arabuluculukKaydetCloud(y);
-    } else { const g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', taraflar: t } as ArabuluculukDosyasi; this.arabuluculukKaydetCloud(g); }
+      this.arabuluculukKaydetCloud(y, 'Yeni arabuluculuk dosyası buluta eklendi.');
+    } else { const g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', taraflar: t } as ArabuluculukDosyasi; this.arabuluculukKaydetCloud(g, 'Arabuluculuk dosyasındaki bilgiler güncellendi.'); }
     this.arabuluculukFormKapat();
   }
-  arabuluculukDurumGuncelle(a: ArabuluculukDosyasi, yD: string) { const k = {...a}; k.durum = yD as any; this.arabuluculukKaydetCloud(k); }
-  arabuluculukSil(id: number) { this.arabuluculukSilCloud(id); this.silinecekArabuluculukId = null; }
+  arabuluculukDurumGuncelle(a: ArabuluculukDosyasi, yD: string) { const k = {...a}; k.durum = yD as any; this.arabuluculukKaydetCloud(k, 'Arabuluculuk durumu güncellendi.'); }
+  arabuluculukSil(id: number) { this.arabuluculukSilCloud(id, 'Arabuluculuk dosyası kayıttan kaldırıldı.'); this.silinecekArabuluculukId = null; }
 
   muvekkilFormunuAc(m?: Muvekkil) { 
     this.formHata = ''; this.formModu = m ? 'duzenle' : 'ekle'; 
@@ -2254,31 +2431,31 @@ export class App implements OnInit {
 
     if (this.formModu === 'ekle') {
       const y: Muvekkil = { id: Date.now(), tip: this.islemGorenMuvekkil.tip as any, _isNewDiger: this.islemGorenMuvekkil.tip === 'Diğer', adSoyad: this.islemGorenMuvekkil.adSoyad || '', tcKimlik: this.islemGorenMuvekkil.tcKimlik || '', telefon: this.islemGorenMuvekkil.telefon || '', eposta: this.islemGorenMuvekkil.eposta || '', adres: this.islemGorenMuvekkil.adres || '', bankaBilgileri: this.islemGorenMuvekkil.bankaBilgileri || '', vergiDairesi: this.islemGorenMuvekkil.vergiDairesi || '', vekaletnameUrl: vUrl, yetkililer: yList };
-      this.muvekkilKaydetCloud(y);
+      this.muvekkilKaydetCloud(y, 'Yeni kişi veya kurum kaydı oluşturuldu.');
     } else {
       const g = { ...this.islemGorenMuvekkil, yetkililer: yList, adSoyad: this.islemGorenMuvekkil.adSoyad || '', _isNewDiger: this.islemGorenMuvekkil.tip === 'Diğer', vekaletnameUrl: vUrl } as Muvekkil;
-      this.muvekkilKaydetCloud(g);
+      this.muvekkilKaydetCloud(g, 'Kişi veya kurum bilgileri güncellendi.');
       this.davalar.forEach(d => { if(d.muvekkilId === g.id && d.muvekkil !== g.adSoyad) { d.muvekkil = g.adSoyad!; this.davaKaydetCloud(d); }});
       this.icralar.forEach(i => { if(i.muvekkilId === g.id && i.muvekkil !== g.adSoyad) { i.muvekkil = g.adSoyad!; this.icraKaydetCloud(i); }});
     }
     this.muvekkilFormKapat();
   }
   muvekkilSil(id: number) {
-    if (this.davalar.some(d => d.muvekkilId === id) || this.icralar.some(i => i.muvekkilId === id) || this.arabuluculukDosyalar.some(a => a.muvekkilId === id)) return alert("Önce bu kişi/kuruma ait dosyaları silin.");
-    this.muvekkilSilCloud(id); this.silinecekMuvekkilId = null;
+    if (this.davalar.some(d => d.muvekkilId === id) || this.icralar.some(i => i.muvekkilId === id) || this.arabuluculukDosyalar.some(a => a.muvekkilId === id)) { this.bildirimGoster('error', 'Kayıt silinemedi', 'Bu kişi veya kuruma bağlı aktif dosyalar bulunduğu için önce dosyaları temizlemeniz gerekiyor.'); return; }
+    this.muvekkilSilCloud(id, 'Kişi veya kurum kaydı silindi.'); this.silinecekMuvekkilId = null;
   }
 
-  aktifDosyaKaydet(dosya: any) { if (this.aktifSayfa === 'icraDetay') this.icraKaydetCloud(dosya); else if (this.aktifSayfa === 'arabuluculukDetay') this.arabuluculukKaydetCloud(dosya); else this.davaKaydetCloud(dosya); }
-  aktifDosyaDurumGuncelle(yD: string) { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; k.durum = yD; if (this.aktifSayfa === 'detay' && k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = ''; this.aktifDosyaKaydet(k); }
+  aktifDosyaKaydet(dosya: any, basariMesaji?: string) { if (this.aktifSayfa === 'icraDetay') this.icraKaydetCloud(dosya, basariMesaji); else if (this.aktifSayfa === 'arabuluculukDetay') this.arabuluculukKaydetCloud(dosya, basariMesaji); else this.davaKaydetCloud(dosya, basariMesaji); }
+  aktifDosyaDurumGuncelle(yD: string) { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; k.durum = yD; if (this.aktifSayfa === 'detay' && k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = ''; this.aktifDosyaKaydet(k, 'Dosya durumu kaydedildi.'); }
 
   finansalIslemEkle() {
     if (!this.yeniIslem.tutar || !this.yeniIslem.aciklama || !this.aktifDosya) return;
     this.yeniIslem.aciklama = this.formatMetin(this.yeniIslem.aciklama);
     const k: any = {...this.aktifDosya}; if (!k.finansalIslemler) k.finansalIslemler = [];
     k.finansalIslemler.unshift({ id: Date.now(), tarih: this.yeniIslem.tarih || new Date().toISOString().split('T')[0], tur: this.yeniIslem.tur as any, tutar: this.yeniIslem.tutar, aciklama: this.yeniIslem.aciklama || '' });
-    this.aktifDosyaKaydet(k); this.yeniIslem = { tur: this.yeniIslem.tur, tarih: new Date().toISOString().split('T')[0], tutar: undefined, aciklama: '' };
+    this.aktifDosyaKaydet(k, 'Finans hareketi dosyaya eklendi.'); this.yeniIslem = { tur: this.yeniIslem.tur, tarih: new Date().toISOString().split('T')[0], tutar: undefined, aciklama: '' };
   }
-  finansalIslemSil(id: number) { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; k.finansalIslemler = k.finansalIslemler!.filter((i:any) => i.id !== id); this.aktifDosyaKaydet(k); }
+  finansalIslemSil(id: number) { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; k.finansalIslemler = k.finansalIslemler!.filter((i:any) => i.id !== id); this.aktifDosyaKaydet(k, 'Finans hareketi silindi.'); }
 
   klasorGecis(id: number) { this.acikKlasorler[id] = !this.acikKlasorler[id]; }
 
@@ -2288,9 +2465,9 @@ export class App implements OnInit {
     let url = this.yeniEvrak.url.trim(); if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
     const yeni = { id: Date.now(), isim: this.yeniEvrak.isim || 'İsimsiz', url: url, tarih: new Date().toISOString(), ekler: [], tebligTarihi: this.yeniEvrak.tebligTarihi, sonEylemTarihi: this.yeniEvrak.sonEylemTarihi, yaziRengi: this.getEvrakYaziRengi(this.yeniEvrak.yaziRengi) };
     if (this.aktifSayfa === 'sablonlar') {
-      this.sablonlar[this.aktifSablonSekmesi].unshift(yeni); this.sablonlariKaydetCloud();
+      this.sablonlar[this.aktifSablonSekmesi].unshift(yeni); this.sablonlariKaydetCloud('Yeni şablon listeye eklendi.');
     } else {
-      if (!this.aktifDosya) return; const k: any = {...this.aktifDosya}; if (!k.evraklar) k.evraklar = []; k.evraklar.unshift(yeni); this.aktifDosyaKaydet(k);
+      if (!this.aktifDosya) return; const k: any = {...this.aktifDosya}; if (!k.evraklar) k.evraklar = []; k.evraklar.unshift(yeni); this.aktifDosyaKaydet(k, 'Evrak bağlantısı dosyaya eklendi.');
     }
     this.yeniEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi };
   }
@@ -2306,12 +2483,12 @@ export class App implements OnInit {
       const sl = this.sablonlar[this.aktifSablonSekmesi];
       if (this.duzenlenenEvrakParentId) { const p = sl.find((e:any) => e.id === this.duzenlenenEvrakParentId); if (p && p.ekler) { const i = p.ekler.findIndex((e:any) => e.id === this.duzenlenenEvrakId); if (i !== -1) p.ekler[i] = this.duzenlenenEvrak as EvrakBaglantisi; } } 
       else { const i = sl.findIndex((e:any) => e.id === this.duzenlenenEvrakId); if (i !== -1) sl[i] = this.duzenlenenEvrak as EvrakBaglantisi; }
-      this.sablonlariKaydetCloud();
+      this.sablonlariKaydetCloud('Şablon bilgileri güncellendi.');
     } else {
       if (!this.aktifDosya) return; const k: any = {...this.aktifDosya};
       if (this.duzenlenenEvrakParentId) { const p = k.evraklar!.find((e:any) => e.id === this.duzenlenenEvrakParentId); if (p && p.ekler) { const i = p.ekler.findIndex((e:any) => e.id === this.duzenlenenEvrakId); if (i !== -1) p.ekler[i] = this.duzenlenenEvrak as EvrakBaglantisi; } } 
       else { const i = k.evraklar!.findIndex((e:any) => e.id === this.duzenlenenEvrakId); if (i !== -1) k.evraklar![i] = this.duzenlenenEvrak as EvrakBaglantisi; }
-      this.aktifDosyaKaydet(k);
+      this.aktifDosyaKaydet(k, 'Evrak bilgileri güncellendi.');
     }
     this.evrakDuzenleIptal();
   }
@@ -2327,12 +2504,12 @@ export class App implements OnInit {
     this.yeniEkEvrak.isim = this.formatMetin(this.yeniEkEvrak.isim);
     let url = this.yeniEkEvrak.url.trim(); if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
     const y = { id: Date.now(), isim: this.yeniEkEvrak.isim || 'İsimsiz', url: url, tarih: new Date().toISOString(), tebligTarihi: this.yeniEkEvrak.tebligTarihi, sonEylemTarihi: this.yeniEkEvrak.sonEylemTarihi, yaziRengi: this.getEvrakYaziRengi(this.yeniEkEvrak.yaziRengi) };
-    if (this.aktifSayfa === 'sablonlar') { const p = this.sablonlar[this.aktifSablonSekmesi].find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); this.sablonlariKaydetCloud(); } } 
-    else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); this.aktifDosyaKaydet(k); } }
+    if (this.aktifSayfa === 'sablonlar') { const p = this.sablonlar[this.aktifSablonSekmesi].find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); this.sablonlariKaydetCloud('Alt şablon eklendi.'); } } 
+    else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); this.aktifDosyaKaydet(k, 'Alt evrak bağlantısı eklendi.'); } }
     this.ekEvrakFormKapat();
   }
-  evrakSil(id: number) { if (this.aktifSayfa === 'sablonlar') { this.sablonlar[this.aktifSablonSekmesi] = this.sablonlar[this.aktifSablonSekmesi].filter((e:any) => e.id !== id); this.sablonlariKaydetCloud(); } else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; k.evraklar = k.evraklar!.filter((e:any) => e.id !== id); this.aktifDosyaKaydet(k); } }
-  ekEvrakSil(parentId: number, ekId: number) { if (this.aktifSayfa === 'sablonlar') { const p = this.sablonlar[this.aktifSablonSekmesi].find((e:any) => e.id === parentId); if (p && p.ekler) { p.ekler = p.ekler.filter((e:any) => e.id !== ekId); this.sablonlariKaydetCloud(); } } else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); if (p && p.ekler) { p.ekler = p.ekler.filter((e:any) => e.id !== ekId); this.aktifDosyaKaydet(k); } } }
+  evrakSil(id: number) { if (this.aktifSayfa === 'sablonlar') { this.sablonlar[this.aktifSablonSekmesi] = this.sablonlar[this.aktifSablonSekmesi].filter((e:any) => e.id !== id); this.sablonlariKaydetCloud('Şablon kayıttan kaldırıldı.'); } else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; k.evraklar = k.evraklar!.filter((e:any) => e.id !== id); this.aktifDosyaKaydet(k, 'Evrak bağlantısı silindi.'); } }
+  ekEvrakSil(parentId: number, ekId: number) { if (this.aktifSayfa === 'sablonlar') { const p = this.sablonlar[this.aktifSablonSekmesi].find((e:any) => e.id === parentId); if (p && p.ekler) { p.ekler = p.ekler.filter((e:any) => e.id !== ekId); this.sablonlariKaydetCloud('Alt şablon silindi.'); } } else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); if (p && p.ekler) { p.ekler = p.ekler.filter((e:any) => e.id !== ekId); this.aktifDosyaKaydet(k, 'Alt evrak bağlantısı silindi.'); } } }
 
   getDosyaFinans(dosya: any) {
     let isArabuluculuk = dosya.buroNo !== undefined;
@@ -2362,6 +2539,121 @@ export class App implements OnInit {
   silmeOnayiIste(id: number, tur: 'dava'|'icra'|'arabuluculuk'|'muvekkil') { if(tur === 'dava') this.silinecekDavaId = id; else if(tur === 'icra') this.silinecekIcraId = id; else if(tur === 'arabuluculuk') this.silinecekArabuluculukId = id; else this.silinecekMuvekkilId = id; }
   silmeIptal() { this.silinecekDavaId = null; this.silinecekIcraId = null; this.silinecekArabuluculukId = null; this.silinecekMuvekkilId = null; }
   guvenliUrl(url: string) { return url; }
+  bildirimGoster(tur: BildirimTur, baslik: string, mesaj = '') {
+    const id = Date.now() + this.bildirimSayaci++;
+    this.bildirimler = [...this.bildirimler, { id, tur, baslik, mesaj }];
+    const sure = tur === 'error' ? 6000 : 3200;
+    setTimeout(() => this.bildirimKapat(id), sure);
+  }
+  bildirimKapat(id: number) { this.bildirimler = this.bildirimler.filter(b => b.id !== id); }
+  getBildirimClass(tur: BildirimTur) {
+    if (tur === 'success') return 'border-emerald-200 bg-white/95';
+    if (tur === 'error') return 'border-rose-200 bg-white/95';
+    return 'border-blue-200 bg-white/95';
+  }
+  getBildirimIkonClass(tur: BildirimTur) {
+    if (tur === 'success') return 'bg-emerald-100 text-emerald-700';
+    if (tur === 'error') return 'bg-rose-100 text-rose-700';
+    return 'bg-blue-100 text-blue-700';
+  }
+  getAktifDosyaKapakKartiClass() {
+    return this.aktifSayfa === 'detay'
+      ? 'border-blue-100 bg-gradient-to-br from-blue-100 via-sky-50 to-white'
+      : this.aktifSayfa === 'icraDetay'
+      ? 'border-emerald-100 bg-gradient-to-br from-emerald-100 via-teal-50 to-white'
+      : 'border-violet-100 bg-gradient-to-br from-violet-100 via-fuchsia-50 to-white';
+  }
+  getAktifDosyaTemaRozetClass() {
+    return this.aktifSayfa === 'detay'
+      ? 'border-blue-200 bg-blue-50 text-blue-700'
+      : this.aktifSayfa === 'icraDetay'
+      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+      : 'border-violet-200 bg-violet-50 text-violet-700';
+  }
+  getAktifDosyaDurumSinifi() {
+    if (!this.aktifDosya) return 'bg-slate-100 text-slate-600 border-slate-200';
+    return this.aktifSayfa === 'detay'
+      ? this.getDurumClass(this.aktifDosya.durum)
+      : this.aktifSayfa === 'icraDetay'
+      ? this.getIcraDurumClass(this.aktifDosya.durum)
+      : this.getArabuluculukDurumClass(this.aktifDosya.durum);
+  }
+  getAktifDosyaTurEtiketi() {
+    return this.aktifSayfa === 'detay' ? 'Dava Dosyası' : this.aktifSayfa === 'icraDetay' ? 'İcra Dosyası' : 'Arabuluculuk Dosyası';
+  }
+  getAktifDosyaReferansMetni() {
+    const dosya = this.aktifDosya;
+    if (!dosya) return 'Dosya bilgisi yok';
+    if (this.aktifSayfa === 'detay') {
+      const dava = dosya as DavaDosyasi;
+      if (dava.dosyaNumaralari && dava.dosyaNumaralari.length > 0) return dava.dosyaNumaralari.map(num => `${num.tur}: ${num.no}`).join(' • ');
+      return dava.dosyaNo || 'Dava dosyası';
+    }
+    if (this.aktifSayfa === 'icraDetay') {
+      const icra = dosya as IcraDosyasi;
+      return `${icra.icraDairesi || 'İcra Dairesi'} / ${icra.dosyaNo || 'Dosya No'}`;
+    }
+    const arabuluculuk = dosya as ArabuluculukDosyasi;
+    return `${arabuluculuk.buroNo ? arabuluculuk.buroNo + ' / ' : ''}${arabuluculuk.arabuluculukNo || 'Arabuluculuk Dosyası'}`;
+  }
+  getAktifDosyaTarafOzeti() {
+    const dosya = this.aktifDosya;
+    if (!dosya) return 'Dosya tarafı bulunamadı.';
+    if (this.aktifSayfa === 'detay') return `${dosya.muvekkil || 'Müvekkil yok'} | ${dosya.karsiTaraf || 'Karşı taraf belirtilmedi'}`;
+    if (this.aktifSayfa === 'icraDetay') return `${dosya.alacakli || 'Alacaklı yok'} | ${dosya.borclu || 'Borçlu yok'} | Muhatap: ${dosya.muvekkil || '-'}`;
+    return (dosya.taraflar || []).map((taraf: any) => taraf.isim).join(' | ') || 'Taraf bilgisi girilmemiş.';
+  }
+  getAktifDosyaBirincilEtiket() { return this.aktifSayfa === 'detay' ? 'Mahkeme' : this.aktifSayfa === 'icraDetay' ? 'İcra Dairesi' : 'Büro'; }
+  getAktifDosyaBirincilDeger() {
+    const dosya = this.aktifDosya;
+    if (!dosya) return '-';
+    return this.aktifSayfa === 'detay' ? (dosya.mahkeme || '-') : this.aktifSayfa === 'icraDetay' ? (dosya.icraDairesi || '-') : (dosya.buro || '-');
+  }
+  getAktifDosyaIkincilEtiket() { return this.aktifSayfa === 'detay' ? 'Konu' : this.aktifSayfa === 'icraDetay' ? 'Takip Tipi' : 'Uyuşmazlık'; }
+  getAktifDosyaIkincilDeger() {
+    const dosya = this.aktifDosya;
+    if (!dosya) return '-';
+    return this.aktifSayfa === 'detay'
+      ? (dosya.konu || '-')
+      : this.aktifSayfa === 'icraDetay'
+      ? (dosya.takipTipi || 'Belirtilmedi')
+      : `${dosya.basvuruTuru || '-'} / ${dosya.uyusmazlikTuru || '-'}`;
+  }
+  getAktifDosyaBaglantiOzeti() {
+    const dosya = this.aktifDosya;
+    if (!dosya) return '';
+    if (this.aktifSayfa === 'detay' && dosya.baglantiliIcraId) return `Bağlantılı icra: ${this.getIcraNo(dosya.baglantiliIcraId)}`;
+    if (this.aktifSayfa === 'icraDetay' && dosya.baglantiliDavaId) return `Bağlantılı dava: ${this.getDavaNo(dosya.baglantiliDavaId)}`;
+    if (this.aktifSayfa === 'arabuluculukDetay' && dosya.toplantiYontemi) return `Toplantı yöntemi: ${dosya.toplantiYontemi}`;
+    return '';
+  }
+  getAktifDosyaKritikTarihEtiketi() {
+    if (this.aktifSayfa === 'detay') return 'Sonraki Duruşma';
+    if (this.aktifSayfa === 'icraDetay') return 'Takip Tarihi';
+    return 'Toplantı Tarihi';
+  }
+  getAktifDosyaKritikTarih() {
+    const dosya = this.aktifDosya;
+    if (!dosya) return '';
+    if (this.aktifSayfa === 'detay') return dosya.durusmaTarihi || '';
+    if (this.aktifSayfa === 'icraDetay') return dosya.takipTarihi || '';
+    return dosya.toplantiTarihi || '';
+  }
+  getAktifDosyaKritikTarihMetni() {
+    const tarih = this.getAktifDosyaKritikTarih();
+    return tarih ? this.formatTarihKisa(tarih) : 'Planlanmadı';
+  }
+  getAktifDosyaKritikTarihDurumu() {
+    const tarih = this.getAktifDosyaKritikTarih();
+    if (!tarih) return 'Takvim girilmedi';
+    if (this.aktifSayfa === 'icraDetay') return 'Takip açılış tarihi';
+    return this.hesaplaKalanGun(tarih);
+  }
+  getAktifDosyaToplamEvrakSayisi() {
+    const dosya = this.aktifDosya;
+    if (!dosya) return 0;
+    return (dosya.evraklar || []).reduce((toplam: number, evrak: any) => toplam + 1 + ((evrak.ekler || []).length), 0);
+  }
   getDetayTabClass(sekme: DetaySekmesi) {
     if (this.aktifDetaySekmesi !== sekme) return 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-white/70';
     return this.aktifSayfa === 'detay'
