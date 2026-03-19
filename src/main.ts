@@ -1397,12 +1397,40 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
       <!-- BUTUN FORMLAR VE MODALLAR (HER ZAMAN VE HER SAYFADA CALISABILMESI ICIN DISARIYA ALINDI) -->
       @if (davaFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in-up">
-            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center"><h3 class="text-lg font-bold text-slate-800">{{ formModu === 'ekle' ? 'Yeni Dava Dosyası' : 'Dosyayı Düzenle' }}</h3><button (click)="davaFormKapat()" class="text-slate-400 hover:text-slate-600 transition-colors">Kapat</button></div>
-            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
-              @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm font-medium">{{ formHata }}</div> }
+          <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
+            <div class="bg-gradient-to-br from-slate-900 via-blue-900 to-blue-600 px-6 py-5 text-white">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.25em] text-white/90">Dava Dosyası</span>
+                  <h3 class="mt-3 text-2xl font-black tracking-tight">{{ formModu === 'ekle' ? 'Yeni dava dosyası oluştur' : 'Dava dosyasını güncelle' }}</h3>
+                  <p class="mt-2 max-w-2xl text-sm leading-6 text-blue-100/90">Mahkeme, taraf ve finans bilgilerini daha okunaklı bir düzenle girin. Kritik alanlar üstte, tamamlayıcı alanlar ise daha ayırt edici kartlarda toplandı.</p>
+                </div>
+                <button (click)="davaFormKapat()" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-white/20">Kapat</button>
+              </div>
+            </div>
+            <div class="bg-slate-50 p-6 space-y-5 max-h-[72vh] overflow-y-auto custom-scrollbar">
+              @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium shadow-sm">{{ formHata }}</div> }
 
-              <div class="col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <div class="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 via-white to-blue-50 p-4 shadow-sm">
+                <div class="grid gap-3 md:grid-cols-3">
+                  <div class="rounded-2xl border border-blue-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-blue-700">Zorunlu Alanlar</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">En az bir dosya numarası ve müvekkil seçimi olmadan kayıt tamamlanmaz.</p>
+                  </div>
+                  <div class="rounded-2xl border border-blue-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-blue-700">Dosya Satırı</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">{{ islemGorenDava.dosyaNumaralari?.length || 0 }} adet numara alanı hazır.</p>
+                  </div>
+                  <div class="rounded-2xl border border-blue-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-blue-700">Hızlı Not</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">Duruşma tarihi ve ücret alanı girildiğinde dosya özeti çok daha güçlü görünür.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid gap-4 xl:grid-cols-2 items-start">
+
+              <div class="col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-3">Dosya Numaraları <span class="text-red-500">*</span></label>
                 <div class="space-y-3">
                   @for(num of islemGorenDava.dosyaNumaralari; track $index) {
@@ -1416,7 +1444,10 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                 <button (click)="dosyaNumarasiEkle()" class="mt-4 px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg hover:bg-blue-200 transition-colors">Numara Ekle</button>
               </div>
 
-              <div class="flex gap-4">
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-700">Taraf ve İlişki Bilgisi</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Müvekkil, pozisyon ve bağlantılı icra kaydını aynı bölümde tutarak dosyayı daha hızlı tarayabilirsiniz.</p>
+                <div class="mt-4 flex gap-4">
                 <div class="flex-1">
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Müvekkil <span class="text-red-500">*</span></label>
                   <select [(ngModel)]="islemGorenDava.muvekkilId" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
@@ -1431,24 +1462,32 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                     <option value="Davacı">Davacı</option><option value="Davalı">Davalı</option><option value="Üçüncü Kişi">Üçüncü Kişi</option>
                   </select>
                 </div>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Bağlantılı İcra Dosyası (Opsiyonel)</label>
-                <select [(ngModel)]="islemGorenDava.baglantiliIcraId" class="w-full px-3 py-2 border border-emerald-200 bg-emerald-50 rounded-lg outline-none">
-                  <option [ngValue]="undefined">Bağlantı Yok</option>
-                  @for(i of icralar; track i.id) { <option [ngValue]="i.id">{{ i.icraDairesi }} - {{ i.dosyaNo }} ({{i.borclu}})</option> }
-                </select>
+                </div>
+                <div class="mt-4">
+                  <label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Bağlantılı İcra Dosyası (Opsiyonel)</label>
+                  <select [(ngModel)]="islemGorenDava.baglantiliIcraId" class="w-full px-3 py-2 border border-emerald-200 bg-emerald-50 rounded-lg outline-none">
+                    <option [ngValue]="undefined">Bağlantı Yok</option>
+                    @for(i of icralar; track i.id) { <option [ngValue]="i.id">{{ i.icraDairesi }} - {{ i.dosyaNo }} ({{i.borclu}})</option> }
+                  </select>
+                </div>
               </div>
 
-              <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Karşı Taraf</label><input [(ngModel)]="islemGorenDava.karsiTaraf" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-              <div class="flex gap-2">
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-700">Uyuşmazlık Bilgisi</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Karşı taraf, mahkeme ve arşiv notları ayrı bir blokta görünerek ekranı daha düzenli hale getirir.</p>
+                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Karşı Taraf</label><input [(ngModel)]="islemGorenDava.karsiTaraf" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div class="mt-4 flex gap-2">
                 <div class="w-3/5"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mahkeme</label><input [(ngModel)]="islemGorenDava.mahkeme" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div class="w-2/5"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Konu</label><input [(ngModel)]="islemGorenDava.konu" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-              </div>
+                </div>
               
-              <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label><input [(ngModel)]="islemGorenDava.arsivYeri" type="text" placeholder="Örn: Mavi Klasör, Dolap 2, Raf 1" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
+                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label><input [(ngModel)]="islemGorenDava.arsivYeri" type="text" placeholder="Örn: Mavi Klasör, Dolap 2, Raf 1" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
+              </div>
 
-              <div class="grid grid-cols-2 gap-4 mt-2">
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-blue-700">Takvim ve Finans</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Durum, duruşma takvimi ve ücret alanını bu blokta toplayarak dosyanın canlı durumunu daha net görürsünüz.</p>
+                <div class="mt-4 grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Durum</label>
                   <select [(ngModel)]="islemGorenDava.durum" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
@@ -1456,64 +1495,111 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                   </select>
                 </div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Dava Açılış Tarihi</label><input [(ngModel)]="islemGorenDava.takipTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-              </div>
+                </div>
 
-              <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Sonraki Duruşma Tarihi</label><input [(ngModel)]="islemGorenDava.durusmaTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Sonraki Duruşma Tarihi</label><input [(ngModel)]="islemGorenDava.durusmaTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
 
               @if (islemGorenDava.durum === 'İstinaf/Temyiz') {
-                <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg mt-2"><label class="block text-xs font-bold text-orange-800 uppercase mb-1">İstinaf Mahkemesi</label><input [(ngModel)]="islemGorenDava.istinafMahkemesi" type="text" class="w-full px-3 py-2 border border-orange-200 rounded-lg outline-none bg-white"></div>
+                <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg mt-4"><label class="block text-xs font-bold text-orange-800 uppercase mb-1">İstinaf Mahkemesi</label><input [(ngModel)]="islemGorenDava.istinafMahkemesi" type="text" class="w-full px-3 py-2 border border-orange-200 rounded-lg outline-none bg-white"></div>
               }
 
-              <div class="border-t border-slate-100 pt-3 mt-2"><label class="block text-xs font-bold text-blue-600 uppercase mb-1">Anlaşılan Vekalet Ücreti (₺)</label><input [(ngModel)]="islemGorenDava.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-blue-200 bg-blue-50 rounded-lg outline-none"></div>
+                <div class="border-t border-slate-100 pt-4 mt-4"><label class="block text-xs font-bold text-blue-600 uppercase mb-1">Anlaşılan Vekalet Ücreti (₺)</label><input [(ngModel)]="islemGorenDava.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-blue-200 bg-blue-50 rounded-lg outline-none"></div>
+              </div>
+              </div>
             </div>
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3"><button (click)="davaFormKapat()" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-200 rounded-lg transition-colors">İptal</button><button (click)="davaKaydet()" class="px-5 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all">Kaydet</button></div>
+            <div class="px-6 py-4 bg-white border-t border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-xs font-semibold text-slate-500">Kırmızı yıldızlı alanlar kritik kaydı tamamlar. Diğer alanlar dosya özetini güçlendirir.</p>
+              <div class="flex justify-end gap-3">
+                <button (click)="davaFormKapat()" class="px-4 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors">İptal</button>
+                <button (click)="davaKaydet()" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all">{{ formModu === 'ekle' ? 'Kaydı Oluştur' : 'Değişiklikleri Kaydet' }}</button>
+              </div>
+            </div>
           </div>
         </div>
       }
 
       @if (icraFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in-up">
-            <div class="bg-emerald-600 px-6 py-4 flex justify-between items-center"><h3 class="text-lg font-bold text-white">{{ formModu === 'ekle' ? 'Yeni İcra Takibi' : 'İcra Takibini Düzenle' }}</h3><button (click)="icraFormKapat()" class="text-emerald-100 hover:text-white transition-colors">Kapat</button></div>
-            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
-              @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm font-medium">{{ formHata }}</div> }
+          <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
+            <div class="bg-gradient-to-br from-emerald-900 via-emerald-700 to-teal-500 px-6 py-5 text-white">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.25em] text-white/90">İcra Takibi</span>
+                  <h3 class="mt-3 text-2xl font-black tracking-tight">{{ formModu === 'ekle' ? 'Yeni icra takibi oluştur' : 'İcra takibini güncelle' }}</h3>
+                  <p class="mt-2 max-w-2xl text-sm leading-6 text-emerald-100/90">Takip dosyasının kimliği, taraf bilgileri ve bağlantılı dava kaydı aynı ekranda daha net bölümlendirildi.</p>
+                </div>
+                <button (click)="icraFormKapat()" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-white/20">Kapat</button>
+              </div>
+            </div>
+            <div class="bg-slate-50 p-6 space-y-5 max-h-[72vh] overflow-y-auto custom-scrollbar">
+              @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium shadow-sm">{{ formHata }}</div> }
 
-              <div class="flex gap-4">
+              <div class="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 p-4 shadow-sm">
+                <div class="grid gap-3 md:grid-cols-3">
+                  <div class="rounded-2xl border border-emerald-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-700">Zorunlu Alanlar</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">İcra dairesi, dosya numarası, müvekkil ve takip tipi olmadan kayıt tamamlanmaz.</p>
+                  </div>
+                  <div class="rounded-2xl border border-emerald-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-700">Takip Tipi</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">{{ islemGorenIcra.takipTipi || 'Takip tipi seçimi bekleniyor.' }}</p>
+                  </div>
+                  <div class="rounded-2xl border border-emerald-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-700">Hızlı Not</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">Bağlantılı dava ve arşiv yeri birlikte girildiğinde icra dosyası çok daha hızlı bulunur.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid gap-4 xl:grid-cols-2 items-start">
+
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Takip Kimliği</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">İcra dairesi, dosya numarası ve müvekkil alanı ilk bakışta okunabilecek şekilde öne çıkarıldı.</p>
+                <div class="mt-4 flex gap-4">
                 <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">İcra Dairesi <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenIcra.icraDairesi" type="text" placeholder="Örn: İst. 1. İcra" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Dosya No <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenIcra.dosyaNo" type="text" placeholder="Örn: 2024/123" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-              </div>
+                </div>
 
-              <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Müvekkil <span class="text-red-500">*</span></label>
-                <select [(ngModel)]="islemGorenIcra.muvekkilId" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
-                  <option [ngValue]="undefined" disabled>Müvekkil Seçiniz</option>
-                  @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Diğer' ? '(Diğer)' : '' }}</option> }
-                </select>
+                <div class="mt-4">
+                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Müvekkil <span class="text-red-500">*</span></label>
+                  <select [(ngModel)]="islemGorenIcra.muvekkilId" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    <option [ngValue]="undefined" disabled>Müvekkil Seçiniz</option>
+                    @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Diğer' ? '(Diğer)' : '' }}</option> }
+                  </select>
+                </div>
               </div>
               
-              <div class="flex gap-4">
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-700">Taraf ve İlişki Bilgisi</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Alacaklı, borçlu ve bağlı dava bilgisi aynı blokta durarak takibi daha kolay okunur hale getirir.</p>
+                <div class="mt-4 flex gap-4">
                 <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Alacaklı</label><input [(ngModel)]="islemGorenIcra.alacakli" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Borçlu</label><input [(ngModel)]="islemGorenIcra.borclu" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-              </div>
+                </div>
 
-              <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Takip Tipi <span class="text-red-500">*</span></label>
-                <select [(ngModel)]="islemGorenIcra.takipTipi" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
-                  <option value="İlamsız">İlamsız</option><option value="İlamlı">İlamlı</option><option value="Kambiyo">Kambiyo</option><option value="Rehnin Paraya Çevrilmesi">Rehnin Paraya Çevrilmesi</option><option value="İhtiyati Haciz">İhtiyati Haciz</option>
-                </select>
-              </div>
+                <div class="mt-4">
+                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Takip Tipi <span class="text-red-500">*</span></label>
+                  <select [(ngModel)]="islemGorenIcra.takipTipi" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    <option value="İlamsız">İlamsız</option><option value="İlamlı">İlamlı</option><option value="Kambiyo">Kambiyo</option><option value="Rehnin Paraya Çevrilmesi">Rehnin Paraya Çevrilmesi</option><option value="İhtiyati Haciz">İhtiyati Haciz</option>
+                  </select>
+                </div>
 
-              <div>
-                <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Bağlantılı Dava Dosyası (Opsiyonel)</label>
-                <select [(ngModel)]="islemGorenIcra.baglantiliDavaId" class="w-full px-3 py-2 border border-blue-200 bg-blue-50 rounded-lg outline-none">
-                  <option [ngValue]="undefined">Bağlantı Yok</option>
-                  @for(d of davalar; track d.id) { <option [ngValue]="d.id">{{ d.dosyaNo }} ({{d.karsiTaraf}})</option> }
-                </select>
-              </div>
+                <div class="mt-4">
+                  <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Bağlantılı Dava Dosyası (Opsiyonel)</label>
+                  <select [(ngModel)]="islemGorenIcra.baglantiliDavaId" class="w-full px-3 py-2 border border-blue-200 bg-blue-50 rounded-lg outline-none">
+                    <option [ngValue]="undefined">Bağlantı Yok</option>
+                    @for(d of davalar; track d.id) { <option [ngValue]="d.id">{{ d.dosyaNo }} ({{d.karsiTaraf}})</option> }
+                  </select>
+                </div>
               
-              <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label><input [(ngModel)]="islemGorenIcra.arsivYeri" type="text" placeholder="Örn: Kırmızı Klasör, İcra Dolabı" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
+                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label><input [(ngModel)]="islemGorenIcra.arsivYeri" type="text" placeholder="Örn: Kırmızı Klasör, İcra Dolabı" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
+              </div>
 
-              <div class="grid grid-cols-2 gap-4">
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Durum ve Finans</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Takibin mevcut aşaması, tarihi ve vekalet ücreti tek alanda öne çıkarıldı.</p>
+                <div class="mt-4 grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Durum</label>
                   <select [(ngModel)]="islemGorenIcra.durum" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
@@ -1521,34 +1607,73 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                   </select>
                 </div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Takip Tarihi</label><input [(ngModel)]="islemGorenIcra.takipTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                </div>
+                <div class="border-t border-slate-100 pt-4 mt-4"><label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Anlaşılan Vekalet Ücreti (₺)</label><input [(ngModel)]="islemGorenIcra.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-emerald-200 bg-emerald-50 rounded-lg outline-none"></div>
               </div>
-              <div class="border-t border-slate-100 pt-3 mt-2"><label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Anlaşılan Vekalet Ücreti (₺)</label><input [(ngModel)]="islemGorenIcra.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-emerald-200 bg-emerald-50 rounded-lg outline-none"></div>
+              </div>
             </div>
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3"><button (click)="icraFormKapat()" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-200 rounded-lg transition-colors">İptal</button><button (click)="icraKaydet()" class="px-5 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-all">Kaydet</button></div>
+            <div class="px-6 py-4 bg-white border-t border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-xs font-semibold text-slate-500">Kimlik ve takip tipi alanı eksiksiz tutulduğunda icra kartları çok daha düzenli görünür.</p>
+              <div class="flex justify-end gap-3">
+                <button (click)="icraFormKapat()" class="px-4 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors">İptal</button>
+                <button (click)="icraKaydet()" class="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all">{{ formModu === 'ekle' ? 'Kaydı Oluştur' : 'Değişiklikleri Kaydet' }}</button>
+              </div>
+            </div>
           </div>
         </div>
       }
 
       @if (arabuluculukFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in-up">
-            <div class="bg-purple-600 px-6 py-4 flex justify-between items-center"><h3 class="text-lg font-bold text-white">{{ formModu === 'ekle' ? 'Yeni Arabuluculuk Dosyası' : 'Arabuluculuk Dosyasını Düzenle' }}</h3><button (click)="arabuluculukFormKapat()" class="text-purple-200 hover:text-white transition-colors">Kapat</button></div>
-            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
-              @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm font-medium">{{ formHata }}</div> }
+          <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
+            <div class="bg-gradient-to-br from-purple-900 via-purple-700 to-fuchsia-500 px-6 py-5 text-white">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.25em] text-white/90">Arabuluculuk</span>
+                  <h3 class="mt-3 text-2xl font-black tracking-tight">{{ formModu === 'ekle' ? 'Yeni arabuluculuk dosyası oluştur' : 'Arabuluculuk dosyasını güncelle' }}</h3>
+                  <p class="mt-2 max-w-2xl text-sm leading-6 text-purple-100/90">Başvuru türü, taraflar ve toplantı akışı daha seçilebilir bloklara ayrıldı. Böylece süreç ekranı daha profesyonel okunuyor.</p>
+                </div>
+                <button (click)="arabuluculukFormKapat()" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-white/20">Kapat</button>
+              </div>
+            </div>
+            <div class="bg-slate-50 p-6 space-y-5 max-h-[72vh] overflow-y-auto custom-scrollbar">
+              @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium shadow-sm">{{ formHata }}</div> }
 
-              <div class="flex gap-4">
-                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Büro No @if(islemGorenArabuluculuk.basvuruTuru === 'Dava Şartı'){<span class="text-red-500">*</span>}</label><input [(ngModel)]="islemGorenArabuluculuk.buroNo" type="text" placeholder="Örn: 2024/123" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arabuluculuk No <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenArabuluculuk.arabuluculukNo" type="text" placeholder="Örn: 2024/456" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+              <div class="rounded-2xl border border-purple-100 bg-gradient-to-r from-purple-50 via-white to-purple-50 p-4 shadow-sm">
+                <div class="grid gap-3 md:grid-cols-3">
+                  <div class="rounded-2xl border border-purple-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-purple-700">Zorunlu Alanlar</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">Arabuluculuk numarası, büro, müvekkil ilişkisi ve uyuşmazlık türü kayıt için kritik alanlardır.</p>
+                  </div>
+                  <div class="rounded-2xl border border-purple-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-purple-700">Taraf Sayısı</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">{{ islemGorenArabuluculuk.taraflar?.length || 0 }} taraf satırı hazır.</p>
+                  </div>
+                  <div class="rounded-2xl border border-purple-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-purple-700">Hızlı Not</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">Toplantı tarihi ve yöntem bilgisi ajanda görünümünde dosyayı öne çıkarır.</p>
+                  </div>
+                </div>
               </div>
 
-              <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Büro <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenArabuluculuk.buro" type="text" placeholder="Örn: İstanbul Arabuluculuk Bürosu" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+              <div class="grid gap-4 xl:grid-cols-2 items-start">
+
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-purple-700">Dosya Kimliği</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Büro, dosya numarası ve kayıtlı muhatap bilgileri tek blokta görünerek ilk bakışı kolaylaştırır.</p>
+                <div class="mt-4 flex gap-4">
+                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Büro No @if(islemGorenArabuluculuk.basvuruTuru === 'Dava Şartı'){<span class="text-red-500">*</span>}</label><input [(ngModel)]="islemGorenArabuluculuk.buroNo" type="text" placeholder="Örn: 2024/123" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arabuluculuk No <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenArabuluculuk.arabuluculukNo" type="text" placeholder="Örn: 2024/456" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                </div>
+
+                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Büro <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenArabuluculuk.buro" type="text" placeholder="Örn: İstanbul Arabuluculuk Bürosu" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
               
-              <div class="border-t border-slate-100 pt-3 mt-1 relative">
+                <div class="border-t border-slate-100 pt-4 mt-4 relative">
                 <label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Hesap Muhatabı (Kayıtlı İlişki) <span class="text-red-500">*</span></label>
                 
                 <div (click)="arabuluculukMuvekkilDropdownAcik = !arabuluculukMuvekkilDropdownAcik" class="w-full px-3 py-2 border border-emerald-200 bg-emerald-50 rounded-lg outline-none text-sm font-medium cursor-pointer flex justify-between items-center text-slate-800">
                   <span>{{ secilenMuvekkilAd(islemGorenArabuluculuk.muvekkilId) || 'Kişi/Kurum Seçiniz' }}</span>
-                  <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7 7"></path></svg>
+                  <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
 
                 @if(arabuluculukMuvekkilDropdownAcik) {
@@ -1570,8 +1695,12 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                   </div>
                 }
               </div>
+              </div>
 
-              <div class="flex gap-4">
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-purple-700">Süreç ve Taraflar</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Başvuru türü, uyuşmazlık başlığı ve taraf listesi daha net bir iş akışında sunulur.</p>
+                <div class="mt-4 flex gap-4">
                 <div class="flex-1">
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Başvuru Türü <span class="text-red-500">*</span></label>
                   <select [(ngModel)]="islemGorenArabuluculuk.basvuruTuru" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
@@ -1584,9 +1713,9 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                     <option value="Kira">Kira</option><option value="İşçi İşveren">İşçi İşveren</option><option value="Ticari">Ticari</option><option value="Boşanma">Boşanma</option><option value="Ortaklığın Giderilmesi">Ortaklığın Giderilmesi</option><option value="Tüketici">Tüketici</option>
                   </select>
                 </div>
-              </div>
+                </div>
 
-              <div class="col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div class="mt-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-3">Taraflar <span class="text-red-500">*</span></label>
                 <div class="space-y-3">
                   @for(taraf of islemGorenArabuluculuk.taraflar; track $index) {
@@ -1599,8 +1728,12 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                 </div>
                 <button (click)="tarafEkle()" class="mt-4 px-3 py-1.5 bg-purple-100 text-purple-700 text-xs font-bold rounded-lg hover:bg-purple-200 transition-colors">Taraf Ekle</button>
               </div>
+              </div>
               
-              <div class="grid grid-cols-2 gap-4">
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-purple-700">Toplantı ve Finans</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Toplantı, arşiv ve ücret bilgileri bir arada durarak dosyanın son durumunu daha rahat gösterir.</p>
+                <div class="mt-4 grid grid-cols-2 gap-4">
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Toplantı Tarihi</label><input [(ngModel)]="islemGorenArabuluculuk.toplantiTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Toplantı Yöntemi</label>
@@ -1608,11 +1741,11 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                     <option [ngValue]="undefined">Belirtilmedi</option><option value="Yüzyüze">Yüzyüze</option><option value="Videokonferans">Videokonferans</option><option value="Telekonferans">Telekonferans</option>
                   </select>
                 </div>
-              </div>
+                </div>
 
-              <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label><input [(ngModel)]="islemGorenArabuluculuk.arsivYeri" type="text" placeholder="Örn: Mor Klasör, Çekmece 3" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
+                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label><input [(ngModel)]="islemGorenArabuluculuk.arsivYeri" type="text" placeholder="Örn: Mor Klasör, Çekmece 3" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
 
-              <div class="grid grid-cols-2 gap-4">
+                <div class="mt-4 grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Durum</label>
                   <select [(ngModel)]="islemGorenArabuluculuk.durum" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
@@ -1620,22 +1753,56 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                   </select>
                 </div>
                 <div><label class="block text-xs font-bold text-purple-600 uppercase mb-1">Brüt Hizmet Ücreti (₺)</label><input [(ngModel)]="islemGorenArabuluculuk.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-purple-200 bg-purple-50 rounded-lg outline-none"></div>
+                </div>
+              </div>
               </div>
 
             </div>
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3"><button (click)="arabuluculukFormKapat()" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-200 rounded-lg transition-colors">İptal</button><button (click)="arabuluculukKaydet()" class="px-5 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-all">Kaydet</button></div>
+            <div class="px-6 py-4 bg-white border-t border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-xs font-semibold text-slate-500">Taraf, toplantı ve ücret alanları birlikte girildiğinde arabuluculuk kaydı daha profesyonel görünür.</p>
+              <div class="flex justify-end gap-3">
+                <button (click)="arabuluculukFormKapat()" class="px-4 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors">İptal</button>
+                <button (click)="arabuluculukKaydet()" class="px-6 py-2.5 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 shadow-lg shadow-purple-600/20 transition-all">{{ formModu === 'ekle' ? 'Kaydı Oluştur' : 'Değişiklikleri Kaydet' }}</button>
+              </div>
+            </div>
           </div>
         </div>
       }
 
       @if (muvekkilFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in-up">
-            <div class="bg-indigo-600 px-6 py-4 flex justify-between items-center"><h3 class="text-lg font-bold text-white">{{ formModu === 'ekle' ? 'Yeni Kişi/Kurum Kaydı' : 'Kayıt Düzenle' }}</h3><button (click)="muvekkilFormKapat()" class="text-indigo-200 hover:text-white transition-colors">Kapat</button></div>
-            <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
-              @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm font-medium">{{ formHata }}</div> }
+          <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
+            <div class="bg-gradient-to-br from-indigo-900 via-indigo-700 to-sky-500 px-6 py-5 text-white">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.25em] text-white/90">Kişi / Kurum</span>
+                  <h3 class="mt-3 text-2xl font-black tracking-tight">{{ formModu === 'ekle' ? 'Yeni kişi veya kurum kaydı oluştur' : 'Kayıt bilgilerini güncelle' }}</h3>
+                  <p class="mt-2 max-w-2xl text-sm leading-6 text-indigo-100/90">İletişim, finans ve vekalet bilgilerini daha kurumsal kartlara ayırdım. Böylece müvekkil ekranı ilk bakışta daha düzenli duruyor.</p>
+                </div>
+                <button (click)="muvekkilFormKapat()" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-white/20">Kapat</button>
+              </div>
+            </div>
+            <div class="bg-slate-50 p-6 space-y-5 max-h-[75vh] overflow-y-auto custom-scrollbar">
+              @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium shadow-sm">{{ formHata }}</div> }
+
+              <div class="rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-indigo-50 p-4 shadow-sm">
+                <div class="grid gap-3 md:grid-cols-3">
+                  <div class="rounded-2xl border border-indigo-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-indigo-700">Zorunlu Alanlar</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">Kayıt tipi ile ad soyad / unvan alanı olmadan kart tamamlanmaz.</p>
+                  </div>
+                  <div class="rounded-2xl border border-indigo-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-indigo-700">Kayıt Tipi</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">{{ islemGorenMuvekkil.tip || 'Tip seçimi bekleniyor.' }}</p>
+                  </div>
+                  <div class="rounded-2xl border border-indigo-100 bg-white/80 p-4">
+                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-indigo-700">Hızlı Not</p>
+                    <p class="mt-2 text-sm font-semibold leading-6 text-slate-700">Telefon, e-posta ve vekalet bağlantısı birlikte girildiğinde dosya açılışı çok hızlanır.</p>
+                  </div>
+                </div>
+              </div>
               
-              <div class="mb-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div class="mb-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <label class="block text-xs font-bold text-slate-600 mb-2 uppercase tracking-wider">Kayıt Tipi Seçin <span class="text-red-500">*</span></label>
                 <div class="flex flex-wrap gap-3 sm:gap-6">
                   <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-700 text-sm">
@@ -1653,30 +1820,39 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                 </div>
               </div>
 
-              <div><label class="block text-xs font-bold text-slate-500 mb-1">Ad Soyad / Unvan <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenMuvekkil.adSoyad" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid gap-4 xl:grid-cols-2 items-start">
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-indigo-700">Kimlik ve İletişim</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Temel kişi veya kurum bilgileri tek blokta durarak müvekkil kartını daha düzenli hale getirir.</p>
+                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 mb-1">Ad Soyad / Unvan <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenMuvekkil.adSoyad" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div class="mt-4 grid grid-cols-2 gap-4">
                 <div><label class="block text-xs font-bold text-slate-500 mb-1">TC Kimlik / VKN</label><input [(ngModel)]="islemGorenMuvekkil.tcKimlik" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div><label class="block text-xs font-bold text-slate-500 mb-1">Telefon</label><input [(ngModel)]="islemGorenMuvekkil.telefon" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
               </div>
-              <div class="grid grid-cols-2 gap-4">
+                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 mb-1">Adres</label><textarea [(ngModel)]="islemGorenMuvekkil.adres" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></textarea></div>
+              </div>
+
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-700">Finans ve Belgeler</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Banka, e-posta ve vekalet bağlantısını bir arada tutarak dosya hazırlığını hızlandırın.</p>
+                <div class="mt-4 grid grid-cols-2 gap-4">
                 <div><label class="block text-xs font-bold text-slate-500 mb-1">E-Posta</label><input [(ngModel)]="islemGorenMuvekkil.eposta" type="email" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div><label class="block text-xs font-bold text-slate-500 mb-1">Banka ve IBAN Bilgisi</label><input [(ngModel)]="islemGorenMuvekkil.bankaBilgileri" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
               </div>
-              <div><label class="block text-xs font-bold text-slate-500 mb-1">Vekaletname Bağlantısı (URL)</label><input [(ngModel)]="islemGorenMuvekkil.vekaletnameUrl" type="text" placeholder="Örn: Google Drive linki, UYAP bağlantısı..." class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none text-blue-600 bg-slate-50 focus:bg-white transition-colors"></div>
-              <div><label class="block text-xs font-bold text-slate-500 mb-1">Adres</label><textarea [(ngModel)]="islemGorenMuvekkil.adres" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></textarea></div>
+                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 mb-1">Vekaletname Bağlantısı (URL)</label><input [(ngModel)]="islemGorenMuvekkil.vekaletnameUrl" type="text" placeholder="Örn: Google Drive linki, UYAP bağlantısı..." class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none text-blue-600 bg-slate-50 focus:bg-white transition-colors"></div>
+              </div>
 
               @if (islemGorenMuvekkil.tip === 'Şirketler') {
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">Vergi Dairesi</label><input [(ngModel)]="islemGorenMuvekkil.vergiDairesi" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-                
-                <div class="col-span-2 bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                <div class="col-span-2 bg-indigo-50 p-5 rounded-2xl border border-indigo-100 shadow-sm">
                   <label class="block text-xs font-bold text-indigo-700 uppercase mb-3">Şirket / Kurum Yetkilileri</label>
+                  <div class="mb-4"><label class="block text-xs font-bold text-slate-500 mb-1">Vergi Dairesi</label><input [(ngModel)]="islemGorenMuvekkil.vergiDairesi" type="text" class="w-full px-3 py-2 border border-indigo-200 rounded-lg outline-none bg-white"></div>
                   <div class="space-y-3">
                     @for(y of islemGorenMuvekkil.yetkililer; track $index) {
                       <div class="flex gap-2 items-center flex-wrap sm:flex-nowrap">
-                        <input [(ngModel)]="y.adSoyad" type="text" placeholder="Ad Soyad" class="w-full sm:w-1/4 px-2 py-2 border border-indigo-200 rounded-lg outline-none text-xs">
-                        <input [(ngModel)]="y.telefon" type="text" placeholder="Telefon" class="w-full sm:w-1/5 px-2 py-2 border border-indigo-200 rounded-lg outline-none text-xs">
-                        <input [(ngModel)]="y.eposta" type="email" placeholder="E-Posta" class="w-full sm:w-1/4 px-2 py-2 border border-indigo-200 rounded-lg outline-none text-xs">
-                        <input [(ngModel)]="y.pozisyon" type="text" placeholder="Pozisyon" class="w-full sm:flex-1 px-2 py-2 border border-indigo-200 rounded-lg outline-none text-xs">
+                        <input [(ngModel)]="y.adSoyad" type="text" placeholder="Ad Soyad" class="w-full sm:w-1/4 px-2 py-2 border border-indigo-200 rounded-lg outline-none text-xs bg-white">
+                        <input [(ngModel)]="y.telefon" type="text" placeholder="Telefon" class="w-full sm:w-1/5 px-2 py-2 border border-indigo-200 rounded-lg outline-none text-xs bg-white">
+                        <input [(ngModel)]="y.eposta" type="email" placeholder="E-Posta" class="w-full sm:w-1/4 px-2 py-2 border border-indigo-200 rounded-lg outline-none text-xs bg-white">
+                        <input [(ngModel)]="y.pozisyon" type="text" placeholder="Pozisyon" class="w-full sm:flex-1 px-2 py-2 border border-indigo-200 rounded-lg outline-none text-xs bg-white">
                         <button (click)="yetkiliSil($index)" class="p-1.5 text-indigo-400 hover:text-red-500 hover:bg-red-50 rounded-lg">Sil</button>
                       </div>
                     }
@@ -1685,7 +1861,7 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                     <button (click)="yetkiliEkle()" class="px-3 py-1.5 bg-indigo-200 text-indigo-800 text-xs font-bold rounded-lg hover:bg-indigo-300 transition-colors">Manuel Ekle</button>
                     <div>
                       <button (click)="yetkiliSecimDropdownAcik = !yetkiliSecimDropdownAcik" class="px-3 py-1.5 bg-white border border-indigo-200 text-indigo-700 text-xs font-bold rounded-lg hover:bg-indigo-50 transition-colors flex items-center gap-1 shadow-sm">
-                        Kayıtlı Kişilerden Seç <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7 7"></path></svg>
+                        Kayıtlı Kişilerden Seç <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                       </button>
                       @if(yetkiliSecimDropdownAcik) {
                         <div class="fixed inset-0 z-[65]" (click)="yetkiliSecimDropdownAcik = false"></div>
@@ -1708,8 +1884,14 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                   </div>
                 </div>
               }
+              </div>
             </div>
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3"><button (click)="muvekkilFormKapat()" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-200 rounded-lg transition-colors">İptal</button><button (click)="muvekkilKaydet()" class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 shadow-md transition-all">Kaydet</button></div>
+            <div class="px-6 py-4 bg-white border-t border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-xs font-semibold text-slate-500">İletişim ve belge alanları dolu olduğunda dosya açarken müvekkil seçimi çok daha akıcı olur.</p>
+              <div class="flex justify-end gap-3">
+                <button (click)="muvekkilFormKapat()" class="px-4 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors">İptal</button><button (click)="muvekkilKaydet()" class="px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition-all">{{ formModu === 'ekle' ? 'Kaydı Oluştur' : 'Değişiklikleri Kaydet' }}</button>
+              </div>
+            </div>
           </div>
         </div>
       }
