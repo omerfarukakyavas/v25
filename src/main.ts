@@ -45,23 +45,39 @@ interface DosyaNumarasi { tur: string; no: string; }
 interface ArabuluculukTaraf { id: number; tip: 'Başvurucu' | 'Diğer Taraf'; isim: string; }
 
 interface DavaDosyasi { 
-  id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; karsiTaraf: string; mahkeme: string; konu: string; durum: 'Derdest' | 'Kapalı' | 'İstinaf/Temyiz'; istinafMahkemesi?: string; durusmaTarihi?: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; muvekkilPozisyonu?: string; arsivYeri?: string;
+  id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; karsiTaraf: string; mahkeme: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; muvekkilPozisyonu?: string; arsivYeri?: string;
   icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
   buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiYontemi?: string;
 }
 
 interface IcraDosyasi {
-  id: number; icraDairesi: string; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkilId?: number; muvekkil: string; alacakli: string; borclu: string; takipTipi?: string; takipTarihi: string; durum: 'Aktif' | 'İnfaz/Kapalı' | 'İtiraz Edildi' | 'Tehir-i İcra'; baglantiliDavaId?: number; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; arsivYeri?: string;
+  id: number; icraDairesi: string; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkilId?: number; muvekkil: string; alacakli: string; borclu: string; takipTipi?: string; takipTarihi: string; durum: string; baglantiliDavaId?: number; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; arsivYeri?: string;
   karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string;
   buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiYontemi?: string;
 }
 
 interface ArabuluculukDosyasi {
-  id: number; buroNo: string; arabuluculukNo: string; buro: string; basvuruTuru: 'Dava Şartı' | 'İhtiyari'; uyusmazlikTuru: 'Kira' | 'İşçi İşveren' | 'Ticari' | 'Boşanma' | 'Ortaklığın Giderilmesi' | 'Tüketici'; taraflar: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiYontemi?: 'Yüzyüze' | 'Videokonferans' | 'Telekonferans'; durum: 'Hazırlık' | 'Müzakere' | 'İmza' | 'Tahsilat' | 'Kapalı'; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; muvekkilId?: number; arsivYeri?: string;
+  id: number; buroNo: string; arabuluculukNo: string; buro: string; basvuruTuru: 'Dava Şartı' | 'İhtiyari'; uyusmazlikTuru: 'Kira' | 'İşçi İşveren' | 'Ticari' | 'Boşanma' | 'Ortaklığın Giderilmesi' | 'Tüketici'; taraflar: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiYontemi?: 'Yüzyüze' | 'Videokonferans' | 'Telekonferans'; durum: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; muvekkilId?: number; arsivYeri?: string;
   dosyaNo?: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil?: string; karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string; icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
 }
 
 interface Muvekkil { id: number; tip?: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer'; _isNewDiger?: boolean; adSoyad: string; tcKimlik: string; telefon: string; eposta: string; adres: string; bankaBilgileri: string; vergiDairesi?: string; vekaletnameUrl?: string; yetkililer?: { id: number; adSoyad: string; telefon: string; eposta?: string; pozisyon: string; }[]; }
+
+type AjandaKaynak = 'dava' | 'icra' | 'arabuluculuk';
+type AjandaTur = 'durusma' | 'toplanti' | 'sureliIs';
+
+interface AjandaKaydi {
+  id: string;
+  tarih: string;
+  tur: AjandaTur;
+  kaynak: AjandaKaynak;
+  dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi;
+  baslik: string;
+  altBaslik: string;
+  taraflar: string;
+  evrakIsmi?: string;
+  anaEvrakIsmi?: string;
+}
 
 type SayfaTipi = 'dashboard' | 'davalar' | 'icralar' | 'arabuluculuk' | 'sablonlar' | 'muhasebe' | 'iliskiler' | 'ajanda' | 'detay' | 'icraDetay' | 'arabuluculukDetay';
 type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
@@ -132,7 +148,7 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
           <div class="p-4 border-t border-slate-800 flex justify-between items-center">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700"><svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-              <div class="overflow-hidden"><p class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[100px]">{{ user?.email }}</p><p class="text-xs font-medium flex items-center gap-1 text-emerald-400">Bulut Aktif</p></div>
+              <div class="overflow-hidden"><p class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[100px]">{{ user.email }}</p><p class="text-xs font-medium flex items-center gap-1 text-emerald-400">Bulut Aktif</p></div>
             </div>
             <button (click)="cikisYap()" class="p-2 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-all" title="Çıkış Yap"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
           </div>
@@ -453,6 +469,170 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                         } @empty { <tr><td colspan="6" class="p-10 text-center text-slate-400">Arabuluculuk dosyası bulunamadı.</td></tr> }
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              }
+
+              @case ('ajanda') {
+                <div class="space-y-6 max-w-7xl mx-auto pb-10">
+                  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-xl shadow-sm text-white">
+                      <p class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Toplam Ajanda</p>
+                      <p class="text-3xl font-black">{{ ajandaOzet.toplam }}</p>
+                      <p class="text-xs text-slate-400 mt-2">Dava, arabuluculuk ve sureli isler tek listede.</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-amber-100">
+                      <p class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Bugun</p>
+                      <p class="text-3xl font-black text-slate-800">{{ ajandaOzet.bugun }}</p>
+                      <p class="text-xs text-slate-500 mt-2">Bugune denk gelen kayit</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
+                      <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">7 Gun Icinde</p>
+                      <p class="text-3xl font-black text-slate-800">{{ ajandaOzet.yakin }}</p>
+                      <p class="text-xs text-slate-500 mt-2">Yaklasan is ve toplanti</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-rose-100">
+                      <p class="text-xs font-bold text-rose-600 uppercase tracking-wider mb-1">Gecikmis</p>
+                      <p class="text-3xl font-black text-slate-800">{{ ajandaOzet.gecmis }}</p>
+                      <p class="text-xs text-slate-500 mt-2">Tarihi gecmis kayit</p>
+                    </div>
+                  </div>
+
+                  <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-3">
+                    <div class="flex-1">
+                      <input [(ngModel)]="ajandaArama" type="text" placeholder="Taraf, dosya, evrak veya mahkeme ara..." class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    </div>
+                    <div class="lg:w-52">
+                      <select [(ngModel)]="ajandaZamanFiltresi" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg outline-none bg-white font-medium text-slate-700">
+                        <option value="all">Tum Tarihler</option>
+                        <option value="today">Sadece Bugun</option>
+                        <option value="7days">7 Gun Icinde</option>
+                        <option value="30days">30 Gun Icinde</option>
+                        <option value="overdue">Gecikmisler</option>
+                      </select>
+                    </div>
+                    <div class="lg:w-52">
+                      <select [(ngModel)]="ajandaTurFiltresi" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg outline-none bg-white font-medium text-slate-700">
+                        <option value="all">Tum Kayitlar</option>
+                        <option value="durusma">Durusmalar</option>
+                        <option value="toplanti">Toplantilar</option>
+                        <option value="sureliIs">Sureli Isler</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                    <div class="xl:col-span-8 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                      <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                          <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider">Ajanda Akisi</h3>
+                          <p class="text-xs text-slate-500 mt-1">Bir satira tiklayarak dogrudan ilgili dosya detayina gidebilirsiniz.</p>
+                        </div>
+                        <div class="text-xs font-bold text-slate-500 bg-white border border-slate-200 rounded-full px-3 py-1.5 w-fit">
+                          {{ filtrelenmisAjandaKayitlari.length }} kayit
+                        </div>
+                      </div>
+
+                      <div class="divide-y divide-slate-100">
+                        @for (kayit of filtrelenmisAjandaKayitlari; track kayit.id) {
+                          <button (click)="ajandaKaydinaGit(kayit)" class="w-full text-left px-5 py-4 hover:bg-slate-50 transition-colors group">
+                            <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+                              <div class="shrink-0 flex items-center gap-3">
+                                <div class="w-16 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center shadow-sm">
+                                  <div class="text-[10px] uppercase font-black text-slate-400">{{ formatTarihAy(kayit.tarih) }}</div>
+                                  <div class="text-2xl font-black text-slate-800 leading-none mt-1">{{ formatTarihGun(kayit.tarih) }}</div>
+                                </div>
+                                <div class="hidden sm:flex flex-col gap-2 min-w-[120px]">
+                                  <span [class]="getAjandaTurClass(kayit.tur)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-center">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
+                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-center">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
+                                </div>
+                              </div>
+
+                              <div class="min-w-0 flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                  <span [class]="getAjandaTurClass(kayit.tur)" class="sm:hidden px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
+                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="sm:hidden px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
+                                  <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ ajandaDurumMetni(kayit.tarih) }}</span>
+                                </div>
+                                <h3 class="text-base font-black text-slate-800 group-hover:text-blue-700 transition-colors">{{ kayit.baslik }}</h3>
+                                <p class="text-sm text-slate-600 font-medium mt-1">{{ kayit.taraflar }}</p>
+                                <p class="text-xs text-slate-500 mt-2">{{ kayit.altBaslik }}</p>
+                                @if (kayit.anaEvrakIsmi) {
+                                  <p class="text-xs text-slate-400 mt-1">Bagli evrak: {{ kayit.anaEvrakIsmi }}</p>
+                                }
+                              </div>
+
+                              <div class="lg:text-right shrink-0 lg:min-w-[190px]">
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tarih</p>
+                                <p class="text-sm font-bold text-slate-800 mt-1">{{ formatTarih(kayit.tarih) }}</p>
+                                <p class="text-xs text-slate-500 mt-1">{{ getAjandaDosyaOzeti(kayit.kaynak, kayit.dosya) }}</p>
+                                <p class="text-xs text-blue-600 font-bold mt-3 group-hover:underline">Detaya git</p>
+                              </div>
+                            </div>
+                          </button>
+                        } @empty {
+                          <div class="px-6 py-16 text-center">
+                            <div class="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+                              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <p class="text-lg font-bold text-slate-700">Bu filtrelerle gorunen bir ajanda kaydi yok.</p>
+                            <p class="text-sm text-slate-500 mt-2">Zaman filtresini genisletmeyi veya farkli bir arama yapmayi deneyin.</p>
+                          </div>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="xl:col-span-4 space-y-6">
+                      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-4">Yaklasan 5 Kayit</h3>
+                        <div class="space-y-3">
+                          @for (kayit of yaklasanAjandaKayitlari; track kayit.id) {
+                            <button (click)="ajandaKaydinaGit(kayit)" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-slate-50 transition-colors">
+                              <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                  <p class="text-xs font-black text-slate-800 truncate">{{ kayit.baslik }}</p>
+                                  <p class="text-[11px] text-slate-500 mt-1 truncate">{{ kayit.taraflar }}</p>
+                                </div>
+                                <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0">{{ ajandaDurumMetni(kayit.tarih) }}</span>
+                              </div>
+                              <div class="flex items-center justify-between mt-3 text-[11px] text-slate-500">
+                                <span>{{ getAjandaTurEtiketi(kayit.tur) }}</span>
+                                <span>{{ formatTarihKisa(kayit.tarih) }}</span>
+                              </div>
+                            </button>
+                          } @empty {
+                            <div class="text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-xl p-4">Yaklasan bir kayit bulunmuyor.</div>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-4">Dagilim</h3>
+                        <div class="space-y-3">
+                          <div class="flex items-center justify-between p-3 rounded-xl bg-blue-50 border border-blue-100">
+                            <div>
+                              <p class="text-xs font-black text-blue-700 uppercase tracking-wider">Durusmalar</p>
+                              <p class="text-xs text-blue-600 mt-1">Dava dosyalarindaki durusma tarihleri</p>
+                            </div>
+                            <span class="text-2xl font-black text-blue-700">{{ ajandaOzet.durusma }}</span>
+                          </div>
+                          <div class="flex items-center justify-between p-3 rounded-xl bg-purple-50 border border-purple-100">
+                            <div>
+                              <p class="text-xs font-black text-purple-700 uppercase tracking-wider">Toplantilar</p>
+                              <p class="text-xs text-purple-600 mt-1">Arabuluculuk gorusmeleri</p>
+                            </div>
+                            <span class="text-2xl font-black text-purple-700">{{ ajandaOzet.toplanti }}</span>
+                          </div>
+                          <div class="flex items-center justify-between p-3 rounded-xl bg-rose-50 border border-rose-100">
+                            <div>
+                              <p class="text-xs font-black text-rose-700 uppercase tracking-wider">Sureli Isler</p>
+                              <p class="text-xs text-rose-600 mt-1">Son eylem tarihi girilen evraklar</p>
+                            </div>
+                            <span class="text-2xl font-black text-rose-700">{{ ajandaOzet.sureliIs }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               }
@@ -1441,6 +1621,9 @@ export class App implements OnInit {
   iliskiArama = '';
   iliskiFiltre = 'Tümü';
   iliskiSiralama = 'a-z';
+  ajandaArama = '';
+  ajandaZamanFiltresi: 'all' | 'today' | '7days' | '30days' | 'overdue' = 'all';
+  ajandaTurFiltresi: 'all' | AjandaTur = 'all';
   
   arabuluculukMuvekkilDropdownAcik = false;
   arabuluculukMuvekkilArama = '';
@@ -1632,6 +1815,227 @@ export class App implements OnInit {
       if (item.tip === 'Arabuluculuk') o.arabuluculuk += item.kalan;
     });
     return o;
+  }
+
+  ajandaTarihDamgasi(str?: string) {
+    if (!str) return Number.MAX_SAFE_INTEGER;
+    const tarih = new Date(str);
+    tarih.setHours(0, 0, 0, 0);
+    return tarih.getTime();
+  }
+
+  ajandaGunFarki(str?: string) {
+    if (!str) return Number.MAX_SAFE_INTEGER;
+    const bugun = new Date();
+    bugun.setHours(0, 0, 0, 0);
+    return Math.round((this.ajandaTarihDamgasi(str) - bugun.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  ajandaDurumMetni(str?: string) {
+    const fark = this.ajandaGunFarki(str);
+    if (!isFinite(fark)) return 'Tarih yok';
+    if (fark < 0) return `${Math.abs(fark)} gun gecmis`;
+    if (fark === 0) return 'Bugun';
+    if (fark === 1) return 'Yarin';
+    return `${fark} gun kaldi`;
+  }
+
+  getAjandaKalanGunClass(str?: string) {
+    const fark = this.ajandaGunFarki(str);
+    if (fark < 0) return 'bg-rose-100 text-rose-700';
+    if (fark === 0) return 'bg-amber-100 text-amber-700';
+    if (fark <= 7) return 'bg-blue-100 text-blue-700';
+    return 'bg-slate-100 text-slate-600';
+  }
+
+  getAjandaTurEtiketi(tur: AjandaTur) {
+    if (tur === 'durusma') return 'Durusma';
+    if (tur === 'toplanti') return 'Toplanti';
+    return 'Sureli Is';
+  }
+
+  getAjandaTurClass(tur: AjandaTur) {
+    if (tur === 'durusma') return 'bg-blue-100 text-blue-700';
+    if (tur === 'toplanti') return 'bg-purple-100 text-purple-700';
+    return 'bg-rose-100 text-rose-700';
+  }
+
+  getAjandaKaynakEtiketi(kaynak: AjandaKaynak) {
+    if (kaynak === 'dava') return 'Dava';
+    if (kaynak === 'icra') return 'Icra';
+    return 'Arabuluculuk';
+  }
+
+  getAjandaKaynakClass(kaynak: AjandaKaynak) {
+    if (kaynak === 'dava') return 'bg-slate-100 text-slate-700';
+    if (kaynak === 'icra') return 'bg-emerald-100 text-emerald-700';
+    return 'bg-violet-100 text-violet-700';
+  }
+
+  getAjandaDosyaOzeti(kaynak: AjandaKaynak, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi) {
+    if (kaynak === 'dava') {
+      const dava = dosya as DavaDosyasi;
+      return dava.dosyaNo || 'Dava dosyasi';
+    }
+    if (kaynak === 'icra') {
+      const icra = dosya as IcraDosyasi;
+      return `${icra.icraDairesi || ''} ${icra.dosyaNo || ''}`.trim() || 'Icra dosyasi';
+    }
+    const arabuluculuk = dosya as ArabuluculukDosyasi;
+    return `${arabuluculuk.buroNo ? arabuluculuk.buroNo + ' / ' : ''}${arabuluculuk.arabuluculukNo || ''}`.trim() || 'Arabuluculuk dosyasi';
+  }
+
+  ajandaKaydinaGit(kayit: AjandaKaydi) {
+    if (kayit.kaynak === 'dava') this.detayaGit(kayit.dosya as DavaDosyasi);
+    else if (kayit.kaynak === 'icra') this.icraDetayinaGit(kayit.dosya as IcraDosyasi);
+    else this.arabuluculukDetayinaGit(kayit.dosya as ArabuluculukDosyasi);
+
+    if (kayit.tur === 'sureliIs') this.aktifDetaySekmesi = 'sureliIsler';
+  }
+
+  get ajandaKayitlariLegacy() {
+    const kayitlar: AjandaKaydi[] = [];
+
+    this.davalar.forEach(dava => {
+      if (dava.durum === 'KapalÄ±' || !dava.durusmaTarihi) return;
+      kayitlar.push({
+        id: `dava-durusma-${dava.id}`,
+        tarih: dava.durusmaTarihi,
+        tur: 'durusma',
+        kaynak: 'dava',
+        dosya: dava,
+        baslik: dava.mahkeme || 'Dava Durusmasi',
+        altBaslik: dava.konu || this.getAjandaDosyaOzeti('dava', dava),
+        taraflar: `${dava.muvekkil || 'Bilinmiyor'} - ${dava.karsiTaraf || 'Diger Taraf'}`
+      });
+    });
+
+    this.arabuluculukDosyalar.forEach(arabuluculuk => {
+      if (arabuluculuk.durum === 'KapalÄ±' || !arabuluculuk.toplantiTarihi) return;
+      kayitlar.push({
+        id: `arabuluculuk-toplanti-${arabuluculuk.id}`,
+        tarih: arabuluculuk.toplantiTarihi,
+        tur: 'toplanti',
+        kaynak: 'arabuluculuk',
+        dosya: arabuluculuk,
+        baslik: this.getAjandaDosyaOzeti('arabuluculuk', arabuluculuk),
+        altBaslik: arabuluculuk.toplantiYontemi ? `${arabuluculuk.buro || 'Arabuluculuk'} - ${arabuluculuk.toplantiYontemi}` : (arabuluculuk.buro || 'Arabuluculuk toplantisi'),
+        taraflar: arabuluculuk.taraflar?.map(t => t.isim).join(' - ') || 'Taraf bilgisi yok'
+      });
+    });
+
+    this.tumAcilSureliIsler.forEach(is => {
+      kayitlar.push({
+        id: `${is.tur}-sureli-${is.dosya.id}-${is.evrak.id}`,
+        tarih: is.evrak.sonEylemTarihi,
+        tur: 'sureliIs',
+        kaynak: is.tur,
+        dosya: is.dosya,
+        baslik: is.evrak.isim || 'Sureli is',
+        altBaslik: this.getAjandaDosyaOzeti(is.tur, is.dosya),
+        taraflar: this.getTaraflarMetni(is),
+        evrakIsmi: is.evrak.isim,
+        anaEvrakIsmi: is.anaEvrakIsim
+      });
+    });
+
+    return kayitlar.sort((a, b) => this.ajandaTarihDamgasi(a.tarih) - this.ajandaTarihDamgasi(b.tarih));
+  }
+
+  get ajandaKayitlari() {
+    const kayitlar: AjandaKaydi[] = [];
+
+    this.davalar.forEach(dava => {
+      if (dava.durum.toLowerCase().includes('kap') || !dava.durusmaTarihi) return;
+      kayitlar.push({
+        id: `dava-durusma-${dava.id}`,
+        tarih: dava.durusmaTarihi,
+        tur: 'durusma',
+        kaynak: 'dava',
+        dosya: dava,
+        baslik: dava.mahkeme || 'Dava Durusmasi',
+        altBaslik: dava.konu || this.getAjandaDosyaOzeti('dava', dava),
+        taraflar: `${dava.muvekkil || 'Bilinmiyor'} - ${dava.karsiTaraf || 'Diger Taraf'}`
+      });
+    });
+
+    this.arabuluculukDosyalar.forEach(arabuluculuk => {
+      if (arabuluculuk.durum.toLowerCase().includes('kap') || !arabuluculuk.toplantiTarihi) return;
+      kayitlar.push({
+        id: `arabuluculuk-toplanti-${arabuluculuk.id}`,
+        tarih: arabuluculuk.toplantiTarihi,
+        tur: 'toplanti',
+        kaynak: 'arabuluculuk',
+        dosya: arabuluculuk,
+        baslik: this.getAjandaDosyaOzeti('arabuluculuk', arabuluculuk),
+        altBaslik: arabuluculuk.toplantiYontemi ? `${arabuluculuk.buro || 'Arabuluculuk'} - ${arabuluculuk.toplantiYontemi}` : (arabuluculuk.buro || 'Arabuluculuk toplantisi'),
+        taraflar: arabuluculuk.taraflar?.map(t => t.isim).join(' - ') || 'Taraf bilgisi yok'
+      });
+    });
+
+    this.tumAcilSureliIsler.forEach(is => {
+      kayitlar.push({
+        id: `${is.tur}-sureli-${is.dosya.id}-${is.evrak.id}`,
+        tarih: is.evrak.sonEylemTarihi,
+        tur: 'sureliIs',
+        kaynak: is.tur,
+        dosya: is.dosya,
+        baslik: is.evrak.isim || 'Sureli is',
+        altBaslik: this.getAjandaDosyaOzeti(is.tur, is.dosya),
+        taraflar: this.getTaraflarMetni(is),
+        evrakIsmi: is.evrak.isim,
+        anaEvrakIsmi: is.anaEvrakIsim
+      });
+    });
+
+    return kayitlar.sort((a, b) => this.ajandaTarihDamgasi(a.tarih) - this.ajandaTarihDamgasi(b.tarih));
+  }
+
+  get filtrelenmisAjandaKayitlari() {
+    const arama = this.ajandaArama.trim().toLowerCase();
+    return this.ajandaKayitlari.filter(kayit => {
+      const fark = this.ajandaGunFarki(kayit.tarih);
+      const metin = [
+        kayit.baslik,
+        kayit.altBaslik,
+        kayit.taraflar,
+        kayit.evrakIsmi || '',
+        kayit.anaEvrakIsmi || '',
+        this.getAjandaKaynakEtiketi(kayit.kaynak),
+        this.getAjandaTurEtiketi(kayit.tur),
+        this.getAjandaDosyaOzeti(kayit.kaynak, kayit.dosya)
+      ].join(' ').toLowerCase();
+
+      const aramaUygun = !arama || metin.includes(arama);
+      const zamanUygun = this.ajandaZamanFiltresi === 'all'
+        || (this.ajandaZamanFiltresi === 'today' && fark === 0)
+        || (this.ajandaZamanFiltresi === '7days' && fark >= 0 && fark <= 7)
+        || (this.ajandaZamanFiltresi === '30days' && fark >= 0 && fark <= 30)
+        || (this.ajandaZamanFiltresi === 'overdue' && fark < 0);
+      const turUygun = this.ajandaTurFiltresi === 'all' || kayit.tur === this.ajandaTurFiltresi;
+
+      return aramaUygun && zamanUygun && turUygun;
+    });
+  }
+
+  get ajandaOzet() {
+    const kayitlar = this.ajandaKayitlari;
+    return {
+      toplam: kayitlar.length,
+      bugun: kayitlar.filter(kayit => this.ajandaGunFarki(kayit.tarih) === 0).length,
+      yakin: kayitlar.filter(kayit => {
+        const fark = this.ajandaGunFarki(kayit.tarih);
+        return fark >= 0 && fark <= 7;
+      }).length,
+      gecmis: kayitlar.filter(kayit => this.ajandaGunFarki(kayit.tarih) < 0).length,
+      durusma: kayitlar.filter(kayit => kayit.tur === 'durusma').length,
+      toplanti: kayitlar.filter(kayit => kayit.tur === 'toplanti').length,
+      sureliIs: kayitlar.filter(kayit => kayit.tur === 'sureliIs').length
+    };
+  }
+
+  get yaklasanAjandaKayitlari() {
+    return this.ajandaKayitlari.filter(kayit => this.ajandaGunFarki(kayit.tarih) >= 0).slice(0, 5);
   }
 
   get filtrelenmisMuhasebeListesi() {
