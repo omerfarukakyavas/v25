@@ -40,24 +40,24 @@ const getFirebaseConfig = () => {
 
 // --- VERİ MODELLERİ ---
 interface FinansalIslem { id: number; tarih: string; tur: string; tutar: number; aciklama: string; }
-interface EvrakBaglantisi { id: number; isim: string; url: string; tarih: string; tebligTarihi?: string; sonEylemTarihi?: string; yaziRengi?: string; ekler?: EvrakBaglantisi[]; } 
+interface EvrakBaglantisi { id: number; isim: string; url: string; tarih: string; tebligTarihi?: string; sonEylemTarihi?: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; yaziRengi?: string; ekler?: EvrakBaglantisi[]; } 
 interface DosyaNumarasi { tur: string; no: string; }
 interface ArabuluculukTaraf { id: number; tip: 'Başvurucu' | 'Diğer Taraf'; isim: string; }
 
 interface DavaDosyasi { 
-  id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; karsiTaraf: string; mahkeme: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; muvekkilPozisyonu?: string; arsivYeri?: string;
+  id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; karsiTaraf: string; mahkeme: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; muvekkilPozisyonu?: string; arsivYeri?: string;
   icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
-  buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiYontemi?: string;
+  buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: string;
 }
 
 interface IcraDosyasi {
   id: number; icraDairesi: string; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkilId?: number; muvekkil: string; alacakli: string; borclu: string; takipTipi?: string; takipTarihi: string; durum: string; baglantiliDavaId?: number; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; arsivYeri?: string;
-  karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string;
-  buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiYontemi?: string;
+  karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string;
+  buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: string;
 }
 
 interface ArabuluculukDosyasi {
-  id: number; buroNo: string; arabuluculukNo: string; buro: string; basvuruTuru: 'Dava Şartı' | 'İhtiyari'; uyusmazlikTuru: 'Kira' | 'İşçi İşveren' | 'Ticari' | 'Boşanma' | 'Ortaklığın Giderilmesi' | 'Tüketici'; taraflar: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiYontemi?: 'Yüzyüze' | 'Videokonferans' | 'Telekonferans'; durum: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; muvekkilId?: number; arsivYeri?: string;
+  id: number; buroNo: string; arabuluculukNo: string; buro: string; basvuruTuru: 'Dava Şartı' | 'İhtiyari'; uyusmazlikTuru: 'Kira' | 'İşçi İşveren' | 'Ticari' | 'Boşanma' | 'Ortaklığın Giderilmesi' | 'Tüketici'; taraflar: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: 'Yüzyüze' | 'Videokonferans' | 'Telekonferans'; durum: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; muvekkilId?: number; arsivYeri?: string;
   dosyaNo?: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil?: string; karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string; icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
 }
 
@@ -69,12 +69,14 @@ type AjandaTur = 'durusma' | 'toplanti' | 'sureliIs';
 interface AjandaKaydi {
   id: string;
   tarih: string;
+  saat?: string;
   tur: AjandaTur;
   kaynak: AjandaKaynak;
   dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi;
   baslik: string;
   altBaslik: string;
   taraflar: string;
+  evrakId?: number;
   evrakIsmi?: string;
   anaEvrakIsmi?: string;
 }
@@ -483,7 +485,7 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                             @if (dava.durusmaTarihi) {
                               <div class="mt-2 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700">
                                 <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                {{ formatTarih(dava.durusmaTarihi) }}
+                                {{ formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati) }}
                               </div>
                             } @else {
                               <p class="mt-2 text-sm font-medium text-slate-400">Henüz duruşma tarihi girilmedi.</p>
@@ -544,8 +546,8 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                               </td>
                               <td class="p-5"><div class="rounded-xl border border-sky-100 bg-sky-50/70 px-3 py-2"><div class="text-slate-800 font-medium">{{ dava.mahkeme }}</div><div class="text-xs text-slate-500 mt-1">{{ dava.konu }}</div></div></td>
                               <td class="p-5 text-slate-600">
-                                 @if(dava.durusmaTarihi) { <span class="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-3 py-2 text-blue-700 font-semibold shadow-sm"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {{ formatTarih(dava.durusmaTarihi) }}</span> } 
-                                 @else { <span class="text-slate-400 text-sm">-</span> }
+                               @if(dava.durusmaTarihi) { <span class="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-3 py-2 text-blue-700 font-semibold shadow-sm"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {{ formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati) }}</span> } 
+                               @else { <span class="text-slate-400 text-sm">-</span> }
                               </td>
                               <td class="p-5">
                                 <div class="relative inline-block">
@@ -786,7 +788,7 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                             @if (arb.toplantiTarihi) {
                               <div class="mt-2 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-700">
                                 <svg class="h-4 w-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                {{ formatTarih(arb.toplantiTarihi) }}
+                                {{ formatTarihSaat(arb.toplantiTarihi, arb.toplantiSaati) }}
                               </div>
                               @if (arb.toplantiYontemi) {
                                 <div class="mt-2 inline-flex rounded-full bg-purple-50 px-2 py-1 text-[10px] font-bold uppercase text-purple-600">{{ arb.toplantiYontemi }}</div>
@@ -857,7 +859,7 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                               </td>
                               <td class="p-5 text-slate-600">
                                  @if(arb.toplantiTarihi) { 
-                                   <span class="inline-flex items-center gap-1.5 rounded-xl border border-violet-200 bg-white px-3 py-2 text-sm font-semibold text-violet-700 shadow-sm"><svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {{ formatTarih(arb.toplantiTarihi) }}</span> 
+                                 <span class="inline-flex items-center gap-1.5 rounded-xl border border-violet-200 bg-white px-3 py-2 text-sm font-semibold text-violet-700 shadow-sm"><svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {{ formatTarihSaat(arb.toplantiTarihi, arb.toplantiSaati) }}</span> 
                                    @if(arb.toplantiYontemi) { <div class="text-[10px] text-purple-600 font-bold bg-purple-50 inline-block px-1.5 py-0.5 rounded mt-1">{{ arb.toplantiYontemi }}</div> }
                                  } @else { <span class="text-slate-400 text-sm">-</span> }
                               </td>
@@ -953,7 +955,7 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
 
                       <div class="divide-y divide-slate-100">
                         @for (kayit of filtrelenmisAjandaKayitlari; track kayit.id) {
-                          <button (click)="ajandaKaydinaGit(kayit)" class="w-full text-left px-5 py-4 hover:bg-slate-50 transition-colors group">
+                          <div (click)="ajandaKaydinaGit(kayit)" class="w-full cursor-pointer text-left px-5 py-4 hover:bg-slate-50 transition-colors group">
                             <div class="flex flex-col lg:flex-row lg:items-center gap-4">
                               <div class="shrink-0 flex items-center gap-3">
                                 <div class="w-16 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center shadow-sm">
@@ -971,6 +973,9 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                                   <span [class]="getAjandaTurClass(kayit.tur)" class="sm:hidden px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
                                   <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="sm:hidden px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
                                   <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ ajandaDurumMetni(kayit.tarih) }}</span>
+                                  @if (kayit.saat) {
+                                    <span class="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-black uppercase tracking-wider text-slate-600">Saat {{ formatSaat(kayit.saat) }}</span>
+                                  }
                                 </div>
                                 <h3 class="text-base font-black text-slate-800 group-hover:text-blue-700 transition-colors">{{ kayit.baslik }}</h3>
                                 <p class="text-sm text-slate-600 font-medium mt-1">{{ kayit.taraflar }}</p>
@@ -983,11 +988,17 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                               <div class="lg:text-right shrink-0 lg:min-w-[190px]">
                                 <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tarih</p>
                                 <p class="text-sm font-bold text-slate-800 mt-1">{{ formatTarih(kayit.tarih) }}</p>
+                                @if (kayit.saat) {
+                                  <p class="text-xs font-bold text-slate-500 mt-1">Saat {{ formatSaat(kayit.saat) }}</p>
+                                }
                                 <p class="text-xs text-slate-500 mt-1">{{ getAjandaDosyaOzeti(kayit.kaynak, kayit.dosya) }}</p>
-                                <p class="text-xs text-blue-600 font-bold mt-3 group-hover:underline">Detaya git</p>
+                                <div class="mt-3 flex flex-col items-start gap-2 lg:items-end">
+                                  <button type="button" (click)="ajandaKaydiTamamla(kayit, $event)" class="rounded-full bg-slate-900 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-slate-800">{{ getAjandaTamamlaMetni(kayit) }}</button>
+                                  <p class="text-xs text-blue-600 font-bold group-hover:underline">Detaya git</p>
+                                </div>
                               </div>
                             </div>
-                          </button>
+                          </div>
                         } @empty {
                           <div class="px-6 py-16 text-center">
                             <div class="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
@@ -1010,6 +1021,7 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                                 <div class="min-w-0">
                                   <p class="text-xs font-black text-slate-800 truncate">{{ kayit.baslik }}</p>
                                   <p class="text-[11px] text-slate-500 mt-1 truncate">{{ kayit.taraflar }}</p>
+                                  @if (kayit.saat) { <p class="text-[10px] font-bold text-slate-400 mt-1">Saat {{ formatSaat(kayit.saat) }}</p> }
                                 </div>
                                 <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0">{{ ajandaDurumMetni(kayit.tarih) }}</span>
                               </div>
@@ -1471,6 +1483,22 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Mahkeme</p><p class="font-medium text-slate-800">{{ aktifDosya.mahkeme }}</p></div>
                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Konu</p><p class="font-medium text-slate-800">{{ aktifDosya.konu }}</p></div>
                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Arşiv / Klasör Konumu</p><p class="font-medium text-slate-800">{{ aktifDosya.arsivYeri || 'Belirtilmedi' }}</p></div>
+                           <div class="col-span-2 mt-2 flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50/70 p-3 sm:flex-row sm:items-center sm:justify-between">
+                             <div>
+                               <p class="text-[10px] font-bold uppercase tracking-wider text-blue-700">Duruşma Takvimi</p>
+                               <p class="mt-1 font-bold text-slate-800">{{ getAktifDavaDurusmaMetni() }}</p>
+                               <p class="mt-1 text-xs font-medium" [class]="aktifDavaDurusmaTamamlandiMi() ? 'text-emerald-600' : 'text-slate-500'">
+                                 {{ aktifDavaDurusmaTamamlandiMi() ? 'Duruşma gerçekleşti olarak işaretlendi.' : 'Ajandada aktif duruşma kaydı olarak izleniyor.' }}
+                               </p>
+                             </div>
+                             @if (getAktifDavaDosyasi()?.durusmaTarihi) {
+                               @if (aktifDavaDurusmaTamamlandiMi()) {
+                                 <button (click)="aktifDavaDurusmaAjandayaGeriAl()" class="w-full rounded-lg bg-white px-3 py-2 text-xs font-bold text-blue-700 shadow-sm ring-1 ring-blue-200 transition-colors hover:bg-blue-100 sm:w-auto">Ajandaya Geri Al</button>
+                               } @else {
+                                 <button (click)="aktifDavaDurusmaTamamla()" class="w-full rounded-lg bg-blue-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-blue-800 sm:w-auto">Duruşma Yapıldı</button>
+                               }
+                             }
+                           </div>
                            @if (aktifDosya.baglantiliIcraId) {
                              <div class="col-span-2 mt-2 flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 sm:flex-row sm:items-center sm:justify-between"><div><p class="text-xs text-emerald-700 font-bold uppercase tracking-wider mb-0.5">Bağlantılı İcra Dosyası</p><p class="font-bold text-slate-800">{{ getIcraNo(aktifDosya.baglantiliIcraId) }}</p></div><button (click)="icrayaGitId(aktifDosya.baglantiliIcraId)" class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700 sm:w-auto sm:py-1.5">İcraya Git</button></div>
                            }
@@ -1509,8 +1537,23 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Uyuşmazlık Türü</p><p class="font-medium text-slate-800">{{ aktifDosya.uyusmazlikTuru }}</p></div>
                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Arşiv / Klasör Konumu</p><p class="font-medium text-slate-800">{{ aktifDosya.arsivYeri || 'Belirtilmedi' }}</p></div>
                            <div class="col-span-2 mt-2 flex flex-col gap-3 rounded-lg border border-purple-100 bg-purple-50 p-3 sm:flex-row sm:items-center sm:justify-between">
-                             <div><p class="text-[10px] text-purple-600 font-bold uppercase tracking-wider mb-0.5">Toplantı Bilgisi</p><p class="font-bold text-slate-800">{{ formatTarih(aktifDosya.toplantiTarihi) }} - <span class="uppercase text-xs">{{aktifDosya.toplantiYontemi}}</span></p></div>
-                             @if(aktifDosya.toplantiTarihi) { <div class="px-3 py-1 bg-white border border-purple-200 text-purple-700 font-bold text-xs rounded shadow-sm">{{ hesaplaKalanGun(aktifDosya.toplantiTarihi) }}</div> }
+                             <div>
+                               <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wider mb-0.5">Toplantı Bilgisi</p>
+                               <p class="font-bold text-slate-800">{{ getAktifArabuluculukToplantiMetni() }} @if(getAktifArabuluculukDosyasi()?.toplantiYontemi) { - <span class="uppercase text-xs">{{getAktifArabuluculukDosyasi()?.toplantiYontemi}}</span> }</p>
+                               <p class="mt-1 text-xs font-medium" [class]="aktifArabuluculukToplantiTamamlandiMi() ? 'text-emerald-600' : 'text-slate-500'">
+                                 {{ aktifArabuluculukToplantiTamamlandiMi() ? 'Toplantı gerçekleşti olarak işaretlendi.' : 'Ajandada aktif toplantı kaydı olarak izleniyor.' }}
+                               </p>
+                             </div>
+                             <div class="flex flex-col gap-2 sm:items-end">
+                               @if(getAktifArabuluculukDosyasi()?.toplantiTarihi) { <div class="px-3 py-1 bg-white border border-purple-200 text-purple-700 font-bold text-xs rounded shadow-sm">{{ aktifArabuluculukToplantiTamamlandiMi() ? 'Gerçekleşti' : hesaplaKalanGun(getAktifArabuluculukDosyasi()?.toplantiTarihi) }}</div> }
+                               @if (getAktifArabuluculukDosyasi()?.toplantiTarihi) {
+                                 @if (aktifArabuluculukToplantiTamamlandiMi()) {
+                                   <button (click)="aktifArabuluculukToplantiyiAjandayaGeriAl()" class="w-full rounded-lg bg-white px-3 py-2 text-xs font-bold text-purple-700 shadow-sm ring-1 ring-purple-200 transition-colors hover:bg-purple-100 sm:w-auto">Ajandaya Geri Al</button>
+                                 } @else {
+                                   <button (click)="aktifArabuluculukToplantiyiTamamla()" class="w-full rounded-lg bg-purple-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-purple-800 sm:w-auto">Toplantı Yapıldı</button>
+                                 }
+                               }
+                             </div>
                            </div>
                          }
                       </div>
@@ -1658,6 +1701,7 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                                        <p class="text-base font-black text-slate-800 sm:text-lg">{{ is.isim }}</p>
                                        @if(is.anaEvrakIsim) { <p class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded inline-block mt-1">Ek Dosya: {{ is.anaEvrakIsim }}</p> }
                                        <p class="text-xs text-slate-500 mt-2 font-medium">Tebliğ Tarihi: {{ is.tebligTarihi ? formatTarih(is.tebligTarihi) : 'Belirtilmedi' }}</p>
+                                       <button (click)="sureliIsiTamamlandiIsaretle(aktifDosya, aktifSayfa === 'detay' ? 'dava' : (aktifSayfa === 'icraDetay' ? 'icra' : 'arabuluculuk'), is.id)" class="mt-3 rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-800">Tamamlandı Olarak İşaretle</button>
                                      </div>
                                      <div class="w-full rounded-lg border border-red-100 bg-red-50 p-3 sm:min-w-[160px] sm:w-auto sm:text-right">
                                        <p class="text-[10px] font-black text-red-800 uppercase tracking-widest mb-1">Son Eylem Günü</p>
@@ -1848,6 +1892,47 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                     <option [ngValue]="undefined" disabled>Müvekkil Seçiniz</option>
                     @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Diğer' ? '(Diğer)' : '' }}</option> }
                   </select>
+                  <div class="mt-2 flex flex-col gap-2 rounded-xl border border-dashed border-blue-200 bg-blue-50/50 p-3">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <p class="text-[11px] font-semibold text-slate-600">Aradığınız müvekkil listede yoksa buradan hızlıca ekleyebilirsiniz.</p>
+                      @if (!hizliMuvekkilFormAcik) {
+                        <button (click)="hizliMuvekkilKaydiAc()" class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">Yeni Müvekkil Ekle</button>
+                      }
+                    </div>
+                    @if (hizliMuvekkilFormAcik) {
+                      <div class="grid gap-3 rounded-xl border border-blue-100 bg-white p-3 sm:grid-cols-2">
+                        <div>
+                          <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Kayıt Tipi</label>
+                          <select [(ngModel)]="hizliMuvekkilKaydi.tip" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none bg-white">
+                            <option value="Müvekkil">Müvekkil</option>
+                            <option value="Şirketler">Şirket / Kurum</option>
+                            <option value="Borçlular">Borçlu</option>
+                            <option value="Diğer">Diğer</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Ad Soyad / Unvan</label>
+                          <input [(ngModel)]="hizliMuvekkilKaydi.adSoyad" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">TC / VKN</label>
+                          <input [(ngModel)]="hizliMuvekkilKaydi.tcKimlik" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Telefon</label>
+                          <input [(ngModel)]="hizliMuvekkilKaydi.telefon" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                        </div>
+                        <div class="sm:col-span-2">
+                          <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">E-Posta</label>
+                          <input [(ngModel)]="hizliMuvekkilKaydi.eposta" type="email" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                        </div>
+                        <div class="sm:col-span-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                          <button (click)="hizliMuvekkilKaydiIptal()" class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-200">İptal</button>
+                          <button (click)="hizliMuvekkilKaydet()" class="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-emerald-700">Kaydet ve Seç</button>
+                        </div>
+                      </div>
+                    }
+                  </div>
                 </div>
                 <div class="w-1/3">
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Pozisyonu</label>
@@ -1891,7 +1976,10 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Dava Açılış Tarihi</label><input [(ngModel)]="islemGorenDava.takipTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 </div>
 
-                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Sonraki Duruşma Tarihi</label><input [(ngModel)]="islemGorenDava.durusmaTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div class="mt-4 grid grid-cols-2 gap-4">
+                  <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Sonraki Duruşma Tarihi</label><input [(ngModel)]="islemGorenDava.durusmaTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                  <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Duruşma Saati</label><input [(ngModel)]="islemGorenDava.durusmaSaati" type="time" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white"></div>
+                </div>
 
               @if (islemGorenDava.durum === 'İstinaf/Temyiz') {
                 <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg mt-4"><label class="block text-xs font-bold text-orange-800 uppercase mb-1">İstinaf Mahkemesi</label><input [(ngModel)]="islemGorenDava.istinafMahkemesi" type="text" class="w-full px-3 py-2 border border-orange-200 rounded-lg outline-none bg-white"></div>
@@ -2127,8 +2215,9 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
               <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-purple-700">Toplantı ve Finans</p>
                 <p class="mt-2 text-sm leading-6 text-slate-500">Toplantı, arşiv ve ücret bilgileri bir arada durarak dosyanın son durumunu daha rahat gösterir.</p>
-                <div class="mt-4 grid grid-cols-2 gap-4">
+                <div class="mt-4 grid grid-cols-3 gap-4">
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Toplantı Tarihi</label><input [(ngModel)]="islemGorenArabuluculuk.toplantiTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Toplantı Saati</label><input [(ngModel)]="islemGorenArabuluculuk.toplantiSaati" type="time" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white"></div>
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Toplantı Yöntemi</label>
                   <select [(ngModel)]="islemGorenArabuluculuk.toplantiYontemi" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
@@ -2330,6 +2419,8 @@ export class App implements OnInit {
   
   arabuluculukMuvekkilDropdownAcik = false;
   arabuluculukMuvekkilArama = '';
+  hizliMuvekkilFormAcik = false;
+  hizliMuvekkilKaydi: Partial<Muvekkil> = { tip: 'Müvekkil' };
 
   yetkiliSecimDropdownAcik = false;
   yetkiliSecimArama = '';
@@ -2345,6 +2436,7 @@ export class App implements OnInit {
   yeniEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi }; ekEklenenEvrakId: number | null = null;
   yeniEkEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi }; duzenlenenEvrakId: number | null = null;
   duzenlenenEvrakParentId: number | null = null; duzenlenenEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi };
+  duzenlenenEvrakOrijinalSonEylemTarihi = '';
   acikKlasorler: Record<number, boolean> = {}; 
 
   ngOnInit() { this.initFirebase(); }
@@ -2614,18 +2706,23 @@ export class App implements OnInit {
     return o;
   }
 
-  ajandaTarihDamgasi(str?: string) {
+  ajandaGunDamgasi(str?: string) {
     if (!str) return Number.MAX_SAFE_INTEGER;
     const tarih = new Date(str);
     tarih.setHours(0, 0, 0, 0);
     return tarih.getTime();
   }
 
+  ajandaTarihDamgasi(str?: string) {
+    if (!str) return Number.MAX_SAFE_INTEGER;
+    return new Date(str).getTime();
+  }
+
   ajandaGunFarki(str?: string) {
     if (!str) return Number.MAX_SAFE_INTEGER;
     const bugun = new Date();
     bugun.setHours(0, 0, 0, 0);
-    return Math.round((this.ajandaTarihDamgasi(str) - bugun.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.round((this.ajandaGunDamgasi(str) - bugun.getTime()) / (1000 * 60 * 60 * 24));
   }
 
   ajandaDurumMetni(str?: string) {
@@ -2694,10 +2791,11 @@ export class App implements OnInit {
     const kayitlar: AjandaKaydi[] = [];
 
     this.davalar.forEach(dava => {
-      if (dava.durum === 'KapalÄ±' || !dava.durusmaTarihi) return;
+      if (dava.durum === 'KapalÄ±' || !dava.durusmaTarihi || dava.durusmaTamamlandiMi) return;
       kayitlar.push({
         id: `dava-durusma-${dava.id}`,
-        tarih: dava.durusmaTarihi,
+        tarih: this.birlestirTarihVeSaat(dava.durusmaTarihi, dava.durusmaSaati),
+        saat: dava.durusmaSaati,
         tur: 'durusma',
         kaynak: 'dava',
         dosya: dava,
@@ -2708,10 +2806,11 @@ export class App implements OnInit {
     });
 
     this.arabuluculukDosyalar.forEach(arabuluculuk => {
-      if (arabuluculuk.durum === 'KapalÄ±' || !arabuluculuk.toplantiTarihi) return;
+      if (arabuluculuk.durum === 'KapalÄ±' || !arabuluculuk.toplantiTarihi || arabuluculuk.toplantiTamamlandiMi) return;
       kayitlar.push({
         id: `arabuluculuk-toplanti-${arabuluculuk.id}`,
-        tarih: arabuluculuk.toplantiTarihi,
+        tarih: this.birlestirTarihVeSaat(arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati),
+        saat: arabuluculuk.toplantiSaati,
         tur: 'toplanti',
         kaynak: 'arabuluculuk',
         dosya: arabuluculuk,
@@ -2731,6 +2830,7 @@ export class App implements OnInit {
         baslik: is.evrak.isim || 'Sureli is',
         altBaslik: this.getAjandaDosyaOzeti(is.tur, is.dosya),
         taraflar: this.getTaraflarMetni(is),
+        evrakId: is.evrak.id,
         evrakIsmi: is.evrak.isim,
         anaEvrakIsmi: is.anaEvrakIsim
       });
@@ -2743,10 +2843,11 @@ export class App implements OnInit {
     const kayitlar: AjandaKaydi[] = [];
 
     this.davalar.forEach(dava => {
-      if (dava.durum.toLowerCase().includes('kap') || !dava.durusmaTarihi) return;
+      if (dava.durum.toLowerCase().includes('kap') || !dava.durusmaTarihi || dava.durusmaTamamlandiMi) return;
       kayitlar.push({
         id: `dava-durusma-${dava.id}`,
-        tarih: dava.durusmaTarihi,
+        tarih: this.birlestirTarihVeSaat(dava.durusmaTarihi, dava.durusmaSaati),
+        saat: dava.durusmaSaati,
         tur: 'durusma',
         kaynak: 'dava',
         dosya: dava,
@@ -2757,10 +2858,11 @@ export class App implements OnInit {
     });
 
     this.arabuluculukDosyalar.forEach(arabuluculuk => {
-      if (arabuluculuk.durum.toLowerCase().includes('kap') || !arabuluculuk.toplantiTarihi) return;
+      if (arabuluculuk.durum.toLowerCase().includes('kap') || !arabuluculuk.toplantiTarihi || arabuluculuk.toplantiTamamlandiMi) return;
       kayitlar.push({
         id: `arabuluculuk-toplanti-${arabuluculuk.id}`,
-        tarih: arabuluculuk.toplantiTarihi,
+        tarih: this.birlestirTarihVeSaat(arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati),
+        saat: arabuluculuk.toplantiSaati,
         tur: 'toplanti',
         kaynak: 'arabuluculuk',
         dosya: arabuluculuk,
@@ -2780,6 +2882,7 @@ export class App implements OnInit {
         baslik: is.evrak.isim || 'Sureli is',
         altBaslik: this.getAjandaDosyaOzeti(is.tur, is.dosya),
         taraflar: this.getTaraflarMetni(is),
+        evrakId: is.evrak.id,
         evrakIsmi: is.evrak.isim,
         anaEvrakIsmi: is.anaEvrakIsim
       });
@@ -2889,8 +2992,8 @@ export class App implements OnInit {
     const dosya = this.aktifDosya; if (!dosya) return [];
     let isler: any[] = [];
     (dosya.evraklar || []).forEach((e:any) => {
-       if (e.sonEylemTarihi) isler.push({...e, anaEvrakIsim: null});
-       (e.ekler || []).forEach((ek:any) => { if (ek.sonEylemTarihi) isler.push({...ek, anaEvrakIsim: e.isim}); });
+       if (e.sonEylemTarihi && !e.tamamlandiMi) isler.push({...e, anaEvrakIsim: null});
+       (e.ekler || []).forEach((ek:any) => { if (ek.sonEylemTarihi && !ek.tamamlandiMi) isler.push({...ek, anaEvrakIsim: e.isim}); });
     });
     return isler.sort((a,b) => new Date(a.sonEylemTarihi).getTime() - new Date(b.sonEylemTarihi).getTime());
   }
@@ -2900,22 +3003,22 @@ export class App implements OnInit {
     this.davalar.forEach(d => {
         if (d.durum === 'Kapalı') return;
         (d.evraklar || []).forEach(e => {
-           if (e.sonEylemTarihi) isler.push({ tur: 'dava', dosya: d, evrak: e });
-           (e.ekler || []).forEach(ek => { if (ek.sonEylemTarihi) isler.push({ tur: 'dava', dosya: d, evrak: ek, anaEvrakIsim: e.isim }); });
+           if (e.sonEylemTarihi && !e.tamamlandiMi) isler.push({ tur: 'dava', dosya: d, evrak: e });
+           (e.ekler || []).forEach(ek => { if (ek.sonEylemTarihi && !ek.tamamlandiMi) isler.push({ tur: 'dava', dosya: d, evrak: ek, anaEvrakIsim: e.isim }); });
         });
     });
     this.icralar.forEach(i => {
         if (i.durum === 'İnfaz/Kapalı') return;
         (i.evraklar || []).forEach(e => {
-           if (e.sonEylemTarihi) isler.push({ tur: 'icra', dosya: i, evrak: e });
-           (e.ekler || []).forEach(ek => { if (ek.sonEylemTarihi) isler.push({ tur: 'icra', dosya: i, evrak: ek, anaEvrakIsim: e.isim }); });
+           if (e.sonEylemTarihi && !e.tamamlandiMi) isler.push({ tur: 'icra', dosya: i, evrak: e });
+           (e.ekler || []).forEach(ek => { if (ek.sonEylemTarihi && !ek.tamamlandiMi) isler.push({ tur: 'icra', dosya: i, evrak: ek, anaEvrakIsim: e.isim }); });
         });
     });
     this.arabuluculukDosyalar.forEach(a => {
         if (a.durum === 'Kapalı') return;
         (a.evraklar || []).forEach(e => {
-           if (e.sonEylemTarihi) isler.push({ tur: 'arabuluculuk', dosya: a, evrak: e });
-           (e.ekler || []).forEach(ek => { if (ek.sonEylemTarihi) isler.push({ tur: 'arabuluculuk', dosya: a, evrak: ek, anaEvrakIsim: e.isim }); });
+           if (e.sonEylemTarihi && !e.tamamlandiMi) isler.push({ tur: 'arabuluculuk', dosya: a, evrak: e });
+           (e.ekler || []).forEach(ek => { if (ek.sonEylemTarihi && !ek.tamamlandiMi) isler.push({ tur: 'arabuluculuk', dosya: a, evrak: ek, anaEvrakIsim: e.isim }); });
         });
     });
     return isler.sort((a,b) => new Date(a.evrak.sonEylemTarihi).getTime() - new Date(b.evrak.sonEylemTarihi).getTime());
@@ -2940,6 +3043,8 @@ export class App implements OnInit {
 
   dosyaFormunuAc(d?: DavaDosyasi) {
     this.formHata = '';
+    this.hizliMuvekkilFormAcik = false;
+    this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
     if (d) { 
       this.formModu = 'duzenle'; 
       this.islemGorenDava = { ...d, dosyaNumaralari: Array.isArray(d.dosyaNumaralari) ? d.dosyaNumaralari.map(n => ({...n})) : [] }; 
@@ -2947,12 +3052,12 @@ export class App implements OnInit {
          this.islemGorenDava.dosyaNumaralari = [{ tur: 'ESAS', no: this.islemGorenDava.dosyaNo || '' }, { tur: 'KARAR', no: '' }]; 
       }
     } 
-    else { this.formModu = 'ekle'; this.islemGorenDava = { durum: 'Derdest', muvekkilId: undefined, muvekkilPozisyonu: undefined, dosyaNumaralari: [{ tur: 'ESAS', no: '' }, { tur: 'KARAR', no: '' }] }; }
+    else { this.formModu = 'ekle'; this.islemGorenDava = { durum: 'Derdest', muvekkilId: undefined, muvekkilPozisyonu: undefined, durusmaSaati: '', durusmaTamamlandiMi: false, dosyaNumaralari: [{ tur: 'ESAS', no: '' }, { tur: 'KARAR', no: '' }] }; }
     this.davaFormAcik = true;
   }
   dosyaNumarasiEkle() { if (!this.islemGorenDava.dosyaNumaralari) this.islemGorenDava.dosyaNumaralari = []; this.islemGorenDava.dosyaNumaralari.push({ tur: 'ESAS', no: '' }); }
   dosyaNumarasiSil(i: number) { if (this.islemGorenDava.dosyaNumaralari) this.islemGorenDava.dosyaNumaralari.splice(i, 1); }
-  davaFormKapat() { this.davaFormAcik = false; }
+  davaFormKapat() { this.davaFormAcik = false; this.hizliMuvekkilFormAcik = false; this.hizliMuvekkilKaydi = { tip: 'Müvekkil' }; }
   davaKaydet() {
     const num = (this.islemGorenDava.dosyaNumaralari || []).filter(n => n.no && n.no.trim() !== '');
     if (num.length === 0 || !this.islemGorenDava.muvekkilId) { this.formHata = "Dosya numarası ve muhatap zorunludur."; return; }
@@ -2967,9 +3072,15 @@ export class App implements OnInit {
     const m = this.muvekkiller.find(x => x.id == this.islemGorenDava.muvekkilId);
     const noStr = num.map(n => `${n.tur}: ${n.no}`).join(' | ');
     if (this.formModu === 'ekle') {
-      const y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: m?.id || Number(this.islemGorenDava.muvekkilId), muvekkil: m?.adSoyad || 'Bilinmiyor', muvekkilPozisyonu: this.islemGorenDava.muvekkilPozisyonu, karsiTaraf: this.islemGorenDava.karsiTaraf || '-', mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: this.islemGorenDava.baglantiliIcraId, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', finansalIslemler: [], evraklar: [] };
+      const y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: m?.id || Number(this.islemGorenDava.muvekkilId), muvekkil: m?.adSoyad || this.islemGorenDava.muvekkil || 'Bilinmiyor', muvekkilPozisyonu: this.islemGorenDava.muvekkilPozisyonu, karsiTaraf: this.islemGorenDava.karsiTaraf || '-', mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', durusmaSaati: this.islemGorenDava.durusmaSaati || '', durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: this.islemGorenDava.baglantiliIcraId, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', finansalIslemler: [], evraklar: [] };
       this.davaKaydetCloud(y, 'Yeni dava dosyası buluta eklendi.');
-    } else { const g = { ...this.islemGorenDava, dosyaNo: noStr, dosyaNumaralari: num, muvekkil: m?.adSoyad || this.islemGorenDava.muvekkil } as DavaDosyasi; this.davaKaydetCloud(g, 'Dava dosyasındaki bilgiler güncellendi.'); }
+    } else {
+      const mevcut = this.davalar.find(x => x.id === this.islemGorenDava.id);
+      const durusmaDegisti = (mevcut?.durusmaTarihi || '') !== (this.islemGorenDava.durusmaTarihi || '') || (mevcut?.durusmaSaati || '') !== (this.islemGorenDava.durusmaSaati || '');
+      const g = { ...this.islemGorenDava, dosyaNo: noStr, dosyaNumaralari: num, muvekkil: m?.adSoyad || this.islemGorenDava.muvekkil || 'Bilinmiyor' } as DavaDosyasi;
+      if (durusmaDegisti) { g.durusmaTamamlandiMi = false; g.durusmaTamamlanmaTarihi = ''; }
+      this.davaKaydetCloud(g, 'Dava dosyasındaki bilgiler güncellendi.');
+    }
     this.davaFormKapat();
   }
   durumGuncelle(d: DavaDosyasi, yD: string) { const k = {...d}; k.durum = yD as any; if (k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = ''; this.davaKaydetCloud(k, 'Dava durum etiketi güncellendi.'); }
@@ -3007,7 +3118,7 @@ export class App implements OnInit {
       this.formModu = 'duzenle'; 
       this.islemGorenArabuluculuk = { ...a, taraflar: Array.isArray(a.taraflar) ? a.taraflar.map(t => ({...t})) : [] }; 
     }
-    else { this.formModu = 'ekle'; this.islemGorenArabuluculuk = { durum: 'Hazırlık', basvuruTuru: 'Dava Şartı', uyusmazlikTuru: 'İşçi İşveren', buro: 'İstanbul Anadolu', taraflar: [{ id: Date.now(), tip: 'Başvurucu', isim: '' }, { id: Date.now() + 1, tip: 'Diğer Taraf', isim: '' }] }; }
+    else { this.formModu = 'ekle'; this.islemGorenArabuluculuk = { durum: 'Hazırlık', basvuruTuru: 'Dava Şartı', uyusmazlikTuru: 'İşçi İşveren', buro: 'İstanbul Anadolu', toplantiSaati: '', toplantiTamamlandiMi: false, taraflar: [{ id: Date.now(), tip: 'Başvurucu', isim: '' }, { id: Date.now() + 1, tip: 'Diğer Taraf', isim: '' }] }; }
     this.arabuluculukFormAcik = true;
   }
   arabuluculukFormKapat() { this.arabuluculukFormAcik = false; }
@@ -3023,9 +3134,15 @@ export class App implements OnInit {
     t.forEach(taraf => taraf.isim = this.formatMetin(taraf.isim));
 
     if (this.formModu === 'ekle') {
-      const y: ArabuluculukDosyasi = { id: Date.now(), buroNo: this.islemGorenArabuluculuk.buroNo || '', arabuluculukNo: this.islemGorenArabuluculuk.arabuluculukNo || '', buro: this.islemGorenArabuluculuk.buro || '', basvuruTuru: this.islemGorenArabuluculuk.basvuruTuru as any, uyusmazlikTuru: this.islemGorenArabuluculuk.uyusmazlikTuru as any, taraflar: t, muvekkilId: this.islemGorenArabuluculuk.muvekkilId, toplantiTarihi: this.islemGorenArabuluculuk.toplantiTarihi, toplantiYontemi: this.islemGorenArabuluculuk.toplantiYontemi, durum: this.islemGorenArabuluculuk.durum as any, arsivYeri: this.islemGorenArabuluculuk.arsivYeri || '', vekaletUcreti: this.islemGorenArabuluculuk.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [] };
+      const y: ArabuluculukDosyasi = { id: Date.now(), buroNo: this.islemGorenArabuluculuk.buroNo || '', arabuluculukNo: this.islemGorenArabuluculuk.arabuluculukNo || '', buro: this.islemGorenArabuluculuk.buro || '', basvuruTuru: this.islemGorenArabuluculuk.basvuruTuru as any, uyusmazlikTuru: this.islemGorenArabuluculuk.uyusmazlikTuru as any, taraflar: t, muvekkilId: this.islemGorenArabuluculuk.muvekkilId, toplantiTarihi: this.islemGorenArabuluculuk.toplantiTarihi, toplantiSaati: this.islemGorenArabuluculuk.toplantiSaati || '', toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '', toplantiYontemi: this.islemGorenArabuluculuk.toplantiYontemi, durum: this.islemGorenArabuluculuk.durum as any, arsivYeri: this.islemGorenArabuluculuk.arsivYeri || '', vekaletUcreti: this.islemGorenArabuluculuk.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [] };
       this.arabuluculukKaydetCloud(y, 'Yeni arabuluculuk dosyası buluta eklendi.');
-    } else { const g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', taraflar: t } as ArabuluculukDosyasi; this.arabuluculukKaydetCloud(g, 'Arabuluculuk dosyasındaki bilgiler güncellendi.'); }
+    } else {
+      const mevcut = this.arabuluculukDosyalar.find(x => x.id === this.islemGorenArabuluculuk.id);
+      const toplantiDegisti = (mevcut?.toplantiTarihi || '') !== (this.islemGorenArabuluculuk.toplantiTarihi || '') || (mevcut?.toplantiSaati || '') !== (this.islemGorenArabuluculuk.toplantiSaati || '');
+      const g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', taraflar: t } as ArabuluculukDosyasi;
+      if (toplantiDegisti) { g.toplantiTamamlandiMi = false; g.toplantiTamamlanmaTarihi = ''; }
+      this.arabuluculukKaydetCloud(g, 'Arabuluculuk dosyasındaki bilgiler güncellendi.');
+    }
     this.arabuluculukFormKapat();
   }
   arabuluculukDurumGuncelle(a: ArabuluculukDosyasi, yD: string) { const k = {...a}; k.durum = yD as any; this.arabuluculukKaydetCloud(k, 'Arabuluculuk durumu güncellendi.'); }
@@ -3037,6 +3154,38 @@ export class App implements OnInit {
     this.muvekkilFormAcik = true; 
   }
   muvekkilFormKapat() { this.muvekkilFormAcik = false; this.yetkiliSecimDropdownAcik = false; this.yetkiliSecimArama = ''; }
+  hizliMuvekkilKaydiAc() {
+    this.formHata = '';
+    this.hizliMuvekkilFormAcik = true;
+    this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
+  }
+  hizliMuvekkilKaydiIptal() {
+    this.hizliMuvekkilFormAcik = false;
+    this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
+  }
+  hizliMuvekkilKaydet() {
+    if (!this.hizliMuvekkilKaydi.adSoyad || !this.hizliMuvekkilKaydi.tip) { this.formHata = 'Hızlı müvekkil kaydı için tip ve ad soyad / unvan zorunludur.'; return; }
+    const adSoyad = this.formatMetin(this.hizliMuvekkilKaydi.adSoyad) || '';
+    const yeni: Muvekkil = {
+      id: Date.now(),
+      tip: this.hizliMuvekkilKaydi.tip as any,
+      _isNewDiger: this.hizliMuvekkilKaydi.tip === 'Diğer',
+      adSoyad,
+      tcKimlik: this.hizliMuvekkilKaydi.tcKimlik || '',
+      telefon: this.hizliMuvekkilKaydi.telefon || '',
+      eposta: this.hizliMuvekkilKaydi.eposta || '',
+      adres: '',
+      bankaBilgileri: '',
+      vergiDairesi: '',
+      vekaletnameUrl: '',
+      yetkililer: []
+    };
+    this.muvekkilKaydetCloud(yeni, 'Yeni müvekkil dava ekranından oluşturuldu.');
+    this.islemGorenDava.muvekkilId = yeni.id;
+    this.islemGorenDava.muvekkil = adSoyad;
+    this.formHata = '';
+    this.hizliMuvekkilKaydiIptal();
+  }
   yetkiliEkle() { if (!this.islemGorenMuvekkil.yetkililer) this.islemGorenMuvekkil.yetkililer = []; this.islemGorenMuvekkil.yetkililer.push({ id: Date.now(), adSoyad: '', telefon: '', eposta: '', pozisyon: '' }); }
   kayitliYetkiliEkle(m: Muvekkil) {
     if (!this.islemGorenMuvekkil.yetkililer) this.islemGorenMuvekkil.yetkililer = [];
@@ -3078,6 +3227,57 @@ export class App implements OnInit {
 
   aktifDosyaKaydet(dosya: any, basariMesaji?: string) { if (this.aktifSayfa === 'icraDetay') this.icraKaydetCloud(dosya, basariMesaji); else if (this.aktifSayfa === 'arabuluculukDetay') this.arabuluculukKaydetCloud(dosya, basariMesaji); else this.davaKaydetCloud(dosya, basariMesaji); }
   aktifDosyaDurumGuncelle(yD: string) { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; k.durum = yD; if (this.aktifSayfa === 'detay' && k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = ''; this.aktifDosyaKaydet(k, 'Dosya durumu kaydedildi.'); }
+  durusmaTamamlandiIsaretle(dava: DavaDosyasi, event?: Event) {
+    event?.stopPropagation();
+    const k = { ...dava, durusmaTamamlandiMi: true, durusmaTamamlanmaTarihi: new Date().toISOString() };
+    this.davaKaydetCloud(k, 'Duruşma gerçekleşti olarak işaretlendi ve ajandadan kaldırıldı.');
+  }
+  durusmaAjandayaGeriAl(dava: DavaDosyasi, event?: Event) {
+    event?.stopPropagation();
+    const k = { ...dava, durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '' };
+    this.davaKaydetCloud(k, 'Duruşma yeniden ajandaya alındı.');
+  }
+  toplantiTamamlandiIsaretle(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
+    event?.stopPropagation();
+    const k = { ...arabuluculuk, toplantiTamamlandiMi: true, toplantiTamamlanmaTarihi: new Date().toISOString() };
+    this.arabuluculukKaydetCloud(k, 'Toplantı gerçekleşti olarak işaretlendi ve ajandadan kaldırıldı.');
+  }
+  toplantiAjandayaGeriAl(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
+    event?.stopPropagation();
+    const k = { ...arabuluculuk, toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '' };
+    this.arabuluculukKaydetCloud(k, 'Toplantı yeniden ajandaya alındı.');
+  }
+  evrakKaydiniGuncelle(evraklar: EvrakBaglantisi[] | undefined, evrakId: number, updater: (evrak: EvrakBaglantisi) => void): boolean {
+    if (!evraklar) return false;
+    for (const evrak of evraklar) {
+      if (evrak.id === evrakId) { updater(evrak); return true; }
+      if (this.evrakKaydiniGuncelle(evrak.ekler, evrakId, updater)) return true;
+    }
+    return false;
+  }
+  sureliIsiTamamlandiIsaretle(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null | undefined, kaynak: AjandaKaynak, evrakId: number, event?: Event) {
+    event?.stopPropagation();
+    if (!dosya) return;
+    const k: any = JSON.parse(JSON.stringify(dosya));
+    const bulundu = this.evrakKaydiniGuncelle(k.evraklar, evrakId, (evrak) => {
+      evrak.tamamlandiMi = true;
+      evrak.tamamlanmaTarihi = new Date().toISOString();
+    });
+    if (!bulundu) return;
+    if (kaynak === 'dava') this.davaKaydetCloud(k, 'Süreli iş tamamlandı olarak işaretlendi.');
+    else if (kaynak === 'icra') this.icraKaydetCloud(k, 'Süreli iş tamamlandı olarak işaretlendi.');
+    else this.arabuluculukKaydetCloud(k, 'Süreli iş tamamlandı olarak işaretlendi.');
+  }
+  ajandaKaydiTamamla(kayit: AjandaKaydi, event?: Event) {
+    if (kayit.tur === 'durusma') this.durusmaTamamlandiIsaretle(kayit.dosya as DavaDosyasi, event);
+    else if (kayit.tur === 'toplanti') this.toplantiTamamlandiIsaretle(kayit.dosya as ArabuluculukDosyasi, event);
+    else if (kayit.evrakId) this.sureliIsiTamamlandiIsaretle(kayit.dosya, kayit.kaynak, kayit.evrakId, event);
+  }
+  getAjandaTamamlaMetni(kayit: AjandaKaydi) {
+    if (kayit.tur === 'durusma') return 'Duruşma Yapıldı';
+    if (kayit.tur === 'toplanti') return 'Toplantı Yapıldı';
+    return 'Tamamlandı';
+  }
 
   finansalIslemEkle() {
     if (!this.yeniIslem.tutar || !this.yeniIslem.aciklama || !this.aktifDosya) return;
@@ -3094,7 +3294,7 @@ export class App implements OnInit {
     if (!this.yeniEvrak.isim || !this.yeniEvrak.url) return;
     this.yeniEvrak.isim = this.formatMetin(this.yeniEvrak.isim);
     let url = this.yeniEvrak.url.trim(); if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-    const yeni = { id: Date.now(), isim: this.yeniEvrak.isim || 'İsimsiz', url: url, tarih: new Date().toISOString(), ekler: [], tebligTarihi: this.yeniEvrak.tebligTarihi, sonEylemTarihi: this.yeniEvrak.sonEylemTarihi, yaziRengi: this.getEvrakYaziRengi(this.yeniEvrak.yaziRengi) };
+    const yeni = { id: Date.now(), isim: this.yeniEvrak.isim || 'İsimsiz', url: url, tarih: new Date().toISOString(), ekler: [], tebligTarihi: this.yeniEvrak.tebligTarihi, sonEylemTarihi: this.yeniEvrak.sonEylemTarihi, tamamlandiMi: false, tamamlanmaTarihi: '', yaziRengi: this.getEvrakYaziRengi(this.yeniEvrak.yaziRengi) };
     if (this.aktifSayfa === 'sablonlar') {
       this.sablonlar[this.aktifSablonSekmesi].unshift(yeni); this.sablonlariKaydetCloud('Yeni şablon listeye eklendi.');
     } else {
@@ -3103,13 +3303,14 @@ export class App implements OnInit {
     this.yeniEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi };
   }
   
-  evrakDuzenleBaslat(evrak: EvrakBaglantisi, parentId: number | null = null) { this.duzenlenenEvrakId = evrak.id; this.duzenlenenEvrakParentId = parentId; this.duzenlenenEvrak = { ...evrak, yaziRengi: this.getEvrakYaziRengi(evrak.yaziRengi) }; }
-  evrakDuzenleIptal() { this.duzenlenenEvrakId = null; this.duzenlenenEvrakParentId = null; this.duzenlenenEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi }; }
+  evrakDuzenleBaslat(evrak: EvrakBaglantisi, parentId: number | null = null) { this.duzenlenenEvrakId = evrak.id; this.duzenlenenEvrakParentId = parentId; this.duzenlenenEvrakOrijinalSonEylemTarihi = evrak.sonEylemTarihi || ''; this.duzenlenenEvrak = { ...evrak, yaziRengi: this.getEvrakYaziRengi(evrak.yaziRengi) }; }
+  evrakDuzenleIptal() { this.duzenlenenEvrakId = null; this.duzenlenenEvrakParentId = null; this.duzenlenenEvrakOrijinalSonEylemTarihi = ''; this.duzenlenenEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi }; }
   
   evrakGuncelleKaydet() {
     if (!this.duzenlenenEvrak.isim || !this.duzenlenenEvrak.url) return;
     this.duzenlenenEvrak.isim = this.formatMetin(this.duzenlenenEvrak.isim);
     let url = this.duzenlenenEvrak.url.trim(); if (!/^https?:\/\//i.test(url)) url = 'https://' + url; this.duzenlenenEvrak.url = url; this.duzenlenenEvrak.yaziRengi = this.getEvrakYaziRengi(this.duzenlenenEvrak.yaziRengi);
+    if ((this.duzenlenenEvrak.sonEylemTarihi || '') !== this.duzenlenenEvrakOrijinalSonEylemTarihi) { this.duzenlenenEvrak.tamamlandiMi = false; this.duzenlenenEvrak.tamamlanmaTarihi = ''; }
     if (this.aktifSayfa === 'sablonlar') {
       const sl = this.sablonlar[this.aktifSablonSekmesi];
       if (this.duzenlenenEvrakParentId) { const p = sl.find((e:any) => e.id === this.duzenlenenEvrakParentId); if (p && p.ekler) { const i = p.ekler.findIndex((e:any) => e.id === this.duzenlenenEvrakId); if (i !== -1) p.ekler[i] = this.duzenlenenEvrak as EvrakBaglantisi; } } 
@@ -3134,7 +3335,7 @@ export class App implements OnInit {
     if (!this.yeniEkEvrak.isim || !this.yeniEkEvrak.url) return;
     this.yeniEkEvrak.isim = this.formatMetin(this.yeniEkEvrak.isim);
     let url = this.yeniEkEvrak.url.trim(); if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-    const y = { id: Date.now(), isim: this.yeniEkEvrak.isim || 'İsimsiz', url: url, tarih: new Date().toISOString(), tebligTarihi: this.yeniEkEvrak.tebligTarihi, sonEylemTarihi: this.yeniEkEvrak.sonEylemTarihi, yaziRengi: this.getEvrakYaziRengi(this.yeniEkEvrak.yaziRengi) };
+    const y = { id: Date.now(), isim: this.yeniEkEvrak.isim || 'İsimsiz', url: url, tarih: new Date().toISOString(), tebligTarihi: this.yeniEkEvrak.tebligTarihi, sonEylemTarihi: this.yeniEkEvrak.sonEylemTarihi, tamamlandiMi: false, tamamlanmaTarihi: '', yaziRengi: this.getEvrakYaziRengi(this.yeniEkEvrak.yaziRengi) };
     if (this.aktifSayfa === 'sablonlar') { const p = this.sablonlar[this.aktifSablonSekmesi].find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); this.sablonlariKaydetCloud('Alt şablon eklendi.'); } } 
     else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); this.aktifDosyaKaydet(k, 'Alt evrak bağlantısı eklendi.'); } }
     this.ekEvrakFormKapat();
@@ -3270,16 +3471,47 @@ export class App implements OnInit {
     if (this.aktifSayfa === 'icraDetay') return dosya.takipTarihi || '';
     return dosya.toplantiTarihi || '';
   }
+  getAktifDosyaKritikSaat() {
+    const dosya = this.aktifDosya;
+    if (!dosya) return '';
+    if (this.aktifSayfa === 'detay') return (dosya as DavaDosyasi).durusmaSaati || '';
+    if (this.aktifSayfa === 'arabuluculukDetay') return (dosya as ArabuluculukDosyasi).toplantiSaati || '';
+    return '';
+  }
   getAktifDosyaKritikTarihMetni() {
     const tarih = this.getAktifDosyaKritikTarih();
-    return tarih ? this.formatTarihKisa(tarih) : 'Planlanmadı';
+    return tarih ? this.formatTarihSaatKisa(tarih, this.getAktifDosyaKritikSaat()) : 'Planlanmadı';
   }
   getAktifDosyaKritikTarihDurumu() {
     const tarih = this.getAktifDosyaKritikTarih();
     if (!tarih) return 'Takvim girilmedi';
+    if (this.aktifSayfa === 'detay' && (this.aktifDosya as DavaDosyasi)?.durusmaTamamlandiMi) return 'Gerçekleşti';
+    if (this.aktifSayfa === 'arabuluculukDetay' && (this.aktifDosya as ArabuluculukDosyasi)?.toplantiTamamlandiMi) return 'Gerçekleşti';
     if (this.aktifSayfa === 'icraDetay') return 'Takip açılış tarihi';
     return this.hesaplaKalanGun(tarih);
   }
+  getAktifDosyaTakvimTamamlandiMi() {
+    if (!this.aktifDosya) return false;
+    if (this.aktifSayfa === 'detay') return !!(this.aktifDosya as DavaDosyasi).durusmaTamamlandiMi;
+    if (this.aktifSayfa === 'arabuluculukDetay') return !!(this.aktifDosya as ArabuluculukDosyasi).toplantiTamamlandiMi;
+    return false;
+  }
+  getAktifDavaDosyasi() { return this.aktifSayfa === 'detay' ? this.aktifDosya as DavaDosyasi : null; }
+  getAktifArabuluculukDosyasi() { return this.aktifSayfa === 'arabuluculukDetay' ? this.aktifDosya as ArabuluculukDosyasi : null; }
+  getAktifDavaDurusmaMetni() {
+    const dava = this.getAktifDavaDosyasi();
+    return this.formatTarihSaat(dava?.durusmaTarihi, dava?.durusmaSaati);
+  }
+  aktifDavaDurusmaTamamlandiMi() { return !!this.getAktifDavaDosyasi()?.durusmaTamamlandiMi; }
+  aktifDavaDurusmaTamamla() { const dava = this.getAktifDavaDosyasi(); if (dava) this.durusmaTamamlandiIsaretle(dava); }
+  aktifDavaDurusmaAjandayaGeriAl() { const dava = this.getAktifDavaDosyasi(); if (dava) this.durusmaAjandayaGeriAl(dava); }
+  getAktifArabuluculukToplantiMetni() {
+    const dosya = this.getAktifArabuluculukDosyasi();
+    return this.formatTarihSaat(dosya?.toplantiTarihi, dosya?.toplantiSaati);
+  }
+  aktifArabuluculukToplantiTamamlandiMi() { return !!this.getAktifArabuluculukDosyasi()?.toplantiTamamlandiMi; }
+  aktifArabuluculukToplantiyiTamamla() { const dosya = this.getAktifArabuluculukDosyasi(); if (dosya) this.toplantiTamamlandiIsaretle(dosya); }
+  aktifArabuluculukToplantiyiAjandayaGeriAl() { const dosya = this.getAktifArabuluculukDosyasi(); if (dosya) this.toplantiAjandayaGeriAl(dosya); }
   getAktifDosyaToplamEvrakSayisi() {
     const dosya = this.aktifDosya;
     if (!dosya) return 0;
@@ -3310,10 +3542,26 @@ export class App implements OnInit {
   getArabuluculukDurumClass(d: string) { return d === 'Hazırlık' ? 'bg-slate-100 text-slate-700 border-slate-200' : d === 'Müzakere' ? 'bg-blue-100 text-blue-700 border-blue-200' : d === 'İmza' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : d === 'Tahsilat' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-500 border-slate-200'; }
   getPozisyonClass(p?: string) { return p === 'Davacı' ? 'bg-emerald-50 text-emerald-600' : p === 'Davalı' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'; }
   
+  birlestirTarihVeSaat(tarih?: string, saat?: string) {
+    if (!tarih) return '';
+    const temizSaat = (saat || '').trim().slice(0, 5);
+    return temizSaat ? `${tarih}T${temizSaat}:00` : tarih;
+  }
+  formatSaat(saat?: string) { return saat ? saat.slice(0, 5) : ''; }
   formatTarih(str?: string) { return str ? new Date(str).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'; }
   formatTarihGun(str?: string) { return str ? new Date(str).getDate().toString() : ''; }
   formatTarihAy(str?: string) { return str ? new Date(str).toLocaleDateString('tr-TR', { month: 'short' }) : ''; }
   formatTarihKisa(str?: string) { return str ? new Date(str).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''; }
+  formatTarihSaatKisa(tarih?: string, saat?: string) {
+    if (!tarih) return '';
+    const tarihMetni = this.formatTarihKisa(tarih);
+    return saat ? `${tarihMetni} • ${this.formatSaat(saat)}` : tarihMetni;
+  }
+  formatTarihSaat(tarih?: string, saat?: string) {
+    if (!tarih) return '-';
+    const tarihMetni = this.formatTarih(tarih);
+    return saat ? `${tarihMetni} • ${this.formatSaat(saat)}` : tarihMetni;
+  }
   formatPara(miktar: number) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(miktar || 0); }
   hesaplaKalanGun(str?: string) { if (!str) return ''; const d = new Date(str); const b = new Date(); b.setHours(0,0,0,0); const f = Math.ceil((d.getTime() - b.getTime()) / (1000 * 3600 * 24)); return f < 0 ? 'Süresi Geçti!' : (f === 0 ? 'Bugün Son!' : `${f} Gün Kaldı`); }
   getTaraflarMetni(is: any): string {
