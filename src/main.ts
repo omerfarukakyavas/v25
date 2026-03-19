@@ -163,9 +163,9 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
           </div>
         </aside>
 
-        <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
-          <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm flex-shrink-0">
-            <h2 class="text-2xl font-bold text-slate-800">
+        <main class="flex-1 min-w-0 flex flex-col h-screen overflow-hidden relative">
+          <header class="bg-white border-b border-slate-200 min-h-16 flex flex-col gap-3 px-4 py-3 shadow-sm flex-shrink-0 sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+            <h2 class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">
               @switch (aktifSayfa) {
                 @case ('dashboard') { Genel Özet ve İstatistikler }
                 @case ('davalar') { Dava Dosyaları } @case ('icralar') { İcra Takipleri } @case ('arabuluculuk') { Arabuluculuk Dosyaları }
@@ -174,7 +174,11 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                 @case ('arabuluculukDetay') { Arabuluculuk Yönetimi ve Finans }
               }
             </h2>
-            <div class="flex gap-3">
+            <div class="flex flex-wrap gap-2 sm:gap-3 justify-end">
+              <button (click)="cikisYap()" class="md:hidden px-3 py-2 text-slate-600 font-semibold border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Çıkış
+              </button>
               @if (aktifSayfa === 'davalar') { <button (click)="dosyaFormunuAc()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-sm transition-colors font-medium"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Yeni Dosya</button> }
               @else if (aktifSayfa === 'icralar') { <button (click)="icraFormunuAc()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-sm transition-colors font-medium"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Yeni İcra Takibi</button> }
               @else if (aktifSayfa === 'arabuluculuk') { <button (click)="arabuluculukFormAc()" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-sm transition-colors font-medium"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Yeni Arabuluculuk</button> }
@@ -185,7 +189,20 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
             </div>
           </header>
 
-          <div class="flex-1 overflow-auto p-8 custom-scrollbar relative">
+          <div class="md:hidden border-b border-slate-200 bg-white/95 backdrop-blur-sm px-4 py-3 overflow-x-auto custom-scrollbar">
+            <div class="flex gap-2 min-w-max">
+              <button (click)="sayfaDegistir('dashboard')" [class]="getMobilMenuClass('dashboard')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Genel Özet</button>
+              <button (click)="sayfaDegistir('davalar')" [class]="getMobilMenuClass('davalar')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Davalar</button>
+              <button (click)="sayfaDegistir('icralar')" [class]="getMobilMenuClass('icralar')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">İcralar</button>
+              <button (click)="sayfaDegistir('arabuluculuk')" [class]="getMobilMenuClass('arabuluculuk')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Arabuluculuk</button>
+              <button (click)="sayfaDegistir('ajanda')" [class]="getMobilMenuClass('ajanda')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Ajanda</button>
+              <button (click)="sayfaDegistir('muhasebe')" [class]="getMobilMenuClass('muhasebe')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Muhasebe</button>
+              <button (click)="sayfaDegistir('iliskiler')" [class]="getMobilMenuClass('iliskiler')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">İlişkiler</button>
+              <button (click)="sayfaDegistir('sablonlar')" [class]="getMobilMenuClass('sablonlar')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Şablonlar</button>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-auto p-4 sm:p-8 custom-scrollbar relative">
             @switch (aktifSayfa) {
               
               <!-- === YENİ: DASHBOARD (ÖZET EKRANI) === -->
@@ -2232,7 +2249,23 @@ export class App implements OnInit {
   getDavaNo(id?: number) { if(!id) return ''; return this.davalar.find(d=>d.id===id)?.dosyaNo || 'Bulunamadı'; }
   getIcraNo(id?: number) { if(!id) return ''; return this.icralar.find(i=>i.id===id)?.dosyaNo || 'Bulunamadı'; }
 
-  getMenuClass(s: SayfaTipi): string { const b = "flex items-center gap-3 px-4 py-3 rounded-lg transition-all group cursor-pointer "; return (this.aktifSayfa === s || (s === 'davalar' && this.aktifSayfa === 'detay') || (s === 'icralar' && this.aktifSayfa === 'icraDetay') || (s === 'arabuluculuk' && this.aktifSayfa === 'arabuluculukDetay')) ? b + "bg-blue-600 text-white shadow-md" : b + "text-slate-400 hover:bg-slate-800 hover:text-white"; }
+  sayfaAktifMi(s: SayfaTipi) {
+    return this.aktifSayfa === s
+      || (s === 'davalar' && this.aktifSayfa === 'detay')
+      || (s === 'icralar' && this.aktifSayfa === 'icraDetay')
+      || (s === 'arabuluculuk' && this.aktifSayfa === 'arabuluculukDetay');
+  }
+
+  getMenuClass(s: SayfaTipi): string {
+    const b = "flex items-center gap-3 px-4 py-3 rounded-lg transition-all group cursor-pointer ";
+    return this.sayfaAktifMi(s) ? b + "bg-blue-600 text-white shadow-md" : b + "text-slate-400 hover:bg-slate-800 hover:text-white";
+  }
+
+  getMobilMenuClass(s: SayfaTipi): string {
+    return this.sayfaAktifMi(s)
+      ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
+      : 'border-slate-200 bg-white text-slate-600';
+  }
 
   get filtrelenmisDavalar() { return this.davalar.filter(d => { const s = this.aramaMetni.toLowerCase(); const mS = d.dosyaNo.toLowerCase().includes(s) || d.muvekkil.toLowerCase().includes(s) || d.mahkeme.toLowerCase().includes(s); const mD = this.durumFiltresi === 'Tümü' || d.durum === this.durumFiltresi; return mS && mD; }); }
   get filtrelenmisIcralar() { return this.icralar.filter(i => { const s = this.aramaMetni.toLowerCase(); const mS = i.dosyaNo.toLowerCase().includes(s) || i.icraDairesi.toLowerCase().includes(s) || i.alacakli.toLowerCase().includes(s) || i.borclu.toLowerCase().includes(s); const mD = this.durumFiltresi === 'Tümü' || i.durum === this.durumFiltresi; return mS && mD; }); }
