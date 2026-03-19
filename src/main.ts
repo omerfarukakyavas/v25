@@ -216,6 +216,123 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                      </div>
                   </div>
 
+                  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-gradient-to-r from-slate-50 via-white to-slate-50 px-6 py-5 border-b border-slate-100 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div>
+                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-[0.22em] flex items-center gap-2">
+                          <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.66 18h16.68a1 1 0 00.87-1.5l-7.5-13a1 1 0 00-1.74 0z"></path></svg>
+                          Akıllı Uyarı Merkezi
+                        </h3>
+                        <p class="mt-2 text-sm leading-6 text-slate-500">Gecikmiş işler, bugün yapılacaklar, 7 gün içindeki kritik kayıtlar ve tahsilat bekleyen dosyalar tek merkezde toplandı.</p>
+                      </div>
+                      <div class="flex gap-3">
+                        <button (click)="sayfaDegistir('ajanda')" class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-colors shadow-sm">Ajandayı Aç</button>
+                        <button (click)="sayfaDegistir('muhasebe')" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors">Tahsilatı Gör</button>
+                      </div>
+                    </div>
+
+                    <div class="p-6 space-y-6">
+                      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <button (click)="sayfaDegistir('ajanda')" class="text-left rounded-2xl border border-rose-100 bg-rose-50/80 p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                          <p class="text-[11px] font-black uppercase tracking-[0.22em] text-rose-700">Gecikmiş</p>
+                          <p class="mt-3 text-3xl font-black text-rose-700">{{ dashboardUyariOzet.gecmis }}</p>
+                          <p class="mt-2 text-sm font-medium leading-6 text-rose-900/80">Süresi geçmiş ajanda ve evrak kaydı</p>
+                        </button>
+                        <button (click)="sayfaDegistir('ajanda')" class="text-left rounded-2xl border border-amber-100 bg-amber-50/80 p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                          <p class="text-[11px] font-black uppercase tracking-[0.22em] text-amber-700">Bugün</p>
+                          <p class="mt-3 text-3xl font-black text-amber-700">{{ dashboardUyariOzet.bugun }}</p>
+                          <p class="mt-2 text-sm font-medium leading-6 text-amber-900/80">Bugün takip edilmesi gereken kayıt</p>
+                        </button>
+                        <button (click)="sayfaDegistir('ajanda')" class="text-left rounded-2xl border border-blue-100 bg-blue-50/80 p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                          <p class="text-[11px] font-black uppercase tracking-[0.22em] text-blue-700">7 Gün İçinde</p>
+                          <p class="mt-3 text-3xl font-black text-blue-700">{{ dashboardUyariOzet.yediGun }}</p>
+                          <p class="mt-2 text-sm font-medium leading-6 text-blue-900/80">Yaklaşan duruşma, toplantı veya süreli iş</p>
+                        </button>
+                        <button (click)="sayfaDegistir('muhasebe')" class="text-left rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                          <p class="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-700">Tahsilat Bekleyen</p>
+                          <p class="mt-3 text-3xl font-black text-emerald-700">{{ dashboardUyariOzet.tahsilat }}</p>
+                          <p class="mt-2 text-sm font-medium leading-6 text-emerald-900/80">Toplam {{ formatPara(dashboardUyariOzet.tahsilatTutari) }} bekleyen alacak</p>
+                        </button>
+                      </div>
+
+                      <div class="grid grid-cols-1 xl:grid-cols-[1.35fr,0.65fr] gap-6">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
+                          <div class="flex items-center justify-between mb-4">
+                            <div>
+                              <h4 class="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Öncelikli Ajanda</h4>
+                              <p class="text-xs text-slate-500 mt-1">Önce gecikmiş, sonra bugün ve yakın tarihli kayıtlar listelenir.</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full bg-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-wider">{{ oncelikliAjandaKayitlari.length }} kayıt</span>
+                          </div>
+
+                          <div class="space-y-3">
+                            @for (kayit of oncelikliAjandaKayitlari; track kayit.id) {
+                              <button (click)="ajandaKaydinaGit(kayit)" class="w-full text-left rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                  <span [class]="getAjandaTurClass(kayit.tur)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
+                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
+                                  <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ ajandaDurumMetni(kayit.tarih) }}</span>
+                                </div>
+                                <p class="text-sm font-bold text-slate-800">{{ kayit.baslik }}</p>
+                                <p class="text-xs text-slate-500 mt-1">{{ kayit.taraflar }}</p>
+                                <p class="text-[11px] text-slate-400 mt-2">{{ kayit.altBaslik }}</p>
+                              </button>
+                            } @empty {
+                              <div class="rounded-2xl border border-emerald-100 border-dashed bg-emerald-50/70 p-5 text-sm font-medium text-emerald-700">Şu an kritik ajanda kaydı görünmüyor. Güzel gidiyorsunuz.</div>
+                            }
+                          </div>
+                        </div>
+
+                        <div class="space-y-4">
+                          <div class="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
+                            <div class="flex items-center justify-between mb-4">
+                              <div>
+                                <h4 class="text-sm font-black text-emerald-800 uppercase tracking-[0.2em]">Tahsilat Önceliği</h4>
+                                <p class="text-xs text-emerald-700/80 mt-1">En yüksek kalan bakiyeler üstte gösterilir.</p>
+                              </div>
+                              <span class="px-3 py-1 rounded-full bg-white text-emerald-700 text-[11px] font-black uppercase tracking-wider">{{ oncelikliTahsilatKayitlari.length }} dosya</span>
+                            </div>
+
+                            <div class="space-y-3">
+                              @for (islem of oncelikliTahsilatKayitlari; track islem.id + islem.tip) {
+                                <button (click)="islem.detayFonk()" class="w-full text-left rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                                  <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                      <p class="text-sm font-bold text-slate-800">{{ islem.isim }}</p>
+                                      <p class="text-xs text-slate-500 mt-1">{{ islem.muvekkil }}</p>
+                                    </div>
+                                    <span class="text-sm font-black text-emerald-700">{{ formatPara(islem.kalan) }}</span>
+                                  </div>
+                                  <p class="text-[11px] text-slate-400 mt-2">{{ islem.tip }} dosyası</p>
+                                </button>
+                              } @empty {
+                                <div class="rounded-2xl border border-emerald-100 border-dashed bg-white/80 p-4 text-sm font-medium text-emerald-700">Bekleyen tahsilat görünmüyor.</div>
+                              }
+                            </div>
+                          </div>
+
+                          <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                            <h4 class="text-sm font-black text-slate-800 uppercase tracking-[0.2em] mb-4">Ajanda Dağılımı</h4>
+                            <div class="grid grid-cols-3 gap-3">
+                              <div class="rounded-2xl bg-blue-50 border border-blue-100 p-4 text-center">
+                                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Duruşma</p>
+                                <p class="mt-2 text-2xl font-black text-blue-700">{{ ajandaOzet.durusma }}</p>
+                              </div>
+                              <div class="rounded-2xl bg-purple-50 border border-purple-100 p-4 text-center">
+                                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-purple-700">Toplantı</p>
+                                <p class="mt-2 text-2xl font-black text-purple-700">{{ ajandaOzet.toplanti }}</p>
+                              </div>
+                              <div class="rounded-2xl bg-rose-50 border border-rose-100 p-4 text-center">
+                                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-rose-700">Süreli İş</p>
+                                <p class="mt-2 text-2xl font-black text-rose-700">{{ ajandaOzet.sureliIs }}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm col-span-2">
                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6 flex items-center gap-2"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg> Dosya Durum Özetleri</h3>
@@ -2419,6 +2536,45 @@ export class App implements OnInit {
       toplanti: kayitlar.filter(kayit => kayit.tur === 'toplanti').length,
       sureliIs: kayitlar.filter(kayit => kayit.tur === 'sureliIs').length
     };
+  }
+
+  get dashboardUyariOzet() {
+    const kayitlar = this.ajandaKayitlari;
+    const bugun = kayitlar.filter(kayit => this.ajandaGunFarki(kayit.tarih) === 0).length;
+    const gecmis = kayitlar.filter(kayit => this.ajandaGunFarki(kayit.tarih) < 0).length;
+    const yediGun = kayitlar.filter(kayit => {
+      const fark = this.ajandaGunFarki(kayit.tarih);
+      return fark > 0 && fark <= 7;
+    }).length;
+
+    return {
+      bugun,
+      gecmis,
+      yediGun,
+      tahsilat: this.muhasebeListesi.length,
+      tahsilatTutari: this.muhasebeOzet.toplam
+    };
+  }
+
+  get oncelikliAjandaKayitlari() {
+    return [...this.ajandaKayitlari]
+      .filter(kayit => {
+        const fark = this.ajandaGunFarki(kayit.tarih);
+        return fark < 0 || fark <= 7;
+      })
+      .sort((a, b) => {
+        const farkA = this.ajandaGunFarki(a.tarih);
+        const farkB = this.ajandaGunFarki(b.tarih);
+        const oncelikA = farkA < 0 ? 0 : (farkA === 0 ? 1 : 2);
+        const oncelikB = farkB < 0 ? 0 : (farkB === 0 ? 1 : 2);
+        if (oncelikA !== oncelikB) return oncelikA - oncelikB;
+        return this.ajandaTarihDamgasi(a.tarih) - this.ajandaTarihDamgasi(b.tarih);
+      })
+      .slice(0, 6);
+  }
+
+  get oncelikliTahsilatKayitlari() {
+    return this.muhasebeListesi.slice(0, 4);
   }
 
   get yaklasanAjandaKayitlari() {
