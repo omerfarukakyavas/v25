@@ -1915,15 +1915,9 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
       @if (davaFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
-            <div class="bg-gradient-to-br from-slate-900 via-blue-900 to-blue-600 px-6 py-5 text-white">
-              <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.25em] text-white/90">Dava Dosyası</span>
-                  <h3 class="mt-3 text-2xl font-black tracking-tight">{{ formModu === 'ekle' ? 'Yeni dava dosyası oluştur' : 'Dava dosyasını güncelle' }}</h3>
-                  <p class="mt-2 max-w-2xl text-sm leading-6 text-blue-100/90">Mahkeme, taraf ve finans bilgilerini daha okunaklı bir düzenle girin. Kritik alanlar üstte, tamamlayıcı alanlar ise daha ayırt edici kartlarda toplandı.</p>
-                </div>
-                <button (click)="davaFormKapat()" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-white/20">Kapat</button>
-              </div>
+            <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
+              <h3 class="text-xl font-black tracking-tight text-slate-900">{{ formModu === 'ekle' ? 'Yeni dava dosyası oluştur' : 'Dava dosyasını güncelle' }}</h3>
+              <button (click)="davaFormKapat()" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100">Kapat</button>
             </div>
             <div class="bg-slate-50 p-6 space-y-5 max-h-[72vh] overflow-y-auto custom-scrollbar">
               @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium shadow-sm">{{ formHata }}</div> }
@@ -2096,15 +2090,9 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
       @if (icraFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
-            <div class="bg-gradient-to-br from-emerald-900 via-emerald-700 to-teal-500 px-6 py-5 text-white">
-              <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.25em] text-white/90">İcra Takibi</span>
-                  <h3 class="mt-3 text-2xl font-black tracking-tight">{{ formModu === 'ekle' ? 'Yeni icra takibi oluştur' : 'İcra takibini güncelle' }}</h3>
-                  <p class="mt-2 max-w-2xl text-sm leading-6 text-emerald-100/90">Takip dosyasının kimliği, taraf bilgileri ve bağlantılı dava kaydı aynı ekranda daha net bölümlendirildi.</p>
-                </div>
-                <button (click)="icraFormKapat()" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-white/20">Kapat</button>
-              </div>
+            <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
+              <h3 class="text-xl font-black tracking-tight text-slate-900">{{ formModu === 'ekle' ? 'Yeni icra takibi oluştur' : 'İcra takibini güncelle' }}</h3>
+              <button (click)="icraFormKapat()" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100">Kapat</button>
             </div>
             <div class="bg-slate-50 p-6 space-y-5 max-h-[72vh] overflow-y-auto custom-scrollbar">
               @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium shadow-sm">{{ formHata }}</div> }
@@ -2184,15 +2172,9 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
       @if (arabuluculukFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
-            <div class="bg-gradient-to-br from-purple-900 via-purple-700 to-fuchsia-500 px-6 py-5 text-white">
-              <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.25em] text-white/90">Arabuluculuk</span>
-                  <h3 class="mt-3 text-2xl font-black tracking-tight">{{ formModu === 'ekle' ? 'Yeni arabuluculuk dosyası oluştur' : 'Arabuluculuk dosyasını güncelle' }}</h3>
-                  <p class="mt-2 max-w-2xl text-sm leading-6 text-purple-100/90">Başvuru türü, taraflar ve toplantı akışı daha seçilebilir bloklara ayrıldı. Böylece süreç ekranı daha profesyonel okunuyor.</p>
-                </div>
-                <button (click)="arabuluculukFormKapat()" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-white/20">Kapat</button>
-              </div>
+            <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
+              <h3 class="text-xl font-black tracking-tight text-slate-900">{{ formModu === 'ekle' ? 'Yeni arabuluculuk dosyası oluştur' : 'Arabuluculuk dosyasını güncelle' }}</h3>
+              <button (click)="arabuluculukFormKapat()" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100">Kapat</button>
             </div>
             <div class="bg-slate-50 p-6 space-y-5 max-h-[72vh] overflow-y-auto custom-scrollbar">
               @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium shadow-sm">{{ formHata }}</div> }
