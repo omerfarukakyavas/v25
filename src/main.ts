@@ -516,40 +516,40 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                     }
                   </div>
                   <div class="hidden md:block">
-                    <div class="overflow-x-auto custom-scrollbar">
-                      <table class="w-full text-left border-collapse min-w-max">
+                    <div class="overflow-hidden">
+                      <table class="w-full table-fixed text-left border-collapse">
                         <thead>
                           <tr class="bg-blue-50/80 border-b border-blue-100 text-blue-700 uppercase text-xs font-semibold tracking-wider">
-                            <th class="p-5">Dosya Numaraları</th><th class="p-5">Müvekkil</th><th class="p-5">Mahkeme / Konu</th><th class="p-5">Sonraki Duruşma</th><th class="p-5">Durum</th><th class="p-5 text-right">İşlemler</th>
+                            <th class="w-[22%] p-4">Dosya Numaraları</th><th class="w-[20%] p-4">Müvekkil</th><th class="w-[24%] p-4">Mahkeme / Konu</th><th class="w-[18%] p-4">Sonraki Duruşma</th><th class="w-[9%] p-4">Durum</th><th class="w-[7%] p-4 text-right">İşlemler</th>
                           </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                           @for (dava of filtrelenmisDavalar; track dava.id) {
                             <tr class="hover:bg-blue-50/40 transition-colors group">
-                              <td class="p-5">
+                              <td class="p-4 align-top">
                                 <div class="flex items-start gap-3">
                                   <div class="w-1 self-stretch rounded-full bg-blue-500"></div>
-                                  <div class="flex flex-col gap-1.5">
+                                  <div class="min-w-0 flex flex-col gap-1.5">
                                     @if (dava.dosyaNumaralari && dava.dosyaNumaralari.length > 0) {
                                       @for (num of dava.dosyaNumaralari; track $index) {
-                                        <div class="text-xs font-medium text-slate-700 flex items-center gap-1.5"><span class="text-[9px] font-bold text-blue-700 uppercase bg-blue-100 px-1.5 py-0.5 rounded">{{num.tur}}</span><span>{{num.no}}</span></div>
+                                        <div class="flex items-start gap-1.5 text-xs font-medium text-slate-700"><span class="mt-0.5 shrink-0 text-[9px] font-bold text-blue-700 uppercase bg-blue-100 px-1.5 py-0.5 rounded">{{num.tur}}</span><span class="min-w-0 break-words leading-5">{{num.no}}</span></div>
                                       }
-                                    } @else { <div class="text-xs font-medium text-slate-700">{{dava.dosyaNo}}</div> }
+                                    } @else { <div class="text-xs font-medium text-slate-700 break-words leading-5">{{dava.dosyaNo}}</div> }
                                   </div>
                                 </div>
                               </td>
-                              <td class="p-5">
-                                <div class="inline-flex min-w-[170px] flex-col rounded-xl border border-blue-100 bg-blue-50/70 px-3 py-2">
-                                  <div class="text-slate-700 font-medium">{{ dava.muvekkil }}</div>
+                              <td class="p-4 align-top">
+                                <div class="flex w-full flex-col rounded-xl border border-blue-100 bg-blue-50/70 px-3 py-2">
+                                  <div class="break-words text-sm font-medium leading-5 text-slate-700">{{ dava.muvekkil }}</div>
                                   @if(dava.muvekkilPozisyonu) { <div [class]="getPozisyonClass(dava.muvekkilPozisyonu)" class="text-[10px] font-bold uppercase mt-1 inline-block px-1.5 py-0.5 rounded w-fit">{{dava.muvekkilPozisyonu}}</div> }
                                 </div>
                               </td>
-                              <td class="p-5"><div class="rounded-xl border border-sky-100 bg-sky-50/70 px-3 py-2"><div class="text-slate-800 font-medium">{{ dava.mahkeme }}</div><div class="text-xs text-slate-500 mt-1">{{ dava.konu }}</div></div></td>
-                              <td class="p-5 text-slate-600">
-                               @if(dava.durusmaTarihi) { <span class="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-3 py-2 text-blue-700 font-semibold shadow-sm"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {{ formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati) }}</span> } 
+                              <td class="p-4 align-top"><div class="rounded-xl border border-sky-100 bg-sky-50/70 px-3 py-2"><div class="break-words text-sm font-medium leading-5 text-slate-800">{{ dava.mahkeme }}</div><div class="mt-1 break-words text-xs leading-5 text-slate-500">{{ dava.konu }}</div></div></td>
+                              <td class="p-4 align-top text-slate-600">
+                               @if(dava.durusmaTarihi) { <span class="inline-flex max-w-full items-start gap-2 rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold leading-5 text-blue-700 shadow-sm"><svg class="mt-0.5 h-4 w-4 shrink-0 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="break-words">{{ formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati) }}</span></span> } 
                                @else { <span class="text-slate-400 text-sm">-</span> }
                               </td>
-                              <td class="p-5">
+                              <td class="p-4 align-top">
                                 <div class="relative inline-block">
                                   <select [ngModel]="dava.durum" (ngModelChange)="durumGuncelle(dava, $event)" [class]="getDurumClass(dava.durum)" class="pl-3 pr-7 py-1 rounded-full text-xs font-bold border cursor-pointer hover:shadow-md transition-all outline-none appearance-none">
                                     <option value="Derdest" class="text-slate-700 bg-white">Derdest</option><option value="İstinaf/Temyiz" class="text-slate-700 bg-white">İstinaf/Temyiz</option><option value="Kapalı" class="text-slate-700 bg-white">Kapalı</option>
@@ -557,7 +557,7 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 opacity-60"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
                                 </div>
                               </td>
-                              <td class="p-5 text-right">
+                              <td class="p-4 align-top text-right">
                                 <div class="flex items-center justify-end gap-1">
                                   @if (silinecekDavaId === dava.id) {
                                     <span class="text-xs font-medium text-red-500 mr-2">Silinsin mi?</span>
@@ -2594,7 +2594,21 @@ export class App implements OnInit {
     }
   }
 
-  sayfaDegistir(s: SayfaTipi) { this.aktifSayfa = s; if (s !== 'detay') this.seciliDava = null; if (s !== 'icraDetay') this.seciliIcra = null; if (s !== 'arabuluculukDetay') this.seciliArabuluculuk = null; this.aramaMetni = ''; }
+  varsayilanDurumFiltresi(s: SayfaTipi) {
+    if (s === 'davalar') return 'Derdest';
+    if (s === 'arabuluculuk') return 'Hazırlık';
+    return 'Tümü';
+  }
+  sayfaDegistir(s: SayfaTipi) {
+    this.aktifSayfa = s;
+    if (s !== 'detay') this.seciliDava = null;
+    if (s !== 'icraDetay') this.seciliIcra = null;
+    if (s !== 'arabuluculukDetay') this.seciliArabuluculuk = null;
+    this.aramaMetni = '';
+    if (s === 'davalar' || s === 'icralar' || s === 'arabuluculuk') {
+      this.durumFiltresi = this.varsayilanDurumFiltresi(s);
+    }
+  }
 
   detayaGit(d: DavaDosyasi) { this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Vekalet Ücreti', tarih: new Date().toISOString().split('T')[0] }; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
   icraDetayinaGit(i: IcraDosyasi) { this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Vekalet Ücreti', tarih: new Date().toISOString().split('T')[0] }; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
