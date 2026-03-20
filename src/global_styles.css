@@ -1,1 +1,35 @@
 /* Add application styles & imports to this file! */
+
+:root {
+  --app-font-sans: "Segoe UI Variable Text", "Aptos", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--app-font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.55;
+  color: #0f172a;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  letter-spacing: 0.01em;
+}
+
+::placeholder {
+  color: #94a3b8;
+}

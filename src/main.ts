@@ -2253,8 +2253,9 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
       }
 
       @if (muvekkilFormAcik) {
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
+        <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 p-2 backdrop-blur-sm sm:flex sm:items-center sm:justify-center sm:p-4">
+          <div class="mx-auto flex min-h-full w-full items-start sm:items-center sm:justify-center">
+          <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up flex max-h-[calc(100dvh-1rem)] flex-col sm:max-h-[92vh]">
             <div class="bg-gradient-to-br from-indigo-900 via-indigo-700 to-sky-500 px-6 py-5 text-white">
               <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
@@ -2265,7 +2266,7 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                 <button (click)="muvekkilFormKapat()" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-white/20">Kapat</button>
               </div>
             </div>
-            <div class="bg-slate-50 p-6 space-y-5 max-h-[75vh] overflow-y-auto custom-scrollbar">
+            <div class="min-h-0 flex-1 overflow-y-auto bg-slate-50 p-4 space-y-5 custom-scrollbar sm:p-6">
               @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium shadow-sm">{{ formHata }}</div> }
 
               <div class="rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-indigo-50 p-4 shadow-sm">
@@ -2369,12 +2370,15 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
               }
               </div>
             </div>
-            <div class="px-6 py-4 bg-white border-t border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="shrink-0 border-t border-slate-200 bg-white px-4 py-4 sm:px-6">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p class="text-xs font-semibold text-slate-500">İletişim ve belge alanları dolu olduğunda dosya açarken müvekkil seçimi çok daha akıcı olur.</p>
-              <div class="flex justify-end gap-3">
-                <button (click)="muvekkilFormKapat()" class="px-4 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors">İptal</button><button (click)="muvekkilKaydet()" class="px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition-all">{{ formModu === 'ekle' ? 'Kaydı Oluştur' : 'Değişiklikleri Kaydet' }}</button>
+              <div class="grid grid-cols-1 gap-3 sm:flex sm:justify-end">
+                <button (click)="muvekkilFormKapat()" class="w-full rounded-xl px-4 py-2.5 text-center font-semibold text-slate-600 transition-colors hover:bg-slate-100 sm:w-auto">İptal</button><button (click)="muvekkilKaydet()" class="w-full rounded-xl bg-indigo-600 px-6 py-3 text-center font-bold text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-700 sm:w-auto sm:py-2.5">{{ formModu === 'ekle' ? 'Kaydı Oluştur' : 'Değişiklikleri Kaydet' }}</button>
+              </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
       }
