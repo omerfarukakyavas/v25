@@ -45,23 +45,47 @@ interface DosyaNumarasi { tur: string; no: string; }
 interface ArabuluculukTaraf { id: number; tip: 'Başvurucu' | 'Diğer Taraf'; isim: string; }
 
 interface DavaDosyasi { 
-  id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; karsiTaraf: string; mahkeme: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; muvekkilPozisyonu?: string; arsivYeri?: string;
+  id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; karsiTaraf: string; mahkeme: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; muvekkilPozisyonu?: string; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[];
   icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
   buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: string;
 }
 
 interface IcraDosyasi {
-  id: number; icraDairesi: string; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkilId?: number; muvekkil: string; alacakli: string; borclu: string; takipTipi?: string; takipTarihi: string; durum: string; baglantiliDavaId?: number; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; arsivYeri?: string;
+  id: number; icraDairesi: string; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkilId?: number; muvekkil: string; alacakli: string; borclu: string; takipTipi?: string; takipTarihi: string; durum: string; baglantiliDavaId?: number; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[];
   karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string;
   buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: string;
 }
 
 interface ArabuluculukDosyasi {
   id: number; buroNo: string; arabuluculukNo: string; buro: string; basvuruTuru: 'Dava Şartı' | 'İhtiyari'; uyusmazlikTuru: 'Kira' | 'İşçi İşveren' | 'Ticari' | 'Boşanma' | 'Ortaklığın Giderilmesi' | 'Tüketici'; taraflar: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: 'Yüzyüze' | 'Videokonferans' | 'Telekonferans'; durum: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; muvekkilId?: number; arsivYeri?: string;
+  islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[];
   dosyaNo?: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil?: string; karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string; icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
 }
 
 interface Muvekkil { id: number; tip?: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer'; _isNewDiger?: boolean; adSoyad: string; tcKimlik: string; telefon: string; eposta: string; adres: string; bankaBilgileri: string; vergiDairesi?: string; vekaletnameUrl?: string; yetkililer?: { id: number; adSoyad: string; telefon: string; eposta?: string; pozisyon: string; }[]; }
+
+type DosyaIslemKategori = 'dosya' | 'durum' | 'takvim' | 'evrak' | 'finans';
+type TakvimGecmisiDurumu = 'Planlandı' | 'Güncellendi' | 'Gerçekleşti' | 'Ajandaya Geri Alındı' | 'Kaldırıldı';
+
+interface DosyaIslemKaydi {
+  id: number;
+  tarih: string;
+  kategori: DosyaIslemKategori;
+  baslik: string;
+  aciklama: string;
+  kullanici?: string;
+}
+
+interface TakvimGecmisKaydi {
+  id: number;
+  tur: 'Duruşma' | 'Toplantı';
+  durum: TakvimGecmisiDurumu;
+  kayitTarihi: string;
+  planlananTarih?: string;
+  planlananSaat?: string;
+  gerceklesmeTarihi?: string;
+  aciklama?: string;
+}
 
 type AjandaKaynak = 'dava' | 'icra' | 'arabuluculuk';
 type AjandaTur = 'durusma' | 'toplanti' | 'sureliIs';
@@ -91,7 +115,7 @@ interface UygulamaBildirimi {
 }
 
 type SayfaTipi = 'dashboard' | 'davalar' | 'icralar' | 'arabuluculuk' | 'sablonlar' | 'muhasebe' | 'iliskiler' | 'ajanda' | 'detay' | 'icraDetay' | 'arabuluculukDetay';
-type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
+type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
 
 @Component({
   selector: 'app-root',
@@ -1566,6 +1590,10 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                              Süreli İşler
                              @if(aktifDosyaSureliIsleri.length > 0) { <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span> }
                            </button>
+                           <button (click)="aktifDetaySekmesi = 'gecmis'" [class]="getDetayTabClass('gecmis')" class="relative flex min-w-[120px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
+                             Geçmiş
+                             @if(getAktifDosyaGecmisSayisi() > 0) { <span class="absolute top-2 right-2 rounded-full bg-slate-900 px-1.5 py-0.5 text-[9px] font-black text-white">{{ getAktifDosyaGecmisSayisi() }}</span> }
+                           </button>
                         </div>
 
                         <div class="flex h-full flex-1 flex-col bg-slate-50/50 p-3 sm:p-5">
@@ -1715,6 +1743,55 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler';
                                    <p class="text-lg font-bold text-slate-600">Harika! Bu dosyada süreli işiniz bulunmuyor.</p>
                                  </div>
                                }
+                            </div>
+                          }
+                          @if (aktifDetaySekmesi === 'gecmis') {
+                            <div class="grid h-full gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+                              <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                <div class="border-b border-slate-100 bg-slate-50 px-4 py-3">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">İşlem Günlüğü</p>
+                                  <h4 class="mt-1 text-sm font-bold text-slate-800">Dosyada yapılan hareketler</h4>
+                                </div>
+                                <div class="max-h-[28rem] space-y-3 overflow-y-auto p-4 pr-3 custom-scrollbar">
+                                  @for (kayit of aktifDosyaIslemGecmisi; track kayit.id) {
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                      <div class="flex flex-wrap items-center justify-between gap-2">
+                                        <span [class]="getDosyaIslemKategoriClass(kayit.kategori)" class="rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em]">{{ kayit.kategori }}</span>
+                                        <span class="text-[11px] font-medium text-slate-400">{{ formatTarihSaatKisa(kayit.tarih) }}</span>
+                                      </div>
+                                      <p class="mt-3 text-sm font-black text-slate-800">{{ kayit.baslik }}</p>
+                                      <p class="mt-2 text-sm leading-6 text-slate-600">{{ kayit.aciklama || 'Açıklama girilmedi.' }}</p>
+                                      @if (kayit.kullanici) { <p class="mt-3 text-[11px] font-medium text-slate-400">İşleyen: {{ kayit.kullanici }}</p> }
+                                    </div>
+                                  } @empty {
+                                    <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm font-medium text-slate-500">Henüz işlem geçmişi oluşmadı.</div>
+                                  }
+                                </div>
+                              </div>
+                              <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                <div class="border-b border-slate-100 bg-slate-50 px-4 py-3">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Takvim Hafızası</p>
+                                  <h4 class="mt-1 text-sm font-bold text-slate-800">{{ aktifSayfa === 'detay' ? 'Duruşma geçmişi' : (aktifSayfa === 'arabuluculukDetay' ? 'Toplantı geçmişi' : 'Takvim geçmişi') }}</h4>
+                                </div>
+                                <div class="max-h-[28rem] space-y-3 overflow-y-auto p-4 pr-3 custom-scrollbar">
+                                  @for (kayit of aktifDosyaTakvimGecmisi; track kayit.id) {
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                      <div class="flex flex-wrap items-center justify-between gap-2">
+                                        <span class="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-700">{{ kayit.tur }}</span>
+                                        <span [class]="getTakvimGecmisiDurumClass(kayit.durum)" class="rounded-full border px-2.5 py-1 text-[10px] font-black">{{ kayit.durum }}</span>
+                                      </div>
+                                      <p class="mt-3 text-sm font-bold text-slate-800">{{ kayit.planlananTarih ? formatTarihSaat(kayit.planlananTarih, kayit.planlananSaat) : 'Takvim planı kaldırıldı' }}</p>
+                                      @if (kayit.aciklama) { <p class="mt-2 text-sm leading-6 text-slate-600">{{ kayit.aciklama }}</p> }
+                                      <div class="mt-3 flex flex-wrap gap-2 text-[11px] font-medium text-slate-400">
+                                        <span>Kaydedildi: {{ formatTarihSaatKisa(kayit.kayitTarihi) }}</span>
+                                        @if (kayit.gerceklesmeTarihi) { <span>Gerçekleşme: {{ formatTarihSaatKisa(kayit.gerceklesmeTarihi) }}</span> }
+                                      </div>
+                                    </div>
+                                  } @empty {
+                                    <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm font-medium text-slate-500">{{ aktifSayfa === 'icraDetay' ? 'Bu dosyada ayrı bir takvim geçmişi bulunmuyor.' : 'Henüz duruşma veya toplantı geçmişi oluşmadı.' }}</div>
+                                  }
+                                </div>
+                              </div>
                             </div>
                           }
                         </div>
@@ -2402,6 +2479,7 @@ export class App implements OnInit {
   emailGiris = ''; sifreGiris = ''; authModu: 'giris' | 'kayit' = 'giris'; authHata = ''; authYukleniyor = false;
   bildirimler: UygulamaBildirimi[] = [];
   bildirimSayaci = 0;
+  gecmisKaydiSayaci = 0;
 
   davalar: DavaDosyasi[] = []; icralar: IcraDosyasi[] = []; arabuluculukDosyalar: ArabuluculukDosyasi[] = []; muvekkiller: Muvekkil[] = [];
   aktifSayfa: SayfaTipi = 'dashboard'; seciliDava: DavaDosyasi | null = null; seciliIcra: IcraDosyasi | null = null; seciliArabuluculuk: ArabuluculukDosyasi | null = null;
@@ -2618,6 +2696,81 @@ export class App implements OnInit {
   icrayaGitId(id?: number) { if(!id) return; const i = this.icralar.find(x=>x.id===id); if(i) this.icraDetayinaGit(i); }
   getDavaNo(id?: number) { if(!id) return ''; return this.davalar.find(d=>d.id===id)?.dosyaNo || 'Bulunamadı'; }
   getIcraNo(id?: number) { if(!id) return ''; return this.icralar.find(i=>i.id===id)?.dosyaNo || 'Bulunamadı'; }
+
+  yeniGecmisKaydiId() { return Date.now() + this.gecmisKaydiSayaci++; }
+  kopyaliVeri<T>(veri: T): T { return JSON.parse(JSON.stringify(veri)); }
+  yeniDosyaIslemKaydi(kategori: DosyaIslemKategori, baslik: string, aciklama = '', tarih = new Date().toISOString()): DosyaIslemKaydi {
+    return { id: this.yeniGecmisKaydiId(), tarih, kategori, baslik, aciklama, kullanici: this.user?.email || 'Yerel kullanıcı' };
+  }
+  dosyayaIslemKaydiEkle<T extends DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi>(dosya: T, kategori: DosyaIslemKategori, baslik: string, aciklama = '', tarih = new Date().toISOString()): T {
+    const kayitli = this.kopyaliVeri(dosya);
+    kayitli.islemGecmisi = [this.yeniDosyaIslemKaydi(kategori, baslik, aciklama, tarih), ...(kayitli.islemGecmisi || [])].slice(0, 120);
+    return kayitli;
+  }
+  dosyayaTakvimKaydiEkle<T extends DavaDosyasi | ArabuluculukDosyasi>(dosya: T, tur: 'Duruşma' | 'Toplantı', durum: TakvimGecmisiDurumu, planlananTarih?: string, planlananSaat?: string, aciklama = '', gerceklesmeTarihi?: string): T {
+    const kayitli = this.kopyaliVeri(dosya);
+    const yeniKayit: TakvimGecmisKaydi = {
+      id: this.yeniGecmisKaydiId(),
+      tur,
+      durum,
+      kayitTarihi: new Date().toISOString(),
+      planlananTarih,
+      planlananSaat,
+      gerceklesmeTarihi,
+      aciklama
+    };
+    kayitli.takvimGecmisi = [yeniKayit, ...(kayitli.takvimGecmisi || [])].slice(0, 80);
+    return kayitli;
+  }
+  ayniDegerMi(onceki: any, sonraki: any) { return (onceki ?? '') === (sonraki ?? ''); }
+  degisenAlanMetni(alanlar: Array<{ etiket: string; onceki: any; sonraki: any }>) {
+    const degisenler = alanlar.filter(alan => !this.ayniDegerMi(alan.onceki, alan.sonraki)).map(alan => alan.etiket);
+    if (degisenler.length === 0) return 'Dosya kartındaki bilgiler gözden geçirilip kaydedildi.';
+    if (degisenler.length === 1) return `${degisenler[0]} alanı güncellendi.`;
+    if (degisenler.length === 2) return `${degisenler[0]} ve ${degisenler[1]} alanları güncellendi.`;
+    return `${degisenler.slice(0, 3).join(', ')} başlıkları güncellendi.`;
+  }
+  davaGuncellemeOzeti(onceki: DavaDosyasi | undefined, sonraki: DavaDosyasi) {
+    return this.degisenAlanMetni([
+      { etiket: 'Dosya numarası', onceki: onceki?.dosyaNo, sonraki: sonraki.dosyaNo },
+      { etiket: 'Müvekkil', onceki: onceki?.muvekkil, sonraki: sonraki.muvekkil },
+      { etiket: 'Karşı taraf', onceki: onceki?.karsiTaraf, sonraki: sonraki.karsiTaraf },
+      { etiket: 'Mahkeme', onceki: onceki?.mahkeme, sonraki: sonraki.mahkeme },
+      { etiket: 'Konu', onceki: onceki?.konu, sonraki: sonraki.konu },
+      { etiket: 'Duruşma', onceki: this.birlestirTarihVeSaat(onceki?.durusmaTarihi, onceki?.durusmaSaati), sonraki: this.birlestirTarihVeSaat(sonraki.durusmaTarihi, sonraki.durusmaSaati) },
+      { etiket: 'Arşiv yeri', onceki: onceki?.arsivYeri, sonraki: sonraki.arsivYeri },
+      { etiket: 'Vekalet ücreti', onceki: onceki?.vekaletUcreti, sonraki: sonraki.vekaletUcreti }
+    ]);
+  }
+  icraGuncellemeOzeti(onceki: IcraDosyasi | undefined, sonraki: IcraDosyasi) {
+    return this.degisenAlanMetni([
+      { etiket: 'İcra dairesi', onceki: onceki?.icraDairesi, sonraki: sonraki.icraDairesi },
+      { etiket: 'Dosya numarası', onceki: onceki?.dosyaNo, sonraki: sonraki.dosyaNo },
+      { etiket: 'Muhatap', onceki: onceki?.muvekkil, sonraki: sonraki.muvekkil },
+      { etiket: 'Alacaklı', onceki: onceki?.alacakli, sonraki: sonraki.alacakli },
+      { etiket: 'Borçlu', onceki: onceki?.borclu, sonraki: sonraki.borclu },
+      { etiket: 'Takip tipi', onceki: onceki?.takipTipi, sonraki: sonraki.takipTipi },
+      { etiket: 'Takip tarihi', onceki: onceki?.takipTarihi, sonraki: sonraki.takipTarihi },
+      { etiket: 'Arşiv yeri', onceki: onceki?.arsivYeri, sonraki: sonraki.arsivYeri }
+    ]);
+  }
+  arabuluculukGuncellemeOzeti(onceki: ArabuluculukDosyasi | undefined, sonraki: ArabuluculukDosyasi) {
+    return this.degisenAlanMetni([
+      { etiket: 'Büro no', onceki: onceki?.buroNo, sonraki: sonraki.buroNo },
+      { etiket: 'Arabuluculuk no', onceki: onceki?.arabuluculukNo, sonraki: sonraki.arabuluculukNo },
+      { etiket: 'Büro', onceki: onceki?.buro, sonraki: sonraki.buro },
+      { etiket: 'Uyuşmazlık türü', onceki: onceki?.uyusmazlikTuru, sonraki: sonraki.uyusmazlikTuru },
+      { etiket: 'Taraflar', onceki: (onceki?.taraflar || []).map(t => `${t.tip}:${t.isim}`).join('|'), sonraki: (sonraki.taraflar || []).map(t => `${t.tip}:${t.isim}`).join('|') },
+      { etiket: 'Toplantı', onceki: this.birlestirTarihVeSaat(onceki?.toplantiTarihi, onceki?.toplantiSaati), sonraki: this.birlestirTarihVeSaat(sonraki.toplantiTarihi, sonraki.toplantiSaati) },
+      { etiket: 'Arşiv yeri', onceki: onceki?.arsivYeri, sonraki: sonraki.arsivYeri },
+      { etiket: 'Hizmet ücreti', onceki: onceki?.vekaletUcreti, sonraki: sonraki.vekaletUcreti }
+    ]);
+  }
+  takvimDegisimMetni(oncekiTarih?: string, oncekiSaat?: string, sonrakiTarih?: string, sonrakiSaat?: string) {
+    const onceki = oncekiTarih ? this.formatTarihSaat(oncekiTarih, oncekiSaat) : 'Plan yoktu';
+    const sonraki = sonrakiTarih ? this.formatTarihSaat(sonrakiTarih, sonrakiSaat) : 'Plan kaldırıldı';
+    return `${onceki} -> ${sonraki}`;
+  }
 
   sayfaAktifMi(s: SayfaTipi) {
     return this.aktifSayfa === s
@@ -3005,6 +3158,12 @@ export class App implements OnInit {
   }
 
   get aktifDosya() { return this.aktifSayfa === 'icraDetay' ? this.seciliIcra : (this.aktifSayfa === 'arabuluculukDetay' ? this.seciliArabuluculuk : this.seciliDava); }
+  get aktifDosyaIslemGecmisi() {
+    return [...(this.aktifDosya?.islemGecmisi || [])].sort((a, b) => new Date(b.tarih).getTime() - new Date(a.tarih).getTime());
+  }
+  get aktifDosyaTakvimGecmisi() {
+    return [...(this.aktifDosya?.takvimGecmisi || [])].sort((a, b) => new Date(b.kayitTarihi).getTime() - new Date(a.kayitTarihi).getTime());
+  }
   
   get aktifDosyaSureliIsleri() {
     const dosya = this.aktifDosya; if (!dosya) return [];
@@ -3090,18 +3249,40 @@ export class App implements OnInit {
     const m = this.muvekkiller.find(x => x.id == this.islemGorenDava.muvekkilId);
     const noStr = num.map(n => `${n.tur}: ${n.no}`).join(' | ');
     if (this.formModu === 'ekle') {
-      const y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: m?.id || Number(this.islemGorenDava.muvekkilId), muvekkil: m?.adSoyad || this.islemGorenDava.muvekkil || 'Bilinmiyor', muvekkilPozisyonu: this.islemGorenDava.muvekkilPozisyonu, karsiTaraf: this.islemGorenDava.karsiTaraf || '-', mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', durusmaSaati: this.islemGorenDava.durusmaSaati || '', durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: this.islemGorenDava.baglantiliIcraId, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', finansalIslemler: [], evraklar: [] };
+      let y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: m?.id || Number(this.islemGorenDava.muvekkilId), muvekkil: m?.adSoyad || this.islemGorenDava.muvekkil || 'Bilinmiyor', muvekkilPozisyonu: this.islemGorenDava.muvekkilPozisyonu, karsiTaraf: this.islemGorenDava.karsiTaraf || '-', mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', durusmaSaati: this.islemGorenDava.durusmaSaati || '', durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: this.islemGorenDava.baglantiliIcraId, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'Dava dosyası açıldı', `${noStr} referansıyla yeni kayıt oluşturuldu.`);
+      if (y.durusmaTarihi) {
+        y = this.dosyayaTakvimKaydiEkle(y, 'Duruşma', 'Planlandı', y.durusmaTarihi, y.durusmaSaati, 'İlk duruşma planı kaydedildi.');
+        y = this.dosyayaIslemKaydiEkle(y, 'takvim', 'Duruşma takvimi oluşturuldu', this.formatTarihSaat(y.durusmaTarihi, y.durusmaSaati));
+      }
       this.davaKaydetCloud(y, 'Yeni dava dosyası buluta eklendi.');
     } else {
       const mevcut = this.davalar.find(x => x.id === this.islemGorenDava.id);
       const durusmaDegisti = (mevcut?.durusmaTarihi || '') !== (this.islemGorenDava.durusmaTarihi || '') || (mevcut?.durusmaSaati || '') !== (this.islemGorenDava.durusmaSaati || '');
-      const g = { ...this.islemGorenDava, dosyaNo: noStr, dosyaNumaralari: num, muvekkil: m?.adSoyad || this.islemGorenDava.muvekkil || 'Bilinmiyor' } as DavaDosyasi;
+      let g = { ...this.islemGorenDava, dosyaNo: noStr, dosyaNumaralari: num, muvekkil: m?.adSoyad || this.islemGorenDava.muvekkil || 'Bilinmiyor' } as DavaDosyasi;
       if (durusmaDegisti) { g.durusmaTamamlandiMi = false; g.durusmaTamamlanmaTarihi = ''; }
+      g = this.dosyayaIslemKaydiEkle(g, 'dosya', 'Dava dosyası güncellendi', this.davaGuncellemeOzeti(mevcut, g));
+      if (durusmaDegisti) {
+        if (g.durusmaTarihi) {
+          g = this.dosyayaTakvimKaydiEkle(g, 'Duruşma', mevcut?.durusmaTarihi ? 'Güncellendi' : 'Planlandı', g.durusmaTarihi, g.durusmaSaati, this.takvimDegisimMetni(mevcut?.durusmaTarihi, mevcut?.durusmaSaati, g.durusmaTarihi, g.durusmaSaati));
+          g = this.dosyayaIslemKaydiEkle(g, 'takvim', mevcut?.durusmaTarihi ? 'Duruşma takvimi güncellendi' : 'Duruşma takvimi oluşturuldu', this.takvimDegisimMetni(mevcut?.durusmaTarihi, mevcut?.durusmaSaati, g.durusmaTarihi, g.durusmaSaati));
+        } else if (mevcut?.durusmaTarihi) {
+          g = this.dosyayaTakvimKaydiEkle(g, 'Duruşma', 'Kaldırıldı', mevcut.durusmaTarihi, mevcut.durusmaSaati, 'Planlı duruşma ajandadan kaldırıldı.');
+          g = this.dosyayaIslemKaydiEkle(g, 'takvim', 'Duruşma takvimi kaldırıldı', this.formatTarihSaat(mevcut.durusmaTarihi, mevcut.durusmaSaati));
+        }
+      }
       this.davaKaydetCloud(g, 'Dava dosyasındaki bilgiler güncellendi.');
     }
     this.davaFormKapat();
   }
-  durumGuncelle(d: DavaDosyasi, yD: string) { const k = {...d}; k.durum = yD as any; if (k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = ''; this.davaKaydetCloud(k, 'Dava durum etiketi güncellendi.'); }
+  durumGuncelle(d: DavaDosyasi, yD: string) {
+    let k = { ...d };
+    const oncekiDurum = k.durum;
+    k.durum = yD as any;
+    if (k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = '';
+    k = this.dosyayaIslemKaydiEkle(k, 'durum', 'Dava durumu güncellendi', `${oncekiDurum} -> ${yD}`);
+    this.davaKaydetCloud(k, 'Dava durum etiketi güncellendi.');
+  }
   dosyaSil(id: number) { this.davaSilCloud(id, 'Dava dosyası kayıttan kaldırıldı.'); this.silinecekDavaId = null; }
 
   icraFormunuAc(i?: IcraDosyasi) {
@@ -3122,12 +3303,24 @@ export class App implements OnInit {
 
     const m = this.muvekkiller.find(x => x.id == this.islemGorenIcra.muvekkilId);
     if (this.formModu === 'ekle') {
-      const y: IcraDosyasi = { id: Date.now(), icraDairesi: this.islemGorenIcra.icraDairesi || '', dosyaNo: this.islemGorenIcra.dosyaNo || '', muvekkilId: m?.id, muvekkil: m?.adSoyad || 'Bilinmiyor', alacakli: this.islemGorenIcra.alacakli || '-', borclu: this.islemGorenIcra.borclu || '-', takipTipi: this.islemGorenIcra.takipTipi || '', takipTarihi: this.islemGorenIcra.takipTarihi || '', durum: this.islemGorenIcra.durum as any, baglantiliDavaId: this.islemGorenIcra.baglantiliDavaId, arsivYeri: this.islemGorenIcra.arsivYeri || '', vekaletUcreti: this.islemGorenIcra.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [] };
+      let y: IcraDosyasi = { id: Date.now(), icraDairesi: this.islemGorenIcra.icraDairesi || '', dosyaNo: this.islemGorenIcra.dosyaNo || '', muvekkilId: m?.id, muvekkil: m?.adSoyad || 'Bilinmiyor', alacakli: this.islemGorenIcra.alacakli || '-', borclu: this.islemGorenIcra.borclu || '-', takipTipi: this.islemGorenIcra.takipTipi || '', takipTarihi: this.islemGorenIcra.takipTarihi || '', durum: this.islemGorenIcra.durum as any, baglantiliDavaId: this.islemGorenIcra.baglantiliDavaId, arsivYeri: this.islemGorenIcra.arsivYeri || '', vekaletUcreti: this.islemGorenIcra.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'İcra dosyası açıldı', `${y.icraDairesi} / ${y.dosyaNo} referansıyla yeni takip oluşturuldu.`);
       this.icraKaydetCloud(y, 'Yeni icra dosyası buluta eklendi.');
-    } else { const g = { ...this.islemGorenIcra, muvekkil: m?.adSoyad || this.islemGorenIcra.muvekkil } as IcraDosyasi; this.icraKaydetCloud(g, 'İcra dosyasındaki bilgiler güncellendi.'); }
+    } else {
+      let g = { ...this.islemGorenIcra, muvekkil: m?.adSoyad || this.islemGorenIcra.muvekkil } as IcraDosyasi;
+      const mevcut = this.icralar.find(x => x.id === this.islemGorenIcra.id);
+      g = this.dosyayaIslemKaydiEkle(g, 'dosya', 'İcra dosyası güncellendi', this.icraGuncellemeOzeti(mevcut, g));
+      this.icraKaydetCloud(g, 'İcra dosyasındaki bilgiler güncellendi.');
+    }
     this.icraFormKapat();
   }
-  icraDurumGuncelle(i: IcraDosyasi, yD: string) { const k = {...i}; k.durum = yD as any; this.icraKaydetCloud(k, 'İcra dosyasının durumu güncellendi.'); }
+  icraDurumGuncelle(i: IcraDosyasi, yD: string) {
+    let k = { ...i };
+    const oncekiDurum = k.durum;
+    k.durum = yD as any;
+    k = this.dosyayaIslemKaydiEkle(k, 'durum', 'İcra durumu güncellendi', `${oncekiDurum} -> ${yD}`);
+    this.icraKaydetCloud(k, 'İcra dosyasının durumu güncellendi.');
+  }
   icraSil(id: number) { this.icraSilCloud(id, 'İcra dosyası kayıttan kaldırıldı.'); this.silinecekIcraId = null; }
 
   arabuluculukFormAc(a?: ArabuluculukDosyasi) {
@@ -3152,18 +3345,39 @@ export class App implements OnInit {
     t.forEach(taraf => taraf.isim = this.formatMetin(taraf.isim));
 
     if (this.formModu === 'ekle') {
-      const y: ArabuluculukDosyasi = { id: Date.now(), buroNo: this.islemGorenArabuluculuk.buroNo || '', arabuluculukNo: this.islemGorenArabuluculuk.arabuluculukNo || '', buro: this.islemGorenArabuluculuk.buro || '', basvuruTuru: this.islemGorenArabuluculuk.basvuruTuru as any, uyusmazlikTuru: this.islemGorenArabuluculuk.uyusmazlikTuru as any, taraflar: t, muvekkilId: this.islemGorenArabuluculuk.muvekkilId, toplantiTarihi: this.islemGorenArabuluculuk.toplantiTarihi, toplantiSaati: this.islemGorenArabuluculuk.toplantiSaati || '', toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '', toplantiYontemi: this.islemGorenArabuluculuk.toplantiYontemi, durum: this.islemGorenArabuluculuk.durum as any, arsivYeri: this.islemGorenArabuluculuk.arsivYeri || '', vekaletUcreti: this.islemGorenArabuluculuk.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [] };
+      let y: ArabuluculukDosyasi = { id: Date.now(), buroNo: this.islemGorenArabuluculuk.buroNo || '', arabuluculukNo: this.islemGorenArabuluculuk.arabuluculukNo || '', buro: this.islemGorenArabuluculuk.buro || '', basvuruTuru: this.islemGorenArabuluculuk.basvuruTuru as any, uyusmazlikTuru: this.islemGorenArabuluculuk.uyusmazlikTuru as any, taraflar: t, muvekkilId: this.islemGorenArabuluculuk.muvekkilId, toplantiTarihi: this.islemGorenArabuluculuk.toplantiTarihi, toplantiSaati: this.islemGorenArabuluculuk.toplantiSaati || '', toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '', toplantiYontemi: this.islemGorenArabuluculuk.toplantiYontemi, durum: this.islemGorenArabuluculuk.durum as any, arsivYeri: this.islemGorenArabuluculuk.arsivYeri || '', vekaletUcreti: this.islemGorenArabuluculuk.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'Arabuluculuk dosyası açıldı', `${y.arabuluculukNo} referansıyla yeni arabuluculuk kaydı oluşturuldu.`);
+      if (y.toplantiTarihi) {
+        y = this.dosyayaTakvimKaydiEkle(y, 'Toplantı', 'Planlandı', y.toplantiTarihi, y.toplantiSaati, 'İlk toplantı planı kaydedildi.');
+        y = this.dosyayaIslemKaydiEkle(y, 'takvim', 'Toplantı takvimi oluşturuldu', this.formatTarihSaat(y.toplantiTarihi, y.toplantiSaati));
+      }
       this.arabuluculukKaydetCloud(y, 'Yeni arabuluculuk dosyası buluta eklendi.');
     } else {
       const mevcut = this.arabuluculukDosyalar.find(x => x.id === this.islemGorenArabuluculuk.id);
       const toplantiDegisti = (mevcut?.toplantiTarihi || '') !== (this.islemGorenArabuluculuk.toplantiTarihi || '') || (mevcut?.toplantiSaati || '') !== (this.islemGorenArabuluculuk.toplantiSaati || '');
-      const g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', taraflar: t } as ArabuluculukDosyasi;
+      let g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', taraflar: t } as ArabuluculukDosyasi;
       if (toplantiDegisti) { g.toplantiTamamlandiMi = false; g.toplantiTamamlanmaTarihi = ''; }
+      g = this.dosyayaIslemKaydiEkle(g, 'dosya', 'Arabuluculuk dosyası güncellendi', this.arabuluculukGuncellemeOzeti(mevcut, g));
+      if (toplantiDegisti) {
+        if (g.toplantiTarihi) {
+          g = this.dosyayaTakvimKaydiEkle(g, 'Toplantı', mevcut?.toplantiTarihi ? 'Güncellendi' : 'Planlandı', g.toplantiTarihi, g.toplantiSaati, this.takvimDegisimMetni(mevcut?.toplantiTarihi, mevcut?.toplantiSaati, g.toplantiTarihi, g.toplantiSaati));
+          g = this.dosyayaIslemKaydiEkle(g, 'takvim', mevcut?.toplantiTarihi ? 'Toplantı takvimi güncellendi' : 'Toplantı takvimi oluşturuldu', this.takvimDegisimMetni(mevcut?.toplantiTarihi, mevcut?.toplantiSaati, g.toplantiTarihi, g.toplantiSaati));
+        } else if (mevcut?.toplantiTarihi) {
+          g = this.dosyayaTakvimKaydiEkle(g, 'Toplantı', 'Kaldırıldı', mevcut.toplantiTarihi, mevcut.toplantiSaati, 'Planlı toplantı ajandadan kaldırıldı.');
+          g = this.dosyayaIslemKaydiEkle(g, 'takvim', 'Toplantı takvimi kaldırıldı', this.formatTarihSaat(mevcut.toplantiTarihi, mevcut.toplantiSaati));
+        }
+      }
       this.arabuluculukKaydetCloud(g, 'Arabuluculuk dosyasındaki bilgiler güncellendi.');
     }
     this.arabuluculukFormKapat();
   }
-  arabuluculukDurumGuncelle(a: ArabuluculukDosyasi, yD: string) { const k = {...a}; k.durum = yD as any; this.arabuluculukKaydetCloud(k, 'Arabuluculuk durumu güncellendi.'); }
+  arabuluculukDurumGuncelle(a: ArabuluculukDosyasi, yD: string) {
+    let k = { ...a };
+    const oncekiDurum = k.durum;
+    k.durum = yD as any;
+    k = this.dosyayaIslemKaydiEkle(k, 'durum', 'Arabuluculuk durumu güncellendi', `${oncekiDurum} -> ${yD}`);
+    this.arabuluculukKaydetCloud(k, 'Arabuluculuk durumu güncellendi.');
+  }
   arabuluculukSil(id: number) { this.arabuluculukSilCloud(id, 'Arabuluculuk dosyası kayıttan kaldırıldı.'); this.silinecekArabuluculukId = null; }
 
   muvekkilFormunuAc(m?: Muvekkil) { 
@@ -3244,25 +3458,43 @@ export class App implements OnInit {
   }
 
   aktifDosyaKaydet(dosya: any, basariMesaji?: string) { if (this.aktifSayfa === 'icraDetay') this.icraKaydetCloud(dosya, basariMesaji); else if (this.aktifSayfa === 'arabuluculukDetay') this.arabuluculukKaydetCloud(dosya, basariMesaji); else this.davaKaydetCloud(dosya, basariMesaji); }
-  aktifDosyaDurumGuncelle(yD: string) { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; k.durum = yD; if (this.aktifSayfa === 'detay' && k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = ''; this.aktifDosyaKaydet(k, 'Dosya durumu kaydedildi.'); }
+  aktifDosyaDurumGuncelle(yD: string) {
+    if (!this.aktifDosya) return;
+    let k: any = { ...this.aktifDosya };
+    const oncekiDurum = k.durum;
+    k.durum = yD;
+    if (this.aktifSayfa === 'detay' && k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = '';
+    k = this.dosyayaIslemKaydiEkle(k, 'durum', 'Dosya durumu kaydedildi', `${oncekiDurum} -> ${yD}`);
+    this.aktifDosyaKaydet(k, 'Dosya durumu kaydedildi.');
+  }
   durusmaTamamlandiIsaretle(dava: DavaDosyasi, event?: Event) {
     event?.stopPropagation();
-    const k = { ...dava, durusmaTamamlandiMi: true, durusmaTamamlanmaTarihi: new Date().toISOString() };
+    const tamamlanmaTarihi = new Date().toISOString();
+    let k = { ...dava, durusmaTamamlandiMi: true, durusmaTamamlanmaTarihi: tamamlanmaTarihi };
+    k = this.dosyayaTakvimKaydiEkle(k, 'Duruşma', 'Gerçekleşti', dava.durusmaTarihi, dava.durusmaSaati, 'Duruşma gerçekleşti olarak işlendi.', tamamlanmaTarihi);
+    k = this.dosyayaIslemKaydiEkle(k, 'takvim', 'Duruşma gerçekleşti olarak işlendi', this.formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati), tamamlanmaTarihi);
     this.davaKaydetCloud(k, 'Duruşma gerçekleşti olarak işaretlendi ve ajandadan kaldırıldı.');
   }
   durusmaAjandayaGeriAl(dava: DavaDosyasi, event?: Event) {
     event?.stopPropagation();
-    const k = { ...dava, durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '' };
+    let k = { ...dava, durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '' };
+    k = this.dosyayaTakvimKaydiEkle(k, 'Duruşma', 'Ajandaya Geri Alındı', dava.durusmaTarihi, dava.durusmaSaati, 'Duruşma yeniden aktif ajandaya alındı.');
+    k = this.dosyayaIslemKaydiEkle(k, 'takvim', 'Duruşma ajandaya geri alındı', this.formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati));
     this.davaKaydetCloud(k, 'Duruşma yeniden ajandaya alındı.');
   }
   toplantiTamamlandiIsaretle(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
     event?.stopPropagation();
-    const k = { ...arabuluculuk, toplantiTamamlandiMi: true, toplantiTamamlanmaTarihi: new Date().toISOString() };
+    const tamamlanmaTarihi = new Date().toISOString();
+    let k = { ...arabuluculuk, toplantiTamamlandiMi: true, toplantiTamamlanmaTarihi: tamamlanmaTarihi };
+    k = this.dosyayaTakvimKaydiEkle(k, 'Toplantı', 'Gerçekleşti', arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati, 'Toplantı gerçekleşti olarak işlendi.', tamamlanmaTarihi);
+    k = this.dosyayaIslemKaydiEkle(k, 'takvim', 'Toplantı gerçekleşti olarak işlendi', this.formatTarihSaat(arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati), tamamlanmaTarihi);
     this.arabuluculukKaydetCloud(k, 'Toplantı gerçekleşti olarak işaretlendi ve ajandadan kaldırıldı.');
   }
   toplantiAjandayaGeriAl(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
     event?.stopPropagation();
-    const k = { ...arabuluculuk, toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '' };
+    let k = { ...arabuluculuk, toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '' };
+    k = this.dosyayaTakvimKaydiEkle(k, 'Toplantı', 'Ajandaya Geri Alındı', arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati, 'Toplantı yeniden aktif ajandaya alındı.');
+    k = this.dosyayaIslemKaydiEkle(k, 'takvim', 'Toplantı ajandaya geri alındı', this.formatTarihSaat(arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati));
     this.arabuluculukKaydetCloud(k, 'Toplantı yeniden ajandaya alındı.');
   }
   evrakKaydiniGuncelle(evraklar: EvrakBaglantisi[] | undefined, evrakId: number, updater: (evrak: EvrakBaglantisi) => void): boolean {
@@ -3276,15 +3508,18 @@ export class App implements OnInit {
   sureliIsiTamamlandiIsaretle(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null | undefined, kaynak: AjandaKaynak, evrakId: number, event?: Event) {
     event?.stopPropagation();
     if (!dosya) return;
+    let tamamlamaAciklamasi = 'Süreli iş tamamlandı olarak işlendi.';
     const k: any = JSON.parse(JSON.stringify(dosya));
     const bulundu = this.evrakKaydiniGuncelle(k.evraklar, evrakId, (evrak) => {
       evrak.tamamlandiMi = true;
       evrak.tamamlanmaTarihi = new Date().toISOString();
+      tamamlamaAciklamasi = `${evrak.isim} süresi tamamlandı olarak işaretlendi.`;
     });
     if (!bulundu) return;
-    if (kaynak === 'dava') this.davaKaydetCloud(k, 'Süreli iş tamamlandı olarak işaretlendi.');
-    else if (kaynak === 'icra') this.icraKaydetCloud(k, 'Süreli iş tamamlandı olarak işaretlendi.');
-    else this.arabuluculukKaydetCloud(k, 'Süreli iş tamamlandı olarak işaretlendi.');
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Süreli iş tamamlandı', tamamlamaAciklamasi);
+    if (kaynak === 'dava') this.davaKaydetCloud(kayitli, 'Süreli iş tamamlandı olarak işaretlendi.');
+    else if (kaynak === 'icra') this.icraKaydetCloud(kayitli, 'Süreli iş tamamlandı olarak işaretlendi.');
+    else this.arabuluculukKaydetCloud(kayitli, 'Süreli iş tamamlandı olarak işaretlendi.');
   }
   ajandaKaydiTamamla(kayit: AjandaKaydi, event?: Event) {
     if (kayit.tur === 'durusma') this.durusmaTamamlandiIsaretle(kayit.dosya as DavaDosyasi, event);
@@ -3302,9 +3537,17 @@ export class App implements OnInit {
     this.yeniIslem.aciklama = this.formatMetin(this.yeniIslem.aciklama);
     const k: any = {...this.aktifDosya}; if (!k.finansalIslemler) k.finansalIslemler = [];
     k.finansalIslemler.unshift({ id: Date.now(), tarih: this.yeniIslem.tarih || new Date().toISOString().split('T')[0], tur: this.yeniIslem.tur as any, tutar: this.yeniIslem.tutar, aciklama: this.yeniIslem.aciklama || '' });
-    this.aktifDosyaKaydet(k, 'Finans hareketi dosyaya eklendi.'); this.yeniIslem = { tur: this.yeniIslem.tur, tarih: new Date().toISOString().split('T')[0], tutar: undefined, aciklama: '' };
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi eklendi', `${this.yeniIslem.tur}: ${this.formatPara(this.yeniIslem.tutar || 0)} • ${this.yeniIslem.aciklama || ''}`);
+    this.aktifDosyaKaydet(kayitli, 'Finans hareketi dosyaya eklendi.'); this.yeniIslem = { tur: this.yeniIslem.tur, tarih: new Date().toISOString().split('T')[0], tutar: undefined, aciklama: '' };
   }
-  finansalIslemSil(id: number) { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; k.finansalIslemler = k.finansalIslemler!.filter((i:any) => i.id !== id); this.aktifDosyaKaydet(k, 'Finans hareketi silindi.'); }
+  finansalIslemSil(id: number) {
+    if(!this.aktifDosya) return;
+    const k: any = {...this.aktifDosya};
+    const silinen = (k.finansalIslemler || []).find((i:any) => i.id === id);
+    k.finansalIslemler = k.finansalIslemler!.filter((i:any) => i.id !== id);
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi silindi', silinen ? `${silinen.tur}: ${this.formatPara(silinen.tutar || 0)} • ${silinen.aciklama || ''}` : 'Seçili finans hareketi kayıttan kaldırıldı.');
+    this.aktifDosyaKaydet(kayitli, 'Finans hareketi silindi.');
+  }
 
   klasorGecis(id: number) { this.acikKlasorler[id] = !this.acikKlasorler[id]; }
 
@@ -3316,7 +3559,7 @@ export class App implements OnInit {
     if (this.aktifSayfa === 'sablonlar') {
       this.sablonlar[this.aktifSablonSekmesi].unshift(yeni); this.sablonlariKaydetCloud('Yeni şablon listeye eklendi.');
     } else {
-      if (!this.aktifDosya) return; const k: any = {...this.aktifDosya}; if (!k.evraklar) k.evraklar = []; k.evraklar.unshift(yeni); this.aktifDosyaKaydet(k, 'Evrak bağlantısı dosyaya eklendi.');
+      if (!this.aktifDosya) return; const k: any = {...this.aktifDosya}; if (!k.evraklar) k.evraklar = []; k.evraklar.unshift(yeni); const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak bağlantısı eklendi', `${yeni.isim}${yeni.sonEylemTarihi ? ' • Son eylem: ' + this.formatTarihKisa(yeni.sonEylemTarihi) : ''}`); this.aktifDosyaKaydet(kayitli, 'Evrak bağlantısı dosyaya eklendi.');
     }
     this.yeniEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi };
   }
@@ -3338,7 +3581,8 @@ export class App implements OnInit {
       if (!this.aktifDosya) return; const k: any = {...this.aktifDosya};
       if (this.duzenlenenEvrakParentId) { const p = k.evraklar!.find((e:any) => e.id === this.duzenlenenEvrakParentId); if (p && p.ekler) { const i = p.ekler.findIndex((e:any) => e.id === this.duzenlenenEvrakId); if (i !== -1) p.ekler[i] = this.duzenlenenEvrak as EvrakBaglantisi; } } 
       else { const i = k.evraklar!.findIndex((e:any) => e.id === this.duzenlenenEvrakId); if (i !== -1) k.evraklar![i] = this.duzenlenenEvrak as EvrakBaglantisi; }
-      this.aktifDosyaKaydet(k, 'Evrak bilgileri güncellendi.');
+      const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', this.duzenlenenEvrakParentId ? 'Alt evrak güncellendi' : 'Evrak bilgileri güncellendi', `${this.duzenlenenEvrak.isim || 'Evrak'} kaydı düzenlendi.`);
+      this.aktifDosyaKaydet(kayitli, 'Evrak bilgileri güncellendi.');
     }
     this.evrakDuzenleIptal();
   }
@@ -3355,11 +3599,11 @@ export class App implements OnInit {
     let url = this.yeniEkEvrak.url.trim(); if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
     const y = { id: Date.now(), isim: this.yeniEkEvrak.isim || 'İsimsiz', url: url, tarih: new Date().toISOString(), tebligTarihi: this.yeniEkEvrak.tebligTarihi, sonEylemTarihi: this.yeniEkEvrak.sonEylemTarihi, tamamlandiMi: false, tamamlanmaTarihi: '', yaziRengi: this.getEvrakYaziRengi(this.yeniEkEvrak.yaziRengi) };
     if (this.aktifSayfa === 'sablonlar') { const p = this.sablonlar[this.aktifSablonSekmesi].find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); this.sablonlariKaydetCloud('Alt şablon eklendi.'); } } 
-    else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); this.aktifDosyaKaydet(k, 'Alt evrak bağlantısı eklendi.'); } }
+    else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Alt evrak bağlantısı eklendi', `${p.isim} altına ${y.isim} eklendi.`); this.aktifDosyaKaydet(kayitli, 'Alt evrak bağlantısı eklendi.'); } }
     this.ekEvrakFormKapat();
   }
-  evrakSil(id: number) { if (this.aktifSayfa === 'sablonlar') { this.sablonlar[this.aktifSablonSekmesi] = this.sablonlar[this.aktifSablonSekmesi].filter((e:any) => e.id !== id); this.sablonlariKaydetCloud('Şablon kayıttan kaldırıldı.'); } else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; k.evraklar = k.evraklar!.filter((e:any) => e.id !== id); this.aktifDosyaKaydet(k, 'Evrak bağlantısı silindi.'); } }
-  ekEvrakSil(parentId: number, ekId: number) { if (this.aktifSayfa === 'sablonlar') { const p = this.sablonlar[this.aktifSablonSekmesi].find((e:any) => e.id === parentId); if (p && p.ekler) { p.ekler = p.ekler.filter((e:any) => e.id !== ekId); this.sablonlariKaydetCloud('Alt şablon silindi.'); } } else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); if (p && p.ekler) { p.ekler = p.ekler.filter((e:any) => e.id !== ekId); this.aktifDosyaKaydet(k, 'Alt evrak bağlantısı silindi.'); } } }
+  evrakSil(id: number) { if (this.aktifSayfa === 'sablonlar') { this.sablonlar[this.aktifSablonSekmesi] = this.sablonlar[this.aktifSablonSekmesi].filter((e:any) => e.id !== id); this.sablonlariKaydetCloud('Şablon kayıttan kaldırıldı.'); } else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const silinen = k.evraklar!.find((e:any) => e.id === id); k.evraklar = k.evraklar!.filter((e:any) => e.id !== id); const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak bağlantısı silindi', silinen ? `${silinen.isim} kayıttan kaldırıldı.` : 'Seçili evrak kaydı kaldırıldı.'); this.aktifDosyaKaydet(kayitli, 'Evrak bağlantısı silindi.'); } }
+  ekEvrakSil(parentId: number, ekId: number) { if (this.aktifSayfa === 'sablonlar') { const p = this.sablonlar[this.aktifSablonSekmesi].find((e:any) => e.id === parentId); if (p && p.ekler) { p.ekler = p.ekler.filter((e:any) => e.id !== ekId); this.sablonlariKaydetCloud('Alt şablon silindi.'); } } else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); const silinen = p?.ekler?.find((e:any) => e.id === ekId); if (p && p.ekler) { p.ekler = p.ekler.filter((e:any) => e.id !== ekId); const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Alt evrak bağlantısı silindi', silinen ? `${p.isim} altından ${silinen.isim} kaldırıldı.` : 'Seçili alt evrak kaldırıldı.'); this.aktifDosyaKaydet(kayitli, 'Alt evrak bağlantısı silindi.'); } } }
 
   getDosyaFinans(dosya: any) {
     let isArabuluculuk = dosya.buroNo !== undefined;
@@ -3535,6 +3779,9 @@ export class App implements OnInit {
     if (!dosya) return 0;
     return (dosya.evraklar || []).reduce((toplam: number, evrak: any) => toplam + 1 + ((evrak.ekler || []).length), 0);
   }
+  getAktifDosyaGecmisSayisi() {
+    return this.aktifDosyaIslemGecmisi.length + this.aktifDosyaTakvimGecmisi.length;
+  }
   getDetayTabClass(sekme: DetaySekmesi) {
     if (this.aktifDetaySekmesi !== sekme) return 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-white/70';
     return this.aktifSayfa === 'detay'
@@ -3542,6 +3789,20 @@ export class App implements OnInit {
       : this.aktifSayfa === 'icraDetay'
       ? 'border-emerald-500 text-emerald-700 bg-emerald-50/70'
       : 'border-violet-500 text-violet-700 bg-violet-50/70';
+  }
+  getDosyaIslemKategoriClass(kategori: DosyaIslemKategori) {
+    if (kategori === 'durum') return 'bg-amber-50 text-amber-700 border-amber-200';
+    if (kategori === 'takvim') return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+    if (kategori === 'evrak') return 'bg-sky-50 text-sky-700 border-sky-200';
+    if (kategori === 'finans') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    return 'bg-slate-100 text-slate-700 border-slate-200';
+  }
+  getTakvimGecmisiDurumClass(durum: TakvimGecmisiDurumu) {
+    if (durum === 'Gerçekleşti') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    if (durum === 'Güncellendi') return 'bg-blue-50 text-blue-700 border-blue-200';
+    if (durum === 'Ajandaya Geri Alındı') return 'bg-amber-50 text-amber-700 border-amber-200';
+    if (durum === 'Kaldırıldı') return 'bg-rose-50 text-rose-700 border-rose-200';
+    return 'bg-slate-100 text-slate-700 border-slate-200';
   }
   getAktifDosyaBilgiKartiClass() {
     return this.aktifSayfa === 'detay'
@@ -3572,6 +3833,10 @@ export class App implements OnInit {
   formatTarihKisa(str?: string) { return str ? new Date(str).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''; }
   formatTarihSaatKisa(tarih?: string, saat?: string) {
     if (!tarih) return '';
+    if (!saat && tarih.includes('T')) {
+      const tamTarih = new Date(tarih);
+      return tamTarih.toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', ' •');
+    }
     const tarihMetni = this.formatTarihKisa(tarih);
     return saat ? `${tarihMetni} • ${this.formatSaat(saat)}` : tarihMetni;
   }
