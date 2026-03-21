@@ -47,7 +47,7 @@ interface ArabuluculukTaraf { id: number; tip: 'Başvurucu' | 'Diğer Taraf'; is
 interface DavaTarafKaydi { id: number; isim: string; muvekkilId?: number; }
 
 interface DavaDosyasi { 
-  id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; karsiTaraf: string; mahkeme: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; muvekkilPozisyonu?: string; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[]; davacilar?: DavaTarafKaydi[]; davalilar?: DavaTarafKaydi[];
+  id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; muvekkiller?: DavaTarafKaydi[]; karsiTaraf: string; mahkeme: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; muvekkilPozisyonu?: string; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[]; davacilar?: DavaTarafKaydi[]; davalilar?: DavaTarafKaydi[];
   icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
   buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: string;
 }
@@ -1324,6 +1324,42 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                           <div class="w-12 h-12 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold text-xl shadow-inner shrink-0">{{ muvekkil.adSoyad.charAt(0).toUpperCase() }}</div>
                           <div><h3 class="font-bold text-slate-800 text-lg leading-tight">{{ muvekkil.adSoyad }}</h3><p class="text-xs text-slate-500 mt-0.5">TC/VKN: {{ muvekkil.tcKimlik || '-' }}</p></div>
                         </div>
+                        @if (seciliIliskiId === muvekkil.id) {
+                          <div class="border-b border-slate-100 bg-white px-5 py-4">
+                            <div class="grid gap-2 sm:grid-cols-3">
+                              <div class="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3">
+                                <p class="text-[10px] font-black uppercase tracking-wider text-blue-600">Dava</p>
+                                <p class="mt-2 text-2xl font-black text-slate-900">{{ seciliIliskiDosyaOzeti.dava }}</p>
+                              </div>
+                              <div class="rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+                                <p class="text-[10px] font-black uppercase tracking-wider text-emerald-600">İcra</p>
+                                <p class="mt-2 text-2xl font-black text-slate-900">{{ seciliIliskiDosyaOzeti.icra }}</p>
+                              </div>
+                              <div class="rounded-2xl border border-purple-100 bg-purple-50/70 px-4 py-3">
+                                <p class="text-[10px] font-black uppercase tracking-wider text-purple-600">Arabuluculuk</p>
+                                <p class="mt-2 text-2xl font-black text-slate-900">{{ seciliIliskiDosyaOzeti.arabuluculuk }}</p>
+                              </div>
+                            </div>
+                            <div class="mt-3 space-y-2">
+                              @for (kayit of seciliIliskiDosyalari; track kayit.id) {
+                                <button type="button" (click)="$event.stopPropagation(); iliskiDosyasinaGit(kayit)" class="flex w-full flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-left transition-colors hover:border-slate-300 hover:bg-white">
+                                  <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                      <span [class]="kayit.tur === 'dava' ? 'bg-blue-100 text-blue-700' : (kayit.tur === 'icra' ? 'bg-emerald-100 text-emerald-700' : 'bg-purple-100 text-purple-700')" class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]">{{ kayit.tur === 'dava' ? 'Dava' : (kayit.tur === 'icra' ? 'İcra' : 'Arabuluculuk') }}</span>
+                                      <span [class]="kayit.tur === 'dava' ? getDurumClass(kayit.durum) : (kayit.tur === 'icra' ? getIcraDurumClass(kayit.durum) : getArabuluculukDurumClass(kayit.durum))" class="rounded-full px-2.5 py-1 text-[10px] font-bold">{{ kayit.durum }}</span>
+                                    </div>
+                                    <p class="mt-3 text-sm font-black text-slate-900">{{ kayit.baslik }}</p>
+                                    <p class="mt-1 text-xs font-medium text-slate-600">{{ kayit.altBaslik }}</p>
+                                    <p class="mt-2 text-[11px] text-slate-500">{{ kayit.referans }}</p>
+                                  </div>
+                                  <span class="text-[11px] font-bold text-indigo-600">Dosyaya git</span>
+                                </button>
+                              } @empty {
+                                <div class="rounded-2xl border border-dashed border-slate-200 px-5 py-8 text-center text-sm font-medium text-slate-500">Bu kayıtla eşleşen dava, icra veya arabuluculuk dosyası bulunamadı.</div>
+                              }
+                            </div>
+                          </div>
+                        }
                         <div class="p-5 space-y-3 text-sm flex-1">
                           <div class="flex items-center gap-3 text-slate-600"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg><span>{{ muvekkil.telefon || 'Belirtilmedi' }}</span></div>
                           <div class="flex items-start gap-3 text-slate-600"><svg class="w-4 h-4 text-slate-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><span class="break-all">{{ muvekkil.adres || 'Adres girilmedi' }}</span></div>
@@ -1407,6 +1443,46 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                                 </div>
                               </td>
                             </tr>
+                            @if (seciliIliskiId === muvekkil.id) {
+                              <tr class="bg-slate-50/80">
+                                <td colspan="5" class="px-5 pb-5 pt-0">
+                                  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                    <div class="grid gap-2 sm:grid-cols-3">
+                                      <div class="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3">
+                                        <p class="text-[10px] font-black uppercase tracking-wider text-blue-600">Dava</p>
+                                        <p class="mt-2 text-2xl font-black text-slate-900">{{ seciliIliskiDosyaOzeti.dava }}</p>
+                                      </div>
+                                      <div class="rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+                                        <p class="text-[10px] font-black uppercase tracking-wider text-emerald-600">İcra</p>
+                                        <p class="mt-2 text-2xl font-black text-slate-900">{{ seciliIliskiDosyaOzeti.icra }}</p>
+                                      </div>
+                                      <div class="rounded-2xl border border-purple-100 bg-purple-50/70 px-4 py-3">
+                                        <p class="text-[10px] font-black uppercase tracking-wider text-purple-600">Arabuluculuk</p>
+                                        <p class="mt-2 text-2xl font-black text-slate-900">{{ seciliIliskiDosyaOzeti.arabuluculuk }}</p>
+                                      </div>
+                                    </div>
+                                    <div class="mt-3 space-y-2">
+                                      @for (kayit of seciliIliskiDosyalari; track kayit.id) {
+                                        <button type="button" (click)="$event.stopPropagation(); iliskiDosyasinaGit(kayit)" class="flex w-full flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-left transition-colors hover:border-slate-300 hover:bg-white sm:flex-row sm:items-center sm:justify-between">
+                                          <div class="min-w-0">
+                                            <div class="flex flex-wrap items-center gap-2">
+                                              <span [class]="kayit.tur === 'dava' ? 'bg-blue-100 text-blue-700' : (kayit.tur === 'icra' ? 'bg-emerald-100 text-emerald-700' : 'bg-purple-100 text-purple-700')" class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]">{{ kayit.tur === 'dava' ? 'Dava' : (kayit.tur === 'icra' ? 'İcra' : 'Arabuluculuk') }}</span>
+                                              <span [class]="kayit.tur === 'dava' ? getDurumClass(kayit.durum) : (kayit.tur === 'icra' ? getIcraDurumClass(kayit.durum) : getArabuluculukDurumClass(kayit.durum))" class="rounded-full px-2.5 py-1 text-[10px] font-bold">{{ kayit.durum }}</span>
+                                            </div>
+                                            <p class="mt-3 text-base font-black text-slate-900">{{ kayit.baslik }}</p>
+                                            <p class="mt-1 text-sm font-medium text-slate-600">{{ kayit.altBaslik }}</p>
+                                            <p class="mt-2 text-xs text-slate-500">{{ kayit.referans }}</p>
+                                          </div>
+                                          <span class="shrink-0 text-xs font-bold text-indigo-600">Dosyaya git</span>
+                                        </button>
+                                      } @empty {
+                                        <div class="rounded-2xl border border-dashed border-slate-200 px-5 py-8 text-center text-sm font-medium text-slate-500">Bu kayıtla eşleşen dava, icra veya arabuluculuk dosyası bulunamadı.</div>
+                                      }
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            }
                           } @empty { <tr><td colspan="5" class="p-10 text-center text-slate-400 font-medium">Kriterlere uygun kayıt bulunamadı.</td></tr> }
                         </tbody>
                       </table>
@@ -1414,53 +1490,6 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                   </div>
                 }
               }
-            }
-
-            @if (aktifSayfa === 'iliskiler' && seciliIliski) {
-              <div class="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div class="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <p class="text-[11px] font-black uppercase tracking-[0.22em] text-indigo-500">Bağlı Dosyalar</p>
-                    <h3 class="mt-2 text-xl font-black text-slate-900">{{ seciliIliski.adSoyad }}</h3>
-                    <p class="mt-1 text-sm text-slate-500">Bu kişi ya da kurumla ilişkili dava, icra ve arabuluculuk kayıtları aşağıda sıralanır.</p>
-                  </div>
-                  <button type="button" (click)="iliskiDetayiKapat()" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100">Kapat</button>
-                </div>
-                <div class="grid gap-3 border-b border-slate-100 px-5 py-4 sm:grid-cols-3">
-                  <div class="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3">
-                    <p class="text-[10px] font-black uppercase tracking-wider text-blue-600">Dava</p>
-                    <p class="mt-2 text-2xl font-black text-slate-900">{{ seciliIliskiDosyaOzeti.dava }}</p>
-                  </div>
-                  <div class="rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
-                    <p class="text-[10px] font-black uppercase tracking-wider text-emerald-600">İcra</p>
-                    <p class="mt-2 text-2xl font-black text-slate-900">{{ seciliIliskiDosyaOzeti.icra }}</p>
-                  </div>
-                  <div class="rounded-2xl border border-purple-100 bg-purple-50/70 px-4 py-3">
-                    <p class="text-[10px] font-black uppercase tracking-wider text-purple-600">Arabuluculuk</p>
-                    <p class="mt-2 text-2xl font-black text-slate-900">{{ seciliIliskiDosyaOzeti.arabuluculuk }}</p>
-                  </div>
-                </div>
-                <div class="p-5">
-                  <div class="space-y-3">
-                    @for (kayit of seciliIliskiDosyalari; track kayit.id) {
-                      <button type="button" (click)="iliskiDosyasinaGit(kayit)" class="flex w-full flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-left transition-colors hover:border-slate-300 hover:bg-white sm:flex-row sm:items-center sm:justify-between">
-                        <div class="min-w-0">
-                          <div class="flex flex-wrap items-center gap-2">
-                            <span [class]="kayit.tur === 'dava' ? 'bg-blue-100 text-blue-700' : (kayit.tur === 'icra' ? 'bg-emerald-100 text-emerald-700' : 'bg-purple-100 text-purple-700')" class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]">{{ kayit.tur === 'dava' ? 'Dava' : (kayit.tur === 'icra' ? 'İcra' : 'Arabuluculuk') }}</span>
-                            <span [class]="kayit.tur === 'dava' ? getDurumClass(kayit.durum) : (kayit.tur === 'icra' ? getIcraDurumClass(kayit.durum) : getArabuluculukDurumClass(kayit.durum))" class="rounded-full px-2.5 py-1 text-[10px] font-bold">{{ kayit.durum }}</span>
-                          </div>
-                          <p class="mt-3 text-base font-black text-slate-900">{{ kayit.baslik }}</p>
-                          <p class="mt-1 text-sm font-medium text-slate-600">{{ kayit.altBaslik }}</p>
-                          <p class="mt-2 text-xs text-slate-500">{{ kayit.referans }}</p>
-                        </div>
-                        <span class="shrink-0 text-xs font-bold text-indigo-600">Dosyaya git</span>
-                      </button>
-                    } @empty {
-                      <div class="rounded-2xl border border-dashed border-slate-200 px-5 py-10 text-center text-sm font-medium text-slate-500">Bu kayıtla eşleşen dava, icra veya arabuluculuk dosyası bulunamadı.</div>
-                    }
-                  </div>
-                </div>
-              </div>
             }
 
             <!-- ORTAK DOSYA DETAY SAYFASI (DAVA, İCRA, ARABULUCULUK) -->
@@ -2000,12 +2029,25 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                 <p class="mt-2 text-sm leading-6 text-slate-500">Müvekkil, pozisyon ve bağlantılı icra kaydını aynı bölümde tutarak dosyayı daha hızlı tarayabilirsiniz.</p>
                 <div class="mt-4 grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
                 <div class="flex-1">
-                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Müvekkil <span class="text-red-500">*</span></label>
-                  <select [(ngModel)]="islemGorenDava.muvekkilId" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
-                    <option [ngValue]="undefined" disabled>Müvekkil Seçiniz</option>
-                    @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Diğer' ? '(Diğer)' : '' }}</option> }
-                  </select>
-                  <div class="mt-2 flex flex-col gap-2 rounded-xl border border-dashed border-blue-200 bg-blue-50/50 p-3">
+                  <div class="flex items-center justify-between gap-3">
+                    <label class="block text-xs font-bold text-slate-500 uppercase">Müvekkiller <span class="text-red-500">*</span></label>
+                    <button type="button" (click)="davaMuvekkilEkle()" class="rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-slate-700">Müvekkil Ekle</button>
+                  </div>
+                  <div class="mt-3 space-y-2">
+                    @for(muvekkilKaydi of (islemGorenDava.muvekkiller || []); track $index) {
+                      <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                        <div class="grid gap-2 md:grid-cols-[220px_minmax(0,1fr)_auto] md:items-center">
+                          <select [ngModel]="muvekkilKaydi.muvekkilId" (ngModelChange)="davaMuvekkilSecimDegisti(muvekkilKaydi, $event)" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
+                            <option [ngValue]="undefined">Listeden kişi / şirket seç</option>
+                            @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option> }
+                          </select>
+                          <input [(ngModel)]="muvekkilKaydi.isim" (ngModelChange)="davaMuvekkilMetniElleDegisti(muvekkilKaydi, $event)" type="text" placeholder="Müvekkil adı / unvanı" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
+                          <button type="button" (click)="davaMuvekkilSil($index)" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600">Sil</button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  <div class="mt-3 flex flex-col gap-2 rounded-xl border border-dashed border-blue-200 bg-blue-50/50 p-3">
                     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <p class="text-[11px] font-semibold text-slate-600">Aradığınız müvekkil listede yoksa buradan hızlıca ekleyebilirsiniz.</p>
                       @if (!hizliMuvekkilFormAcik) {
@@ -2110,7 +2152,7 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                   </div>
                 </div>
                 <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-medium leading-6 text-slate-500">
-                  Seçtiğiniz müvekkil, kaydetme sırasında {{ islemGorenDava.muvekkilPozisyonu === 'Davalı' ? 'davalı' : 'davacı' }} tarafına otomatik eklenir. Diğer tarafları buradan çoğaltabilirsiniz.
+                  Seçtiğiniz müvekkiller, kaydetme sırasında {{ islemGorenDava.muvekkilPozisyonu === 'Davalı' ? 'davalı' : 'davacı' }} tarafına otomatik eklenir. Diğer tarafları buradan çoğaltabilirsiniz.
                 </div>
                 <div class="mt-4 grid gap-3 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mahkeme</label><input [(ngModel)]="islemGorenDava.mahkeme" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
@@ -2816,19 +2858,41 @@ export class App implements OnInit {
   davaTarafListesiKopyala(liste?: DavaTarafKaydi[]) {
     return Array.isArray(liste) ? liste.map(taraf => ({ ...taraf })) : [];
   }
+  davaMuvekkilleriVarsayilanOlustur(dava?: Partial<DavaDosyasi> | null) {
+    let muvekkiller = this.davaTarafListesiKopyala(dava?.muvekkiller);
+
+    if (!muvekkiller.length) {
+      const muvekkil = (dava?.muvekkil || '').trim();
+      if (muvekkil) {
+        muvekkiller.push({ id: Date.now(), isim: muvekkil, muvekkilId: dava?.muvekkilId });
+      }
+    }
+
+    if (!muvekkiller.length) muvekkiller = [{ id: Date.now(), isim: '' }];
+    return muvekkiller;
+  }
+  davaMuvekkilleriniHazirla(liste?: DavaTarafKaydi[]) {
+    return (liste || [])
+      .map(kayit => {
+        const secilen = kayit.muvekkilId ? this.muvekkiller.find(m => m.id == kayit.muvekkilId) : undefined;
+        const isim = (this.formatMetin(secilen?.adSoyad || kayit.isim) || '').trim();
+        return { ...kayit, isim, muvekkilId: secilen?.id || kayit.muvekkilId };
+      })
+      .filter(kayit => kayit.isim !== '');
+  }
   davaTaraflariVarsayilanOlustur(dava?: Partial<DavaDosyasi> | null) {
     let davacilar = this.davaTarafListesiKopyala(dava?.davacilar);
     let davalilar = this.davaTarafListesiKopyala(dava?.davalilar);
 
     if (!davacilar.length && !davalilar.length) {
-      const muvekkil = (dava?.muvekkil || '').trim();
+      const muvekkiller = this.davaMuvekkilleriniHazirla(this.davaMuvekkilleriVarsayilanOlustur(dava));
       const karsiTaraflar = this.davaTarafMetniniParcala(dava?.karsiTaraf);
-      if (muvekkil) {
-        if (dava?.muvekkilPozisyonu === 'Davalı') davalilar.push({ id: Date.now(), isim: muvekkil });
-        else davacilar.push({ id: Date.now(), isim: muvekkil });
-      }
+      muvekkiller.forEach((muvekkil, index) => {
+        if (dava?.muvekkilPozisyonu === 'Davalı') davalilar.push({ id: Date.now() + index, isim: muvekkil.isim, muvekkilId: muvekkil.muvekkilId });
+        else davacilar.push({ id: Date.now() + index, isim: muvekkil.isim, muvekkilId: muvekkil.muvekkilId });
+      });
       karsiTaraflar.forEach((isim, index) => {
-        const kayit = { id: Date.now() + index + 1, isim };
+        const kayit = { id: Date.now() + muvekkiller.length + index + 1, isim };
         if (dava?.muvekkilPozisyonu === 'Davalı') davacilar.push(kayit);
         else davalilar.push(kayit);
       });
@@ -2859,6 +2923,13 @@ export class App implements OnInit {
     }
     return liste;
   }
+  davaMuvekkilTaraflariniDahilEt(liste: DavaTarafKaydi[], muvekkiller: DavaTarafKaydi[]) {
+    let guncelListe = [...liste];
+    muvekkiller.forEach(muvekkil => {
+      guncelListe = this.davaMuvekkilTarafiniDahilEt(guncelListe, muvekkil.isim, muvekkil.muvekkilId);
+    });
+    return guncelListe;
+  }
   getDavaTarafOzet(dava?: Partial<DavaDosyasi> | null) {
     if (!dava) return 'Taraf bilgisi girilmedi.';
     const { davacilar, davalilar } = this.getDavaTarafKayitlari(dava);
@@ -2879,6 +2950,17 @@ export class App implements OnInit {
     if (!this.islemGorenDava[anahtar]) this.islemGorenDava[anahtar] = [];
     this.islemGorenDava[anahtar]!.push({ id: Date.now(), isim: '' });
   }
+  davaMuvekkilEkle() {
+    if (!this.islemGorenDava.muvekkiller) this.islemGorenDava.muvekkiller = [];
+    this.islemGorenDava.muvekkiller.push({ id: Date.now(), isim: '' });
+  }
+  davaMuvekkilSil(index: number) {
+    if (!this.islemGorenDava.muvekkiller) return;
+    this.islemGorenDava.muvekkiller.splice(index, 1);
+    if (this.islemGorenDava.muvekkiller.length === 0) {
+      this.islemGorenDava.muvekkiller = [{ id: Date.now(), isim: '' }];
+    }
+  }
   davaTarafSil(tur: 'davaci' | 'davali', index: number) {
     const anahtar = tur === 'davaci' ? 'davacilar' : 'davalilar';
     if (this.islemGorenDava[anahtar]) {
@@ -2893,10 +2975,20 @@ export class App implements OnInit {
     taraf.muvekkilId = secilen?.id;
     if (secilen) taraf.isim = secilen.adSoyad;
   }
+  davaMuvekkilSecimDegisti(kayit: DavaTarafKaydi, muvekkilId?: number) {
+    const secilen = this.muvekkiller.find(m => m.id == muvekkilId);
+    kayit.muvekkilId = secilen?.id;
+    kayit.isim = secilen?.adSoyad || '';
+  }
   davaTarafMetniElleDegisti(taraf: DavaTarafKaydi, isim: string) {
     taraf.isim = isim;
     const eslesen = this.muvekkiller.find(m => this.metinEsit(m.adSoyad, isim));
     taraf.muvekkilId = eslesen?.id;
+  }
+  davaMuvekkilMetniElleDegisti(kayit: DavaTarafKaydi, isim: string) {
+    kayit.isim = isim;
+    const eslesen = this.muvekkiller.find(m => this.metinEsit(m.adSoyad, isim));
+    kayit.muvekkilId = eslesen?.id;
   }
   metinEsit(a?: string, b?: string) {
     return (a || '').trim().toLocaleLowerCase('tr-TR') === (b || '').trim().toLocaleLowerCase('tr-TR');
@@ -2968,7 +3060,7 @@ export class App implements OnInit {
     });
   }
   iliskiKaydiSec(muvekkil: Muvekkil) {
-    this.seciliIliskiId = muvekkil.id;
+    this.seciliIliskiId = this.seciliIliskiId === muvekkil.id ? null : muvekkil.id;
   }
   iliskiDetayiKapat() {
     this.seciliIliskiId = null;
@@ -2987,6 +3079,7 @@ export class App implements OnInit {
     const davaKayitlari = this.davalar
       .filter(dava =>
         dava.muvekkilId === muvekkil.id
+        || (dava.muvekkiller || []).some(kayit => this.iliskiDosyaylaEslesiyor(muvekkil, kayit.isim, kayit.muvekkilId))
         || this.getDavaTarafKayitlari(dava).davacilar.some(taraf => this.iliskiDosyaylaEslesiyor(muvekkil, taraf.isim, taraf.muvekkilId))
         || this.getDavaTarafKayitlari(dava).davalilar.some(taraf => this.iliskiDosyaylaEslesiyor(muvekkil, taraf.isim, taraf.muvekkilId))
       )
@@ -3434,12 +3527,13 @@ export class App implements OnInit {
     if (d) { 
       this.formModu = 'duzenle'; 
       const taraflar = this.davaTaraflariVarsayilanOlustur(d);
-      this.islemGorenDava = { ...d, dosyaNumaralari: Array.isArray(d.dosyaNumaralari) ? d.dosyaNumaralari.map(n => ({...n})) : [], davacilar: taraflar.davacilar, davalilar: taraflar.davalilar }; 
+      const muvekkiller = this.davaMuvekkilleriVarsayilanOlustur(d);
+      this.islemGorenDava = { ...d, dosyaNumaralari: Array.isArray(d.dosyaNumaralari) ? d.dosyaNumaralari.map(n => ({...n})) : [], muvekkiller, davacilar: taraflar.davacilar, davalilar: taraflar.davalilar }; 
       if (!this.islemGorenDava.dosyaNumaralari || this.islemGorenDava.dosyaNumaralari.length === 0) {
          this.islemGorenDava.dosyaNumaralari = [{ tur: 'ESAS', no: this.islemGorenDava.dosyaNo || '' }, { tur: 'KARAR', no: '' }]; 
       }
     } 
-    else { const taraflar = this.davaTaraflariVarsayilanOlustur({ muvekkilPozisyonu: 'Davacı' }); this.formModu = 'ekle'; this.islemGorenDava = { durum: 'Derdest', muvekkilId: undefined, muvekkilPozisyonu: 'Davacı', durusmaSaati: '', durusmaTamamlandiMi: false, dosyaNumaralari: [{ tur: 'ESAS', no: '' }, { tur: 'KARAR', no: '' }], davacilar: taraflar.davacilar, davalilar: taraflar.davalilar }; }
+    else { const varsayilanDava = { muvekkilPozisyonu: 'Davacı' } as Partial<DavaDosyasi>; const taraflar = this.davaTaraflariVarsayilanOlustur(varsayilanDava); const muvekkiller = this.davaMuvekkilleriVarsayilanOlustur(varsayilanDava); this.formModu = 'ekle'; this.islemGorenDava = { durum: 'Derdest', muvekkilId: undefined, muvekkilPozisyonu: 'Davacı', durusmaSaati: '', durusmaTamamlandiMi: false, dosyaNumaralari: [{ tur: 'ESAS', no: '' }, { tur: 'KARAR', no: '' }], muvekkiller, davacilar: taraflar.davacilar, davalilar: taraflar.davalilar }; }
     this.davaFormAcik = true;
   }
   dosyaNumarasiEkle() { if (!this.islemGorenDava.dosyaNumaralari) this.islemGorenDava.dosyaNumaralari = []; this.islemGorenDava.dosyaNumaralari.push({ tur: 'ESAS', no: '' }); }
@@ -3447,7 +3541,8 @@ export class App implements OnInit {
   davaFormKapat() { this.davaFormAcik = false; this.hizliMuvekkilFormAcik = false; this.hizliMuvekkilKaydi = { tip: 'Müvekkil' }; }
   davaKaydet() {
     const num = (this.islemGorenDava.dosyaNumaralari || []).filter(n => n.no && n.no.trim() !== '');
-    if (num.length === 0 || !this.islemGorenDava.muvekkilId) { this.formHata = "Dosya numarası ve muhatap zorunludur."; return; }
+    const muvekkiller = this.davaMuvekkilleriniHazirla(this.islemGorenDava.muvekkiller);
+    if (num.length === 0 || muvekkiller.length === 0) { this.formHata = "Dosya numarası ve müvekkil zorunludur."; return; }
     if (this.islemGorenDava.durum !== 'İstinaf/Temyiz') this.islemGorenDava.istinafMahkemesi = '';
     
     this.islemGorenDava.mahkeme = this.formatMetin(this.islemGorenDava.mahkeme);
@@ -3455,17 +3550,17 @@ export class App implements OnInit {
     this.islemGorenDava.istinafMahkemesi = this.formatMetin(this.islemGorenDava.istinafMahkemesi);
     this.islemGorenDava.arsivYeri = this.formatMetin(this.islemGorenDava.arsivYeri);
 
-    const m = this.muvekkiller.find(x => x.id == this.islemGorenDava.muvekkilId);
-    const muvekkil = m?.adSoyad || this.islemGorenDava.muvekkil || 'Bilinmiyor';
+    const birincilMuvekkil = muvekkiller[0];
+    const muvekkil = muvekkiller.map(kayit => kayit.isim).join(', ') || this.islemGorenDava.muvekkil || 'Bilinmiyor';
     const muvekkilPozisyonu = this.islemGorenDava.muvekkilPozisyonu || 'Davacı';
     let davacilar = this.davaTaraflariniHazirla(this.islemGorenDava.davacilar);
     let davalilar = this.davaTaraflariniHazirla(this.islemGorenDava.davalilar);
-    if (muvekkilPozisyonu === 'Davalı') davalilar = this.davaMuvekkilTarafiniDahilEt(davalilar, muvekkil, m?.id);
-    else davacilar = this.davaMuvekkilTarafiniDahilEt(davacilar, muvekkil, m?.id);
+    if (muvekkilPozisyonu === 'Davalı') davalilar = this.davaMuvekkilTaraflariniDahilEt(davalilar, muvekkiller);
+    else davacilar = this.davaMuvekkilTaraflariniDahilEt(davacilar, muvekkiller);
     const karsiTaraf = (muvekkilPozisyonu === 'Davalı' ? davacilar : davalilar).map(taraf => taraf.isim).join(', ') || '-';
     const noStr = num.map(n => `${n.tur}: ${n.no}`).join(' | ');
     if (this.formModu === 'ekle') {
-      let y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: m?.id || Number(this.islemGorenDava.muvekkilId), muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf, mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', durusmaSaati: this.islemGorenDava.durusmaSaati || '', durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: this.islemGorenDava.baglantiliIcraId, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      let y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: birincilMuvekkil?.muvekkilId, muvekkiller, muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf, mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', durusmaSaati: this.islemGorenDava.durusmaSaati || '', durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: this.islemGorenDava.baglantiliIcraId, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
       y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'Dava dosyası açıldı', `${noStr} referansıyla yeni kayıt oluşturuldu.`);
       if (y.durusmaTarihi) {
         y = this.dosyayaTakvimKaydiEkle(y, 'Duruşma', 'Planlandı', y.durusmaTarihi, y.durusmaSaati, 'İlk duruşma planı kaydedildi.');
@@ -3475,7 +3570,7 @@ export class App implements OnInit {
     } else {
       const mevcut = this.davalar.find(x => x.id === this.islemGorenDava.id);
       const durusmaDegisti = (mevcut?.durusmaTarihi || '') !== (this.islemGorenDava.durusmaTarihi || '') || (mevcut?.durusmaSaati || '') !== (this.islemGorenDava.durusmaSaati || '');
-      let g = { ...this.islemGorenDava, dosyaNo: noStr, dosyaNumaralari: num, muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf } as DavaDosyasi;
+      let g = { ...this.islemGorenDava, dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: birincilMuvekkil?.muvekkilId, muvekkiller, muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf } as DavaDosyasi;
       if (durusmaDegisti) { g.durusmaTamamlandiMi = false; g.durusmaTamamlanmaTarihi = ''; }
       g = this.dosyayaIslemKaydiEkle(g, 'dosya', 'Dava dosyası güncellendi', this.davaGuncellemeOzeti(mevcut, g));
       if (durusmaDegisti) {
@@ -3629,8 +3724,17 @@ export class App implements OnInit {
       yetkililer: []
     };
     this.muvekkilKaydetCloud(yeni, 'Yeni müvekkil dava ekranından oluşturuldu.');
-    this.islemGorenDava.muvekkilId = yeni.id;
-    this.islemGorenDava.muvekkil = adSoyad;
+    if (!this.islemGorenDava.muvekkiller) this.islemGorenDava.muvekkiller = [];
+    const bosKayit = this.islemGorenDava.muvekkiller.find(kayit => !kayit.muvekkilId && !(kayit.isim || '').trim());
+    if (bosKayit) {
+      bosKayit.muvekkilId = yeni.id;
+      bosKayit.isim = adSoyad;
+    } else {
+      this.islemGorenDava.muvekkiller.push({ id: Date.now() + 1, isim: adSoyad, muvekkilId: yeni.id });
+    }
+    const hazirMuvekkiller = this.davaMuvekkilleriniHazirla(this.islemGorenDava.muvekkiller);
+    this.islemGorenDava.muvekkilId = hazirMuvekkiller[0]?.muvekkilId;
+    this.islemGorenDava.muvekkil = hazirMuvekkiller.map(kayit => kayit.isim).join(', ');
     this.formHata = '';
     this.hizliMuvekkilKaydiIptal();
   }
@@ -3643,6 +3747,7 @@ export class App implements OnInit {
   }
   yetkiliSil(i: number) { if (this.islemGorenMuvekkil.yetkililer) this.islemGorenMuvekkil.yetkililer.splice(i, 1); }
   muvekkilKaydet() {
+    const oncekiMuvekkil = this.formModu === 'duzenle' ? this.muvekkiller.find(m => m.id === this.islemGorenMuvekkil.id) : undefined;
     if (!this.islemGorenMuvekkil.adSoyad || !this.islemGorenMuvekkil.tip) { this.formHata = "İsim ve Kayıt Tipi zorunludur."; return; }
     const yList = (this.islemGorenMuvekkil.yetkililer || []).filter(y => y.adSoyad && y.adSoyad.trim() !== '');
     
@@ -3663,13 +3768,51 @@ export class App implements OnInit {
     } else {
       const g = { ...this.islemGorenMuvekkil, yetkililer: yList, adSoyad: this.islemGorenMuvekkil.adSoyad || '', _isNewDiger: this.islemGorenMuvekkil.tip === 'Diğer', vekaletnameUrl: vUrl } as Muvekkil;
       this.muvekkilKaydetCloud(g, 'Kişi veya kurum bilgileri güncellendi.');
-      this.davalar.forEach(d => { if(d.muvekkilId === g.id && d.muvekkil !== g.adSoyad) { d.muvekkil = g.adSoyad!; this.davaKaydetCloud(d); }});
+      this.davalar.forEach(d => {
+        let degisti = false;
+        const muvekkilKayitlari = this.davaTarafListesiKopyala(d.muvekkiller);
+        muvekkilKayitlari.forEach(kayit => {
+          if (kayit.muvekkilId === g.id || (!kayit.muvekkilId && this.metinEsit(kayit.isim, oncekiMuvekkil?.adSoyad))) {
+            kayit.muvekkilId = g.id;
+            kayit.isim = g.adSoyad!;
+            degisti = true;
+          }
+        });
+        (d.davacilar || []).forEach(taraf => {
+          if (taraf.muvekkilId === g.id || (!taraf.muvekkilId && this.metinEsit(taraf.isim, oncekiMuvekkil?.adSoyad))) {
+            taraf.muvekkilId = g.id;
+            taraf.isim = g.adSoyad!;
+            degisti = true;
+          }
+        });
+        (d.davalilar || []).forEach(taraf => {
+          if (taraf.muvekkilId === g.id || (!taraf.muvekkilId && this.metinEsit(taraf.isim, oncekiMuvekkil?.adSoyad))) {
+            taraf.muvekkilId = g.id;
+            taraf.isim = g.adSoyad!;
+            degisti = true;
+          }
+        });
+        if (d.muvekkilId === g.id || this.metinEsit(d.muvekkil, oncekiMuvekkil?.adSoyad)) {
+          degisti = true;
+        }
+        if (degisti) {
+          if (!muvekkilKayitlari.length) {
+            muvekkilKayitlari.push({ id: Date.now(), isim: g.adSoyad!, muvekkilId: g.id });
+          }
+          const hazirMuvekkiller = this.davaMuvekkilleriniHazirla(muvekkilKayitlari);
+          d.muvekkiller = hazirMuvekkiller;
+          d.muvekkilId = hazirMuvekkiller[0]?.muvekkilId;
+          d.muvekkil = hazirMuvekkiller.map(kayit => kayit.isim).join(', ') || g.adSoyad!;
+          d.karsiTaraf = this.getDavaKarsiTarafOzet(d);
+          this.davaKaydetCloud(d);
+        }
+      });
       this.icralar.forEach(i => { if(i.muvekkilId === g.id && i.muvekkil !== g.adSoyad) { i.muvekkil = g.adSoyad!; this.icraKaydetCloud(i); }});
     }
     this.muvekkilFormKapat();
   }
   muvekkilSil(id: number) {
-    if (this.davalar.some(d => d.muvekkilId === id) || this.icralar.some(i => i.muvekkilId === id) || this.arabuluculukDosyalar.some(a => a.muvekkilId === id)) { this.bildirimGoster('error', 'Kayıt silinemedi', 'Bu kişi veya kuruma bağlı aktif dosyalar bulunduğu için önce dosyaları temizlemeniz gerekiyor.'); return; }
+    if (this.davalar.some(d => d.muvekkilId === id || (d.muvekkiller || []).some(kayit => kayit.muvekkilId === id)) || this.icralar.some(i => i.muvekkilId === id) || this.arabuluculukDosyalar.some(a => a.muvekkilId === id)) { this.bildirimGoster('error', 'Kayıt silinemedi', 'Bu kişi veya kuruma bağlı aktif dosyalar bulunduğu için önce dosyaları temizlemeniz gerekiyor.'); return; }
     this.muvekkilSilCloud(id, 'Kişi veya kurum kaydı silindi.'); this.silinecekMuvekkilId = null;
   }
 
@@ -3840,7 +3983,9 @@ export class App implements OnInit {
 
   hesaplaMuvekkilFinans(mId: number) {
     let vb = 0, eb = 0;
-    this.davalar.filter(d => d.muvekkilId === mId).forEach(d => { const f = this.getDosyaFinans(d); vb += f.kalanVekalet; eb += f.emanetBakiye; });
+    this.davalar
+      .filter(d => d.muvekkilId === mId || (d.muvekkiller || []).some(kayit => kayit.muvekkilId === mId))
+      .forEach(d => { const f = this.getDosyaFinans(d); vb += f.kalanVekalet; eb += f.emanetBakiye; });
     this.icralar.filter(i => i.muvekkilId === mId).forEach(i => { const f = this.getDosyaFinans(i); vb += f.kalanVekalet; eb += f.emanetBakiye; });
     this.arabuluculukDosyalar.filter(a => a.muvekkilId === mId).forEach(a => { const f = this.getDosyaFinans(a); vb += f.kalanVekalet; eb += f.emanetBakiye; });
     return { kalanVekaletBorcu: vb, emanetMasrafBakiyesi: eb };
