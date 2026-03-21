@@ -1697,10 +1697,23 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                                     <input [(ngModel)]="yeniEvrak.isim" type="text" placeholder="Evrak Adı (Örn: Dilekçe / Talep)" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 sm:w-1/3">
                                     <input [(ngModel)]="yeniEvrak.url" type="text" placeholder="Bağlantı URL (Google Drive, UYAP vs)" class="flex-1 rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
                                   </div>
-                                  <div class="grid w-full gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2.5 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_180px_auto] xl:items-end">
+                                  <div class="grid w-full gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2.5 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_minmax(0,300px)_auto] xl:items-end">
                                     <div><label class="mb-1 block text-[10px] font-bold text-slate-500">Tebliğ Tarihi (Opsiyonel)</label><input [(ngModel)]="yeniEvrak.tebligTarihi" type="date" class="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none"></div>
                                     <div><label class="mb-1 block text-[10px] font-bold text-red-600">Son Eylem Günü (Opsiyonel)</label><input [(ngModel)]="yeniEvrak.sonEylemTarihi" type="date" class="w-full rounded border border-red-300 bg-red-50 px-3 py-2 text-sm outline-none"></div>
-                                    <div><label class="mb-1 block text-[10px] font-bold text-slate-500">Evrak Yazı Rengi</label><div class="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2 py-1.5"><input [(ngModel)]="yeniEvrak.yaziRengi" type="color" class="h-8 w-10 cursor-pointer border-0 bg-transparent p-0"><span class="text-xs font-bold" [style.color]="getEvrakYaziRengi(yeniEvrak.yaziRengi)">Önizleme</span><button type="button" (click)="yeniEvrak.yaziRengi = varsayilanEvrakYaziRengi" class="ml-auto text-[10px] font-bold text-slate-500 hover:text-slate-700">Varsayılan</button></div></div>
+                                    <div>
+                                      <label class="mb-1 block text-[10px] font-bold text-slate-500">Evrak Yazı Rengi</label>
+                                      <div class="rounded-lg border border-slate-300 bg-white px-2.5 py-2">
+                                        <div class="flex flex-wrap gap-1.5">
+                                          @for (renk of evrakYaziRenkSecenekleri; track renk.deger) {
+                                            <button type="button" (click)="yeniEvrak.yaziRengi = renk.deger" [class.border-slate-900]="getEvrakYaziRengi(yeniEvrak.yaziRengi) === renk.deger" [class.bg-slate-100]="getEvrakYaziRengi(yeniEvrak.yaziRengi) === renk.deger" class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-2 py-1 text-[10px] font-bold text-slate-700 transition-colors hover:bg-slate-50">
+                                              <span class="h-3 w-3 rounded-full border border-slate-200" [style.backgroundColor]="renk.deger"></span>
+                                              {{ renk.etiket }}
+                                            </button>
+                                          }
+                                        </div>
+                                        <p class="mt-2 text-[10px] font-bold" [style.color]="getEvrakYaziRengi(yeniEvrak.yaziRengi)">Önizleme</p>
+                                      </div>
+                                    </div>
                                     <button (click)="evrakEkle()" class="h-[42px] w-full rounded-lg bg-blue-600 px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-blue-700 xl:w-auto">Listeye Ekle</button>
                                   </div>
                                </div>
@@ -1715,10 +1728,23 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                                                 <input [(ngModel)]="duzenlenenEvrak.isim" class="w-full rounded border border-blue-400 px-2 py-1.5 text-sm outline-none sm:w-1/3">
                                                 <input [(ngModel)]="duzenlenenEvrak.url" class="flex-1 px-2 py-1.5 text-sm border border-blue-400 rounded outline-none">
                                               </div>
-                                              <div class="grid gap-2 rounded bg-white/50 p-2 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_170px_auto] xl:items-end">
+                                              <div class="grid gap-2 rounded bg-white/50 p-2 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_minmax(0,300px)_auto] xl:items-end">
                                                 <div class="flex-1"><label class="block text-[10px] font-bold text-slate-500 mb-0.5">Tebliğ:</label><input [(ngModel)]="duzenlenenEvrak.tebligTarihi" type="date" class="w-full px-2 py-1 text-sm border border-slate-300 rounded"></div>
                                                 <div class="flex-1"><label class="block text-[10px] font-bold text-red-500 mb-0.5">Son Eylem:</label><input [(ngModel)]="duzenlenenEvrak.sonEylemTarihi" type="date" class="w-full px-2 py-1 text-sm border border-red-300 rounded"></div>
-                                                <div class="w-[170px]"><label class="block text-[10px] font-bold text-slate-500 mb-0.5">Yazı Rengi:</label><div class="flex items-center gap-2 rounded border border-slate-300 bg-white px-2 py-1"><input [(ngModel)]="duzenlenenEvrak.yaziRengi" type="color" class="h-7 w-8 cursor-pointer border-0 bg-transparent p-0"><span class="text-[10px] font-bold" [style.color]="getEvrakYaziRengi(duzenlenenEvrak.yaziRengi)">Önizleme</span><button type="button" (click)="duzenlenenEvrak.yaziRengi = varsayilanEvrakYaziRengi" class="ml-auto text-[9px] font-bold text-slate-500 hover:text-slate-700">Vars.</button></div></div>
+                                                <div class="min-w-0">
+                                                  <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Yazı Rengi:</label>
+                                                  <div class="rounded border border-slate-300 bg-white px-2 py-2">
+                                                    <div class="flex flex-wrap gap-1.5">
+                                                      @for (renk of evrakYaziRenkSecenekleri; track renk.deger) {
+                                                        <button type="button" (click)="duzenlenenEvrak.yaziRengi = renk.deger" [class.border-slate-900]="getEvrakYaziRengi(duzenlenenEvrak.yaziRengi) === renk.deger" [class.bg-slate-100]="getEvrakYaziRengi(duzenlenenEvrak.yaziRengi) === renk.deger" class="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[9px] font-bold text-slate-700 transition-colors hover:bg-slate-50">
+                                                          <span class="h-2.5 w-2.5 rounded-full border border-slate-200" [style.backgroundColor]="renk.deger"></span>
+                                                          {{ renk.etiket }}
+                                                        </button>
+                                                      }
+                                                    </div>
+                                                    <p class="mt-1.5 text-[10px] font-bold" [style.color]="getEvrakYaziRengi(duzenlenenEvrak.yaziRengi)">Önizleme</p>
+                                                  </div>
+                                                </div>
                                                 <div class="flex flex-col gap-1 sm:flex-row"><button (click)="evrakGuncelleKaydet()" class="rounded bg-green-500 px-4 py-2 text-xs font-bold text-white shadow-sm">Kaydet</button><button (click)="evrakDuzenleIptal()" class="rounded bg-slate-300 px-4 py-2 text-xs font-bold text-slate-700">İptal</button></div>
                                               </div>
                                            </div>
@@ -1764,7 +1790,17 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                                                    <div class="flex flex-col gap-2 sm:flex-row">
                                                      <input [(ngModel)]="duzenlenenEvrak.isim" class="w-full rounded border border-blue-400 px-2 py-1 text-sm outline-none sm:w-1/3">
                                                      <input [(ngModel)]="duzenlenenEvrak.url" class="flex-1 px-2 py-1 text-sm border border-blue-400 rounded outline-none">
-                                                     <div class="flex items-center gap-2 rounded border border-slate-300 bg-white px-2 py-1"><input [(ngModel)]="duzenlenenEvrak.yaziRengi" type="color" class="h-7 w-8 cursor-pointer border-0 bg-transparent p-0"><span class="text-[10px] font-bold" [style.color]="getEvrakYaziRengi(duzenlenenEvrak.yaziRengi)">Önizleme</span></div>
+                                                     <div class="rounded border border-slate-300 bg-white px-2 py-2">
+                                                       <div class="flex flex-wrap gap-1">
+                                                         @for (renk of evrakYaziRenkSecenekleri; track renk.deger) {
+                                                           <button type="button" (click)="duzenlenenEvrak.yaziRengi = renk.deger" [class.border-slate-900]="getEvrakYaziRengi(duzenlenenEvrak.yaziRengi) === renk.deger" [class.bg-slate-100]="getEvrakYaziRengi(duzenlenenEvrak.yaziRengi) === renk.deger" class="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[9px] font-bold text-slate-700 transition-colors hover:bg-slate-50">
+                                                             <span class="h-2.5 w-2.5 rounded-full border border-slate-200" [style.backgroundColor]="renk.deger"></span>
+                                                             {{ renk.etiket }}
+                                                           </button>
+                                                         }
+                                                       </div>
+                                                       <p class="mt-1 text-[10px] font-bold" [style.color]="getEvrakYaziRengi(duzenlenenEvrak.yaziRengi)">Önizleme</p>
+                                                     </div>
                                                      <button (click)="evrakGuncelleKaydet()" class="px-3 py-1 bg-green-500 text-white rounded text-[10px] font-bold">Kaydet</button>
                                                      <button (click)="evrakDuzenleIptal()" class="px-3 py-1 bg-slate-300 text-slate-700 rounded text-[10px] font-bold">İptal</button>
                                                    </div>
@@ -1797,7 +1833,17 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                                           <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                                             <input [(ngModel)]="yeniEkEvrak.isim" type="text" placeholder="Ek Şablon Adı" class="w-full rounded border border-indigo-200 px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-indigo-500 sm:w-1/3">
                                             <input [(ngModel)]="yeniEkEvrak.url" (keyup.enter)="ekEvrakKaydet(evrak.id)" type="text" placeholder="Bağlantı URL" class="flex-1 px-2 py-1.5 text-xs border border-indigo-200 rounded outline-none focus:ring-1 focus:ring-indigo-500">
-                                            <div class="flex items-center gap-2 rounded border border-indigo-200 bg-white px-2 py-1"><input [(ngModel)]="yeniEkEvrak.yaziRengi" type="color" class="h-7 w-8 cursor-pointer border-0 bg-transparent p-0"><span class="text-[10px] font-bold" [style.color]="getEvrakYaziRengi(yeniEkEvrak.yaziRengi)">Önizleme</span></div>
+                                            <div class="rounded border border-indigo-200 bg-white px-2 py-2">
+                                              <div class="flex flex-wrap gap-1">
+                                                @for (renk of evrakYaziRenkSecenekleri; track renk.deger) {
+                                                  <button type="button" (click)="yeniEkEvrak.yaziRengi = renk.deger" [class.border-slate-900]="getEvrakYaziRengi(yeniEkEvrak.yaziRengi) === renk.deger" [class.bg-slate-100]="getEvrakYaziRengi(yeniEkEvrak.yaziRengi) === renk.deger" class="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[9px] font-bold text-slate-700 transition-colors hover:bg-slate-50">
+                                                    <span class="h-2.5 w-2.5 rounded-full border border-slate-200" [style.backgroundColor]="renk.deger"></span>
+                                                    {{ renk.etiket }}
+                                                  </button>
+                                                }
+                                              </div>
+                                              <p class="mt-1 text-[10px] font-bold" [style.color]="getEvrakYaziRengi(yeniEkEvrak.yaziRengi)">Önizleme</p>
+                                            </div>
                                             <button (click)="ekEvrakKaydet(evrak.id)" class="px-4 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded hover:bg-indigo-700">Kaydet</button>
                                             <button (click)="ekEvrakFormKapat()" class="px-4 py-1.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded hover:bg-indigo-200">İptal</button>
                                           </div>
@@ -2591,6 +2637,14 @@ export class App implements OnInit {
   aktifDetaySekmesi: DetaySekmesi = 'notlar'; formHata = '';
 
   varsayilanEvrakYaziRengi = '#0f172a';
+  evrakYaziRenkSecenekleri = [
+    { etiket: 'Varsayılan', deger: '#0f172a' },
+    { etiket: 'Kırmızı', deger: '#dc2626' },
+    { etiket: 'Yeşil', deger: '#16a34a' },
+    { etiket: 'Sarı', deger: '#ca8a04' },
+    { etiket: 'Mavi', deger: '#2563eb' },
+    { etiket: 'Mor', deger: '#7c3aed' }
+  ];
   yeniEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi }; ekEklenenEvrakId: number | null = null;
   yeniEkEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi }; duzenlenenEvrakId: number | null = null;
   duzenlenenEvrakParentId: number | null = null; duzenlenenEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi };
@@ -4174,7 +4228,7 @@ export class App implements OnInit {
   }
   getEvrakYaziRengi(renk?: string) {
     const deger = (renk || '').trim();
-    return /^#[0-9A-Fa-f]{6}$/.test(deger) ? deger : this.varsayilanEvrakYaziRengi;
+    return this.evrakYaziRenkSecenekleri.some(renkSecenegi => renkSecenegi.deger === deger) ? deger : this.varsayilanEvrakYaziRengi;
   }
   
   getDurumClass(d: string) { return d === 'Derdest' ? 'bg-green-100 text-green-700 border-green-200' : d === 'İstinaf/Temyiz' ? 'bg-orange-100 text-orange-700 border-orange-200' : 'bg-slate-100 text-slate-500 border-slate-200'; }
