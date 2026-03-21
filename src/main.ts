@@ -1779,7 +1779,11 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                                            <div class="flex flex-wrap items-center gap-2 shrink-0">
                                              <button (click)="ekEvrakFormAc(evrak.id)" class="px-2 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold rounded transition-colors flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Alt Ek</button>
                                              <button (click)="evrakDuzenleBaslat(evrak)" class="px-2 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-[11px] font-bold rounded transition-colors">Düzenle</button>
-                                             <a [href]="guvenliUrl(evrak.url)" target="_blank" class="px-3 py-1.5 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 text-slate-600 text-[11px] font-bold rounded transition-colors">Aç</a>
+                                             @if (evrak.url) {
+                                               <a [href]="guvenliUrl(evrak.url)" target="_blank" class="px-3 py-1.5 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 text-slate-600 text-[11px] font-bold rounded transition-colors">Aç</a>
+                                             } @else {
+                                               <span class="px-3 py-1.5 bg-slate-100 text-slate-400 text-[11px] font-bold rounded">Bağlantı Yok</span>
+                                             }
                                              <button (click)="evrakSil(evrak.id)" class="text-slate-300 hover:text-red-500 p-1.5 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                                            </div>
                                         }
@@ -1824,7 +1828,11 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                                                  </div>
                                                  <div class="flex flex-wrap items-center gap-1.5 shrink-0">
                                                    <button (click)="evrakDuzenleBaslat(ek, evrak.id)" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] font-bold">Düzenle</button>
-                                                   <a [href]="guvenliUrl(ek.url)" target="_blank" class="px-2 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 text-slate-600 text-[10px] font-bold rounded">Aç</a>
+                                                   @if (ek.url) {
+                                                     <a [href]="guvenliUrl(ek.url)" target="_blank" class="px-2 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 text-slate-600 text-[10px] font-bold rounded">Aç</a>
+                                                   } @else {
+                                                     <span class="px-2 py-1 bg-slate-100 text-slate-400 text-[10px] font-bold rounded">Bağlantı Yok</span>
+                                                   }
                                                    <button (click)="ekEvrakSil(evrak.id, ek.id)" class="text-slate-300 hover:text-red-500 p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                                                  </div>
                                               }
@@ -3971,9 +3979,10 @@ export class App implements OnInit {
   klasorGecis(id: number) { this.acikKlasorler[id] = !this.acikKlasorler[id]; }
 
   evrakEkle() {
-    if (!this.yeniEvrak.isim || !this.yeniEvrak.url) return;
+    if (!this.yeniEvrak.isim) return;
     this.yeniEvrak.isim = this.formatMetin(this.yeniEvrak.isim);
-    let url = this.yeniEvrak.url.trim(); if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    let url = (this.yeniEvrak.url || '').trim();
+    if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
     const yeni = { id: Date.now(), isim: this.yeniEvrak.isim || 'İsimsiz', url: url, tarih: new Date().toISOString(), ekler: [], tebligTarihi: this.yeniEvrak.tebligTarihi, sonEylemTarihi: this.yeniEvrak.sonEylemTarihi, tamamlandiMi: false, tamamlanmaTarihi: '', yaziRengi: this.getEvrakYaziRengi(this.yeniEvrak.yaziRengi) };
     if (this.aktifSayfa === 'sablonlar') {
       this.sablonlar[this.aktifSablonSekmesi].unshift(yeni); this.sablonlariKaydetCloud('Yeni şablon listeye eklendi.');
@@ -3987,9 +3996,9 @@ export class App implements OnInit {
   evrakDuzenleIptal() { this.duzenlenenEvrakId = null; this.duzenlenenEvrakParentId = null; this.duzenlenenEvrakOrijinalSonEylemTarihi = ''; this.duzenlenenEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi }; }
   
   evrakGuncelleKaydet() {
-    if (!this.duzenlenenEvrak.isim || !this.duzenlenenEvrak.url) return;
+    if (!this.duzenlenenEvrak.isim) return;
     this.duzenlenenEvrak.isim = this.formatMetin(this.duzenlenenEvrak.isim);
-    let url = this.duzenlenenEvrak.url.trim(); if (!/^https?:\/\//i.test(url)) url = 'https://' + url; this.duzenlenenEvrak.url = url; this.duzenlenenEvrak.yaziRengi = this.getEvrakYaziRengi(this.duzenlenenEvrak.yaziRengi);
+    let url = (this.duzenlenenEvrak.url || '').trim(); if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url; this.duzenlenenEvrak.url = url; this.duzenlenenEvrak.yaziRengi = this.getEvrakYaziRengi(this.duzenlenenEvrak.yaziRengi);
     if ((this.duzenlenenEvrak.sonEylemTarihi || '') !== this.duzenlenenEvrakOrijinalSonEylemTarihi) { this.duzenlenenEvrak.tamamlandiMi = false; this.duzenlenenEvrak.tamamlanmaTarihi = ''; }
     if (this.aktifSayfa === 'sablonlar') {
       const sl = this.sablonlar[this.aktifSablonSekmesi];
@@ -4013,9 +4022,9 @@ export class App implements OnInit {
   ekEvrakFormAc(parentId: number) { this.ekEklenenEvrakId = parentId; this.yeniEkEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi }; this.evrakDuzenleIptal(); this.acikKlasorler[parentId] = true; }
   ekEvrakFormKapat() { this.ekEklenenEvrakId = null; this.yeniEkEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi }; }
   ekEvrakKaydet(parentId: number) {
-    if (!this.yeniEkEvrak.isim || !this.yeniEkEvrak.url) return;
+    if (!this.yeniEkEvrak.isim) return;
     this.yeniEkEvrak.isim = this.formatMetin(this.yeniEkEvrak.isim);
-    let url = this.yeniEkEvrak.url.trim(); if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    let url = (this.yeniEkEvrak.url || '').trim(); if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
     const y = { id: Date.now(), isim: this.yeniEkEvrak.isim || 'İsimsiz', url: url, tarih: new Date().toISOString(), tebligTarihi: this.yeniEkEvrak.tebligTarihi, sonEylemTarihi: this.yeniEkEvrak.sonEylemTarihi, tamamlandiMi: false, tamamlanmaTarihi: '', yaziRengi: this.getEvrakYaziRengi(this.yeniEkEvrak.yaziRengi) };
     if (this.aktifSayfa === 'sablonlar') { const p = this.sablonlar[this.aktifSablonSekmesi].find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); this.sablonlariKaydetCloud('Alt şablon eklendi.'); } } 
     else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Alt evrak bağlantısı eklendi', `${p.isim} altına ${y.isim} eklendi.`); this.aktifDosyaKaydet(kayitli, 'Alt evrak bağlantısı eklendi.'); } }
