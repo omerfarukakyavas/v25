@@ -1591,7 +1591,13 @@ type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
                               </div>
                            </div>
                            <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Müvekkil</p><p class="font-medium text-slate-800">{{ aktifDosya.muvekkil }} @if(aktifDosya.muvekkilPozisyonu) { <span [class]="getPozisyonClass(aktifDosya.muvekkilPozisyonu)" class="text-[10px] px-1.5 py-0.5 rounded ml-1 uppercase font-bold">{{aktifDosya.muvekkilPozisyonu}}</span> }</p></div>
-                           <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Taraflar</p><p class="font-medium text-slate-800">{{ getDavaTarafOzet(aktifDosya) }}</p></div>
+                           <div>
+                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Taraflar</p>
+                             <div class="space-y-1.5 font-medium text-slate-800">
+                               <p><span class="font-bold text-emerald-600">Davacı:</span> {{ getAktifDavaTarafMetni('davaci') }}</p>
+                               <p><span class="font-bold text-rose-600">Davalı:</span> {{ getAktifDavaTarafMetni('davali') }}</p>
+                             </div>
+                           </div>
                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Mahkeme</p><p class="font-medium text-slate-800">{{ aktifDosya.mahkeme }}</p></div>
                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Konu</p><p class="font-medium text-slate-800">{{ aktifDosya.konu }}</p></div>
                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Arşiv / Klasör Konumu</p><p class="font-medium text-slate-800">{{ aktifDosya.arsivYeri || 'Belirtilmedi' }}</p></div>
@@ -4111,6 +4117,13 @@ export class App implements OnInit {
     if (this.aktifSayfa === 'detay') return this.getDavaTarafOzet(dosya);
     if (this.aktifSayfa === 'icraDetay') return `${dosya.alacakli || 'Alacaklı yok'} | ${dosya.borclu || 'Borçlu yok'} | Muhatap: ${dosya.muvekkil || '-'}`;
     return (dosya.taraflar || []).map((taraf: any) => taraf.isim).join(' | ') || 'Taraf bilgisi girilmemiş.';
+  }
+  getAktifDavaTarafMetni(tur: 'davaci' | 'davali') {
+    const dava = this.getAktifDavaDosyasi();
+    if (!dava) return '-';
+    const taraflar = this.getDavaTarafKayitlari(dava);
+    const liste = tur === 'davaci' ? taraflar.davacilar : taraflar.davalilar;
+    return liste.map(taraf => taraf.isim).join(', ') || '-';
   }
   getAktifDosyaBirincilEtiket() { return this.aktifSayfa === 'detay' ? 'Mahkeme' : this.aktifSayfa === 'icraDetay' ? 'İcra Dairesi' : 'Büro'; }
   getAktifDosyaBirincilDeger() {
