@@ -105,6 +105,9 @@ export class AppComponent implements OnInit {
   googleDocsYetkiIstendi = false;
   yeniMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
   acikMuvekkilGorusmeNotlari: Record<number, boolean> = {};
+  duzenlenenMuvekkilGorusmeNotuId: number | null = null;
+  duzenlenenMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = {};
+  silinecekMuvekkilGorusmeNotuId: number | null = null;
 
   ngOnInit() { this.initFirebase(); }
 
@@ -274,7 +277,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  detayaGit(d: DavaDosyasi) { this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Vekalet Ücreti', tarih: new Date().toISOString().split('T')[0] }; this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' }; this.acikMuvekkilGorusmeNotlari = {}; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
+  detayaGit(d: DavaDosyasi) { this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Vekalet Ücreti', tarih: new Date().toISOString().split('T')[0] }; this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' }; this.acikMuvekkilGorusmeNotlari = {}; this.duzenlenenMuvekkilGorusmeNotuId = null; this.duzenlenenMuvekkilGorusmeNotu = {}; this.silinecekMuvekkilGorusmeNotuId = null; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
   icraDetayinaGit(i: IcraDosyasi) { this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Vekalet Ücreti', tarih: new Date().toISOString().split('T')[0] }; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
   arabuluculukDetayinaGit(a: ArabuluculukDosyasi) { this.seciliArabuluculuk = a; this.aktifSayfa = 'arabuluculukDetay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Ödeme', tarih: new Date().toISOString().split('T')[0] }; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
 
@@ -1010,8 +1013,30 @@ export class AppComponent implements OnInit {
   muvekkilGorusmeNotuGorunumDegistir(id: number) {
     this.acikMuvekkilGorusmeNotlari[id] = !this.acikMuvekkilGorusmeNotlari[id];
   }
+  getMuvekkilGorusmeKayitOzetMetni(kayit?: Partial<MuvekkilGorusmeNotu>) {
+    if (!kayit?.tarih) return 'Tarih belirtilmedi';
+    const temel = this.formatTarihSaat(kayit.tarih, kayit.saat);
+    return kayit.yontem ? `${temel} • ${kayit.yontem}` : temel;
+  }
   muvekkilGorusmeNotuFormunuSifirla() {
     this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
+  }
+  muvekkilGorusmeNotuDuzenlemeBaslat(kayit: MuvekkilGorusmeNotu) {
+    this.duzenlenenMuvekkilGorusmeNotuId = kayit.id;
+    this.duzenlenenMuvekkilGorusmeNotu = { ...kayit };
+    this.silinecekMuvekkilGorusmeNotuId = null;
+    this.acikMuvekkilGorusmeNotlari[kayit.id] = true;
+  }
+  muvekkilGorusmeNotuDuzenlemeIptal() {
+    this.duzenlenenMuvekkilGorusmeNotuId = null;
+    this.duzenlenenMuvekkilGorusmeNotu = {};
+  }
+  muvekkilGorusmeNotuSilmeIste(id: number) {
+    this.silinecekMuvekkilGorusmeNotuId = id;
+    this.acikMuvekkilGorusmeNotlari[id] = true;
+  }
+  muvekkilGorusmeNotuSilmeIptal() {
+    this.silinecekMuvekkilGorusmeNotuId = null;
   }
   async muvekkilGorusmeNotuKaydet() {
     const dava = this.getAktifDavaDosyasi();
@@ -1049,6 +1074,59 @@ export class AppComponent implements OnInit {
     this.acikMuvekkilGorusmeNotlari[yeniKayit.id] = false;
     this.muvekkilGorusmeNotuFormunuSifirla();
     await this.davaKaydetCloud(kayitli, 'Müvekkil görüşme notu kaydedildi.');
+    this.cdr.detectChanges();
+  }
+  async muvekkilGorusmeNotuGuncelleKaydet() {
+    const dava = this.getAktifDavaDosyasi();
+    const kayitId = this.duzenlenenMuvekkilGorusmeNotuId;
+    if (!dava || !kayitId) return;
+
+    const tarih = this.duzenlenenMuvekkilGorusmeNotu.tarih || new Date().toISOString().split('T')[0];
+    const saat = (this.duzenlenenMuvekkilGorusmeNotu.saat || '').trim().slice(0, 5);
+    const yontem = this.formatMetin(this.duzenlenenMuvekkilGorusmeNotu.yontem) || 'Telefon';
+    const notlar = (this.duzenlenenMuvekkilGorusmeNotu.notlar || '').trim();
+    if (!tarih || !notlar) {
+      this.bildirimGoster('info', 'Görüşme notu eksik', 'Tarih ve not alanını doldurup tekrar deneyin.');
+      return;
+    }
+
+    const k: DavaDosyasi = JSON.parse(JSON.stringify(dava));
+    const kayit = (k.muvekkilGorusmeNotlari || []).find(item => item.id === kayitId);
+    if (!kayit) return;
+
+    kayit.tarih = tarih;
+    kayit.saat = saat;
+    kayit.yontem = yontem;
+    kayit.notlar = notlar;
+    k.muvekkilGorusmeNotlari = [...(k.muvekkilGorusmeNotlari || [])].sort((a, b) => this.muvekkilGorusmeZamanDamgasi(a) - this.muvekkilGorusmeZamanDamgasi(b));
+
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'gorusme', 'Müvekkil görüşme notu güncellendi', this.getMuvekkilGorusmeKayitOzetMetni(kayit));
+    this.seciliDava = kayitli;
+    this.duzenlenenMuvekkilGorusmeNotuDuzenlemeSonrasiSifirla(kayitId);
+    await this.davaKaydetCloud(kayitli, 'Müvekkil görüşme notu güncellendi.');
+    this.cdr.detectChanges();
+  }
+  duzenlenenMuvekkilGorusmeNotuDuzenlemeSonrasiSifirla(kayitId: number) {
+    this.duzenlenenMuvekkilGorusmeNotuId = null;
+    this.duzenlenenMuvekkilGorusmeNotu = {};
+    this.silinecekMuvekkilGorusmeNotuId = null;
+    this.acikMuvekkilGorusmeNotlari[kayitId] = false;
+  }
+  async muvekkilGorusmeNotuSil(id: number) {
+    const dava = this.getAktifDavaDosyasi();
+    if (!dava) return;
+
+    const k: DavaDosyasi = JSON.parse(JSON.stringify(dava));
+    const silinen = (k.muvekkilGorusmeNotlari || []).find(item => item.id === id);
+    if (!silinen) return;
+    k.muvekkilGorusmeNotlari = (k.muvekkilGorusmeNotlari || []).filter(item => item.id !== id);
+
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'gorusme', 'Müvekkil görüşme notu silindi', this.getMuvekkilGorusmeKayitOzetMetni(silinen));
+    this.seciliDava = kayitli;
+    delete this.acikMuvekkilGorusmeNotlari[id];
+    if (this.duzenlenenMuvekkilGorusmeNotuId === id) this.muvekkilGorusmeNotuDuzenlemeIptal();
+    this.silinecekMuvekkilGorusmeNotuId = null;
+    await this.davaKaydetCloud(kayitli, 'Müvekkil görüşme notu silindi.');
     this.cdr.detectChanges();
   }
   
