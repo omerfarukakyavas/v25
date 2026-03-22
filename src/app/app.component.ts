@@ -452,6 +452,12 @@ export class AppComponent implements OnInit {
     const isimler = (dava.muvekkilPozisyonu === 'Davalı' ? davacilar : davalilar).map(taraf => taraf.isim);
     return isimler.length ? isimler.join(', ') : (dava.karsiTaraf || '-');
   }
+  getDavaMuvekkilPozisyonEtiketi(dava?: Partial<DavaDosyasi> | null) {
+    return dava?.muvekkilPozisyonu === 'Davalı' ? 'Davalı' : 'Davacı';
+  }
+  getDavaKarsiTarafPozisyonEtiketi(dava?: Partial<DavaDosyasi> | null) {
+    return this.getDavaMuvekkilPozisyonEtiketi(dava) === 'Davalı' ? 'Davacı' : 'Davalı';
+  }
   davaTarafEkle(tur: 'davaci' | 'davali') {
     const anahtar = tur === 'davaci' ? 'davacilar' : 'davalilar';
     if (!this.islemGorenDava[anahtar]) this.islemGorenDava[anahtar] = [];
