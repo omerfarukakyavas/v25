@@ -1571,6 +1571,12 @@
                       <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden min-h-[320px]">
                         <div class="flex overflow-x-auto border-b border-slate-200 bg-slate-50 custom-scrollbar">
                            <button (click)="aktifDetaySekmesi = 'notlar'" [class]="getDetayTabClass('notlar')" class="flex min-w-[110px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Notlar</button>
+                           @if (aktifSayfa === 'detay') {
+                             <button (click)="aktifDetaySekmesi = 'muvekkilGorusmeleri'" [class]="getDetayTabClass('muvekkilGorusmeleri')" class="relative flex min-w-[180px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
+                               Müvekkil Görüşme Notları
+                               @if (aktifDavaMuvekkilGorusmeNotlari.length > 0) { <span class="absolute top-2 right-2 rounded-full bg-violet-700 px-1.5 py-0.5 text-[9px] font-black text-white">{{ aktifDavaMuvekkilGorusmeNotlari.length }}</span> }
+                             </button>
+                           }
                            <button (click)="aktifDetaySekmesi = 'evraklar'" [class]="getDetayTabClass('evraklar')" class="flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Evrak Bağlantıları</button>
                            <button (click)="aktifDetaySekmesi = 'sureliIsler'" [class]="getDetayTabClass('sureliIsler')" class="relative flex min-w-[120px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
                              Süreli İşler
@@ -1585,6 +1591,81 @@
                         <div class="flex h-full flex-1 flex-col bg-slate-50/50 p-3 sm:p-5">
                           @if (aktifDetaySekmesi === 'notlar') {
                             <textarea [(ngModel)]="aktifDosya.notlar" (blur)="aktifDosyaKaydet(aktifDosya)" placeholder="Dosya notlarınızı buraya yazabilirsiniz... (Otomatik kaydedilir)" class="h-48 w-full resize-none rounded-lg border border-slate-200 bg-amber-50/30 p-3 text-sm leading-relaxed text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 sm:h-64 sm:p-4"></textarea>
+                          }
+                          @if (aktifDetaySekmesi === 'muvekkilGorusmeleri' && aktifSayfa === 'detay') {
+                            <div class="flex h-full flex-col gap-4">
+                              <div class="rounded-2xl border border-violet-100 bg-white shadow-sm">
+                                <div class="border-b border-violet-100 bg-violet-50/70 px-4 py-3">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.22em] text-violet-700">Görüşme Kaydı</p>
+                                  <h4 class="mt-1 text-sm font-bold text-slate-800">Müvekkille yapılan görüşmeleri kronolojik olarak saklayın</h4>
+                                  <p class="mt-2 text-xs leading-5 text-slate-500">Kaydettiğiniz kayıtlar aşağıda kapalı görünür. İstediğiniz kaydı açıp ayrıntısını tekrar okuyabilirsiniz.</p>
+                                </div>
+                                <div class="grid gap-3 p-4 xl:grid-cols-[160px_120px_180px_minmax(0,1fr)]">
+                                  <div>
+                                    <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Tarih</label>
+                                    <input [(ngModel)]="yeniMuvekkilGorusmeNotu.tarih" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-violet-500">
+                                  </div>
+                                  <div>
+                                    <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Saat</label>
+                                    <input [(ngModel)]="yeniMuvekkilGorusmeNotu.saat" type="time" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-violet-500">
+                                  </div>
+                                  <div>
+                                    <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Yöntem</label>
+                                    <select [(ngModel)]="yeniMuvekkilGorusmeNotu.yontem" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-violet-500">
+                                      <option value="Telefon">Telefon</option>
+                                      <option value="Yüz yüze">Yüz yüze</option>
+                                      <option value="Online">Online</option>
+                                      <option value="WhatsApp">WhatsApp</option>
+                                      <option value="E-posta">E-posta</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Notlar</label>
+                                    <textarea [(ngModel)]="yeniMuvekkilGorusmeNotu.notlar" rows="3" placeholder="Görüşme içeriğini kısa ama anlaşılır biçimde yazın..." class="w-full resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm leading-6 outline-none focus:ring-2 focus:ring-violet-500"></textarea>
+                                  </div>
+                                </div>
+                                <div class="flex justify-end border-t border-slate-100 px-4 py-3">
+                                  <button (click)="muvekkilGorusmeNotuKaydet()" class="inline-flex items-center justify-center rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-violet-700">Görüşme Notunu Kaydet</button>
+                                </div>
+                              </div>
+
+                              <div class="flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                <div class="border-b border-slate-100 bg-slate-50 px-4 py-3">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Kayıt Listesi</p>
+                                  <h4 class="mt-1 text-sm font-bold text-slate-800">Kaydedilmiş müvekkil görüşmeleri</h4>
+                                </div>
+                                <div class="max-h-[28rem] space-y-3 overflow-y-auto p-4 pr-3 custom-scrollbar">
+                                  @for (kayit of aktifDavaMuvekkilGorusmeNotlari; track kayit.id) {
+                                    <div class="overflow-hidden rounded-2xl border border-violet-100 bg-violet-50/40 shadow-sm">
+                                      <button (click)="muvekkilGorusmeNotuGorunumDegistir(kayit.id)" class="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-violet-50/80">
+                                        <div class="grid min-w-0 flex-1 gap-2 md:grid-cols-[160px_90px_160px_minmax(0,1fr)] md:items-center">
+                                          <div class="text-sm font-semibold text-slate-800">{{ formatTarih(kayit.tarih) }}</div>
+                                          <div class="text-sm font-medium text-slate-500">{{ kayit.saat ? formatSaat(kayit.saat) : '-' }}</div>
+                                          <div><span class="inline-flex rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-violet-700 ring-1 ring-violet-200">{{ kayit.yontem || 'Belirtilmedi' }}</span></div>
+                                          <div class="min-w-0 text-sm text-slate-600">{{ muvekkilGorusmeNotuOnizleme(kayit.notlar) }}</div>
+                                        </div>
+                                        <svg [class.rotate-180]="muvekkilGorusmeNotuAcikMi(kayit.id)" class="h-4 w-4 shrink-0 text-violet-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                      </button>
+                                      @if (muvekkilGorusmeNotuAcikMi(kayit.id)) {
+                                        <div class="border-t border-violet-100 bg-white px-4 py-4">
+                                          <div class="grid gap-3 sm:grid-cols-3">
+                                            <div><p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Tarih</p><p class="mt-1 text-sm font-semibold text-slate-800">{{ formatTarih(kayit.tarih) }}</p></div>
+                                            <div><p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Saat</p><p class="mt-1 text-sm font-semibold text-slate-800">{{ kayit.saat ? formatSaat(kayit.saat) : 'Belirtilmedi' }}</p></div>
+                                            <div><p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Yöntem</p><p class="mt-1 text-sm font-semibold text-slate-800">{{ kayit.yontem || 'Belirtilmedi' }}</p></div>
+                                          </div>
+                                          <div class="mt-4">
+                                            <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Notlar</p>
+                                            <p class="mt-2 whitespace-pre-line rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">{{ kayit.notlar }}</p>
+                                          </div>
+                                        </div>
+                                      }
+                                    </div>
+                                  } @empty {
+                                    <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm font-medium text-slate-500">Henüz müvekkil görüşme notu eklenmedi.</div>
+                                  }
+                                </div>
+                              </div>
+                            </div>
                           }
                           @if (aktifDetaySekmesi === 'evraklar') {
                             <div class="flex flex-col h-full">
@@ -1817,7 +1898,7 @@
                                   @for (kayit of aktifDosyaIslemGecmisi; track kayit.id) {
                                     <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                                       <div class="flex flex-wrap items-center justify-between gap-2">
-                                        <span [class]="getDosyaIslemKategoriClass(kayit.kategori)" class="rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em]">{{ kayit.kategori }}</span>
+                                        <span [class]="getDosyaIslemKategoriClass(kayit.kategori)" class="rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em]">{{ getDosyaIslemKategoriEtiketi(kayit.kategori) }}</span>
                                         <span class="text-[11px] font-medium text-slate-400">{{ formatTarihSaatKisa(kayit.tarih) }}</span>
                                       </div>
                                       <p class="mt-3 text-sm font-black text-slate-800">{{ kayit.baslik }}</p>

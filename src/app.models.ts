@@ -21,7 +21,7 @@ export interface ArabuluculukTaraf {
 export interface DavaTarafKaydi { id: number; isim: string; muvekkilId?: number; }
 
 export interface DavaDosyasi { 
-  id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; muvekkiller?: DavaTarafKaydi[]; karsiTaraf: string; mahkeme: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; muvekkilPozisyonu?: string; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[]; davacilar?: DavaTarafKaydi[]; davalilar?: DavaTarafKaydi[];
+  id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; muvekkiller?: DavaTarafKaydi[]; karsiTaraf: string; mahkeme: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; notlar?: string; muvekkilGorusmeNotlari?: MuvekkilGorusmeNotu[]; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; muvekkilPozisyonu?: string; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[]; davacilar?: DavaTarafKaydi[]; davalilar?: DavaTarafKaydi[];
   icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
   buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; basvuruKonusu?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: string;
 }
@@ -40,7 +40,16 @@ export interface ArabuluculukDosyasi {
 
 export interface Muvekkil { id: number; tip?: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer'; _isNewDiger?: boolean; adSoyad: string; tcKimlik: string; telefon: string; eposta: string; adres: string; bankaBilgileri: string; vergiDairesi?: string; vekaletnameUrl?: string; yetkililer?: { id: number; adSoyad: string; telefon: string; eposta?: string; pozisyon: string; }[]; }
 
-export type DosyaIslemKategori = 'dosya' | 'durum' | 'takvim' | 'evrak' | 'finans';
+export interface MuvekkilGorusmeNotu {
+  id: number;
+  tarih: string;
+  saat?: string;
+  yontem?: string;
+  notlar: string;
+  kayitTarihi?: string;
+}
+
+export type DosyaIslemKategori = 'dosya' | 'durum' | 'takvim' | 'evrak' | 'finans' | 'gorusme';
 export type TakvimGecmisiDurumu = 'Planlandı' | 'Güncellendi' | 'Gerçekleşti' | 'Ajandaya Geri Alındı' | 'Kaldırıldı';
 
 export interface DosyaIslemKaydi {
@@ -101,4 +110,4 @@ export interface IliskiDosyaKaydi {
 }
 
 export type SayfaTipi = 'dashboard' | 'davalar' | 'icralar' | 'arabuluculuk' | 'sablonlar' | 'muhasebe' | 'iliskiler' | 'ajanda' | 'detay' | 'icraDetay' | 'arabuluculukDetay';
-export type DetaySekmesi = 'notlar' | 'evraklar' | 'sureliIsler' | 'gecmis';
+export type DetaySekmesi = 'notlar' | 'muvekkilGorusmeleri' | 'evraklar' | 'sureliIsler' | 'gecmis';

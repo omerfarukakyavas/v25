@@ -25,6 +25,7 @@ import {
   IcraDosyasi,
   IliskiDosyaKaydi,
   Muvekkil,
+  MuvekkilGorusmeNotu,
   SayfaTipi,
   TakvimGecmisKaydi,
   TakvimGecmisiDurumu,
@@ -102,6 +103,8 @@ export class AppComponent implements OnInit {
   acikKlasorler: Record<number, boolean> = {}; 
   davetMektubuOlusturuluyor = false;
   googleDocsYetkiIstendi = false;
+  yeniMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
+  acikMuvekkilGorusmeNotlari: Record<number, boolean> = {};
 
   ngOnInit() { this.initFirebase(); }
 
@@ -271,7 +274,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  detayaGit(d: DavaDosyasi) { this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Vekalet Ücreti', tarih: new Date().toISOString().split('T')[0] }; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
+  detayaGit(d: DavaDosyasi) { this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Vekalet Ücreti', tarih: new Date().toISOString().split('T')[0] }; this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' }; this.acikMuvekkilGorusmeNotlari = {}; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
   icraDetayinaGit(i: IcraDosyasi) { this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Vekalet Ücreti', tarih: new Date().toISOString().split('T')[0] }; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
   arabuluculukDetayinaGit(a: ArabuluculukDosyasi) { this.seciliArabuluculuk = a; this.aktifSayfa = 'arabuluculukDetay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Ödeme', tarih: new Date().toISOString().split('T')[0] }; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
 
@@ -988,6 +991,66 @@ export class AppComponent implements OnInit {
   get aktifDosyaTakvimGecmisi() {
     return [...(this.aktifDosya?.takvimGecmisi || [])].sort((a, b) => new Date(b.kayitTarihi).getTime() - new Date(a.kayitTarihi).getTime());
   }
+  get aktifDavaMuvekkilGorusmeNotlari() {
+    const dava = this.getAktifDavaDosyasi();
+    return [...(dava?.muvekkilGorusmeNotlari || [])].sort((a, b) => this.muvekkilGorusmeZamanDamgasi(a) - this.muvekkilGorusmeZamanDamgasi(b));
+  }
+  muvekkilGorusmeZamanDamgasi(kayit?: Partial<MuvekkilGorusmeNotu>) {
+    if (!kayit?.tarih) return Number.MAX_SAFE_INTEGER;
+    return new Date(`${kayit.tarih}T${(kayit.saat || '00:00').slice(0, 5) || '00:00'}`).getTime();
+  }
+  muvekkilGorusmeNotuOnizleme(notlar?: string, limit = 120) {
+    const metin = (notlar || '').replace(/\s+/g, ' ').trim();
+    if (!metin) return 'Not girilmedi.';
+    return metin.length > limit ? `${metin.slice(0, limit)}...` : metin;
+  }
+  muvekkilGorusmeNotuAcikMi(id: number) {
+    return !!this.acikMuvekkilGorusmeNotlari[id];
+  }
+  muvekkilGorusmeNotuGorunumDegistir(id: number) {
+    this.acikMuvekkilGorusmeNotlari[id] = !this.acikMuvekkilGorusmeNotlari[id];
+  }
+  muvekkilGorusmeNotuFormunuSifirla() {
+    this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
+  }
+  async muvekkilGorusmeNotuKaydet() {
+    const dava = this.getAktifDavaDosyasi();
+    if (!dava) return;
+
+    const tarih = this.yeniMuvekkilGorusmeNotu.tarih || new Date().toISOString().split('T')[0];
+    const saat = (this.yeniMuvekkilGorusmeNotu.saat || '').trim().slice(0, 5);
+    const yontem = this.formatMetin(this.yeniMuvekkilGorusmeNotu.yontem) || 'Telefon';
+    const notlar = (this.yeniMuvekkilGorusmeNotu.notlar || '').trim();
+    if (!tarih || !notlar) {
+      this.bildirimGoster('info', 'Görüşme notu eksik', 'Tarih ve not alanını doldurup tekrar deneyin.');
+      return;
+    }
+
+    const k: DavaDosyasi = JSON.parse(JSON.stringify(dava));
+    if (!k.muvekkilGorusmeNotlari) k.muvekkilGorusmeNotlari = [];
+    const yeniKayit: MuvekkilGorusmeNotu = {
+      id: this.yeniGecmisKaydiId(),
+      tarih,
+      saat,
+      yontem,
+      notlar,
+      kayitTarihi: new Date().toISOString()
+    };
+    k.muvekkilGorusmeNotlari.push(yeniKayit);
+    k.muvekkilGorusmeNotlari.sort((a, b) => this.muvekkilGorusmeZamanDamgasi(a) - this.muvekkilGorusmeZamanDamgasi(b));
+
+    const kayitli = this.dosyayaIslemKaydiEkle(
+      k,
+      'gorusme',
+      'Müvekkil görüşme notu eklendi',
+      `${this.formatTarihSaat(tarih, saat)}${yontem ? ` • ${yontem}` : ''}`
+    );
+    this.seciliDava = kayitli;
+    this.acikMuvekkilGorusmeNotlari[yeniKayit.id] = false;
+    this.muvekkilGorusmeNotuFormunuSifirla();
+    await this.davaKaydetCloud(kayitli, 'Müvekkil görüşme notu kaydedildi.');
+    this.cdr.detectChanges();
+  }
   
   get aktifDosyaSureliIsleri() {
     const dosya = this.aktifDosya; if (!dosya) return [];
@@ -1121,7 +1184,7 @@ export class AppComponent implements OnInit {
     const karsiTaraf = (muvekkilPozisyonu === 'Davalı' ? davacilar : davalilar).map(taraf => taraf.isim).join(', ') || '-';
     const noStr = num.map(n => `${n.tur}: ${n.no}`).join(' | ');
     if (this.formModu === 'ekle') {
-      let y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: birincilMuvekkil?.muvekkilId, muvekkiller, muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf, mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', durusmaSaati: this.islemGorenDava.durusmaSaati || '', durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: this.islemGorenDava.baglantiliIcraId, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      let y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: birincilMuvekkil?.muvekkilId, muvekkiller, muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf, mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', durusmaSaati: this.islemGorenDava.durusmaSaati || '', durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: this.islemGorenDava.baglantiliIcraId, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', muvekkilGorusmeNotlari: [], finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
       y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'Dava dosyası açıldı', `${noStr} referansıyla yeni kayıt oluşturuldu.`);
       if (y.durusmaTarihi) {
         y = this.dosyayaTakvimKaydiEkle(y, 'Duruşma', 'Planlandı', y.durusmaTarihi, y.durusmaSaati, 'İlk duruşma planı kaydedildi.');
@@ -2013,7 +2076,17 @@ export class AppComponent implements OnInit {
     if (kategori === 'takvim') return 'bg-indigo-50 text-indigo-700 border-indigo-200';
     if (kategori === 'evrak') return 'bg-sky-50 text-sky-700 border-sky-200';
     if (kategori === 'finans') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    if (kategori === 'gorusme') return 'bg-violet-50 text-violet-700 border-violet-200';
     return 'bg-slate-100 text-slate-700 border-slate-200';
+  }
+  getDosyaIslemKategoriEtiketi(kategori: DosyaIslemKategori) {
+    if (kategori === 'dosya') return 'Dosya';
+    if (kategori === 'durum') return 'Durum';
+    if (kategori === 'takvim') return 'Takvim';
+    if (kategori === 'evrak') return 'Evrak';
+    if (kategori === 'finans') return 'Finans';
+    if (kategori === 'gorusme') return 'Görüşme';
+    return kategori;
   }
   getTakvimGecmisiDurumClass(durum: TakvimGecmisiDurumu) {
     if (durum === 'Gerçekleşti') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
