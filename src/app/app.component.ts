@@ -1182,6 +1182,11 @@ export class AppComponent implements OnInit {
     }
     return trimli; // Karışık veri girişiyse olduğu gibi bırak
   }
+  hazirBaglantiUrl(url?: string) {
+    const temiz = (url || '').trim();
+    if (!temiz) return '';
+    return /^https?:\/\//i.test(temiz) ? temiz : `https://${temiz}`;
+  }
   duzMetinTrimle(str: any) {
     return typeof str === 'string' ? str.trim() : str;
   }
@@ -1596,17 +1601,18 @@ export class AppComponent implements OnInit {
   finansalIslemEkle() {
     if (!this.yeniIslem.tutar || !this.yeniIslem.aciklama || !this.aktifDosya) return;
     this.yeniIslem.aciklama = this.formatMetin(this.yeniIslem.aciklama);
+    const makbuzUrl = this.hazirBaglantiUrl(this.yeniIslem.makbuzUrl);
     const k: any = {...this.aktifDosya}; if (!k.finansalIslemler) k.finansalIslemler = [];
-    k.finansalIslemler.unshift({ id: Date.now(), tarih: this.yeniIslem.tarih || new Date().toISOString().split('T')[0], tur: this.yeniIslem.tur as any, tutar: this.yeniIslem.tutar, aciklama: this.yeniIslem.aciklama || '' });
-    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi eklendi', `${this.yeniIslem.tur}: ${this.formatPara(this.yeniIslem.tutar || 0)} • ${this.yeniIslem.aciklama || ''}`);
-    this.aktifDosyaKaydet(kayitli, 'Finans hareketi dosyaya eklendi.'); this.yeniIslem = { tur: this.yeniIslem.tur, tarih: new Date().toISOString().split('T')[0], tutar: undefined, aciklama: '' };
+    k.finansalIslemler.unshift({ id: Date.now(), tarih: this.yeniIslem.tarih || new Date().toISOString().split('T')[0], tur: this.yeniIslem.tur as any, tutar: this.yeniIslem.tutar, aciklama: this.yeniIslem.aciklama || '', makbuzUrl });
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi eklendi', `${this.yeniIslem.tur}: ${this.formatPara(this.yeniIslem.tutar || 0)} • ${this.yeniIslem.aciklama || ''}${makbuzUrl ? ' • Makbuz linki eklendi' : ''}`);
+    this.aktifDosyaKaydet(kayitli, 'Finans hareketi dosyaya eklendi.'); this.yeniIslem = { tur: this.yeniIslem.tur, tarih: new Date().toISOString().split('T')[0], tutar: undefined, aciklama: '', makbuzUrl: '' };
   }
   finansalIslemSil(id: number) {
     if(!this.aktifDosya) return;
     const k: any = {...this.aktifDosya};
     const silinen = (k.finansalIslemler || []).find((i:any) => i.id === id);
     k.finansalIslemler = k.finansalIslemler!.filter((i:any) => i.id !== id);
-    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi silindi', silinen ? `${silinen.tur}: ${this.formatPara(silinen.tutar || 0)} • ${silinen.aciklama || ''}` : 'Seçili finans hareketi kayıttan kaldırıldı.');
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi silindi', silinen ? `${silinen.tur}: ${this.formatPara(silinen.tutar || 0)} • ${silinen.aciklama || ''}${silinen.makbuzUrl ? ' • Makbuz linki vardı' : ''}` : 'Seçili finans hareketi kayıttan kaldırıldı.');
     this.aktifDosyaKaydet(kayitli, 'Finans hareketi silindi.');
   }
 
