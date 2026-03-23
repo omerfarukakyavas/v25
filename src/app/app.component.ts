@@ -86,6 +86,11 @@ export class AppComponent implements OnInit {
   yeniIslem: Partial<FinansalIslem> = { tur: 'Vekalet Ücreti' }; 
   duzenlenenFinansalIslemId: number | null = null;
   duzenlenenFinansalIslem: Partial<FinansalIslem> = {};
+  seciliBaglantiliIcraId: number | undefined = undefined;
+  seciliBaglantiliArabuluculukId: number | undefined = undefined;
+  yeniBaglantiliTedbirDosyasi = '';
+  yeniBaglantiliDelilTespitiDosyasi = '';
+  yeniBaglantiliNoterlikDosyasi = '';
   silinecekDavaId: number | null = null; silinecekIcraId: number | null = null; silinecekArabuluculukId: number | null = null; silinecekMuvekkilId: number | null = null;
   aktifDetaySekmesi: DetaySekmesi = 'notlar'; formHata = '';
 
@@ -285,8 +290,117 @@ export class AppComponent implements OnInit {
 
   davayaGitId(id?: number) { if(!id) return; const d = this.davalar.find(x=>x.id===id); if(d) this.detayaGit(d); }
   icrayaGitId(id?: number) { if(!id) return; const i = this.icralar.find(x=>x.id===id); if(i) this.icraDetayinaGit(i); }
+  arabuluculugaGitId(id?: number) { if(!id) return; const a = this.arabuluculukDosyalar.find(x=>x.id===id); if(a) this.arabuluculukDetayinaGit(a); }
   getDavaNo(id?: number) { if(!id) return ''; return this.davalar.find(d=>d.id===id)?.dosyaNo || 'Bulunamadı'; }
   getIcraNo(id?: number) { if(!id) return ''; return this.icralar.find(i=>i.id===id)?.dosyaNo || 'Bulunamadı'; }
+  getIcraBaglantiEtiketi(id?: number) {
+    if (!id) return 'Bulunamadı';
+    const icra = this.icralar.find(i => i.id === id);
+    return icra ? `${icra.icraDairesi} / ${icra.dosyaNo}` : 'Bulunamadı';
+  }
+  getArabuluculukNo(id?: number) {
+    if (!id) return '';
+    const arabuluculuk = this.arabuluculukDosyalar.find(a => a.id === id);
+    return arabuluculuk ? `${arabuluculuk.buroNo ? arabuluculuk.buroNo + ' / ' : ''}${arabuluculuk.arabuluculukNo}` : 'Bulunamadı';
+  }
+  hazirSayisalBaglantiListesi(liste?: Array<number | null | undefined>, legacyId?: number) {
+    return [...new Set([...(liste || []), legacyId].map(id => Number(id)).filter(id => Number.isFinite(id) && id > 0))];
+  }
+  hazirMetinBaglantiListesi(liste?: string[]) {
+    return [...new Set((liste || []).map(item => this.formatMetin(item)).filter(Boolean))];
+  }
+  getDavaBaglantiliIcraIdleri(dava?: Partial<DavaDosyasi> | DavaDosyasi | null) {
+    return this.hazirSayisalBaglantiListesi(dava?.baglantiliIcraIds, dava?.baglantiliIcraId);
+  }
+  getDavaBaglantiliArabuluculukIdleri(dava?: Partial<DavaDosyasi> | DavaDosyasi | null) {
+    return this.hazirSayisalBaglantiListesi(dava?.baglantiliArabuluculukIds);
+  }
+  getDavaBaglantiMetinListesi(liste?: string[]) {
+    return this.hazirMetinBaglantiListesi(liste);
+  }
+  getBaglantiliIcraDosyalari(dava?: Partial<DavaDosyasi> | DavaDosyasi | null) {
+    return this.getDavaBaglantiliIcraIdleri(dava)
+      .map(id => this.icralar.find(icra => icra.id === id))
+      .filter((icra): icra is IcraDosyasi => !!icra);
+  }
+  getBaglantiliArabuluculukDosyalari(dava?: Partial<DavaDosyasi> | DavaDosyasi | null) {
+    return this.getDavaBaglantiliArabuluculukIdleri(dava)
+      .map(id => this.arabuluculukDosyalar.find(arabuluculuk => arabuluculuk.id === id))
+      .filter((arabuluculuk): arabuluculuk is ArabuluculukDosyasi => !!arabuluculuk);
+  }
+  get secilebilirBaglantiliIcraDosyalari() {
+    const secili = new Set(this.getDavaBaglantiliIcraIdleri(this.islemGorenDava));
+    return this.icralar.filter(icra => !secili.has(icra.id));
+  }
+  get secilebilirBaglantiliArabuluculukDosyalari() {
+    const secili = new Set(this.getDavaBaglantiliArabuluculukIdleri(this.islemGorenDava));
+    return this.arabuluculukDosyalar.filter(arabuluculuk => !secili.has(arabuluculuk.id));
+  }
+  baglantiliIcraEkle() {
+    if (!this.seciliBaglantiliIcraId) return;
+    this.islemGorenDava.baglantiliIcraIds = [...this.getDavaBaglantiliIcraIdleri(this.islemGorenDava), this.seciliBaglantiliIcraId];
+    this.seciliBaglantiliIcraId = undefined;
+  }
+  baglantiliIcraSil(id: number) {
+    this.islemGorenDava.baglantiliIcraIds = this.getDavaBaglantiliIcraIdleri(this.islemGorenDava).filter(item => item !== id);
+    if (this.islemGorenDava.baglantiliIcraId === id) this.islemGorenDava.baglantiliIcraId = undefined;
+  }
+  baglantiliArabuluculukEkle() {
+    if (!this.seciliBaglantiliArabuluculukId) return;
+    this.islemGorenDava.baglantiliArabuluculukIds = [...this.getDavaBaglantiliArabuluculukIdleri(this.islemGorenDava), this.seciliBaglantiliArabuluculukId];
+    this.seciliBaglantiliArabuluculukId = undefined;
+  }
+  baglantiliArabuluculukSil(id: number) {
+    this.islemGorenDava.baglantiliArabuluculukIds = this.getDavaBaglantiliArabuluculukIdleri(this.islemGorenDava).filter(item => item !== id);
+  }
+  baglantiliMetinDosyaEkle(tur: 'tedbir' | 'delil' | 'noterlik') {
+    const alan = tur === 'tedbir'
+      ? 'baglantiliTedbirDosyalari'
+      : tur === 'delil'
+      ? 'baglantiliDelilTespitiDosyalari'
+      : 'baglantiliNoterlikDosyalari';
+    const metin = this.formatMetin(
+      tur === 'tedbir'
+        ? this.yeniBaglantiliTedbirDosyasi
+        : tur === 'delil'
+        ? this.yeniBaglantiliDelilTespitiDosyasi
+        : this.yeniBaglantiliNoterlikDosyasi
+    );
+    if (!metin) return;
+    const mevcutListe = this.getDavaBaglantiMetinListesi(this.islemGorenDava[alan] as string[]);
+    if (!mevcutListe.some(item => this.metinEsit(item, metin))) this.islemGorenDava[alan] = [...mevcutListe, metin] as any;
+    if (tur === 'tedbir') this.yeniBaglantiliTedbirDosyasi = '';
+    else if (tur === 'delil') this.yeniBaglantiliDelilTespitiDosyasi = '';
+    else this.yeniBaglantiliNoterlikDosyasi = '';
+  }
+  baglantiliMetinDosyaSil(alan: 'baglantiliTedbirDosyalari' | 'baglantiliDelilTespitiDosyalari' | 'baglantiliNoterlikDosyalari', index: number) {
+    const liste = this.getDavaBaglantiMetinListesi(this.islemGorenDava[alan] as string[]);
+    liste.splice(index, 1);
+    this.islemGorenDava[alan] = liste as any;
+  }
+  getDavaBaglantiOzeti(dava?: Partial<DavaDosyasi> | DavaDosyasi | null) {
+    const parcalar: string[] = [];
+    const icraSayisi = this.getDavaBaglantiliIcraIdleri(dava).length;
+    const arabuluculukSayisi = this.getDavaBaglantiliArabuluculukIdleri(dava).length;
+    const tedbirSayisi = this.getDavaBaglantiMetinListesi(dava?.baglantiliTedbirDosyalari).length;
+    const delilSayisi = this.getDavaBaglantiMetinListesi(dava?.baglantiliDelilTespitiDosyalari).length;
+    const noterlikSayisi = this.getDavaBaglantiMetinListesi(dava?.baglantiliNoterlikDosyalari).length;
+    if (icraSayisi) parcalar.push(`${icraSayisi} icra`);
+    if (arabuluculukSayisi) parcalar.push(`${arabuluculukSayisi} arabuluculuk`);
+    if (tedbirSayisi) parcalar.push(`${tedbirSayisi} tedbir`);
+    if (delilSayisi) parcalar.push(`${delilSayisi} delil tespiti`);
+    if (noterlikSayisi) parcalar.push(`${noterlikSayisi} noterlik`);
+    return parcalar.join(' • ');
+  }
+  getDavaBaglantiKayitOzeti(dava?: Partial<DavaDosyasi> | DavaDosyasi | null) {
+    return [
+      `icra:${this.getDavaBaglantiliIcraIdleri(dava).join(',')}`,
+      `arabuluculuk:${this.getDavaBaglantiliArabuluculukIdleri(dava).join(',')}`,
+      `tedbir:${this.getDavaBaglantiMetinListesi(dava?.baglantiliTedbirDosyalari).join(',')}`,
+      `delil:${this.getDavaBaglantiMetinListesi(dava?.baglantiliDelilTespitiDosyalari).join(',')}`,
+      `noterlik:${this.getDavaBaglantiMetinListesi(dava?.baglantiliNoterlikDosyalari).join(',')}`
+    ].join('|');
+  }
 
   yeniGecmisKaydiId() { return Date.now() + this.gecmisKaydiSayaci++; }
   kopyaliVeri<T>(veri: T): T { return JSON.parse(JSON.stringify(veri)); }
@@ -329,6 +443,7 @@ export class AppComponent implements OnInit {
       { etiket: 'Mahkeme', onceki: onceki?.mahkeme, sonraki: sonraki.mahkeme },
       { etiket: 'Konu', onceki: onceki?.konu, sonraki: sonraki.konu },
       { etiket: 'Duruşma', onceki: this.birlestirTarihVeSaat(onceki?.durusmaTarihi, onceki?.durusmaSaati), sonraki: this.birlestirTarihVeSaat(sonraki.durusmaTarihi, sonraki.durusmaSaati) },
+      { etiket: 'Bağlantılar', onceki: this.getDavaBaglantiKayitOzeti(onceki), sonraki: this.getDavaBaglantiKayitOzeti(sonraki) },
       { etiket: 'Arşiv yeri', onceki: onceki?.arsivYeri, sonraki: sonraki.arsivYeri },
       { etiket: 'Vekalet ücreti', onceki: onceki?.vekaletUcreti, sonraki: sonraki.vekaletUcreti }
     ]);
@@ -1231,23 +1346,28 @@ export class AppComponent implements OnInit {
 
   dosyaFormunuAc(d?: DavaDosyasi) {
     this.formHata = '';
+    this.seciliBaglantiliIcraId = undefined;
+    this.seciliBaglantiliArabuluculukId = undefined;
+    this.yeniBaglantiliTedbirDosyasi = '';
+    this.yeniBaglantiliDelilTespitiDosyasi = '';
+    this.yeniBaglantiliNoterlikDosyasi = '';
     this.hizliMuvekkilFormAcik = false;
     this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
     if (d) { 
       this.formModu = 'duzenle'; 
       const taraflar = this.davaTaraflariVarsayilanOlustur(d);
       const muvekkiller = this.davaMuvekkilleriVarsayilanOlustur(d);
-      this.islemGorenDava = { ...d, dosyaNumaralari: Array.isArray(d.dosyaNumaralari) ? d.dosyaNumaralari.map(n => ({...n})) : [], muvekkiller, davacilar: taraflar.davacilar, davalilar: taraflar.davalilar }; 
+      this.islemGorenDava = { ...d, dosyaNumaralari: Array.isArray(d.dosyaNumaralari) ? d.dosyaNumaralari.map(n => ({...n})) : [], muvekkiller, davacilar: taraflar.davacilar, davalilar: taraflar.davalilar, baglantiliIcraIds: this.getDavaBaglantiliIcraIdleri(d), baglantiliArabuluculukIds: this.getDavaBaglantiliArabuluculukIdleri(d), baglantiliTedbirDosyalari: this.getDavaBaglantiMetinListesi(d.baglantiliTedbirDosyalari), baglantiliDelilTespitiDosyalari: this.getDavaBaglantiMetinListesi(d.baglantiliDelilTespitiDosyalari), baglantiliNoterlikDosyalari: this.getDavaBaglantiMetinListesi(d.baglantiliNoterlikDosyalari) }; 
       if (!this.islemGorenDava.dosyaNumaralari || this.islemGorenDava.dosyaNumaralari.length === 0) {
          this.islemGorenDava.dosyaNumaralari = [{ tur: 'ESAS', no: this.islemGorenDava.dosyaNo || '' }, { tur: 'KARAR', no: '' }]; 
       }
     } 
-    else { const varsayilanDava = { muvekkilPozisyonu: 'Davacı' } as Partial<DavaDosyasi>; const taraflar = this.davaTaraflariVarsayilanOlustur(varsayilanDava); const muvekkiller = this.davaMuvekkilleriVarsayilanOlustur(varsayilanDava); this.formModu = 'ekle'; this.islemGorenDava = { durum: 'Derdest', muvekkilId: undefined, muvekkilPozisyonu: 'Davacı', durusmaSaati: '', durusmaTamamlandiMi: false, dosyaNumaralari: [{ tur: 'ESAS', no: '' }, { tur: 'KARAR', no: '' }], muvekkiller, davacilar: taraflar.davacilar, davalilar: taraflar.davalilar }; }
+    else { const varsayilanDava = { muvekkilPozisyonu: 'Davacı' } as Partial<DavaDosyasi>; const taraflar = this.davaTaraflariVarsayilanOlustur(varsayilanDava); const muvekkiller = this.davaMuvekkilleriVarsayilanOlustur(varsayilanDava); this.formModu = 'ekle'; this.islemGorenDava = { durum: 'Derdest', muvekkilId: undefined, muvekkilPozisyonu: 'Davacı', durusmaSaati: '', durusmaTamamlandiMi: false, dosyaNumaralari: [{ tur: 'ESAS', no: '' }, { tur: 'KARAR', no: '' }], muvekkiller, davacilar: taraflar.davacilar, davalilar: taraflar.davalilar, baglantiliIcraIds: [], baglantiliArabuluculukIds: [], baglantiliTedbirDosyalari: [], baglantiliDelilTespitiDosyalari: [], baglantiliNoterlikDosyalari: [] }; }
     this.davaFormAcik = true;
   }
   dosyaNumarasiEkle() { if (!this.islemGorenDava.dosyaNumaralari) this.islemGorenDava.dosyaNumaralari = []; this.islemGorenDava.dosyaNumaralari.push({ tur: 'ESAS', no: '' }); }
   dosyaNumarasiSil(i: number) { if (this.islemGorenDava.dosyaNumaralari) this.islemGorenDava.dosyaNumaralari.splice(i, 1); }
-  davaFormKapat() { this.davaFormAcik = false; this.hizliMuvekkilFormAcik = false; this.hizliMuvekkilKaydi = { tip: 'Müvekkil' }; }
+  davaFormKapat() { this.davaFormAcik = false; this.hizliMuvekkilFormAcik = false; this.hizliMuvekkilKaydi = { tip: 'Müvekkil' }; this.seciliBaglantiliIcraId = undefined; this.seciliBaglantiliArabuluculukId = undefined; this.yeniBaglantiliTedbirDosyasi = ''; this.yeniBaglantiliDelilTespitiDosyasi = ''; this.yeniBaglantiliNoterlikDosyasi = ''; }
   davaKaydet() {
     const num = (this.islemGorenDava.dosyaNumaralari || []).filter(n => n.no && n.no.trim() !== '');
     const muvekkiller = this.davaMuvekkilleriniHazirla(this.islemGorenDava.muvekkiller);
@@ -1264,12 +1384,17 @@ export class AppComponent implements OnInit {
     const muvekkilPozisyonu = this.islemGorenDava.muvekkilPozisyonu || 'Davacı';
     let davacilar = this.davaTaraflariniHazirla(this.islemGorenDava.davacilar);
     let davalilar = this.davaTaraflariniHazirla(this.islemGorenDava.davalilar);
+    const baglantiliIcraIds = this.getDavaBaglantiliIcraIdleri(this.islemGorenDava);
+    const baglantiliArabuluculukIds = this.getDavaBaglantiliArabuluculukIdleri(this.islemGorenDava);
+    const baglantiliTedbirDosyalari = this.getDavaBaglantiMetinListesi(this.islemGorenDava.baglantiliTedbirDosyalari);
+    const baglantiliDelilTespitiDosyalari = this.getDavaBaglantiMetinListesi(this.islemGorenDava.baglantiliDelilTespitiDosyalari);
+    const baglantiliNoterlikDosyalari = this.getDavaBaglantiMetinListesi(this.islemGorenDava.baglantiliNoterlikDosyalari);
     if (muvekkilPozisyonu === 'Davalı') davalilar = this.davaMuvekkilTaraflariniDahilEt(davalilar, muvekkiller);
     else davacilar = this.davaMuvekkilTaraflariniDahilEt(davacilar, muvekkiller);
     const karsiTaraf = (muvekkilPozisyonu === 'Davalı' ? davacilar : davalilar).map(taraf => taraf.isim).join(', ') || '-';
     const noStr = num.map(n => `${n.tur}: ${n.no}`).join(' | ');
     if (this.formModu === 'ekle') {
-      let y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: birincilMuvekkil?.muvekkilId, muvekkiller, muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf, mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', durusmaSaati: this.islemGorenDava.durusmaSaati || '', durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: this.islemGorenDava.baglantiliIcraId, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', muvekkilGorusmeNotlari: [], finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      let y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: birincilMuvekkil?.muvekkilId, muvekkiller, muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf, mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', durusmaSaati: this.islemGorenDava.durusmaSaati || '', durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: baglantiliIcraIds[0], baglantiliIcraIds, baglantiliArabuluculukIds, baglantiliTedbirDosyalari, baglantiliDelilTespitiDosyalari, baglantiliNoterlikDosyalari, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', muvekkilGorusmeNotlari: [], finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
       y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'Dava dosyası açıldı', `${noStr} referansıyla yeni kayıt oluşturuldu.`);
       if (y.durusmaTarihi) {
         y = this.dosyayaTakvimKaydiEkle(y, 'Duruşma', 'Planlandı', y.durusmaTarihi, y.durusmaSaati, 'İlk duruşma planı kaydedildi.');
@@ -1279,7 +1404,7 @@ export class AppComponent implements OnInit {
     } else {
       const mevcut = this.davalar.find(x => x.id === this.islemGorenDava.id);
       const durusmaDegisti = (mevcut?.durusmaTarihi || '') !== (this.islemGorenDava.durusmaTarihi || '') || (mevcut?.durusmaSaati || '') !== (this.islemGorenDava.durusmaSaati || '');
-      let g = { ...this.islemGorenDava, dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: birincilMuvekkil?.muvekkilId, muvekkiller, muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf } as DavaDosyasi;
+      let g = { ...this.islemGorenDava, dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: birincilMuvekkil?.muvekkilId, muvekkiller, muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf, baglantiliIcraId: baglantiliIcraIds[0], baglantiliIcraIds, baglantiliArabuluculukIds, baglantiliTedbirDosyalari, baglantiliDelilTespitiDosyalari, baglantiliNoterlikDosyalari } as DavaDosyasi;
       if (durusmaDegisti) { g.durusmaTamamlandiMi = false; g.durusmaTamamlanmaTarihi = ''; }
       g = this.dosyayaIslemKaydiEkle(g, 'dosya', 'Dava dosyası güncellendi', this.davaGuncellemeOzeti(mevcut, g));
       if (durusmaDegisti) {
@@ -2148,7 +2273,10 @@ export class AppComponent implements OnInit {
   getAktifDosyaBaglantiOzeti() {
     const dosya = this.aktifDosya;
     if (!dosya) return '';
-    if (this.aktifSayfa === 'detay' && dosya.baglantiliIcraId) return `Bağlantılı icra: ${this.getIcraNo(dosya.baglantiliIcraId)}`;
+    if (this.aktifSayfa === 'detay') {
+      const ozet = this.getDavaBaglantiOzeti(dosya as DavaDosyasi);
+      return ozet ? `Bağlantılar: ${ozet}` : '';
+    }
     if (this.aktifSayfa === 'icraDetay' && dosya.baglantiliDavaId) return `Bağlantılı dava: ${this.getDavaNo(dosya.baglantiliDavaId)}`;
     if (this.aktifSayfa === 'arabuluculukDetay' && dosya.toplantiYontemi) return `Toplantı yöntemi: ${dosya.toplantiYontemi}`;
     return '';

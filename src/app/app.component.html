@@ -1493,8 +1493,67 @@
                                }
                              }
                            </div>
-                           @if (aktifDosya.baglantiliIcraId) {
-                             <div class="col-span-2 mt-2 flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 sm:flex-row sm:items-center sm:justify-between"><div><p class="text-xs text-emerald-700 font-bold uppercase tracking-wider mb-0.5">Bağlantılı İcra Dosyası</p><p class="font-bold text-slate-800">{{ getIcraNo(aktifDosya.baglantiliIcraId) }}</p></div><button (click)="icrayaGitId(aktifDosya.baglantiliIcraId)" class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700 sm:w-auto sm:py-1.5">İcraya Git</button></div>
+                           @if (getDavaBaglantiOzeti(getAktifDavaDosyasi())) {
+                             <div class="col-span-2 mt-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3">
+                               <div class="flex items-center justify-between gap-3">
+                                 <div>
+                                   <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Bağlantılı Dosyalar</p>
+                                   <p class="mt-1 text-sm font-semibold text-slate-700">{{ getDavaBaglantiOzeti(getAktifDavaDosyasi()) }}</p>
+                                 </div>
+                               </div>
+                               <div class="mt-3 space-y-3">
+                                 @for (icra of getBaglantiliIcraDosyalari(getAktifDavaDosyasi()); track icra.id) {
+                                   <div class="flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                                     <div>
+                                       <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">Bağlantılı İcra Dosyası</p>
+                                       <p class="mt-1 font-bold text-slate-800">{{ icra.icraDairesi }} / {{ icra.dosyaNo }}</p>
+                                       <p class="mt-1 text-xs text-slate-500">{{ icra.alacakli || '-' }} • {{ icra.borclu || '-' }}</p>
+                                     </div>
+                                     <button (click)="icrayaGitId(icra.id)" class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700 sm:w-auto sm:py-1.5">İcraya Git</button>
+                                   </div>
+                                 }
+                                 @for (arabuluculuk of getBaglantiliArabuluculukDosyalari(getAktifDavaDosyasi()); track arabuluculuk.id) {
+                                   <div class="flex flex-col gap-3 rounded-lg border border-violet-200 bg-violet-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                                     <div>
+                                       <p class="text-xs font-bold uppercase tracking-wider text-violet-700">Bağlantılı Arabuluculuk Dosyası</p>
+                                       <p class="mt-1 font-bold text-slate-800">{{ arabuluculuk.buroNo ? arabuluculuk.buroNo + ' / ' : '' }}{{ arabuluculuk.arabuluculukNo }}</p>
+                                       <p class="mt-1 text-xs text-slate-500">{{ arabuluculuk.buro || '-' }} • {{ arabuluculuk.uyusmazlikTuru || '-' }}</p>
+                                     </div>
+                                     <button (click)="arabuluculugaGitId(arabuluculuk.id)" class="w-full rounded-lg bg-violet-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-violet-700 sm:w-auto sm:py-1.5">Arabuluculuğa Git</button>
+                                   </div>
+                                 }
+                                 @if (getDavaBaglantiMetinListesi(getAktifDavaDosyasi()?.baglantiliTedbirDosyalari).length > 0) {
+                                   <div class="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                                     <p class="text-xs font-bold uppercase tracking-wider text-amber-700">Bağlantılı Tedbir Dosyaları</p>
+                                     <div class="mt-2 flex flex-wrap gap-2">
+                                       @for (dosya of getDavaBaglantiMetinListesi(getAktifDavaDosyasi()?.baglantiliTedbirDosyalari); track dosya) {
+                                         <span class="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-amber-200">{{ dosya }}</span>
+                                       }
+                                     </div>
+                                   </div>
+                                 }
+                                 @if (getDavaBaglantiMetinListesi(getAktifDavaDosyasi()?.baglantiliDelilTespitiDosyalari).length > 0) {
+                                   <div class="rounded-lg border border-sky-200 bg-sky-50 p-3">
+                                     <p class="text-xs font-bold uppercase tracking-wider text-sky-700">Bağlantılı Delil Tespiti Dosyaları</p>
+                                     <div class="mt-2 flex flex-wrap gap-2">
+                                       @for (dosya of getDavaBaglantiMetinListesi(getAktifDavaDosyasi()?.baglantiliDelilTespitiDosyalari); track dosya) {
+                                         <span class="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-sky-200">{{ dosya }}</span>
+                                       }
+                                     </div>
+                                   </div>
+                                 }
+                                 @if (getDavaBaglantiMetinListesi(getAktifDavaDosyasi()?.baglantiliNoterlikDosyalari).length > 0) {
+                                   <div class="rounded-lg border border-rose-200 bg-rose-50 p-3">
+                                     <p class="text-xs font-bold uppercase tracking-wider text-rose-700">Bağlantılı Noterlik Dosyaları</p>
+                                     <div class="mt-2 flex flex-wrap gap-2">
+                                       @for (dosya of getDavaBaglantiMetinListesi(getAktifDavaDosyasi()?.baglantiliNoterlikDosyalari); track dosya) {
+                                         <span class="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-rose-200">{{ dosya }}</span>
+                                       }
+                                     </div>
+                                   </div>
+                                 }
+                               </div>
+                             </div>
                            }
                          } @else if (aktifSayfa === 'icraDetay') {
                            <div class="col-span-2 p-3 bg-slate-50 rounded-lg border border-slate-100 mb-2 flex flex-col sm:flex-row gap-4">
@@ -2176,7 +2235,7 @@
 
               <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-700">Taraf ve İlişki Bilgisi</p>
-                <p class="mt-2 text-sm leading-6 text-slate-500">Müvekkil, pozisyon ve bağlantılı icra kaydını aynı bölümde tutarak dosyayı daha hızlı tarayabilirsiniz.</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Müvekkilleri ve bağlantılı dosyaları aynı bölümde toplayarak dava kartını ilk bakışta daha rahat okuyabilirsiniz.</p>
                 <div class="mt-4 grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
                 <div class="flex-1">
                   <div class="flex items-center justify-between gap-3">
@@ -2247,12 +2306,107 @@
                   </select>
                 </div>
                 </div>
-                <div class="mt-4">
-                  <label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Bağlantılı İcra Dosyası (Opsiyonel)</label>
-                  <select [(ngModel)]="islemGorenDava.baglantiliIcraId" class="w-full px-3 py-2 border border-emerald-200 bg-emerald-50 rounded-lg outline-none">
-                    <option [ngValue]="undefined">Bağlantı Yok</option>
-                    @for(i of icralar; track i.id) { <option [ngValue]="i.id">{{ i.icraDairesi }} - {{ i.dosyaNo }} ({{i.borclu}})</option> }
-                  </select>
+                <div class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-4">
+                  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-700">Bağlantılı Dosyalar</p>
+                      <p class="mt-2 text-sm leading-6 text-slate-500">Birden fazla icra veya arabuluculuk dosyasını seçebilir; tedbir, delil tespiti ve noterlik dosyalarını metin olarak ekleyebilirsiniz.</p>
+                    </div>
+                  </div>
+                  <div class="mt-4 grid gap-4 xl:grid-cols-2">
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                      <p class="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-700">Bağlantılı İcra Dosyaları</p>
+                      <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+                        <select [(ngModel)]="seciliBaglantiliIcraId" class="w-full rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm outline-none">
+                          <option [ngValue]="undefined">Listeden icra dosyası seç</option>
+                          @for (icra of secilebilirBaglantiliIcraDosyalari; track icra.id) {
+                            <option [ngValue]="icra.id">{{ icra.icraDairesi }} - {{ icra.dosyaNo }} ({{ icra.borclu }})</option>
+                          }
+                        </select>
+                        <button type="button" (click)="baglantiliIcraEkle()" class="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-emerald-700">Ekle</button>
+                      </div>
+                      <div class="mt-3 space-y-2">
+                        @for (icra of getBaglantiliIcraDosyalari(islemGorenDava); track icra.id) {
+                          <div class="flex items-start justify-between gap-3 rounded-xl border border-emerald-100 bg-white px-3 py-2">
+                            <div>
+                              <p class="text-sm font-bold text-slate-800">{{ icra.icraDairesi }} / {{ icra.dosyaNo }}</p>
+                              <p class="mt-1 text-xs text-slate-500">{{ icra.alacakli || '-' }} • {{ icra.borclu || '-' }}</p>
+                            </div>
+                            <button type="button" (click)="baglantiliIcraSil(icra.id)" class="rounded-lg px-2 py-1 text-[11px] font-bold text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600">Sil</button>
+                          </div>
+                        } @empty {
+                          <div class="rounded-xl border border-dashed border-emerald-200 bg-white px-3 py-4 text-center text-xs font-medium text-slate-500">Henüz bağlantılı icra dosyası eklenmedi.</div>
+                        }
+                      </div>
+                    </div>
+                    <div class="rounded-2xl border border-violet-200 bg-violet-50 p-4">
+                      <p class="text-[11px] font-black uppercase tracking-[0.22em] text-violet-700">Bağlantılı Arabuluculuk Dosyaları</p>
+                      <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+                        <select [(ngModel)]="seciliBaglantiliArabuluculukId" class="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm outline-none">
+                          <option [ngValue]="undefined">Listeden arabuluculuk dosyası seç</option>
+                          @for (arabuluculuk of secilebilirBaglantiliArabuluculukDosyalari; track arabuluculuk.id) {
+                            <option [ngValue]="arabuluculuk.id">{{ arabuluculuk.buroNo ? arabuluculuk.buroNo + ' / ' : '' }}{{ arabuluculuk.arabuluculukNo }} ({{ arabuluculuk.uyusmazlikTuru }})</option>
+                          }
+                        </select>
+                        <button type="button" (click)="baglantiliArabuluculukEkle()" class="rounded-lg bg-violet-600 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-violet-700">Ekle</button>
+                      </div>
+                      <div class="mt-3 space-y-2">
+                        @for (arabuluculuk of getBaglantiliArabuluculukDosyalari(islemGorenDava); track arabuluculuk.id) {
+                          <div class="flex items-start justify-between gap-3 rounded-xl border border-violet-100 bg-white px-3 py-2">
+                            <div>
+                              <p class="text-sm font-bold text-slate-800">{{ arabuluculuk.buroNo ? arabuluculuk.buroNo + ' / ' : '' }}{{ arabuluculuk.arabuluculukNo }}</p>
+                              <p class="mt-1 text-xs text-slate-500">{{ arabuluculuk.buro || '-' }} • {{ arabuluculuk.uyusmazlikTuru || '-' }}</p>
+                            </div>
+                            <button type="button" (click)="baglantiliArabuluculukSil(arabuluculuk.id)" class="rounded-lg px-2 py-1 text-[11px] font-bold text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600">Sil</button>
+                          </div>
+                        } @empty {
+                          <div class="rounded-xl border border-dashed border-violet-200 bg-white px-3 py-4 text-center text-xs font-medium text-slate-500">Henüz bağlantılı arabuluculuk dosyası eklenmedi.</div>
+                        }
+                      </div>
+                    </div>
+                    <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                      <p class="text-[11px] font-black uppercase tracking-[0.22em] text-amber-700">Bağlantılı Tedbir Dosyası</p>
+                      <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+                        <input [(ngModel)]="yeniBaglantiliTedbirDosyasi" (keyup.enter)="baglantiliMetinDosyaEkle('tedbir')" type="text" placeholder="Örn: İstanbul 3. Sulh Hukuk 2026/12 D.İş" class="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm outline-none">
+                        <button type="button" (click)="baglantiliMetinDosyaEkle('tedbir')" class="rounded-lg bg-amber-600 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-amber-700">Ekle</button>
+                      </div>
+                      <div class="mt-3 flex flex-wrap gap-2">
+                        @for (dosya of getDavaBaglantiMetinListesi(islemGorenDava.baglantiliTedbirDosyalari); track dosya) {
+                          <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-amber-200">{{ dosya }}<button type="button" (click)="baglantiliMetinDosyaSil('baglantiliTedbirDosyalari', $index)" class="text-slate-400 transition-colors hover:text-red-500">×</button></span>
+                        } @empty {
+                          <span class="text-xs text-slate-500">Henüz tedbir dosyası eklenmedi.</span>
+                        }
+                      </div>
+                    </div>
+                    <div class="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                      <p class="text-[11px] font-black uppercase tracking-[0.22em] text-sky-700">Bağlantılı Delil Tespiti Dosyası</p>
+                      <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+                        <input [(ngModel)]="yeniBaglantiliDelilTespitiDosyasi" (keyup.enter)="baglantiliMetinDosyaEkle('delil')" type="text" placeholder="Örn: İstanbul 5. Asliye Ticaret 2026/8 D.İş" class="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-sm outline-none">
+                        <button type="button" (click)="baglantiliMetinDosyaEkle('delil')" class="rounded-lg bg-sky-600 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-sky-700">Ekle</button>
+                      </div>
+                      <div class="mt-3 flex flex-wrap gap-2">
+                        @for (dosya of getDavaBaglantiMetinListesi(islemGorenDava.baglantiliDelilTespitiDosyalari); track dosya) {
+                          <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-sky-200">{{ dosya }}<button type="button" (click)="baglantiliMetinDosyaSil('baglantiliDelilTespitiDosyalari', $index)" class="text-slate-400 transition-colors hover:text-red-500">×</button></span>
+                        } @empty {
+                          <span class="text-xs text-slate-500">Henüz delil tespiti dosyası eklenmedi.</span>
+                        }
+                      </div>
+                    </div>
+                    <div class="rounded-2xl border border-rose-200 bg-rose-50 p-4 xl:col-span-2">
+                      <p class="text-[11px] font-black uppercase tracking-[0.22em] text-rose-700">Bağlantılı Noterlik Dosyası</p>
+                      <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+                        <input [(ngModel)]="yeniBaglantiliNoterlikDosyasi" (keyup.enter)="baglantiliMetinDosyaEkle('noterlik')" type="text" placeholder="Örn: Kadıköy 12. Noterliği 2026/14567" class="w-full rounded-lg border border-rose-200 bg-white px-3 py-2 text-sm outline-none">
+                        <button type="button" (click)="baglantiliMetinDosyaEkle('noterlik')" class="rounded-lg bg-rose-600 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-rose-700">Ekle</button>
+                      </div>
+                      <div class="mt-3 flex flex-wrap gap-2">
+                        @for (dosya of getDavaBaglantiMetinListesi(islemGorenDava.baglantiliNoterlikDosyalari); track dosya) {
+                          <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-rose-200">{{ dosya }}<button type="button" (click)="baglantiliMetinDosyaSil('baglantiliNoterlikDosyalari', $index)" class="text-slate-400 transition-colors hover:text-red-500">×</button></span>
+                        } @empty {
+                          <span class="text-xs text-slate-500">Henüz noterlik dosyası eklenmedi.</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
