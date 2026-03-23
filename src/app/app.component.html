@@ -320,7 +320,7 @@
                 </div>
 
                 <div class="bg-gradient-to-r from-blue-50 via-white to-sky-50 p-4 rounded-xl shadow-sm border border-blue-100 mb-6 flex flex-col sm:flex-row gap-4">
-                  <div class="flex-1 relative"><input [(ngModel)]="aramaMetni" type="text" placeholder="Dosya No, müvekkil, diğer taraf veya mahkeme ara..." class="w-full pl-4 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"></div>
+                <div class="flex-1 relative"><input [(ngModel)]="aramaMetni" type="text" placeholder="Dosya No, eski esas, müvekkil, diğer taraf veya mahkeme ara..." class="w-full pl-4 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"></div>
                   <div class="sm:w-64">
                     <select [(ngModel)]="durumFiltresi" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white font-medium text-slate-700">
                       <option value="Tümü">Tüm Durumlar</option><option value="Derdest">Derdest Dosyalar</option><option value="İstinaf/Temyiz">İstinaf/Temyizdekiler</option><option value="Kapalı">Kapalı Dosyalar</option>
@@ -493,7 +493,7 @@
 
               @case ('icralar') {
                 <div class="bg-gradient-to-r from-emerald-50 via-white to-teal-50 p-4 rounded-xl shadow-sm border border-emerald-100 mb-6 flex flex-col sm:flex-row gap-4">
-                  <div class="flex-1 relative"><input [(ngModel)]="aramaMetni" type="text" placeholder="Daire, Dosya No, Alacaklı veya Borçlu ara..." class="w-full pl-4 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-all"></div>
+                <div class="flex-1 relative"><input [(ngModel)]="aramaMetni" type="text" placeholder="Daire, eski esas, dosya no, alacaklı veya borçlu ara..." class="w-full pl-4 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-all"></div>
                   <div class="sm:w-64">
                     <select [(ngModel)]="durumFiltresi" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-all bg-white font-medium text-slate-700">
                       <option value="Tümü">Tüm Durumlar</option><option value="Aktif">Aktif Dosyalar</option><option value="İtiraz Edildi">İtiraz Edilenler</option><option value="Tehir-i İcra">Tehir-i İcra</option><option value="İnfaz/Kapalı">Kapalı Dosyalar</option>
@@ -1474,9 +1474,15 @@
                                <p><span class="font-bold text-rose-600">Davalı:</span> {{ getAktifDavaTarafMetni('davali') }}</p>
                              </div>
                            </div>
-                           <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Mahkeme</p><p class="font-medium text-slate-800">{{ aktifDosya.mahkeme }}</p></div>
-                           <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Konu</p><p class="font-medium text-slate-800">{{ aktifDosya.konu }}</p></div>
-                           <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Arşiv / Klasör Konumu</p><p class="font-medium text-slate-800">{{ aktifDosya.arsivYeri || 'Belirtilmedi' }}</p></div>
+                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Mahkeme</p><p class="font-medium text-slate-800">{{ aktifDosya.mahkeme }}</p></div>
+                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Konu</p><p class="font-medium text-slate-800">{{ aktifDosya.konu }}</p></div>
+                            @if (aktifDosya.eskiMahkeme) {
+                              <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Eski Mahkeme</p><p class="font-medium text-slate-800">{{ aktifDosya.eskiMahkeme }}</p></div>
+                            }
+                            @if (aktifDosya.eskiEsasNo) {
+                              <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Eski Esas / Dosya No</p><p class="font-medium text-slate-800">{{ aktifDosya.eskiEsasNo }}</p></div>
+                            }
+                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Arşiv / Klasör Konumu</p><p class="font-medium text-slate-800">{{ aktifDosya.arsivYeri || 'Belirtilmedi' }}</p></div>
                            <div class="col-span-2 mt-2 flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50/70 p-3 sm:flex-row sm:items-center sm:justify-between">
                              <div>
                                <p class="text-[10px] font-bold uppercase tracking-wider text-blue-700">Duruşma Takvimi</p>
@@ -1556,12 +1562,22 @@
                              </div>
                            }
                          } @else if (aktifSayfa === 'icraDetay') {
-                           <div class="col-span-2 p-3 bg-slate-50 rounded-lg border border-slate-100 mb-2 flex flex-col sm:flex-row gap-4">
-                              <div class="flex-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">İcra Dairesi</p><p class="font-bold text-slate-800">{{ aktifDosya.icraDairesi }}</p></div>
-                              <div class="flex-1 sm:border-l sm:border-slate-200 sm:pl-4"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Dosya No</p><p class="font-bold text-slate-800">{{ aktifDosya.dosyaNo }}</p></div>
-                              <div class="flex-1 sm:border-l sm:border-slate-200 sm:pl-4"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Takip Tipi</p><p class="font-bold text-slate-800">{{ aktifDosya.takipTipi || 'Belirtilmedi' }}</p></div>
-                           </div>
-                           <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Alacaklı</p><p class="font-medium text-slate-800">{{ aktifDosya.alacakli }}</p></div>
+                            <div class="col-span-2 p-3 bg-slate-50 rounded-lg border border-slate-100 mb-2 flex flex-col sm:flex-row gap-4">
+                               <div class="flex-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">İcra Dairesi</p><p class="font-bold text-slate-800">{{ aktifDosya.icraDairesi }}</p></div>
+                               <div class="flex-1 sm:border-l sm:border-slate-200 sm:pl-4"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Dosya No</p><p class="font-bold text-slate-800">{{ aktifDosya.dosyaNo }}</p></div>
+                               <div class="flex-1 sm:border-l sm:border-slate-200 sm:pl-4"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Takip Tipi</p><p class="font-bold text-slate-800">{{ aktifDosya.takipTipi || 'Belirtilmedi' }}</p></div>
+                            </div>
+                            @if (aktifDosya.eskiMahkeme || aktifDosya.eskiEsasNo) {
+                              <div class="col-span-2 grid gap-3 sm:grid-cols-2">
+                                @if (aktifDosya.eskiMahkeme) {
+                                  <div class="rounded-lg border border-amber-200 bg-amber-50/70 p-3"><p class="text-[10px] text-amber-700 font-bold uppercase tracking-wider mb-0.5">Eski Mahkeme / Daire</p><p class="font-medium text-slate-800">{{ aktifDosya.eskiMahkeme }}</p></div>
+                                }
+                                @if (aktifDosya.eskiEsasNo) {
+                                  <div class="rounded-lg border border-amber-200 bg-amber-50/70 p-3"><p class="text-[10px] text-amber-700 font-bold uppercase tracking-wider mb-0.5">Eski Esas / Dosya No</p><p class="font-medium text-slate-800">{{ aktifDosya.eskiEsasNo }}</p></div>
+                                }
+                              </div>
+                            }
+                            <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Alacaklı</p><p class="font-medium text-slate-800">{{ aktifDosya.alacakli }}</p></div>
                            <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Borçlu</p><p class="font-medium text-slate-800">{{ aktifDosya.borclu }}</p></div>
                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Muhatap</p><p class="font-medium text-slate-800">{{ aktifDosya.muvekkil }}</p></div>
                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Takip Tarihi</p><p class="font-medium text-slate-800">{{ formatTarih(aktifDosya.takipTarihi) }}</p></div>
@@ -2464,9 +2480,11 @@
                 <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-medium leading-6 text-slate-500">
                   Seçtiğiniz müvekkiller, kaydetme sırasında {{ islemGorenDava.muvekkilPozisyonu === 'Davalı' ? 'davalı' : 'davacı' }} tarafına otomatik eklenir. Diğer tarafları buradan çoğaltabilirsiniz.
                 </div>
-                <div class="mt-4 grid gap-3 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+                <div class="mt-4 grid gap-3 md:grid-cols-2">
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mahkeme</label><input [(ngModel)]="islemGorenDava.mahkeme" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Konu</label><input [(ngModel)]="islemGorenDava.konu" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Eski Mahkeme (Opsiyonel)</label><input [(ngModel)]="islemGorenDava.eskiMahkeme" type="text" placeholder="Örn: İstanbul 5. Asliye Ticaret Mahkemesi" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Eski Esas / Dosya No (Opsiyonel)</label><input [(ngModel)]="islemGorenDava.eskiEsasNo" type="text" placeholder="Örn: 2023/415" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
                 </div>
                 <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label><input [(ngModel)]="islemGorenDava.arsivYeri" type="text" placeholder="Örn: Mavi Klasör, Dolap 2, Raf 1" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
               </div>
@@ -2523,9 +2541,11 @@
               <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Takip Kimliği</p>
                 <p class="mt-2 text-sm leading-6 text-slate-500">İcra dairesi, dosya numarası ve müvekkil alanı ilk bakışta okunabilecek şekilde öne çıkarıldı.</p>
-                <div class="mt-4 flex gap-4">
-                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">İcra Dairesi <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenIcra.icraDairesi" type="text" placeholder="Örn: İst. 1. İcra" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Dosya No <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenIcra.dosyaNo" type="text" placeholder="Örn: 2024/123" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">İcra Dairesi <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenIcra.icraDairesi" type="text" placeholder="Örn: İst. 1. İcra" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Dosya No <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenIcra.dosyaNo" type="text" placeholder="Örn: 2024/123" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Eski Mahkeme / Daire (Opsiyonel)</label><input [(ngModel)]="islemGorenIcra.eskiMahkeme" type="text" placeholder="Örn: Ankara 7. İcra Dairesi" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Eski Esas / Dosya No (Opsiyonel)</label><input [(ngModel)]="islemGorenIcra.eskiEsasNo" type="text" placeholder="Örn: 2022/9987" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
                 </div>
 
                 <div class="mt-4">

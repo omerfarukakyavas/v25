@@ -465,6 +465,8 @@ export class AppComponent implements OnInit {
       { etiket: 'Müvekkil', onceki: onceki?.muvekkil, sonraki: sonraki.muvekkil },
       { etiket: 'Taraflar', onceki: this.getDavaTarafOzet(onceki), sonraki: this.getDavaTarafOzet(sonraki) },
       { etiket: 'Mahkeme', onceki: onceki?.mahkeme, sonraki: sonraki.mahkeme },
+      { etiket: 'Eski mahkeme', onceki: onceki?.eskiMahkeme, sonraki: sonraki.eskiMahkeme },
+      { etiket: 'Eski esas', onceki: onceki?.eskiEsasNo, sonraki: sonraki.eskiEsasNo },
       { etiket: 'Konu', onceki: onceki?.konu, sonraki: sonraki.konu },
       { etiket: 'Duruşma', onceki: this.birlestirTarihVeSaat(onceki?.durusmaTarihi, onceki?.durusmaSaati), sonraki: this.birlestirTarihVeSaat(sonraki.durusmaTarihi, sonraki.durusmaSaati) },
       { etiket: 'Bağlantılar', onceki: this.getDavaBaglantiKayitOzeti(onceki), sonraki: this.getDavaBaglantiKayitOzeti(sonraki) },
@@ -476,6 +478,8 @@ export class AppComponent implements OnInit {
     return this.degisenAlanMetni([
       { etiket: 'İcra dairesi', onceki: onceki?.icraDairesi, sonraki: sonraki.icraDairesi },
       { etiket: 'Dosya numarası', onceki: onceki?.dosyaNo, sonraki: sonraki.dosyaNo },
+      { etiket: 'Eski mahkeme', onceki: onceki?.eskiMahkeme, sonraki: sonraki.eskiMahkeme },
+      { etiket: 'Eski esas', onceki: onceki?.eskiEsasNo, sonraki: sonraki.eskiEsasNo },
       { etiket: 'Muhatap', onceki: onceki?.muvekkil, sonraki: sonraki.muvekkil },
       { etiket: 'Alacaklı', onceki: onceki?.alacakli, sonraki: sonraki.alacakli },
       { etiket: 'Borçlu', onceki: onceki?.borclu, sonraki: sonraki.borclu },
@@ -671,8 +675,8 @@ export class AppComponent implements OnInit {
       : 'border-slate-200 bg-white text-slate-600';
   }
 
-  get filtrelenmisDavalar() { return this.davalar.filter(d => { const s = this.aramaMetni.toLowerCase(); const mS = d.dosyaNo.toLowerCase().includes(s) || d.muvekkil.toLowerCase().includes(s) || this.getDavaKarsiTarafOzet(d).toLowerCase().includes(s) || d.mahkeme.toLowerCase().includes(s); const mD = this.durumFiltresi === 'Tümü' || d.durum === this.durumFiltresi; return mS && mD; }); }
-  get filtrelenmisIcralar() { return this.icralar.filter(i => { const s = this.aramaMetni.toLowerCase(); const mS = i.dosyaNo.toLowerCase().includes(s) || i.icraDairesi.toLowerCase().includes(s) || i.alacakli.toLowerCase().includes(s) || i.borclu.toLowerCase().includes(s); const mD = this.durumFiltresi === 'Tümü' || i.durum === this.durumFiltresi; return mS && mD; }); }
+  get filtrelenmisDavalar() { return this.davalar.filter(d => { const s = this.aramaMetni.toLowerCase(); const mS = d.dosyaNo.toLowerCase().includes(s) || d.muvekkil.toLowerCase().includes(s) || this.getDavaKarsiTarafOzet(d).toLowerCase().includes(s) || d.mahkeme.toLowerCase().includes(s) || (d.eskiMahkeme || '').toLowerCase().includes(s) || (d.eskiEsasNo || '').toLowerCase().includes(s); const mD = this.durumFiltresi === 'Tümü' || d.durum === this.durumFiltresi; return mS && mD; }); }
+  get filtrelenmisIcralar() { return this.icralar.filter(i => { const s = this.aramaMetni.toLowerCase(); const mS = i.dosyaNo.toLowerCase().includes(s) || i.icraDairesi.toLowerCase().includes(s) || i.alacakli.toLowerCase().includes(s) || i.borclu.toLowerCase().includes(s) || (i.eskiMahkeme || '').toLowerCase().includes(s) || (i.eskiEsasNo || '').toLowerCase().includes(s); const mD = this.durumFiltresi === 'Tümü' || i.durum === this.durumFiltresi; return mS && mD; }); }
   get filtrelenmisArabuluculuk() {
     return this.arabuluculukDosyalar.filter(a => {
       const s = this.aramaMetni.toLowerCase();
@@ -1401,6 +1405,8 @@ export class AppComponent implements OnInit {
     if (this.islemGorenDava.durum !== 'İstinaf/Temyiz') this.islemGorenDava.istinafMahkemesi = '';
     
     this.islemGorenDava.mahkeme = this.formatMetin(this.islemGorenDava.mahkeme);
+    this.islemGorenDava.eskiMahkeme = this.formatMetin(this.islemGorenDava.eskiMahkeme);
+    this.islemGorenDava.eskiEsasNo = this.formatMetin(this.islemGorenDava.eskiEsasNo);
     this.islemGorenDava.konu = this.formatMetin(this.islemGorenDava.konu);
     this.islemGorenDava.istinafMahkemesi = this.formatMetin(this.islemGorenDava.istinafMahkemesi);
     this.islemGorenDava.arsivYeri = this.formatMetin(this.islemGorenDava.arsivYeri);
@@ -1420,7 +1426,7 @@ export class AppComponent implements OnInit {
     const karsiTaraf = (muvekkilPozisyonu === 'Davalı' ? davacilar : davalilar).map(taraf => taraf.isim).join(', ') || '-';
     const noStr = num.map(n => `${n.tur}: ${n.no}`).join(' | ');
     if (this.formModu === 'ekle') {
-      let y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: birincilMuvekkil?.muvekkilId, muvekkiller, muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf, mahkeme: this.islemGorenDava.mahkeme || '-', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', durusmaSaati: this.islemGorenDava.durusmaSaati || '', durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: baglantiliIcraIds[0], baglantiliIcraIds, baglantiliArabuluculukIds, baglantiliTedbirDosyalari, baglantiliDelilTespitiDosyalari, baglantiliNoterlikDosyalari, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', muvekkilGorusmeNotlari: [], finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      let y: DavaDosyasi = { id: Date.now(), dosyaNo: noStr, dosyaNumaralari: num, muvekkilId: birincilMuvekkil?.muvekkilId, muvekkiller, muvekkil, muvekkilPozisyonu, davacilar, davalilar, karsiTaraf, mahkeme: this.islemGorenDava.mahkeme || '-', eskiMahkeme: this.islemGorenDava.eskiMahkeme || '', eskiEsasNo: this.islemGorenDava.eskiEsasNo || '', konu: this.islemGorenDava.konu || '-', durum: this.islemGorenDava.durum as any, istinafMahkemesi: this.islemGorenDava.istinafMahkemesi || '', durusmaTarihi: this.islemGorenDava.durusmaTarihi || '', durusmaSaati: this.islemGorenDava.durusmaSaati || '', durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '', takipTarihi: this.islemGorenDava.takipTarihi || '', vekaletUcreti: this.islemGorenDava.vekaletUcreti || 0, baglantiliIcraId: baglantiliIcraIds[0], baglantiliIcraIds, baglantiliArabuluculukIds, baglantiliTedbirDosyalari, baglantiliDelilTespitiDosyalari, baglantiliNoterlikDosyalari, arsivYeri: this.islemGorenDava.arsivYeri || '', notlar: '', muvekkilGorusmeNotlari: [], finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
       y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'Dava dosyası açıldı', `${noStr} referansıyla yeni kayıt oluşturuldu.`);
       if (y.durusmaTarihi) {
         y = this.dosyayaTakvimKaydiEkle(y, 'Duruşma', 'Planlandı', y.durusmaTarihi, y.durusmaSaati, 'İlk duruşma planı kaydedildi.');
@@ -1468,13 +1474,15 @@ export class AppComponent implements OnInit {
     if (!this.islemGorenIcra.icraDairesi || !this.islemGorenIcra.dosyaNo || !this.islemGorenIcra.muvekkilId || !this.islemGorenIcra.takipTipi) { this.formHata = "Daire, Dosya No, Muhatap ve Takip Tipi zorunludur."; return; }
     
     this.islemGorenIcra.icraDairesi = this.formatMetin(this.islemGorenIcra.icraDairesi);
+    this.islemGorenIcra.eskiMahkeme = this.formatMetin(this.islemGorenIcra.eskiMahkeme);
+    this.islemGorenIcra.eskiEsasNo = this.formatMetin(this.islemGorenIcra.eskiEsasNo);
     this.islemGorenIcra.alacakli = this.formatMetin(this.islemGorenIcra.alacakli);
     this.islemGorenIcra.borclu = this.formatMetin(this.islemGorenIcra.borclu);
     this.islemGorenIcra.arsivYeri = this.formatMetin(this.islemGorenIcra.arsivYeri);
 
     const m = this.muvekkiller.find(x => x.id == this.islemGorenIcra.muvekkilId);
     if (this.formModu === 'ekle') {
-      let y: IcraDosyasi = { id: Date.now(), icraDairesi: this.islemGorenIcra.icraDairesi || '', dosyaNo: this.islemGorenIcra.dosyaNo || '', muvekkilId: m?.id, muvekkil: m?.adSoyad || 'Bilinmiyor', alacakli: this.islemGorenIcra.alacakli || '-', borclu: this.islemGorenIcra.borclu || '-', takipTipi: this.islemGorenIcra.takipTipi || '', takipTarihi: this.islemGorenIcra.takipTarihi || '', durum: this.islemGorenIcra.durum as any, baglantiliDavaId: this.islemGorenIcra.baglantiliDavaId, arsivYeri: this.islemGorenIcra.arsivYeri || '', vekaletUcreti: this.islemGorenIcra.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      let y: IcraDosyasi = { id: Date.now(), icraDairesi: this.islemGorenIcra.icraDairesi || '', dosyaNo: this.islemGorenIcra.dosyaNo || '', eskiMahkeme: this.islemGorenIcra.eskiMahkeme || '', eskiEsasNo: this.islemGorenIcra.eskiEsasNo || '', muvekkilId: m?.id, muvekkil: m?.adSoyad || 'Bilinmiyor', alacakli: this.islemGorenIcra.alacakli || '-', borclu: this.islemGorenIcra.borclu || '-', takipTipi: this.islemGorenIcra.takipTipi || '', takipTarihi: this.islemGorenIcra.takipTarihi || '', durum: this.islemGorenIcra.durum as any, baglantiliDavaId: this.islemGorenIcra.baglantiliDavaId, arsivYeri: this.islemGorenIcra.arsivYeri || '', vekaletUcreti: this.islemGorenIcra.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
       y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'İcra dosyası açıldı', `${y.icraDairesi} / ${y.dosyaNo} referansıyla yeni takip oluşturuldu.`);
       this.icraKaydetCloud(y, 'Yeni icra dosyası buluta eklendi.');
     } else {
