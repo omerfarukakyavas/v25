@@ -1791,46 +1791,36 @@
                           }
                           @if (aktifDetaySekmesi === 'evraklar') {
                             <div class="flex flex-col h-full">
-                                @if (aktifSayfa === 'arabuluculukDetay') {
-                                  <div class="relative mb-4 overflow-hidden rounded-xl border border-violet-100 bg-violet-50/60 p-4 shadow-sm sm:mb-6">
-                                    <div class="absolute inset-y-0 left-0 w-1 bg-violet-500"></div>
-                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                     <div class="pr-2">
-                                       <p class="text-[10px] font-black uppercase tracking-wider text-violet-700">Google Docs Otomasyonu</p>
-                                       <h4 class="mt-1 text-sm font-black text-slate-800 sm:text-base">Davet Mektubu Oluştur</h4>
-                                       <p class="mt-1 text-xs leading-5 text-slate-600">Sistem önce uyuşmazlık türüne uygun şablonu arar. Bu dosya için ilk beklenti <span class="font-bold">{{ getDavetMektubuSablonBeklentisi() }}</span>; bulunamazsa genel <span class="font-bold">Davet Mektubu</span> şablonuna düşer.</p>
+                               @if (aktifSayfa === 'arabuluculukDetay') {
+                                 <div class="mb-4 rounded-xl border border-violet-100 bg-white px-3 py-3 shadow-sm sm:mb-5 sm:px-4">
+                                   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                     <div class="min-w-0">
+                                       <p class="text-[10px] font-black uppercase tracking-[0.22em] text-violet-700">Google Docs Otomasyonu</p>
+                                     </div>
+                                     <div class="flex flex-wrap gap-2">
+                                       <button (click)="davetMektubuOlustur()" [disabled]="davetMektubuOlusturuluyor || aktifDosyadaEvrakAdiVarMi(getDavetMektubuSeciliSablonIsmi())" class="inline-flex items-center justify-center rounded-lg bg-violet-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-violet-300">
+                                         {{ davetMektubuOlusturuluyor ? 'Oluşturuluyor...' : 'Davet Mektubu Oluştur' }}
+                                       </button>
+                                       <button (click)="bilgilendirmeTutanagiOlustur()" [disabled]="bilgilendirmeTutanagiOlusturuluyor || aktifDosyadaEvrakAdiVarMi(getBilgilendirmeTutanagiSeciliSablonIsmi())" class="inline-flex items-center justify-center rounded-lg bg-sky-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-sky-300">
+                                         {{ bilgilendirmeTutanagiOlusturuluyor ? 'Oluşturuluyor...' : 'Bilgilendirme Tutanağı Oluştur' }}
+                                       </button>
+                                     </div>
+                                   </div>
+                                   @if (!googleDocsEntegrasyonuHazirMi() || aktifDosyadaEvrakAdiVarMi(getDavetMektubuSeciliSablonIsmi()) || aktifDosyadaEvrakAdiVarMi(getBilgilendirmeTutanagiSeciliSablonIsmi())) {
+                                     <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
                                        @if (!googleDocsEntegrasyonuHazirMi()) {
-                                         <p class="mt-2 text-xs font-semibold text-rose-600">Google yetki ayarı henüz eklenmediği için ilk kullanım öncesinde küçük bir kurulum gerekecek.</p>
+                                         <span class="inline-flex rounded-full bg-rose-50 px-2.5 py-1 font-semibold text-rose-600 ring-1 ring-rose-200">Google yetki ayarı eksik</span>
                                        }
-                                      @if (aktifDosyadaEvrakAdiVarMi(getDavetMektubuSeciliSablonIsmi())) {
-                                        <p class="mt-2 text-xs font-semibold text-amber-700">Bu dosyada seçili türe ait davet mektubu zaten var. Yeniden üretmek için önce mevcut kaydı silin.</p>
-                                      }
-                                    </div>
-                                    <button (click)="davetMektubuOlustur()" [disabled]="davetMektubuOlusturuluyor || aktifDosyadaEvrakAdiVarMi(getDavetMektubuSeciliSablonIsmi())" class="inline-flex items-center justify-center rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-violet-300">
-                                      {{ davetMektubuOlusturuluyor ? 'Oluşturuluyor...' : 'Davet Mektubu Oluştur' }}
-                                    </button>
-                                    </div>
-                                  </div>
-                                  <div class="relative mb-4 overflow-hidden rounded-xl border border-sky-100 bg-sky-50/60 p-4 shadow-sm sm:mb-6">
-                                    <div class="absolute inset-y-0 left-0 w-1 bg-sky-500"></div>
-                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                      <div class="pr-2">
-                                        <p class="text-[10px] font-black uppercase tracking-wider text-sky-700">Google Docs Otomasyonu</p>
-                                        <h4 class="mt-1 text-sm font-black text-slate-800 sm:text-base">Bilgilendirme Tutanağı Oluştur</h4>
-                                        <p class="mt-1 text-xs leading-5 text-slate-600">Bu belge tek şablondan üretilir. Sistem doğrudan <span class="font-bold">Bilgilendirme Tutanağı</span> adlı Google Docs şablonunu kullanır.</p>
-                                        @if (!googleDocsEntegrasyonuHazirMi()) {
-                                          <p class="mt-2 text-xs font-semibold text-rose-600">Google yetki ayarı henüz eklenmediği için ilk kullanım öncesinde küçük bir kurulum gerekecek.</p>
-                                        }
-                                        @if (aktifDosyadaEvrakAdiVarMi(getBilgilendirmeTutanagiSeciliSablonIsmi())) {
-                                          <p class="mt-2 text-xs font-semibold text-amber-700">Bu dosyada bilgilendirme tutanağı zaten var. Yeniden üretmek için önce mevcut kaydı silin.</p>
-                                        }
-                                      </div>
-                                      <button (click)="bilgilendirmeTutanagiOlustur()" [disabled]="bilgilendirmeTutanagiOlusturuluyor || aktifDosyadaEvrakAdiVarMi(getBilgilendirmeTutanagiSeciliSablonIsmi())" class="inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-sky-300">
-                                        {{ bilgilendirmeTutanagiOlusturuluyor ? 'Oluşturuluyor...' : 'Bilgilendirme Tutanağı Oluştur' }}
-                                      </button>
-                                    </div>
-                                  </div>
-                                }
+                                       @if (aktifDosyadaEvrakAdiVarMi(getDavetMektubuSeciliSablonIsmi())) {
+                                         <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-700 ring-1 ring-amber-200">Davet mektubu zaten var</span>
+                                       }
+                                       @if (aktifDosyadaEvrakAdiVarMi(getBilgilendirmeTutanagiSeciliSablonIsmi())) {
+                                         <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-700 ring-1 ring-amber-200">Bilgilendirme tutanağı zaten var</span>
+                                       }
+                                     </div>
+                                   }
+                                 </div>
+                               }
                                 <div class="relative mb-4 flex flex-col gap-3 overflow-hidden rounded-xl border border-blue-100 bg-white p-3 shadow-sm sm:mb-6 sm:p-4">
                                   <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
                                   <p class="text-[10px] font-black uppercase text-blue-600 tracking-wider">Yeni Ana Evrak Ekle</p>
