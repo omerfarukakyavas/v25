@@ -111,6 +111,7 @@ export class AppComponent implements OnInit {
   duzenlenenEvrakOrijinalSonEylemTarihi = '';
   acikKlasorler: Record<number, boolean> = {}; 
   davetMektubuOlusturuluyor = false;
+  bilgilendirmeTutanagiOlusturuluyor = false;
   googleDocsYetkiIstendi = false;
   yeniMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
   acikMuvekkilGorusmeNotlari: Record<number, boolean> = {};
@@ -1885,6 +1886,12 @@ export class AppComponent implements OnInit {
   getDavetMektubuSeciliSablonIsmi() {
     return this.getDavetMektubuSablonu()?.isim || this.getDavetMektubuSablonBeklentisi();
   }
+  getBilgilendirmeTutanagiSablonu() {
+    return this.arabuluculukSablonuBul(GOOGLE_DOCS_CONFIG.bilgilendirmeTutanagiTemplateName);
+  }
+  getBilgilendirmeTutanagiSeciliSablonIsmi() {
+    return this.getBilgilendirmeTutanagiSablonu()?.isim || GOOGLE_DOCS_CONFIG.bilgilendirmeTutanagiTemplateName;
+  }
   googleDosyaIdAyikla(girdi?: string) {
     const deger = (girdi || '').trim();
     if (!deger) return '';
@@ -1956,7 +1963,7 @@ export class AppComponent implements OnInit {
   getArabuluculukMuvekkilAdi(dosya: ArabuluculukDosyasi) {
     return this.muvekkiller.find(muvekkil => muvekkil.id === dosya.muvekkilId)?.adSoyad || this.getArabuluculukTaraflari(dosya, 'Başvurucu');
   }
-  davetMektubuYerTutuculariniOlustur(dosya: ArabuluculukDosyasi) {
+  arabuluculukBelgeYerTutuculariniOlustur(dosya: ArabuluculukDosyasi) {
     const basvurucular = this.getArabuluculukTarafListesi(dosya, 'Başvurucu');
     const digerTaraflar = this.getArabuluculukTarafListesi(dosya, 'Diğer Taraf');
 
@@ -2044,6 +2051,65 @@ export class AppComponent implements OnInit {
 
     return await yanit.json();
   }
+  async arabuluculukGoogleBelgesiOlustur(dosya: ArabuluculukDosyasi, sablon: EvrakBaglantisi, varsayilanSablonIsmi: string, belgeBasligi: string) {
+    const sablonDosyaId = this.googleDosyaIdAyikla(sablon.url);
+    if (!sablonDosyaId) {
+      throw new Error(`${belgeBasligi} şablonuna geçerli bir Google Docs bağlantısı girin.`);
+    }
+
+    const token = await this.googleErisimBelirteciAl();
+    const belgeAdi = `${belgeBasligi} - ${dosya.buroNo ? `${dosya.buroNo} - ` : ''}${dosya.arabuluculukNo || dosya.id}`;
+    const kopya = await this.googleJsonIstek(`https://www.googleapis.com/drive/v3/files/${sablonDosyaId}/copy?supportsAllDrives=true&fields=id,webViewLink`, token, {
+      method: 'POST',
+      body: JSON.stringify({ name: belgeAdi })
+    });
+
+    let alanlarDolduruldu = false;
+    try {
+      const yerTutucular = this.arabuluculukBelgeYerTutuculariniOlustur(dosya);
+      const requests = Object.entries(yerTutucular).map(([anahtar, deger]) => ({
+        replaceAllText: {
+          containsText: {
+            text: `{{${anahtar}}}`,
+            matchCase: true
+          },
+          replaceText: deger || '-'
+        }
+      }));
+
+      await this.googleJsonIstek(`https://docs.googleapis.com/v1/documents/${kopya.id}:batchUpdate`, token, {
+        method: 'POST',
+        body: JSON.stringify({ requests })
+      });
+      alanlarDolduruldu = true;
+    } catch {
+      alanlarDolduruldu = false;
+    }
+
+    const k: ArabuluculukDosyasi = JSON.parse(JSON.stringify(dosya));
+    if (!k.evraklar) k.evraklar = [];
+    k.evraklar.unshift({
+      id: Date.now(),
+      isim: sablon.isim || varsayilanSablonIsmi,
+      url: kopya.webViewLink || `https://docs.google.com/document/d/${kopya.id}/edit`,
+      tarih: new Date().toISOString(),
+      tamamlandiMi: false,
+      tamamlanmaTarihi: '',
+      yaziRengi: this.getEvrakYaziRengi(sablon.yaziRengi)
+    });
+
+    const belgeBasligiKucuk = belgeBasligi.toLocaleLowerCase('tr-TR');
+    const aciklama = alanlarDolduruldu
+      ? `Google Docs şablonundan ${belgeBasligiKucuk} üretildi.`
+      : 'Google Docs kopyası oluşturuldu, ancak bazı alanlar otomatik doldurulamadı.';
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', `${belgeBasligi} oluşturuldu`, aciklama);
+    await this.arabuluculukKaydetCloud(
+      kayitli,
+      alanlarDolduruldu
+        ? `${belgeBasligi} oluşturuldu ve evraklara eklendi.`
+        : `${belgeBasligi} oluşturuldu. Evraklara eklendi, fakat bazı yer tutucular doldurulamadı.`
+    );
+  }
   async davetMektubuOlustur() {
     if (this.davetMektubuOlusturuluyor) return;
 
@@ -2064,70 +2130,55 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    const sablonDosyaId = this.googleDosyaIdAyikla(sablon.url);
-    if (!sablonDosyaId) {
-      this.bildirimGoster('error', 'Şablon bağlantısı okunamadı', 'Davet Mektubu şablonuna geçerli bir Google Docs bağlantısı girin.');
-      return;
-    }
-
     this.davetMektubuOlusturuluyor = true;
 
     try {
-      const token = await this.googleErisimBelirteciAl();
-      const belgeAdi = `Davet Mektubu - ${dosya.buroNo ? `${dosya.buroNo} - ` : ''}${dosya.arabuluculukNo || dosya.id}`;
-      const kopya = await this.googleJsonIstek(`https://www.googleapis.com/drive/v3/files/${sablonDosyaId}/copy?supportsAllDrives=true&fields=id,webViewLink`, token, {
-        method: 'POST',
-        body: JSON.stringify({ name: belgeAdi })
-      });
-
-      let alanlarDolduruldu = false;
-      try {
-        const yerTutucular = this.davetMektubuYerTutuculariniOlustur(dosya);
-        const requests = Object.entries(yerTutucular).map(([anahtar, deger]) => ({
-          replaceAllText: {
-            containsText: {
-              text: `{{${anahtar}}}`,
-              matchCase: true
-            },
-            replaceText: deger || '-'
-          }
-        }));
-
-        await this.googleJsonIstek(`https://docs.googleapis.com/v1/documents/${kopya.id}:batchUpdate`, token, {
-          method: 'POST',
-          body: JSON.stringify({ requests })
-        });
-        alanlarDolduruldu = true;
-      } catch {
-        alanlarDolduruldu = false;
-      }
-
-      const k: ArabuluculukDosyasi = JSON.parse(JSON.stringify(dosya));
-      if (!k.evraklar) k.evraklar = [];
-      k.evraklar.unshift({
-        id: Date.now(),
-        isim: sablon.isim || GOOGLE_DOCS_CONFIG.davetMektubuTemplateName,
-        url: kopya.webViewLink || `https://docs.google.com/document/d/${kopya.id}/edit`,
-        tarih: new Date().toISOString(),
-        tamamlandiMi: false,
-        tamamlanmaTarihi: '',
-        yaziRengi: this.getEvrakYaziRengi(sablon.yaziRengi)
-      });
-
-      const aciklama = alanlarDolduruldu
-        ? 'Google Docs şablonundan davet mektubu üretildi.'
-        : 'Google Docs kopyası oluşturuldu, ancak bazı alanlar otomatik doldurulamadı.';
-      const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Davet mektubu oluşturuldu', aciklama);
-      await this.arabuluculukKaydetCloud(
-        kayitli,
-        alanlarDolduruldu
-          ? 'Davet mektubu oluşturuldu ve evraklara eklendi.'
-          : 'Davet mektubu oluşturuldu. Evraklara eklendi, fakat bazı yer tutucular doldurulamadı.'
+      await this.arabuluculukGoogleBelgesiOlustur(
+        dosya,
+        sablon,
+        GOOGLE_DOCS_CONFIG.davetMektubuTemplateName,
+        'Davet Mektubu'
       );
     } catch (e: any) {
       this.bildirimGoster('error', 'Davet mektubu oluşturulamadı', e?.message || 'Google Docs bağlantısını kontrol edip tekrar deneyin.');
     } finally {
       this.davetMektubuOlusturuluyor = false;
+      this.cdr.detectChanges();
+    }
+  }
+  async bilgilendirmeTutanagiOlustur() {
+    if (this.bilgilendirmeTutanagiOlusturuluyor) return;
+
+    const dosya = this.getAktifArabuluculukDosyasi();
+    if (!dosya) {
+      this.bildirimGoster('error', 'Arabuluculuk dosyası bulunamadı', 'Önce bir arabuluculuk dosyası açın.');
+      return;
+    }
+
+    const sablon = this.getBilgilendirmeTutanagiSablonu();
+    if (!sablon?.url) {
+      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${GOOGLE_DOCS_CONFIG.bilgilendirmeTutanagiTemplateName}" adlı Google Docs şablonunu ekleyin.`);
+      return;
+    }
+
+    if (this.aktifDosyadaEvrakAdiVarMi(this.getBilgilendirmeTutanagiSeciliSablonIsmi())) {
+      this.bildirimGoster('info', 'Bilgilendirme tutanağı zaten var', 'Bu dosyada bilgilendirme tutanağı bağlantısı zaten bulunuyor.');
+      return;
+    }
+
+    this.bilgilendirmeTutanagiOlusturuluyor = true;
+
+    try {
+      await this.arabuluculukGoogleBelgesiOlustur(
+        dosya,
+        sablon,
+        GOOGLE_DOCS_CONFIG.bilgilendirmeTutanagiTemplateName,
+        'Bilgilendirme Tutanağı'
+      );
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Bilgilendirme tutanağı oluşturulamadı', e?.message || 'Google Docs bağlantısını kontrol edip tekrar deneyin.');
+    } finally {
+      this.bilgilendirmeTutanagiOlusturuluyor = false;
       this.cdr.detectChanges();
     }
   }
