@@ -84,6 +84,8 @@ export class AppComponent implements OnInit {
   islemGorenDava: Partial<DavaDosyasi> = {}; islemGorenIcra: Partial<IcraDosyasi> = {}; islemGorenArabuluculuk: Partial<ArabuluculukDosyasi> = {}; islemGorenMuvekkil: Partial<Muvekkil> = {};
   
   yeniIslem: Partial<FinansalIslem> = { tur: 'Vekalet Ücreti' }; 
+  duzenlenenFinansalIslemId: number | null = null;
+  duzenlenenFinansalIslem: Partial<FinansalIslem> = {};
   silinecekDavaId: number | null = null; silinecekIcraId: number | null = null; silinecekArabuluculukId: number | null = null; silinecekMuvekkilId: number | null = null;
   aktifDetaySekmesi: DetaySekmesi = 'notlar'; formHata = '';
 
@@ -277,9 +279,9 @@ export class AppComponent implements OnInit {
     }
   }
 
-  detayaGit(d: DavaDosyasi) { this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Vekalet Ücreti', tarih: new Date().toISOString().split('T')[0] }; this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' }; this.acikMuvekkilGorusmeNotlari = {}; this.duzenlenenMuvekkilGorusmeNotuId = null; this.duzenlenenMuvekkilGorusmeNotu = {}; this.silinecekMuvekkilGorusmeNotuId = null; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
-  icraDetayinaGit(i: IcraDosyasi) { this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Vekalet Ücreti', tarih: new Date().toISOString().split('T')[0] }; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
-  arabuluculukDetayinaGit(a: ArabuluculukDosyasi) { this.seciliArabuluculuk = a; this.aktifSayfa = 'arabuluculukDetay'; this.aktifDetaySekmesi = 'notlar'; this.yeniIslem = { tur: 'Ödeme', tarih: new Date().toISOString().split('T')[0] }; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
+  detayaGit(d: DavaDosyasi) { this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.finansalIslemFormunuSifirla('Vekalet Ücreti'); this.finansalIslemDuzenlemeIptal(); this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' }; this.acikMuvekkilGorusmeNotlari = {}; this.duzenlenenMuvekkilGorusmeNotuId = null; this.duzenlenenMuvekkilGorusmeNotu = {}; this.silinecekMuvekkilGorusmeNotuId = null; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
+  icraDetayinaGit(i: IcraDosyasi) { this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.finansalIslemFormunuSifirla('Vekalet Ücreti'); this.finansalIslemDuzenlemeIptal(); this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
+  arabuluculukDetayinaGit(a: ArabuluculukDosyasi) { this.seciliArabuluculuk = a; this.aktifSayfa = 'arabuluculukDetay'; this.aktifDetaySekmesi = 'notlar'; this.finansalIslemFormunuSifirla('Ödeme'); this.finansalIslemDuzenlemeIptal(); this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
 
   davayaGitId(id?: number) { if(!id) return; const d = this.davalar.find(x=>x.id===id); if(d) this.detayaGit(d); }
   icrayaGitId(id?: number) { if(!id) return; const i = this.icralar.find(x=>x.id===id); if(i) this.icraDetayinaGit(i); }
@@ -1598,6 +1600,68 @@ export class AppComponent implements OnInit {
     return 'Tamamlandı';
   }
 
+  getFinansalIslemTurSecenekleri() {
+    if (this.aktifSayfa === 'arabuluculukDetay') {
+      return [
+        { value: 'Ödeme Talep Tarihi', label: 'Ödeme Talep Tarihi' },
+        { value: 'Ödeme', label: 'Ödeme' }
+      ];
+    }
+    return [
+      { value: 'Vekalet Ücreti', label: 'Vekalet / Hizmet Tahsilatı' },
+      { value: 'Masraf Avansı (Giriş)', label: 'Masraf Avansı' },
+      { value: 'Masraf Harcaması (Çıkış)', label: 'Masraf Harcaması' }
+    ];
+  }
+  finansalIslemFormunuSifirla(tur = this.getFinansalIslemTurSecenekleri()[0]?.value || 'Vekalet Ücreti') {
+    this.yeniIslem = { tur, tarih: new Date().toISOString().split('T')[0], tutar: undefined, aciklama: '', makbuzUrl: '' };
+  }
+  getFinansalIslemOzetMetni(islem?: Partial<FinansalIslem>) {
+    if (!islem) return 'Finans kaydı';
+    const parcalar = [
+      islem.tur || 'Finans kaydı',
+      this.formatPara(Number(islem.tutar || 0))
+    ];
+    if (islem.aciklama) parcalar.push(islem.aciklama);
+    if (islem.makbuzUrl) parcalar.push('Makbuz linki eklendi');
+    return parcalar.join(' • ');
+  }
+  finansalIslemDuzenlemeBaslat(islem: FinansalIslem) {
+    this.duzenlenenFinansalIslemId = islem.id;
+    this.duzenlenenFinansalIslem = { ...islem, makbuzUrl: islem.makbuzUrl || '' };
+  }
+  finansalIslemDuzenlemeIptal() {
+    this.duzenlenenFinansalIslemId = null;
+    this.duzenlenenFinansalIslem = {};
+  }
+  finansalIslemGuncelle() {
+    if (!this.aktifDosya || !this.duzenlenenFinansalIslemId) return;
+    const tutar = Number(this.duzenlenenFinansalIslem.tutar);
+    const aciklama = (this.duzenlenenFinansalIslem.aciklama || '').trim();
+    if (!tutar || !aciklama) {
+      this.bildirimGoster('info', 'Finans hareketi eksik', 'Tutar ve açıklama alanını doldurup tekrar deneyin.');
+      return;
+    }
+
+    const k: any = { ...this.aktifDosya, finansalIslemler: [...(this.aktifDosya.finansalIslemler || [])] };
+    const index = k.finansalIslemler.findIndex((islem: FinansalIslem) => islem.id === this.duzenlenenFinansalIslemId);
+    if (index === -1) return;
+
+    const guncellenenIslem: FinansalIslem = {
+      ...k.finansalIslemler[index],
+      tarih: this.duzenlenenFinansalIslem.tarih || new Date().toISOString().split('T')[0],
+      tur: this.duzenlenenFinansalIslem.tur || this.getFinansalIslemTurSecenekleri()[0]?.value || 'Vekalet Ücreti',
+      tutar,
+      aciklama: this.formatMetin(aciklama),
+      makbuzUrl: this.hazirBaglantiUrl(this.duzenlenenFinansalIslem.makbuzUrl)
+    };
+    k.finansalIslemler[index] = guncellenenIslem;
+
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi güncellendi', this.getFinansalIslemOzetMetni(guncellenenIslem));
+    this.finansalIslemDuzenlemeIptal();
+    this.aktifDosyaKaydet(kayitli, 'Finans hareketi güncellendi.');
+  }
+
   finansalIslemEkle() {
     if (!this.yeniIslem.tutar || !this.yeniIslem.aciklama || !this.aktifDosya) return;
     this.yeniIslem.aciklama = this.formatMetin(this.yeniIslem.aciklama);
@@ -1605,7 +1669,9 @@ export class AppComponent implements OnInit {
     const k: any = {...this.aktifDosya}; if (!k.finansalIslemler) k.finansalIslemler = [];
     k.finansalIslemler.unshift({ id: Date.now(), tarih: this.yeniIslem.tarih || new Date().toISOString().split('T')[0], tur: this.yeniIslem.tur as any, tutar: this.yeniIslem.tutar, aciklama: this.yeniIslem.aciklama || '', makbuzUrl });
     const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi eklendi', `${this.yeniIslem.tur}: ${this.formatPara(this.yeniIslem.tutar || 0)} • ${this.yeniIslem.aciklama || ''}${makbuzUrl ? ' • Makbuz linki eklendi' : ''}`);
-    this.aktifDosyaKaydet(kayitli, 'Finans hareketi dosyaya eklendi.'); this.yeniIslem = { tur: this.yeniIslem.tur, tarih: new Date().toISOString().split('T')[0], tutar: undefined, aciklama: '', makbuzUrl: '' };
+    this.finansalIslemDuzenlemeIptal();
+    this.aktifDosyaKaydet(kayitli, 'Finans hareketi dosyaya eklendi.');
+    this.finansalIslemFormunuSifirla(this.yeniIslem.tur as string);
   }
   finansalIslemSil(id: number) {
     if(!this.aktifDosya) return;
@@ -1613,6 +1679,7 @@ export class AppComponent implements OnInit {
     const silinen = (k.finansalIslemler || []).find((i:any) => i.id === id);
     k.finansalIslemler = k.finansalIslemler!.filter((i:any) => i.id !== id);
     const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi silindi', silinen ? `${silinen.tur}: ${this.formatPara(silinen.tutar || 0)} • ${silinen.aciklama || ''}${silinen.makbuzUrl ? ' • Makbuz linki vardı' : ''}` : 'Seçili finans hareketi kayıttan kaldırıldı.');
+    if (this.duzenlenenFinansalIslemId === id) this.finansalIslemDuzenlemeIptal();
     this.aktifDosyaKaydet(kayitli, 'Finans hareketi silindi.');
   }
 

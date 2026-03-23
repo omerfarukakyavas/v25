@@ -2007,10 +2007,8 @@
                                    <div>
                                      <label class="block text-[10px] font-bold text-slate-500 mb-0.5">İşlem Türü</label>
                                      <select [(ngModel)]="yeniIslem.tur" class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none bg-white">
-                                       @if (aktifSayfa === 'arabuluculukDetay') {
-                                         <option value="Ödeme Talep Tarihi">Ödeme Talep Tarihi</option><option value="Ödeme">Ödeme</option>
-                                       } @else {
-                                         <option value="Vekalet Ücreti">Vekalet / Hizmet Tahsilatı</option><option value="Masraf Avansı (Giriş)">Masraf Avansı</option><option value="Masraf Harcaması (Çıkış)">Masraf Harcaması</option>
+                                       @for (secenek of getFinansalIslemTurSecenekleri(); track secenek.value) {
+                                         <option [value]="secenek.value">{{ secenek.label }}</option>
                                        }
                                      </select>
                                    </div>
@@ -2051,18 +2049,59 @@
                                           }
                                         </span>
                                       </div>
-                                      <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                                        <div class="flex min-w-0 flex-col gap-1">
-                                          <p class="text-xs text-slate-500">{{ islem.aciklama }}</p>
-                                          @if (islem.makbuzUrl) {
-                                            <a [href]="islem.makbuzUrl" target="_blank" rel="noopener noreferrer" class="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-blue-600 transition-colors hover:text-blue-700 hover:underline">
-                                              Makbuz Linki
-                                              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5v14h14v-5"></path></svg>
-                                            </a>
-                                          }
+                                      @if (duzenlenenFinansalIslemId === islem.id) {
+                                        <div class="space-y-3 border-t border-slate-100 pt-3">
+                                          <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                            <div>
+                                              <label class="mb-0.5 block text-[10px] font-bold text-slate-500">İşlem Türü</label>
+                                              <select [(ngModel)]="duzenlenenFinansalIslem.tur" class="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none">
+                                                @for (secenek of getFinansalIslemTurSecenekleri(); track secenek.value) {
+                                                  <option [value]="secenek.value">{{ secenek.label }}</option>
+                                                }
+                                              </select>
+                                            </div>
+                                            <div>
+                                              <label class="mb-0.5 block text-[10px] font-bold text-slate-500">Tarih</label>
+                                              <input [(ngModel)]="duzenlenenFinansalIslem.tarih" type="date" class="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none">
+                                            </div>
+                                          </div>
+                                          <div class="grid grid-cols-1 gap-2 sm:grid-cols-[140px_minmax(0,1fr)]">
+                                            <div>
+                                              <label class="mb-0.5 block text-[10px] font-bold text-slate-500">{{ aktifSayfa === 'arabuluculukDetay' ? 'Brüt Tutar (₺)' : 'Tutar (₺)' }}</label>
+                                              <input [(ngModel)]="duzenlenenFinansalIslem.tutar" type="number" min="0" class="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none">
+                                            </div>
+                                            <div>
+                                              <label class="mb-0.5 block text-[10px] font-bold text-slate-500">Açıklama</label>
+                                              <input [(ngModel)]="duzenlenenFinansalIslem.aciklama" (keyup.enter)="finansalIslemGuncelle()" type="text" class="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none">
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <label class="mb-0.5 block text-[10px] font-bold text-slate-500">Makbuz / Evrak Linki (Opsiyonel)</label>
+                                            <input [(ngModel)]="duzenlenenFinansalIslem.makbuzUrl" (keyup.enter)="finansalIslemGuncelle()" type="text" class="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none">
+                                          </div>
+                                          <div class="flex flex-wrap justify-end gap-2">
+                                            <button (click)="finansalIslemDuzenlemeIptal()" class="rounded bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-200">İptal</button>
+                                            <button (click)="finansalIslemGuncelle()" class="rounded bg-slate-800 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-slate-900">Değişikliği Kaydet</button>
+                                          </div>
                                         </div>
-                                        <div class="flex items-center gap-2"><span class="text-[10px] text-slate-400 font-medium">{{ formatTarihKisa(islem.tarih) }}</span><button (click)="finansalIslemSil(islem.id)" class="text-xs text-slate-300 hover:text-red-500">Sil</button></div>
-                                      </div>
+                                      } @else {
+                                        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                                          <div class="flex min-w-0 flex-col gap-1">
+                                            <p class="text-xs text-slate-500">{{ islem.aciklama }}</p>
+                                            @if (islem.makbuzUrl) {
+                                              <a [href]="islem.makbuzUrl" target="_blank" rel="noopener noreferrer" class="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-blue-600 transition-colors hover:text-blue-700 hover:underline">
+                                                Makbuz Linki
+                                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5v14h14v-5"></path></svg>
+                                              </a>
+                                            }
+                                          </div>
+                                          <div class="flex items-center gap-2">
+                                            <span class="text-[10px] text-slate-400 font-medium">{{ formatTarihKisa(islem.tarih) }}</span>
+                                            <button (click)="finansalIslemDuzenlemeBaslat(islem)" class="text-xs font-medium text-slate-400 transition-colors hover:text-slate-700">Düzenle</button>
+                                            <button (click)="finansalIslemSil(islem.id)" class="text-xs text-slate-300 hover:text-red-500">Sil</button>
+                                          </div>
+                                        </div>
+                                      }
                                     </div>
                                   }
                                </div>
