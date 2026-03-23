@@ -88,6 +88,8 @@ export class AppComponent implements OnInit {
   duzenlenenFinansalIslem: Partial<FinansalIslem> = {};
   seciliBaglantiliIcraId: number | undefined = undefined;
   seciliBaglantiliArabuluculukId: number | undefined = undefined;
+  baglantiliIcraArama = '';
+  baglantiliArabuluculukArama = '';
   yeniBaglantiliTedbirDosyasi = '';
   yeniBaglantiliDelilTespitiDosyasi = '';
   yeniBaglantiliNoterlikDosyasi = '';
@@ -330,11 +332,33 @@ export class AppComponent implements OnInit {
   }
   get secilebilirBaglantiliIcraDosyalari() {
     const secili = new Set(this.getDavaBaglantiliIcraIdleri(this.islemGorenDava));
-    return this.icralar.filter(icra => !secili.has(icra.id));
+    const arama = (this.baglantiliIcraArama || '').toLocaleLowerCase('tr-TR').trim();
+    return this.icralar.filter(icra => {
+      if (secili.has(icra.id)) return false;
+      if (!arama) return true;
+      return [
+        icra.icraDairesi,
+        icra.dosyaNo,
+        icra.alacakli,
+        icra.borclu,
+        icra.muvekkil
+      ].filter(Boolean).join(' ').toLocaleLowerCase('tr-TR').includes(arama);
+    });
   }
   get secilebilirBaglantiliArabuluculukDosyalari() {
     const secili = new Set(this.getDavaBaglantiliArabuluculukIdleri(this.islemGorenDava));
-    return this.arabuluculukDosyalar.filter(arabuluculuk => !secili.has(arabuluculuk.id));
+    const arama = (this.baglantiliArabuluculukArama || '').toLocaleLowerCase('tr-TR').trim();
+    return this.arabuluculukDosyalar.filter(arabuluculuk => {
+      if (secili.has(arabuluculuk.id)) return false;
+      if (!arama) return true;
+      return [
+        arabuluculuk.buroNo,
+        arabuluculuk.arabuluculukNo,
+        arabuluculuk.buro,
+        arabuluculuk.uyusmazlikTuru,
+        this.getArabuluculukTarafAramaMetni(arabuluculuk.taraflar)
+      ].filter(Boolean).join(' ').toLocaleLowerCase('tr-TR').includes(arama);
+    });
   }
   baglantiliIcraEkle() {
     if (!this.seciliBaglantiliIcraId) return;
@@ -1348,6 +1372,8 @@ export class AppComponent implements OnInit {
     this.formHata = '';
     this.seciliBaglantiliIcraId = undefined;
     this.seciliBaglantiliArabuluculukId = undefined;
+    this.baglantiliIcraArama = '';
+    this.baglantiliArabuluculukArama = '';
     this.yeniBaglantiliTedbirDosyasi = '';
     this.yeniBaglantiliDelilTespitiDosyasi = '';
     this.yeniBaglantiliNoterlikDosyasi = '';
@@ -1367,7 +1393,7 @@ export class AppComponent implements OnInit {
   }
   dosyaNumarasiEkle() { if (!this.islemGorenDava.dosyaNumaralari) this.islemGorenDava.dosyaNumaralari = []; this.islemGorenDava.dosyaNumaralari.push({ tur: 'ESAS', no: '' }); }
   dosyaNumarasiSil(i: number) { if (this.islemGorenDava.dosyaNumaralari) this.islemGorenDava.dosyaNumaralari.splice(i, 1); }
-  davaFormKapat() { this.davaFormAcik = false; this.hizliMuvekkilFormAcik = false; this.hizliMuvekkilKaydi = { tip: 'Müvekkil' }; this.seciliBaglantiliIcraId = undefined; this.seciliBaglantiliArabuluculukId = undefined; this.yeniBaglantiliTedbirDosyasi = ''; this.yeniBaglantiliDelilTespitiDosyasi = ''; this.yeniBaglantiliNoterlikDosyasi = ''; }
+  davaFormKapat() { this.davaFormAcik = false; this.hizliMuvekkilFormAcik = false; this.hizliMuvekkilKaydi = { tip: 'Müvekkil' }; this.seciliBaglantiliIcraId = undefined; this.seciliBaglantiliArabuluculukId = undefined; this.baglantiliIcraArama = ''; this.baglantiliArabuluculukArama = ''; this.yeniBaglantiliTedbirDosyasi = ''; this.yeniBaglantiliDelilTespitiDosyasi = ''; this.yeniBaglantiliNoterlikDosyasi = ''; }
   davaKaydet() {
     const num = (this.islemGorenDava.dosyaNumaralari || []).filter(n => n.no && n.no.trim() !== '');
     const muvekkiller = this.davaMuvekkilleriniHazirla(this.islemGorenDava.muvekkiller);
