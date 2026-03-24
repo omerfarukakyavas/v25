@@ -35,6 +35,24 @@ import {
 declare const __initial_auth_token: any;
 declare const google: any;
 
+type ArabuluculukSureAsamasi = 'normal' | 'uzatma' | 'asildi' | 'tamamlandi';
+
+type ArabuluculukSureSayaci = {
+  dosya: ArabuluculukDosyasi;
+  kuralEtiketi: string;
+  kuralAciklamasi: string;
+  normalSureGun: number;
+  uzatmaSureGun: number;
+  gorevlendirmeTarihi: string;
+  normalSonTarih: string;
+  azamiSonTarih: string;
+  gecenGun: number;
+  normalKalanGun: number;
+  azamiKalanGun: number;
+  asama: ArabuluculukSureAsamasi;
+  tamamlanmaGun?: number;
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -921,6 +939,40 @@ export class AppComponent implements OnInit {
     return new Date(str).getTime();
   }
 
+  gunBazliTarihOlustur(str?: string) {
+    const deger = (str || '').trim().slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(deger)) return null;
+
+    const [yil, ay, gun] = deger.split('-').map(Number);
+    const tarih = new Date(yil, ay - 1, gun);
+    tarih.setHours(0, 0, 0, 0);
+    return Number.isNaN(tarih.getTime()) ? null : tarih;
+  }
+
+  gunBazliIsoTarih(tarih?: Date | null) {
+    if (!tarih) return '';
+    const yil = tarih.getFullYear();
+    const ay = `${tarih.getMonth() + 1}`.padStart(2, '0');
+    const gun = `${tarih.getDate()}`.padStart(2, '0');
+    return `${yil}-${ay}-${gun}`;
+  }
+
+  gunBazliTarihEkle(str?: string, gun = 0) {
+    const tarih = this.gunBazliTarihOlustur(str);
+    if (!tarih) return '';
+    const yeniTarih = new Date(tarih);
+    yeniTarih.setDate(yeniTarih.getDate() + gun);
+    return this.gunBazliIsoTarih(yeniTarih);
+  }
+
+  gunBazliTarihFarki(str?: string) {
+    const tarih = this.gunBazliTarihOlustur(str);
+    if (!tarih) return Number.MAX_SAFE_INTEGER;
+    const bugun = new Date();
+    bugun.setHours(0, 0, 0, 0);
+    return Math.round((tarih.getTime() - bugun.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
   ajandaGunFarki(str?: string) {
     if (!str) return Number.MAX_SAFE_INTEGER;
     const bugun = new Date();
@@ -943,6 +995,130 @@ export class AppComponent implements OnInit {
     if (fark === 0) return 'bg-amber-100 text-amber-700';
     if (fark <= 7) return 'bg-blue-100 text-blue-700';
     return 'bg-slate-100 text-slate-600';
+  }
+
+  getArabuluculukSureKurali(dosya?: Partial<ArabuluculukDosyasi> | null) {
+    const uyusmazlik = (dosya?.uyusmazlikTuru || '').toLocaleLowerCase('tr-TR');
+    const ticariMi = uyusmazlik.includes('ticari');
+
+    return {
+      kuralEtiketi: ticariMi ? 'Ticari dava şartı' : 'Genel dava şartı',
+      kuralAciklamasi: ticariMi ? '6 hafta yasal süre + 2 hafta uzatma' : '3 hafta yasal süre + 1 hafta uzatma',
+      normalSureGun: ticariMi ? 42 : 21,
+      uzatmaSureGun: ticariMi ? 14 : 7
+    };
+  }
+
+  getArabuluculukSureSayaci(dosya?: Partial<ArabuluculukDosyasi> | null): ArabuluculukSureSayaci | null {
+    if (!dosya || dosya.basvuruTuru !== 'Dava Şartı') return null;
+
+    const gorevlendirmeTarihi = (dosya.arabulucuGorevlendirmeTarihi || '').trim();
+    const gorevTarihi = this.gunBazliTarihOlustur(gorevlendirmeTarihi);
+    if (!gorevTarihi) return null;
+
+    const kural = this.getArabuluculukSureKurali(dosya);
+    const normalSonTarih = this.gunBazliTarihEkle(gorevlendirmeTarihi, kural.normalSureGun);
+    const azamiSonTarih = this.gunBazliTarihEkle(gorevlendirmeTarihi, kural.normalSureGun + kural.uzatmaSureGun);
+    const normalKalanGun = this.gunBazliTarihFarki(normalSonTarih);
+    const azamiKalanGun = this.gunBazliTarihFarki(azamiSonTarih);
+
+    const bugun = new Date();
+    bugun.setHours(0, 0, 0, 0);
+    const gecenGun = Math.max(0, Math.round((bugun.getTime() - gorevTarihi.getTime()) / (1000 * 60 * 60 * 24)));
+
+    const temelBilgi = {
+      dosya: dosya as ArabuluculukDosyasi,
+      ...kural,
+      gorevlendirmeTarihi,
+      normalSonTarih,
+      azamiSonTarih,
+      gecenGun,
+      normalKalanGun,
+      azamiKalanGun
+    };
+
+    const tutanakTarihi = this.gunBazliTarihOlustur(dosya.tutanakDuzenlemeTarihi);
+    if (tutanakTarihi) {
+      return {
+        ...temelBilgi,
+        asama: 'tamamlandi',
+        tamamlanmaGun: Math.max(0, Math.round((tutanakTarihi.getTime() - gorevTarihi.getTime()) / (1000 * 60 * 60 * 24)))
+      };
+    }
+
+    const asama: ArabuluculukSureAsamasi = normalKalanGun < 0
+      ? (azamiKalanGun < 0 ? 'asildi' : 'uzatma')
+      : 'normal';
+
+    return {
+      ...temelBilgi,
+      asama
+    };
+  }
+
+  get arabuluculukSureTakipKayitlari() {
+    return this.arabuluculukDosyalar
+      .map(dosya => this.getArabuluculukSureSayaci(dosya))
+      .filter((sayac): sayac is ArabuluculukSureSayaci => !!sayac && sayac.asama !== 'tamamlandi');
+  }
+
+  get arabuluculukSureSayacOzet() {
+    const kayitlar = this.arabuluculukSureTakipKayitlari;
+    return {
+      izlenen: kayitlar.length,
+      normal: kayitlar.filter(kayit => kayit.asama === 'normal').length,
+      uzatma: kayitlar.filter(kayit => kayit.asama === 'uzatma').length,
+      asildi: kayitlar.filter(kayit => kayit.asama === 'asildi').length
+    };
+  }
+
+  get oncelikliArabuluculukSureKayitlari() {
+    return [...this.arabuluculukSureTakipKayitlari]
+      .sort((a, b) => {
+        const oncelikA = a.asama === 'asildi' ? 0 : (a.asama === 'uzatma' ? 1 : 2);
+        const oncelikB = b.asama === 'asildi' ? 0 : (b.asama === 'uzatma' ? 1 : 2);
+        if (oncelikA !== oncelikB) return oncelikA - oncelikB;
+        if (a.azamiKalanGun !== b.azamiKalanGun) return a.azamiKalanGun - b.azamiKalanGun;
+        return this.ajandaGunDamgasi(a.azamiSonTarih) - this.ajandaGunDamgasi(b.azamiSonTarih);
+      })
+      .slice(0, 6);
+  }
+
+  getArabuluculukSureAsamaClass(asama?: ArabuluculukSureAsamasi) {
+    if (asama === 'asildi') return 'bg-rose-100 text-rose-700 border-rose-200';
+    if (asama === 'uzatma') return 'bg-amber-100 text-amber-700 border-amber-200';
+    if (asama === 'tamamlandi') return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+    return 'bg-blue-100 text-blue-700 border-blue-200';
+  }
+
+  getArabuluculukSureAsamaEtiketi(sayac?: ArabuluculukSureSayaci | null) {
+    if (!sayac) return 'Sayaç bekleniyor';
+    if (sayac.asama === 'asildi') return 'Azami Süre Aşıldı';
+    if (sayac.asama === 'uzatma') return 'Uzatma Penceresinde';
+    if (sayac.asama === 'tamamlandi') return 'Süreç Tamamlandı';
+    return 'Normal Sürede';
+  }
+
+  getArabuluculukSureKalanMetni(sayac?: ArabuluculukSureSayaci | null) {
+    if (!sayac) return 'Görevlendirme tarihi bekleniyor';
+    if (sayac.asama === 'tamamlandi') return `Tutanak ${sayac.tamamlanmaGun || 0} günde düzenlendi`;
+    if (sayac.asama === 'asildi') return `Azami süre ${Math.abs(sayac.azamiKalanGun)} gün geçti`;
+    if (sayac.asama === 'uzatma') return sayac.azamiKalanGun === 0 ? 'Azami sürenin son günü' : `Azami süreye ${sayac.azamiKalanGun} gün kaldı`;
+    return sayac.normalKalanGun === 0 ? 'Normal sürenin son günü' : `Normal süreye ${sayac.normalKalanGun} gün kaldı`;
+  }
+
+  getArabuluculukSureDetayMetni(sayac?: ArabuluculukSureSayaci | null) {
+    if (!sayac) return 'Görevlendirme tarihi girildiğinde sayaç otomatik başlayacak.';
+    if (sayac.asama === 'tamamlandi') {
+      return `Tutanak düzenleme tarihi işlendiği için sayaç kapandı. Dosya görevlendirmeden sonra ${sayac.tamamlanmaGun || 0} gün içinde sonuçlandırıldı.`;
+    }
+    if (sayac.asama === 'asildi') {
+      return `Azami sürenin üzerinden ${Math.abs(sayac.azamiKalanGun)} gün geçti. Dosyanın son tutanak ve kapanış adımlarını öncelikli kontrol etmeniz gerekir.`;
+    }
+    if (sayac.asama === 'uzatma') {
+      return `Normal yasal süre doldu. Arabulucunun kullanabileceği uzatma penceresinin son günü ${this.formatTarih(sayac.azamiSonTarih)} olarak izleniyor.`;
+    }
+    return `Normal yasal süre ${this.formatTarih(sayac.normalSonTarih)} tarihinde doluyor. Gerekirse uzatma ile azami son tarih ${this.formatTarih(sayac.azamiSonTarih)} olarak hesaplandı.`;
   }
 
   getAjandaTurEtiketi(tur: AjandaTur) {
@@ -1427,6 +1603,9 @@ export class AppComponent implements OnInit {
       .filter(Boolean)
       .join(' ')
       .toLocaleLowerCase('tr-TR');
+  }
+  getArabuluculukTarafIsimMetni(dosya?: Partial<ArabuluculukDosyasi> | null) {
+    return (dosya?.taraflar || []).map(taraf => taraf.isim).filter(Boolean).join(' • ') || 'Taraf bilgisi yok';
   }
 
   dosyaFormunuAc(d?: DavaDosyasi) {

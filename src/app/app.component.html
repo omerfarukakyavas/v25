@@ -254,6 +254,93 @@
                     </div>
                   </div>
 
+                  <div class="rounded-2xl border border-violet-100 bg-gradient-to-r from-violet-50 via-white to-indigo-50 shadow-sm overflow-hidden">
+                    <div class="border-b border-violet-100/80 px-6 py-5">
+                      <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                          <h3 class="text-sm font-black uppercase tracking-[0.22em] text-violet-800">Arabuluculuk Süre Sayaçları</h3>
+                          <p class="mt-2 text-sm leading-6 text-slate-600">Sadece <span class="font-bold text-slate-800">Dava Şartı</span> olarak açılan arabuluculuk dosyaları izlenir. Sayaç görevlendirme tarihinden başlar; ticari dosyalarda 6 hafta + 2 hafta, diğer dava şartı dosyalarda 3 hafta + 1 hafta olarak hesaplanır.</p>
+                        </div>
+                        <div class="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-violet-700 shadow-sm">
+                          {{ arabuluculukSureSayacOzet.izlenen }} aktif dosya
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="p-6">
+                      <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">İzlenen Dosya</p>
+                          <p class="mt-3 text-3xl font-black text-slate-900">{{ arabuluculukSureSayacOzet.izlenen }}</p>
+                          <p class="mt-2 text-xs font-medium text-slate-500">Görevlendirme tarihi girilmiş aktif dava şartı kayıtlar</p>
+                        </div>
+                        <div class="rounded-2xl border border-blue-100 bg-blue-50/80 p-4 shadow-sm">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Normal Sürede</p>
+                          <p class="mt-3 text-3xl font-black text-blue-700">{{ arabuluculukSureSayacOzet.normal }}</p>
+                          <p class="mt-2 text-xs font-medium text-blue-900/80">Yasal ana süre içinde kalan dosyalar</p>
+                        </div>
+                        <div class="rounded-2xl border border-amber-100 bg-amber-50/80 p-4 shadow-sm">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">Uzatma Penceresi</p>
+                          <p class="mt-3 text-3xl font-black text-amber-700">{{ arabuluculukSureSayacOzet.uzatma }}</p>
+                          <p class="mt-2 text-xs font-medium text-amber-900/80">Normal süre dolmuş, uzatma alanında olan dosyalar</p>
+                        </div>
+                        <div class="rounded-2xl border border-rose-100 bg-rose-50/80 p-4 shadow-sm">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-rose-700">Azami Süresi Geçen</p>
+                          <p class="mt-3 text-3xl font-black text-rose-700">{{ arabuluculukSureSayacOzet.asildi }}</p>
+                          <p class="mt-2 text-xs font-medium text-rose-900/80">Azami son tarihi aşmış dosyalar</p>
+                        </div>
+                      </div>
+
+                      <div class="mt-6 rounded-2xl border border-violet-100 bg-white/90 p-5">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <h4 class="text-sm font-black uppercase tracking-[0.2em] text-slate-800">En Yakın Arabuluculuk Süreleri</h4>
+                            <p class="mt-1 text-xs text-slate-500">Önce azami süresi geçenler, ardından uzatma penceresindekiler ve en yakın son tarihli dosyalar listelenir.</p>
+                          </div>
+                          <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-600">{{ oncelikliArabuluculukSureKayitlari.length }} kayıt</span>
+                        </div>
+
+                        <div class="mt-4 space-y-3">
+                          @for (sure of oncelikliArabuluculukSureKayitlari; track sure.dosya.id) {
+                            <button (click)="arabuluculukDetayinaGit(sure.dosya)" class="w-full rounded-2xl border border-violet-100 bg-gradient-to-r from-white to-violet-50/60 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                              <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                <div class="min-w-0">
+                                  <div class="flex flex-wrap items-center gap-2">
+                                    <span class="rounded-full border border-violet-200 bg-violet-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-violet-700">{{ sure.dosya.uyusmazlikTuru }}</span>
+                                    <span [class]="getArabuluculukSureAsamaClass(sure.asama)" class="rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]">{{ getArabuluculukSureAsamaEtiketi(sure) }}</span>
+                                  </div>
+                                  <p class="mt-3 text-sm font-black text-slate-900">{{ sure.dosya.buroNo ? sure.dosya.buroNo + ' / ' : '' }}{{ sure.dosya.arabuluculukNo }}</p>
+                                  <p class="mt-1 text-xs font-medium text-slate-600">{{ getArabuluculukTarafIsimMetni(sure.dosya) }}</p>
+                                </div>
+                                <div class="flex flex-col gap-2 lg:items-end">
+                                  <span [class]="getArabuluculukSureAsamaClass(sure.asama)" class="inline-flex rounded-full border px-3 py-1.5 text-xs font-black">{{ getArabuluculukSureKalanMetni(sure) }}</span>
+                                  <span class="text-[11px] font-bold text-slate-500">{{ sure.kuralAciklamasi }}</span>
+                                </div>
+                              </div>
+
+                              <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                                <div class="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Görevlendirme</p>
+                                  <p class="mt-1 text-sm font-bold text-slate-800">{{ formatTarih(sure.gorevlendirmeTarihi) }}</p>
+                                </div>
+                                <div class="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Normal Son</p>
+                                  <p class="mt-1 text-sm font-bold text-slate-800">{{ formatTarih(sure.normalSonTarih) }}</p>
+                                </div>
+                                <div class="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Azami Son</p>
+                                  <p class="mt-1 text-sm font-bold text-slate-800">{{ formatTarih(sure.azamiSonTarih) }}</p>
+                                </div>
+                              </div>
+                            </button>
+                          } @empty {
+                            <div class="rounded-2xl border border-dashed border-violet-200 bg-violet-50/50 px-4 py-8 text-center text-sm font-medium text-violet-700">Henüz görevlendirme tarihi girilmiş aktif dava şartı arabuluculuk dosyası görünmüyor.</div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm col-span-2">
                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6 flex items-center gap-2"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg> Dosya Durum Özetleri</h3>
@@ -1771,6 +1858,55 @@
                             <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Görevlendirme Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi) : 'Belirtilmedi' }}</p></div>
                             <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Tutanak Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi) : 'Belirtilmedi' }}</p></div>
                           </div>
+                          @if (getAktifArabuluculukDosyasi()?.basvuruTuru !== 'Dava Şartı') {
+                            <div class="col-span-2 rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm">
+                              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                  <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Arabuluculuk Süre Sayacı</p>
+                                  <p class="mt-2 text-sm font-bold text-slate-800">İhtiyari dosyalarda kanuni süre sayacı işletilmez.</p>
+                                  <p class="mt-1 text-xs leading-5 text-slate-500">Bu blok yalnızca dava şartı arabuluculuk dosyalarında görevlendirme tarihinden itibaren çalışır.</p>
+                                </div>
+                                <span class="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-600">Sayaç yok</span>
+                              </div>
+                            </div>
+                          } @else if (getArabuluculukSureSayaci(getAktifArabuluculukDosyasi()); as sureSayaci) {
+                            <div class="col-span-2 rounded-xl border border-violet-200 bg-gradient-to-r from-violet-50 via-white to-indigo-50 p-4 shadow-sm">
+                              <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                <div>
+                                  <div class="flex flex-wrap items-center gap-2">
+                                    <span class="rounded-full border border-violet-200 bg-violet-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-violet-700">Arabuluculuk Süre Sayacı</span>
+                                    <span class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-600">{{ sureSayaci.kuralEtiketi }}</span>
+                                  </div>
+                                  <p class="mt-3 text-lg font-black text-slate-900">{{ getArabuluculukSureAsamaEtiketi(sureSayaci) }}</p>
+                                  <p class="mt-1 text-xs font-medium text-slate-500">{{ sureSayaci.kuralAciklamasi }}</p>
+                                </div>
+                                <span [class]="getArabuluculukSureAsamaClass(sureSayaci.asama)" class="inline-flex rounded-full border px-3 py-1.5 text-xs font-black">{{ getArabuluculukSureKalanMetni(sureSayaci) }}</span>
+                              </div>
+
+                              <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                                <div class="rounded-xl border border-violet-100 bg-white px-4 py-3">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Görevlendirme</p>
+                                  <p class="mt-1 text-sm font-bold text-slate-800">{{ formatTarih(sureSayaci.gorevlendirmeTarihi) }}</p>
+                                </div>
+                                <div class="rounded-xl border border-violet-100 bg-white px-4 py-3">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Normal Son Tarih</p>
+                                  <p class="mt-1 text-sm font-bold text-slate-800">{{ formatTarih(sureSayaci.normalSonTarih) }}</p>
+                                </div>
+                                <div class="rounded-xl border border-violet-100 bg-white px-4 py-3">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Azami Son Tarih</p>
+                                  <p class="mt-1 text-sm font-bold text-slate-800">{{ formatTarih(sureSayaci.azamiSonTarih) }}</p>
+                                </div>
+                                <div class="rounded-xl border border-violet-100 bg-white px-4 py-3">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{{ sureSayaci.asama === 'tamamlandi' ? 'Tamamlanma Süresi' : 'Geçen Gün' }}</p>
+                                  <p class="mt-1 text-sm font-bold text-slate-800">{{ sureSayaci.asama === 'tamamlandi' ? (sureSayaci.tamamlanmaGun || 0) + ' gün' : sureSayaci.gecenGun + ' gün' }}</p>
+                                </div>
+                              </div>
+
+                              <p class="mt-4 text-xs leading-6 text-slate-600">{{ getArabuluculukSureDetayMetni(sureSayaci) }}</p>
+                            </div>
+                          } @else {
+                            <div class="col-span-2 rounded-xl border border-dashed border-violet-200 bg-violet-50/60 p-4 text-sm font-medium text-violet-700">Görevlendirme tarihi girildiğinde arabuluculuk süre sayacı otomatik başlayacak.</div>
+                          }
                           <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Arşiv / Klasör Konumu</p><p class="font-medium text-slate-800">{{ aktifDosya.arsivYeri || 'Belirtilmedi' }}</p></div>
                            <div class="col-span-2 mt-2 flex flex-col gap-3 rounded-lg border border-purple-100 bg-purple-50 p-3 sm:flex-row sm:items-center sm:justify-between">
                              <div>
