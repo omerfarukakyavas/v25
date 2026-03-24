@@ -106,6 +106,8 @@ export interface UygulamaBildirimi {
   tur: BildirimTur;
   baslik: string;
   mesaj?: string;
+  geriAlEtiketi?: string;
+  geriAlKalanSaniye?: number;
 }
 
 export interface IliskiDosyaKaydi {

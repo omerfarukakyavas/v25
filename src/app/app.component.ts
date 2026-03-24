@@ -53,6 +53,27 @@ type ArabuluculukSureSayaci = {
   tamamlanmaGun?: number;
 };
 
+type GeriAlmaSecenegi = {
+  islem: () => Promise<boolean | void> | boolean | void;
+  sureSaniye?: number;
+  etiket?: string;
+  basariBaslik?: string;
+  basariMesaj?: string;
+};
+
+type BildirimGosterSecenekleri = {
+  sureMs?: number;
+  geriAl?: GeriAlmaSecenegi;
+};
+
+type GeriAlmaKaydi = {
+  islem: () => Promise<boolean | void> | boolean | void;
+  basariBaslik: string;
+  basariMesaj: string;
+  geriSayimTimerId?: ReturnType<typeof setInterval>;
+  isleniyor?: boolean;
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -137,6 +158,9 @@ export class AppComponent implements OnInit {
   duzenlenenMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = {};
   silinecekMuvekkilGorusmeNotuId: number | null = null;
   aktifDavaTarafDetayi: { tur: 'davaci' | 'davali'; tarafId: number } | null = null;
+  private readonly geriAlmaSuresiSaniye = 8;
+  private bildirimKapatmaTimerlari = new Map<number, ReturnType<typeof setTimeout>>();
+  private geriAlmaKayitlari = new Map<number, GeriAlmaKaydi>();
 
   ngOnInit() { this.initFirebase(); }
 
@@ -203,91 +227,148 @@ export class AppComponent implements OnInit {
     });
   }
 
-  async davaKaydetCloud(d: DavaDosyasi, basariMesaji?: string) {
-    if (!this.user) return;
+  async davaKaydetCloud(d: DavaDosyasi, basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
     this.islemYapiyor = true;
     try {
       await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'davalar', d.id.toString()), JSON.parse(JSON.stringify(d)));
       if (basariMesaji) this.bildirimGoster('success', 'Dava dosyası kaydedildi', basariMesaji);
+      return true;
     } catch (e: any) {
       this.bildirimGoster('error', 'Dava dosyası kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+      return false;
     } finally { this.islemYapiyor = false; }
   }
-  async davaSilCloud(id: number, basariMesaji?: string) {
-    if (!this.user) return;
+  async davaSilCloud(id: number, basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
     try {
       await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'davalar', id.toString()));
       if (basariMesaji) this.bildirimGoster('success', 'Dava dosyası silindi', basariMesaji);
+      return true;
     } catch (e: any) {
       this.bildirimGoster('error', 'Dava dosyası silinemedi', e?.message || 'Silme işlemi tamamlanamadı.');
+      return false;
     }
   }
-  async icraKaydetCloud(i: IcraDosyasi, basariMesaji?: string) {
-    if (!this.user) return;
+  async icraKaydetCloud(i: IcraDosyasi, basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
     this.islemYapiyor = true;
     try {
       await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'icralar', i.id.toString()), JSON.parse(JSON.stringify(i)));
       if (basariMesaji) this.bildirimGoster('success', 'İcra dosyası kaydedildi', basariMesaji);
+      return true;
     } catch (e: any) {
       this.bildirimGoster('error', 'İcra dosyası kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+      return false;
     } finally { this.islemYapiyor = false; }
   }
-  async icraSilCloud(id: number, basariMesaji?: string) {
-    if (!this.user) return;
+  async icraSilCloud(id: number, basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
     try {
       await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'icralar', id.toString()));
       if (basariMesaji) this.bildirimGoster('success', 'İcra dosyası silindi', basariMesaji);
+      return true;
     } catch (e: any) {
       this.bildirimGoster('error', 'İcra dosyası silinemedi', e?.message || 'Silme işlemi tamamlanamadı.');
+      return false;
     }
   }
-  async arabuluculukKaydetCloud(a: ArabuluculukDosyasi, basariMesaji?: string) {
-    if (!this.user) return;
+  async arabuluculukKaydetCloud(a: ArabuluculukDosyasi, basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
     this.islemYapiyor = true;
     try {
       await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk', a.id.toString()), JSON.parse(JSON.stringify(a)));
       if (basariMesaji) this.bildirimGoster('success', 'Arabuluculuk dosyası kaydedildi', basariMesaji);
+      return true;
     } catch (e: any) {
       this.bildirimGoster('error', 'Arabuluculuk dosyası kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+      return false;
     } finally { this.islemYapiyor = false; }
   }
-  async arabuluculukSilCloud(id: number, basariMesaji?: string) {
-    if (!this.user) return;
+  async arabuluculukSilCloud(id: number, basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
     try {
       await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk', id.toString()));
       if (basariMesaji) this.bildirimGoster('success', 'Arabuluculuk dosyası silindi', basariMesaji);
+      return true;
     } catch (e: any) {
       this.bildirimGoster('error', 'Arabuluculuk dosyası silinemedi', e?.message || 'Silme işlemi tamamlanamadı.');
+      return false;
     }
   }
-  async muvekkilKaydetCloud(m: Muvekkil, basariMesaji?: string) {
-    if (!this.user) return;
+  async muvekkilKaydetCloud(m: Muvekkil, basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
     this.islemYapiyor = true;
     try {
       await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'muvekkiller', m.id.toString()), JSON.parse(JSON.stringify(m)));
       if (basariMesaji) this.bildirimGoster('success', 'Kişi kaydı kaydedildi', basariMesaji);
+      return true;
     } catch (e: any) {
       console.error(e);
       this.bildirimGoster('error', 'Kişi kaydı kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+      return false;
     } finally { this.islemYapiyor = false; }
   }
-  async muvekkilSilCloud(id: number, basariMesaji?: string) {
-    if (!this.user) return;
+  async muvekkilSilCloud(id: number, basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
     try {
       await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'muvekkiller', id.toString()));
       if (basariMesaji) this.bildirimGoster('success', 'Kişi kaydı silindi', basariMesaji);
+      return true;
     } catch (e: any) {
       this.bildirimGoster('error', 'Kişi kaydı silinemedi', e?.message || 'Silme işlemi tamamlanamadı.');
+      return false;
     }
   }
-  async sablonlariKaydetCloud(basariMesaji?: string) {
-    if (!this.user) return;
+  async sablonlariKaydetCloud(basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
     try {
       await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'sablonlar'), JSON.parse(JSON.stringify(this.sablonlar)));
       if (basariMesaji) this.bildirimGoster('success', 'Şablonlar kaydedildi', basariMesaji);
+      return true;
     } catch (e: any) {
       this.bildirimGoster('error', 'Şablonlar kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+      return false;
     }
+  }
+
+  veriKopyala<T>(veri: T): T {
+    return JSON.parse(JSON.stringify(veri));
+  }
+
+  aktifDetayKaydetFonksiyonu(sayfa: SayfaTipi = this.aktifSayfa): (dosya: any, basariMesaji?: string) => Promise<boolean> {
+    if (sayfa === 'icraDetay') return (dosya: IcraDosyasi, basariMesaji?: string) => this.icraKaydetCloud(dosya, basariMesaji);
+    if (sayfa === 'arabuluculukDetay') return (dosya: ArabuluculukDosyasi, basariMesaji?: string) => this.arabuluculukKaydetCloud(dosya, basariMesaji);
+    return (dosya: DavaDosyasi, basariMesaji?: string) => this.davaKaydetCloud(dosya, basariMesaji);
+  }
+
+  kaynakKaydetFonksiyonu(kaynak: AjandaKaynak): (dosya: any, basariMesaji?: string) => Promise<boolean> {
+    if (kaynak === 'icra') return (dosya: IcraDosyasi, basariMesaji?: string) => this.icraKaydetCloud(dosya, basariMesaji);
+    if (kaynak === 'arabuluculuk') return (dosya: ArabuluculukDosyasi, basariMesaji?: string) => this.arabuluculukKaydetCloud(dosya, basariMesaji);
+    return (dosya: DavaDosyasi, basariMesaji?: string) => this.davaKaydetCloud(dosya, basariMesaji);
+  }
+
+  geriAlMesajiHazirla(mesaj: string) {
+    return `${mesaj} Yanlışlıkla olduysa ${this.geriAlmaSuresiSaniye} saniye içinde geri alabilirsiniz.`;
+  }
+
+  geriAlinabilirBasariBildirimiGoster(
+    baslik: string,
+    mesaj: string,
+    geriAlIslemi: () => Promise<boolean | void> | boolean | void,
+    geriAlBaslik = 'İşlem geri alındı',
+    geriAlMesaj = 'Son işlem önceki haline döndürüldü.'
+  ) {
+    this.bildirimGoster('success', baslik, this.geriAlMesajiHazirla(mesaj), {
+      sureMs: this.geriAlmaSuresiSaniye * 1000,
+      geriAl: {
+        islem: geriAlIslemi,
+        sureSaniye: this.geriAlmaSuresiSaniye,
+        etiket: 'Geri Al',
+        basariBaslik: geriAlBaslik,
+        basariMesaj: geriAlMesaj
+      }
+    });
   }
 
   varsayilanDurumFiltresi(s: SayfaTipi) {
@@ -1520,6 +1601,7 @@ export class AppComponent implements OnInit {
   async muvekkilGorusmeNotuSil(id: number) {
     const dava = this.getAktifDavaDosyasi();
     if (!dava) return;
+    const oncekiKayit = this.veriKopyala(dava);
 
     const k: DavaDosyasi = JSON.parse(JSON.stringify(dava));
     const silinen = (k.muvekkilGorusmeNotlari || []).find(item => item.id === id);
@@ -1531,7 +1613,15 @@ export class AppComponent implements OnInit {
     delete this.acikMuvekkilGorusmeNotlari[id];
     if (this.duzenlenenMuvekkilGorusmeNotuId === id) this.muvekkilGorusmeNotuDuzenlemeIptal();
     this.silinecekMuvekkilGorusmeNotuId = null;
-    await this.davaKaydetCloud(kayitli, 'Müvekkil görüşme notu silindi.');
+    const kaydedildi = await this.davaKaydetCloud(kayitli);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Müvekkil görüşme notu silindi',
+      'Kayıt dosyadan kaldırıldı.',
+      () => this.davaKaydetCloud(this.veriKopyala(oncekiKayit)),
+      'Müvekkil görüşme notu geri yüklendi',
+      'Silinen görüşme notu yeniden dosyaya işlendi.'
+    );
     this.cdr.detectChanges();
   }
   
@@ -1715,15 +1805,39 @@ export class AppComponent implements OnInit {
     }
     this.davaFormKapat();
   }
-  durumGuncelle(d: DavaDosyasi, yD: string) {
+  async durumGuncelle(d: DavaDosyasi, yD: string) {
+    const oncekiKayit = this.veriKopyala(d);
     let k = { ...d };
     const oncekiDurum = k.durum;
+    if (oncekiDurum === yD) return;
     k.durum = yD as any;
     if (k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = '';
     k = this.dosyayaIslemKaydiEkle(k, 'durum', 'Dava durumu güncellendi', `${oncekiDurum} -> ${yD}`);
-    this.davaKaydetCloud(k, 'Dava durum etiketi güncellendi.');
+    const kaydedildi = await this.davaKaydetCloud(k);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Dava durum etiketi güncellendi',
+      'Durum değişikliği kaydedildi.',
+      () => this.davaKaydetCloud(this.veriKopyala(oncekiKayit)),
+      'Dava durum etiketi geri alındı',
+      `${oncekiDurum} durumuna dönüldü.`
+    );
   }
-  dosyaSil(id: number) { this.davaSilCloud(id, 'Dava dosyası kayıttan kaldırıldı.'); this.silinecekDavaId = null; }
+  async dosyaSil(id: number) {
+    const silinen = this.davalar.find(d => d.id === id);
+    if (!silinen) return;
+    const silinenKopya = this.veriKopyala(silinen);
+    const silindi = await this.davaSilCloud(id);
+    if (!silindi) return;
+    this.silinecekDavaId = null;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Dava dosyası kaldırıldı',
+      'Kayıt listeden çıkarıldı.',
+      () => this.davaKaydetCloud(this.veriKopyala(silinenKopya)),
+      'Dava dosyası geri yüklendi',
+      'Silinen dava dosyası yeniden listeye alındı.'
+    );
+  }
 
   icraFormunuAc(i?: IcraDosyasi) {
     this.formHata = '';
@@ -1756,14 +1870,38 @@ export class AppComponent implements OnInit {
     }
     this.icraFormKapat();
   }
-  icraDurumGuncelle(i: IcraDosyasi, yD: string) {
+  async icraDurumGuncelle(i: IcraDosyasi, yD: string) {
+    const oncekiKayit = this.veriKopyala(i);
     let k = { ...i };
     const oncekiDurum = k.durum;
+    if (oncekiDurum === yD) return;
     k.durum = yD as any;
     k = this.dosyayaIslemKaydiEkle(k, 'durum', 'İcra durumu güncellendi', `${oncekiDurum} -> ${yD}`);
-    this.icraKaydetCloud(k, 'İcra dosyasının durumu güncellendi.');
+    const kaydedildi = await this.icraKaydetCloud(k);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'İcra durumu güncellendi',
+      'Durum değişikliği kaydedildi.',
+      () => this.icraKaydetCloud(this.veriKopyala(oncekiKayit)),
+      'İcra durumu geri alındı',
+      `${oncekiDurum} durumuna dönüldü.`
+    );
   }
-  icraSil(id: number) { this.icraSilCloud(id, 'İcra dosyası kayıttan kaldırıldı.'); this.silinecekIcraId = null; }
+  async icraSil(id: number) {
+    const silinen = this.icralar.find(i => i.id === id);
+    if (!silinen) return;
+    const silinenKopya = this.veriKopyala(silinen);
+    const silindi = await this.icraSilCloud(id);
+    if (!silindi) return;
+    this.silinecekIcraId = null;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'İcra dosyası kaldırıldı',
+      'Kayıt listeden çıkarıldı.',
+      () => this.icraKaydetCloud(this.veriKopyala(silinenKopya)),
+      'İcra dosyası geri yüklendi',
+      'Silinen icra dosyası yeniden listeye alındı.'
+    );
+  }
 
   arabuluculukFormAc(a?: ArabuluculukDosyasi) {
     this.formHata = '';
@@ -1813,14 +1951,38 @@ export class AppComponent implements OnInit {
     }
     this.arabuluculukFormKapat();
   }
-  arabuluculukDurumGuncelle(a: ArabuluculukDosyasi, yD: string) {
+  async arabuluculukDurumGuncelle(a: ArabuluculukDosyasi, yD: string) {
+    const oncekiKayit = this.veriKopyala(a);
     let k = { ...a };
     const oncekiDurum = k.durum;
+    if (oncekiDurum === yD) return;
     k.durum = yD as any;
     k = this.dosyayaIslemKaydiEkle(k, 'durum', 'Arabuluculuk durumu güncellendi', `${oncekiDurum} -> ${yD}`);
-    this.arabuluculukKaydetCloud(k, 'Arabuluculuk durumu güncellendi.');
+    const kaydedildi = await this.arabuluculukKaydetCloud(k);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Arabuluculuk durumu güncellendi',
+      'Durum değişikliği kaydedildi.',
+      () => this.arabuluculukKaydetCloud(this.veriKopyala(oncekiKayit)),
+      'Arabuluculuk durumu geri alındı',
+      `${oncekiDurum} durumuna dönüldü.`
+    );
   }
-  arabuluculukSil(id: number) { this.arabuluculukSilCloud(id, 'Arabuluculuk dosyası kayıttan kaldırıldı.'); this.silinecekArabuluculukId = null; }
+  async arabuluculukSil(id: number) {
+    const silinen = this.arabuluculukDosyalar.find(a => a.id === id);
+    if (!silinen) return;
+    const silinenKopya = this.veriKopyala(silinen);
+    const silindi = await this.arabuluculukSilCloud(id);
+    if (!silindi) return;
+    this.silinecekArabuluculukId = null;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Arabuluculuk dosyası kaldırıldı',
+      'Kayıt listeden çıkarıldı.',
+      () => this.arabuluculukKaydetCloud(this.veriKopyala(silinenKopya)),
+      'Arabuluculuk dosyası geri yüklendi',
+      'Silinen arabuluculuk dosyası yeniden listeye alındı.'
+    );
+  }
 
   muvekkilFormunuAc(m?: Muvekkil) { 
     this.formHata = ''; this.formModu = m ? 'duzenle' : 'ekle'; 
@@ -1942,50 +2104,111 @@ export class AppComponent implements OnInit {
     }
     this.muvekkilFormKapat();
   }
-  muvekkilSil(id: number) {
+  async muvekkilSil(id: number) {
     if (this.davalar.some(d => d.muvekkilId === id || (d.muvekkiller || []).some(kayit => kayit.muvekkilId === id)) || this.icralar.some(i => i.muvekkilId === id) || this.arabuluculukDosyalar.some(a => a.muvekkilId === id)) { this.bildirimGoster('error', 'Kayıt silinemedi', 'Bu kişi veya kuruma bağlı aktif dosyalar bulunduğu için önce dosyaları temizlemeniz gerekiyor.'); return; }
-    this.muvekkilSilCloud(id, 'Kişi veya kurum kaydı silindi.'); this.silinecekMuvekkilId = null;
+    const silinen = this.muvekkiller.find(m => m.id === id);
+    if (!silinen) return;
+    const silinenKopya = this.veriKopyala(silinen);
+    const silindi = await this.muvekkilSilCloud(id);
+    if (!silindi) return;
+    this.silinecekMuvekkilId = null;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Kişi veya kurum kaydı silindi',
+      'Kayıt listeden çıkarıldı.',
+      () => this.muvekkilKaydetCloud(this.veriKopyala(silinenKopya)),
+      'Kişi veya kurum kaydı geri yüklendi',
+      'Silinen ilişki kaydı yeniden listeye alındı.'
+    );
   }
 
-  aktifDosyaKaydet(dosya: any, basariMesaji?: string) { if (this.aktifSayfa === 'icraDetay') this.icraKaydetCloud(dosya, basariMesaji); else if (this.aktifSayfa === 'arabuluculukDetay') this.arabuluculukKaydetCloud(dosya, basariMesaji); else this.davaKaydetCloud(dosya, basariMesaji); }
-  aktifDosyaDurumGuncelle(yD: string) {
+  aktifDosyaKaydet(dosya: any, basariMesaji?: string) {
+    return this.aktifDetayKaydetFonksiyonu()(dosya, basariMesaji);
+  }
+  async aktifDosyaDurumGuncelle(yD: string) {
     if (!this.aktifDosya) return;
+    const oncekiKayit = this.veriKopyala(this.aktifDosya);
+    const kaydetFonk = this.aktifDetayKaydetFonksiyonu();
     let k: any = { ...this.aktifDosya };
     const oncekiDurum = k.durum;
+    if (oncekiDurum === yD) return;
     k.durum = yD;
     if (this.aktifSayfa === 'detay' && k.durum !== 'İstinaf/Temyiz') k.istinafMahkemesi = '';
     k = this.dosyayaIslemKaydiEkle(k, 'durum', 'Dosya durumu kaydedildi', `${oncekiDurum} -> ${yD}`);
-    this.aktifDosyaKaydet(k, 'Dosya durumu kaydedildi.');
+    const kaydedildi = await kaydetFonk(k);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Dosya durumu kaydedildi',
+      'Durum değişikliği uygulandı.',
+      () => kaydetFonk(this.veriKopyala(oncekiKayit)),
+      'Dosya durumu geri alındı',
+      `${oncekiDurum} durumuna dönüldü.`
+    );
   }
-  durusmaTamamlandiIsaretle(dava: DavaDosyasi, event?: Event) {
+  async durusmaTamamlandiIsaretle(dava: DavaDosyasi, event?: Event) {
     event?.stopPropagation();
+    const oncekiKayit = this.veriKopyala(dava);
     const tamamlanmaTarihi = new Date().toISOString();
     let k = { ...dava, durusmaTamamlandiMi: true, durusmaTamamlanmaTarihi: tamamlanmaTarihi };
     k = this.dosyayaTakvimKaydiEkle(k, 'Duruşma', 'Gerçekleşti', dava.durusmaTarihi, dava.durusmaSaati, 'Duruşma gerçekleşti olarak işlendi.', tamamlanmaTarihi);
     k = this.dosyayaIslemKaydiEkle(k, 'takvim', 'Duruşma gerçekleşti olarak işlendi', this.formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati), tamamlanmaTarihi);
-    this.davaKaydetCloud(k, 'Duruşma gerçekleşti olarak işaretlendi ve ajandadan kaldırıldı.');
+    const kaydedildi = await this.davaKaydetCloud(k);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Duruşma tamamlandı olarak işlendi',
+      'Ajanda kaydı kapatıldı.',
+      () => this.davaKaydetCloud(this.veriKopyala(oncekiKayit)),
+      'Duruşma kaydı geri alındı',
+      'Duruşma yeniden önceki takvim durumuna döndürüldü.'
+    );
   }
-  durusmaAjandayaGeriAl(dava: DavaDosyasi, event?: Event) {
+  async durusmaAjandayaGeriAl(dava: DavaDosyasi, event?: Event) {
     event?.stopPropagation();
+    const oncekiKayit = this.veriKopyala(dava);
     let k = { ...dava, durusmaTamamlandiMi: false, durusmaTamamlanmaTarihi: '' };
     k = this.dosyayaTakvimKaydiEkle(k, 'Duruşma', 'Ajandaya Geri Alındı', dava.durusmaTarihi, dava.durusmaSaati, 'Duruşma yeniden aktif ajandaya alındı.');
     k = this.dosyayaIslemKaydiEkle(k, 'takvim', 'Duruşma ajandaya geri alındı', this.formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati));
-    this.davaKaydetCloud(k, 'Duruşma yeniden ajandaya alındı.');
+    const kaydedildi = await this.davaKaydetCloud(k);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Duruşma yeniden ajandaya alındı',
+      'Takvim kaydı tekrar aktif hale getirildi.',
+      () => this.davaKaydetCloud(this.veriKopyala(oncekiKayit)),
+      'Duruşma ajanda değişikliği geri alındı',
+      'Duruşma önceki tamamlanma durumuna döndürüldü.'
+    );
   }
-  toplantiTamamlandiIsaretle(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
+  async toplantiTamamlandiIsaretle(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
     event?.stopPropagation();
+    const oncekiKayit = this.veriKopyala(arabuluculuk);
     const tamamlanmaTarihi = new Date().toISOString();
     let k = { ...arabuluculuk, toplantiTamamlandiMi: true, toplantiTamamlanmaTarihi: tamamlanmaTarihi };
     k = this.dosyayaTakvimKaydiEkle(k, 'Toplantı', 'Gerçekleşti', arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati, 'Toplantı gerçekleşti olarak işlendi.', tamamlanmaTarihi);
     k = this.dosyayaIslemKaydiEkle(k, 'takvim', 'Toplantı gerçekleşti olarak işlendi', this.formatTarihSaat(arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati), tamamlanmaTarihi);
-    this.arabuluculukKaydetCloud(k, 'Toplantı gerçekleşti olarak işaretlendi ve ajandadan kaldırıldı.');
+    const kaydedildi = await this.arabuluculukKaydetCloud(k);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Toplantı tamamlandı olarak işlendi',
+      'Ajanda kaydı kapatıldı.',
+      () => this.arabuluculukKaydetCloud(this.veriKopyala(oncekiKayit)),
+      'Toplantı kaydı geri alındı',
+      'Toplantı yeniden önceki takvim durumuna döndürüldü.'
+    );
   }
-  toplantiAjandayaGeriAl(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
+  async toplantiAjandayaGeriAl(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
     event?.stopPropagation();
+    const oncekiKayit = this.veriKopyala(arabuluculuk);
     let k = { ...arabuluculuk, toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '' };
     k = this.dosyayaTakvimKaydiEkle(k, 'Toplantı', 'Ajandaya Geri Alındı', arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati, 'Toplantı yeniden aktif ajandaya alındı.');
     k = this.dosyayaIslemKaydiEkle(k, 'takvim', 'Toplantı ajandaya geri alındı', this.formatTarihSaat(arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati));
-    this.arabuluculukKaydetCloud(k, 'Toplantı yeniden ajandaya alındı.');
+    const kaydedildi = await this.arabuluculukKaydetCloud(k);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Toplantı yeniden ajandaya alındı',
+      'Takvim kaydı tekrar aktif hale getirildi.',
+      () => this.arabuluculukKaydetCloud(this.veriKopyala(oncekiKayit)),
+      'Toplantı ajanda değişikliği geri alındı',
+      'Toplantı önceki tamamlanma durumuna döndürüldü.'
+    );
   }
   evrakKaydiniGuncelle(evraklar: EvrakBaglantisi[] | undefined, evrakId: number, updater: (evrak: EvrakBaglantisi) => void): boolean {
     if (!evraklar) return false;
@@ -1995,9 +2218,11 @@ export class AppComponent implements OnInit {
     }
     return false;
   }
-  sureliIsiTamamlandiIsaretle(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null | undefined, kaynak: AjandaKaynak, evrakId: number, event?: Event) {
+  async sureliIsiTamamlandiIsaretle(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null | undefined, kaynak: AjandaKaynak, evrakId: number, event?: Event) {
     event?.stopPropagation();
     if (!dosya) return;
+    const oncekiKayit = this.veriKopyala(dosya);
+    const kaydetFonk = this.kaynakKaydetFonksiyonu(kaynak);
     let tamamlamaAciklamasi = 'Süreli iş tamamlandı olarak işlendi.';
     const k: any = JSON.parse(JSON.stringify(dosya));
     const bulundu = this.evrakKaydiniGuncelle(k.evraklar, evrakId, (evrak) => {
@@ -2007,9 +2232,15 @@ export class AppComponent implements OnInit {
     });
     if (!bulundu) return;
     const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Süreli iş tamamlandı', tamamlamaAciklamasi);
-    if (kaynak === 'dava') this.davaKaydetCloud(kayitli, 'Süreli iş tamamlandı olarak işaretlendi.');
-    else if (kaynak === 'icra') this.icraKaydetCloud(kayitli, 'Süreli iş tamamlandı olarak işaretlendi.');
-    else this.arabuluculukKaydetCloud(kayitli, 'Süreli iş tamamlandı olarak işaretlendi.');
+    const kaydedildi = await kaydetFonk(kayitli as any);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Süreli iş tamamlandı',
+      'İş kaydı kapatıldı.',
+      () => kaydetFonk(this.veriKopyala(oncekiKayit) as any),
+      'Süreli iş geri açıldı',
+      'İlgili süreli iş tekrar aktif hale getirildi.'
+    );
   }
   ajandaKaydiTamamla(kayit: AjandaKaydi, event?: Event) {
     if (kayit.tur === 'durusma') this.durusmaTamamlandiIsaretle(kayit.dosya as DavaDosyasi, event);
@@ -2095,14 +2326,24 @@ export class AppComponent implements OnInit {
     this.aktifDosyaKaydet(kayitli, 'Finans hareketi dosyaya eklendi.');
     this.finansalIslemFormunuSifirla(this.yeniIslem.tur as string);
   }
-  finansalIslemSil(id: number) {
+  async finansalIslemSil(id: number) {
     if(!this.aktifDosya) return;
+    const oncekiKayit = this.veriKopyala(this.aktifDosya);
+    const kaydetFonk = this.aktifDetayKaydetFonksiyonu();
     const k: any = {...this.aktifDosya};
     const silinen = (k.finansalIslemler || []).find((i:any) => i.id === id);
     k.finansalIslemler = k.finansalIslemler!.filter((i:any) => i.id !== id);
     const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi silindi', silinen ? `${silinen.tur}: ${this.formatPara(silinen.tutar || 0)} • ${silinen.aciklama || ''}${silinen.makbuzUrl ? ' • Makbuz linki vardı' : ''}` : 'Seçili finans hareketi kayıttan kaldırıldı.');
     if (this.duzenlenenFinansalIslemId === id) this.finansalIslemDuzenlemeIptal();
-    this.aktifDosyaKaydet(kayitli, 'Finans hareketi silindi.');
+    const kaydedildi = await kaydetFonk(kayitli);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Finans hareketi silindi',
+      'İşlem geçmişinden kaldırıldı.',
+      () => kaydetFonk(this.veriKopyala(oncekiKayit)),
+      'Finans hareketi geri yüklendi',
+      'Silinen finans hareketi yeniden dosyaya işlendi.'
+    );
   }
 
   klasorGecis(id: number) { this.acikKlasorler[id] = !this.acikKlasorler[id]; }
@@ -2497,8 +2738,88 @@ export class AppComponent implements OnInit {
     else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); if (p) { if (!p.ekler) p.ekler = []; p.ekler.push(y); const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Alt evrak bağlantısı eklendi', `${p.isim} altına ${y.isim} eklendi.`); this.aktifDosyaKaydet(kayitli, 'Alt evrak bağlantısı eklendi.'); } }
     this.ekEvrakFormKapat();
   }
-  evrakSil(id: number) { if (this.aktifSayfa === 'sablonlar') { this.sablonlar[this.aktifSablonSekmesi] = this.sablonlar[this.aktifSablonSekmesi].filter((e:any) => e.id !== id); this.sablonlariKaydetCloud('Şablon kayıttan kaldırıldı.'); } else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const silinen = k.evraklar!.find((e:any) => e.id === id); k.evraklar = k.evraklar!.filter((e:any) => e.id !== id); const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak bağlantısı silindi', silinen ? `${silinen.isim} kayıttan kaldırıldı.` : 'Seçili evrak kaydı kaldırıldı.'); this.aktifDosyaKaydet(kayitli, 'Evrak bağlantısı silindi.'); } }
-  ekEvrakSil(parentId: number, ekId: number) { if (this.aktifSayfa === 'sablonlar') { const p = this.sablonlar[this.aktifSablonSekmesi].find((e:any) => e.id === parentId); if (p && p.ekler) { p.ekler = p.ekler.filter((e:any) => e.id !== ekId); this.sablonlariKaydetCloud('Alt şablon silindi.'); } } else { if(!this.aktifDosya) return; const k: any = {...this.aktifDosya}; const p = k.evraklar!.find((e:any) => e.id === parentId); const silinen = p?.ekler?.find((e:any) => e.id === ekId); if (p && p.ekler) { p.ekler = p.ekler.filter((e:any) => e.id !== ekId); const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Alt evrak bağlantısı silindi', silinen ? `${p.isim} altından ${silinen.isim} kaldırıldı.` : 'Seçili alt evrak kaldırıldı.'); this.aktifDosyaKaydet(kayitli, 'Alt evrak bağlantısı silindi.'); } } }
+  async evrakSil(id: number) {
+    if (this.aktifSayfa === 'sablonlar') {
+      const oncekiSablonlar = this.veriKopyala(this.sablonlar);
+      this.sablonlar[this.aktifSablonSekmesi] = this.sablonlar[this.aktifSablonSekmesi].filter((e:any) => e.id !== id);
+      const kaydedildi = await this.sablonlariKaydetCloud();
+      if (!kaydedildi) {
+        this.sablonlar = oncekiSablonlar;
+        return;
+      }
+      this.geriAlinabilirBasariBildirimiGoster(
+        'Şablon kaldırıldı',
+        'Şablon listesinden çıkarıldı.',
+        async () => {
+          this.sablonlar = this.veriKopyala(oncekiSablonlar);
+          return this.sablonlariKaydetCloud();
+        },
+        'Şablon geri yüklendi',
+        'Silinen şablon yeniden listeye alındı.'
+      );
+      return;
+    }
+    if(!this.aktifDosya) return;
+    const oncekiKayit = this.veriKopyala(this.aktifDosya);
+    const kaydetFonk = this.aktifDetayKaydetFonksiyonu();
+    const k: any = {...this.aktifDosya};
+    const silinen = k.evraklar!.find((e:any) => e.id === id);
+    k.evraklar = k.evraklar!.filter((e:any) => e.id !== id);
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak bağlantısı silindi', silinen ? `${silinen.isim} kayıttan kaldırıldı.` : 'Seçili evrak kaydı kaldırıldı.');
+    const kaydedildi = await kaydetFonk(kayitli);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Evrak bağlantısı silindi',
+      'Kayıt dosyadan kaldırıldı.',
+      () => kaydetFonk(this.veriKopyala(oncekiKayit)),
+      'Evrak bağlantısı geri yüklendi',
+      'Silinen evrak kaydı yeniden dosyaya işlendi.'
+    );
+  }
+  async ekEvrakSil(parentId: number, ekId: number) {
+    if (this.aktifSayfa === 'sablonlar') {
+      const oncekiSablonlar = this.veriKopyala(this.sablonlar);
+      const p = this.sablonlar[this.aktifSablonSekmesi].find((e:any) => e.id === parentId);
+      if (p && p.ekler) {
+        p.ekler = p.ekler.filter((e:any) => e.id !== ekId);
+        const kaydedildi = await this.sablonlariKaydetCloud();
+        if (!kaydedildi) {
+          this.sablonlar = oncekiSablonlar;
+          return;
+        }
+        this.geriAlinabilirBasariBildirimiGoster(
+          'Alt şablon silindi',
+          'Kayıt şablon listesinden çıkarıldı.',
+          async () => {
+            this.sablonlar = this.veriKopyala(oncekiSablonlar);
+            return this.sablonlariKaydetCloud();
+          },
+          'Alt şablon geri yüklendi',
+          'Silinen alt şablon yeniden listeye alındı.'
+        );
+      }
+      return;
+    }
+    if(!this.aktifDosya) return;
+    const oncekiKayit = this.veriKopyala(this.aktifDosya);
+    const kaydetFonk = this.aktifDetayKaydetFonksiyonu();
+    const k: any = {...this.aktifDosya};
+    const p = k.evraklar!.find((e:any) => e.id === parentId);
+    const silinen = p?.ekler?.find((e:any) => e.id === ekId);
+    if (p && p.ekler) {
+      p.ekler = p.ekler.filter((e:any) => e.id !== ekId);
+      const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Alt evrak bağlantısı silindi', silinen ? `${p.isim} altından ${silinen.isim} kaldırıldı.` : 'Seçili alt evrak kaldırıldı.');
+      const kaydedildi = await kaydetFonk(kayitli);
+      if (!kaydedildi) return;
+      this.geriAlinabilirBasariBildirimiGoster(
+        'Alt evrak bağlantısı silindi',
+        'Kayıt dosyadan kaldırıldı.',
+        () => kaydetFonk(this.veriKopyala(oncekiKayit)),
+        'Alt evrak bağlantısı geri yüklendi',
+        'Silinen alt evrak yeniden dosyaya işlendi.'
+      );
+    }
+  }
 
   getDosyaFinans(dosya: any) {
     let isArabuluculuk = dosya.buroNo !== undefined;
@@ -2530,13 +2851,71 @@ export class AppComponent implements OnInit {
   silmeOnayiIste(id: number, tur: 'dava'|'icra'|'arabuluculuk'|'muvekkil') { if(tur === 'dava') this.silinecekDavaId = id; else if(tur === 'icra') this.silinecekIcraId = id; else if(tur === 'arabuluculuk') this.silinecekArabuluculukId = id; else this.silinecekMuvekkilId = id; }
   silmeIptal() { this.silinecekDavaId = null; this.silinecekIcraId = null; this.silinecekArabuluculukId = null; this.silinecekMuvekkilId = null; }
   guvenliUrl(url: string) { return url; }
-  bildirimGoster(tur: BildirimTur, baslik: string, mesaj = '') {
+  bildirimGoster(tur: BildirimTur, baslik: string, mesaj = '', secenekler?: BildirimGosterSecenekleri) {
     const id = Date.now() + this.bildirimSayaci++;
-    this.bildirimler = [...this.bildirimler, { id, tur, baslik, mesaj }];
-    const sure = tur === 'error' ? 6000 : 3200;
-    setTimeout(() => this.bildirimKapat(id), sure);
+    const geriAl = secenekler?.geriAl;
+    const sure = secenekler?.sureMs ?? (geriAl ? (geriAl.sureSaniye || this.geriAlmaSuresiSaniye) * 1000 : (tur === 'error' ? 6000 : 3200));
+    const bildirim: UygulamaBildirimi = {
+      id,
+      tur,
+      baslik,
+      mesaj,
+      geriAlEtiketi: geriAl?.etiket,
+      geriAlKalanSaniye: geriAl ? (geriAl.sureSaniye || this.geriAlmaSuresiSaniye) : undefined
+    };
+
+    this.bildirimler = [...this.bildirimler, bildirim];
+
+    const kapatmaTimeri = setTimeout(() => this.bildirimKapat(id), sure);
+    this.bildirimKapatmaTimerlari.set(id, kapatmaTimeri);
+
+    if (geriAl) {
+      const geriAlmaKaydi: GeriAlmaKaydi = {
+        islem: geriAl.islem,
+        basariBaslik: geriAl.basariBaslik || 'İşlem geri alındı',
+        basariMesaj: geriAl.basariMesaj || 'Son işlem önceki haline döndürüldü.'
+      };
+      geriAlmaKaydi.geriSayimTimerId = setInterval(() => {
+        const hedef = this.bildirimler.find(item => item.id === id);
+        if (!hedef || !hedef.geriAlKalanSaniye) {
+          if (geriAlmaKaydi.geriSayimTimerId) clearInterval(geriAlmaKaydi.geriSayimTimerId);
+          return;
+        }
+        const kalan = hedef.geriAlKalanSaniye - 1;
+        if (kalan <= 0) {
+          if (geriAlmaKaydi.geriSayimTimerId) clearInterval(geriAlmaKaydi.geriSayimTimerId);
+          return;
+        }
+        this.bildirimler = this.bildirimler.map(item => item.id === id ? { ...item, geriAlKalanSaniye: kalan } : item);
+        this.cdr.detectChanges();
+      }, 1000);
+      this.geriAlmaKayitlari.set(id, geriAlmaKaydi);
+    }
   }
-  bildirimKapat(id: number) { this.bildirimler = this.bildirimler.filter(b => b.id !== id); }
+  bildirimKapat(id: number) {
+    const kapatmaTimeri = this.bildirimKapatmaTimerlari.get(id);
+    if (kapatmaTimeri) {
+      clearTimeout(kapatmaTimeri);
+      this.bildirimKapatmaTimerlari.delete(id);
+    }
+    const geriAlmaKaydi = this.geriAlmaKayitlari.get(id);
+    if (geriAlmaKaydi?.geriSayimTimerId) clearInterval(geriAlmaKaydi.geriSayimTimerId);
+    this.geriAlmaKayitlari.delete(id);
+    this.bildirimler = this.bildirimler.filter(b => b.id !== id);
+  }
+  async bildirimGeriAl(id: number) {
+    const kayit = this.geriAlmaKayitlari.get(id);
+    if (!kayit || kayit.isleniyor) return;
+    kayit.isleniyor = true;
+    this.bildirimKapat(id);
+    try {
+      const sonuc = await kayit.islem();
+      if (sonuc === false) return;
+      this.bildirimGoster('success', kayit.basariBaslik, kayit.basariMesaj, { sureMs: 4200 });
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Geri alma tamamlanamadı', e?.message || 'İşlem eski haline döndürülemedi.');
+    }
+  }
   getBildirimClass(tur: BildirimTur) {
     if (tur === 'success') return 'border-emerald-200 bg-white/95';
     if (tur === 'error') return 'border-rose-200 bg-white/95';

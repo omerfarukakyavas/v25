@@ -2581,6 +2581,19 @@
                   @if (bildirim.mesaj) {
                     <p class="mt-1 text-xs font-medium text-slate-600 leading-relaxed">{{ bildirim.mesaj }}</p>
                   }
+                  @if (bildirim.geriAlEtiketi) {
+                    <div class="mt-3 flex items-center justify-between gap-3">
+                      <span class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                        {{ bildirim.geriAlKalanSaniye || 0 }} sn kaldı
+                      </span>
+                      <button
+                        type="button"
+                        (click)="bildirimGeriAl(bildirim.id)"
+                        class="rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-blue-700 transition-colors hover:bg-blue-100">
+                        {{ bildirim.geriAlEtiketi }}
+                      </button>
+                    </div>
+                  }
                 </div>
                 <button type="button" (click)="bildirimKapat(bildirim.id)" class="rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/70 hover:text-slate-600">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
