@@ -1,7 +1,7 @@
 /* Add application styles & imports to this file! */
 
 :root {
-  --app-font-sans: "Segoe UI Variable Text", "Aptos", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --app-font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 
 html {
@@ -15,6 +15,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.55;
   color: #0f172a;
+}
+
+.font-sans {
+  font-family: var(--app-font-sans) !important;
 }
 
 button,
