@@ -2,10 +2,20 @@
 
 :root {
   --app-font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --app-bg: #edf3f9;
+  --app-bg-soft: #f7fafc;
+  --app-surface: #ffffff;
+  --app-border: #d8e1ee;
+  --app-border-strong: #c4d1e3;
+  --app-title: #0f172a;
+  --app-body: #475569;
+  --app-shadow: 0 22px 48px -36px rgba(15, 23, 42, 0.46), 0 6px 18px rgba(148, 163, 184, 0.16);
+  --app-shadow-soft: 0 16px 36px -30px rgba(15, 23, 42, 0.34), 0 4px 12px rgba(148, 163, 184, 0.12);
 }
 
 html {
   font-size: 16px;
+  background: var(--app-bg);
 }
 
 body {
@@ -14,7 +24,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.55;
-  color: #0f172a;
+  color: var(--app-title);
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 26%),
+    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.08), transparent 24%),
+    linear-gradient(180deg, #f6f9fc 0%, var(--app-bg) 100%);
+  min-height: 100vh;
 }
 
 .font-sans {
@@ -36,4 +51,150 @@ textarea {
 
 ::placeholder {
   color: #94a3b8;
+}
+
+.app-shell {
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.1), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.08), transparent 26%),
+    linear-gradient(180deg, #f4f7fb 0%, #eef3f9 100%);
+}
+
+.app-sidebar {
+  background: linear-gradient(180deg, #0f172a 0%, #101a2d 55%, #0b1221 100%);
+  border-right: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.app-topbar {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom-color: var(--app-border) !important;
+  box-shadow: 0 14px 30px -26px rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(16px);
+}
+
+.app-canvas {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(246, 249, 252, 0.9)),
+    linear-gradient(135deg, rgba(191, 219, 254, 0.12), transparent 28%),
+    linear-gradient(225deg, rgba(226, 232, 240, 0.36), transparent 28%);
+}
+
+.app-page {
+  position: relative;
+}
+
+.app-shell h2,
+.app-shell h3,
+.app-shell h4 {
+  color: var(--app-title);
+  margin: 0;
+}
+
+.app-shell h2 {
+  font-size: clamp(1.55rem, 1.2rem + 0.95vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+
+.app-shell h3 {
+  font-size: clamp(1.04rem, 0.98rem + 0.3vw, 1.22rem);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.app-shell h4 {
+  font-size: clamp(0.97rem, 0.94rem + 0.18vw, 1.08rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+}
+
+.app-shell p,
+.app-shell li,
+.app-shell label,
+.app-shell td,
+.app-shell th {
+  color: var(--app-body);
+}
+
+.app-shell [class*="bg-white"][class*="rounded-xl"],
+.app-shell [class*="bg-white"][class*="rounded-2xl"],
+.app-shell [class*="bg-white"][class*="rounded-[1.5rem]"],
+.app-shell [class*="bg-white"][class*="rounded-[1.75rem]"] {
+  border-color: var(--app-border) !important;
+  box-shadow: var(--app-shadow);
+}
+
+.app-shell [class*="bg-gradient-to-r"][class*="rounded-xl"],
+.app-shell [class*="bg-gradient-to-r"][class*="rounded-2xl"],
+.app-shell [class*="bg-gradient-to-br"][class*="rounded-xl"],
+.app-shell [class*="bg-gradient-to-br"][class*="rounded-2xl"] {
+  box-shadow: var(--app-shadow-soft);
+}
+
+.app-shell [class*="border-slate-200"],
+.app-shell [class*="border-slate-100"] {
+  border-color: var(--app-border) !important;
+}
+
+.app-shell [class*="rounded-xl"][class*="border"],
+.app-shell [class*="rounded-2xl"][class*="border"] {
+  border-width: 1px;
+}
+
+.app-shell [class*="text-xs"][class*="uppercase"],
+.app-shell [class*="text-[10px]"][class*="uppercase"],
+.app-shell [class*="text-[11px]"][class*="uppercase"] {
+  letter-spacing: 0.16em !important;
+}
+
+.app-shell input,
+.app-shell select,
+.app-shell textarea {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: #cbd5e1;
+  box-shadow: inset 0 1px 2px rgba(148, 163, 184, 0.08);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.app-shell input:focus,
+.app-shell select:focus,
+.app-shell textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12);
+}
+
+.app-shell button[class*="rounded"],
+.app-shell a[class*="rounded"] {
+  transition: transform 0.16s ease, box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+
+.app-shell button[class*="rounded"]:hover,
+.app-shell a[class*="rounded"]:hover {
+  transform: translateY(-1px);
+}
+
+.app-shell table thead th {
+  color: #334155;
+  font-weight: 800;
+}
+
+.app-shell table tbody tr {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.app-shell table tbody tr:hover {
+  background: #f8fafc;
+}
+
+@media (max-width: 768px) {
+  .app-topbar {
+    backdrop-filter: none;
+  }
+
+  .app-shell h2 {
+    font-size: clamp(1.35rem, 1.2rem + 0.5vw, 1.7rem);
+  }
 }
