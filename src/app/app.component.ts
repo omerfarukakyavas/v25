@@ -161,6 +161,7 @@ export class AppComponent implements OnInit {
   private readonly geriAlmaSuresiSaniye = 8;
   private bildirimKapatmaTimerlari = new Map<number, ReturnType<typeof setTimeout>>();
   private geriAlmaKayitlari = new Map<number, GeriAlmaKaydi>();
+  aktifGeriAlBildirimiId: number | null = null;
 
   ngOnInit() { this.initFirebase(); }
 
@@ -2865,6 +2866,8 @@ export class AppComponent implements OnInit {
     };
 
     this.bildirimler = [...this.bildirimler, bildirim];
+    if (geriAl) this.aktifGeriAlBildirimiId = id;
+    this.cdr.detectChanges();
 
     const kapatmaTimeri = setTimeout(() => this.bildirimKapat(id), sure);
     this.bildirimKapatmaTimerlari.set(id, kapatmaTimeri);
@@ -2902,6 +2905,8 @@ export class AppComponent implements OnInit {
     if (geriAlmaKaydi?.geriSayimTimerId) clearInterval(geriAlmaKaydi.geriSayimTimerId);
     this.geriAlmaKayitlari.delete(id);
     this.bildirimler = this.bildirimler.filter(b => b.id !== id);
+    if (this.aktifGeriAlBildirimiId === id) this.aktifGeriAlBildirimiId = null;
+    this.cdr.detectChanges();
   }
   async bildirimGeriAl(id: number) {
     const kayit = this.geriAlmaKayitlari.get(id);
@@ -2915,6 +2920,16 @@ export class AppComponent implements OnInit {
     } catch (e: any) {
       this.bildirimGoster('error', 'Geri alma tamamlanamadı', e?.message || 'İşlem eski haline döndürülemedi.');
     }
+  }
+  get aktifGeriAlBildirimi() {
+    if (this.aktifGeriAlBildirimiId !== null) {
+      const hedef = this.bildirimler.find(bildirim => bildirim.id === this.aktifGeriAlBildirimiId && !!bildirim.geriAlEtiketi);
+      if (hedef) return hedef;
+    }
+    for (let i = this.bildirimler.length - 1; i >= 0; i--) {
+      if (this.bildirimler[i].geriAlEtiketi) return this.bildirimler[i];
+    }
+    return null;
   }
   getBildirimClass(tur: BildirimTur) {
     if (tur === 'success') return 'border-emerald-200 bg-white/95';

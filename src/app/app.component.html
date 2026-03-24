@@ -2604,6 +2604,27 @@
         </div>
       }
 
+      @if (aktifGeriAlBildirimi; as geriAlBildirimi) {
+        <div class="fixed bottom-4 left-1/2 z-[70] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2">
+          <div class="rounded-[1.6rem] border border-blue-200 bg-white/98 px-5 py-4 shadow-[0_24px_60px_-28px_rgba(37,99,235,0.35)] backdrop-blur-sm">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div class="min-w-0">
+                <p class="text-sm font-black text-slate-900">{{ geriAlBildirimi.baslik }}</p>
+                <p class="mt-1 text-xs font-medium leading-relaxed text-slate-600">
+                  {{ geriAlBildirimi.geriAlKalanSaniye || 0 }} saniye içinde bu işlemi geri alabilirsiniz.
+                </p>
+              </div>
+              <button
+                type="button"
+                (click)="bildirimGeriAl(geriAlBildirimi.id)"
+                class="shrink-0 rounded-2xl border border-blue-200 bg-blue-600 px-4 py-2 text-sm font-black text-white transition-colors hover:bg-blue-700">
+                {{ geriAlBildirimi.geriAlEtiketi || 'Geri Al' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- BUTUN FORMLAR VE MODALLAR (HER ZAMAN VE HER SAYFADA CALISABILMESI ICIN DISARIYA ALINDI) -->
       @if (davaFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
