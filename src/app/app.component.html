@@ -1766,6 +1766,11 @@
                           <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Başvuru Türü</p><p class="font-medium text-slate-800">{{ aktifDosya.basvuruTuru }}</p></div>
                           <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Uyuşmazlık Türü</p><p class="font-medium text-slate-800">{{ aktifDosya.uyusmazlikTuru }}</p></div>
                           <div class="col-span-2"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Başvuru Konusu</p><p class="font-medium text-slate-800 whitespace-pre-line">{{ aktifDosya.basvuruKonusu || 'Belirtilmedi' }}</p></div>
+                          <div class="col-span-2 grid gap-3 sm:grid-cols-3">
+                            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Büroya Başvuru Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.buroyaBasvuruTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.buroyaBasvuruTarihi) : 'Belirtilmedi' }}</p></div>
+                            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Görevlendirme Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi) : 'Belirtilmedi' }}</p></div>
+                            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Tutanak Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi) : 'Belirtilmedi' }}</p></div>
+                          </div>
                           <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Arşiv / Klasör Konumu</p><p class="font-medium text-slate-800">{{ aktifDosya.arsivYeri || 'Belirtilmedi' }}</p></div>
                            <div class="col-span-2 mt-2 flex flex-col gap-3 rounded-lg border border-purple-100 bg-purple-50 p-3 sm:flex-row sm:items-center sm:justify-between">
                              <div>
@@ -2888,6 +2893,20 @@
                 <div class="mt-4">
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Başvuru Konusu</label>
                   <textarea [(ngModel)]="islemGorenArabuluculuk.basvuruKonusu" rows="3" placeholder="Örn: Ayıplı hizmet nedeniyle bedel iadesi ve zarar tazmini talebi" class="w-full resize-y px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white"></textarea>
+                </div>
+                <div class="mt-4 grid gap-4 md:grid-cols-3">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arabuluculuk Bürosuna Başvuru Tarihi <span class="text-red-500">*</span></label>
+                    <input [(ngModel)]="islemGorenArabuluculuk.buroyaBasvuruTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arabulucunun Görevlendirildiği Tarih <span class="text-red-500">*</span></label>
+                    <input [(ngModel)]="islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tutanağın Düzenlendiği Tarih</label>
+                    <input [(ngModel)]="islemGorenArabuluculuk.tutanakDuzenlemeTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                  </div>
                 </div>
 
                 <div class="mt-4 bg-slate-50 p-4 rounded-xl border border-slate-200">

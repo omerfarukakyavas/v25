@@ -120,3 +120,9 @@ export interface IliskiDosyaKaydi {
 
 export type SayfaTipi = 'dashboard' | 'davalar' | 'icralar' | 'arabuluculuk' | 'sablonlar' | 'muhasebe' | 'iliskiler' | 'ajanda' | 'detay' | 'icraDetay' | 'arabuluculukDetay';
 export type DetaySekmesi = 'notlar' | 'muvekkilGorusmeleri' | 'evraklar' | 'sureliIsler' | 'gecmis';
+
+export interface ArabuluculukDosyasi {
+  buroyaBasvuruTarihi?: string;
+  arabulucuGorevlendirmeTarihi?: string;
+  tutanakDuzenlemeTarihi?: string;
+}
