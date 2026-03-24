@@ -274,7 +274,6 @@ export class AppComponent implements OnInit {
 
   varsayilanDurumFiltresi(s: SayfaTipi) {
     if (s === 'davalar') return 'Derdest';
-    if (s === 'arabuluculuk') return 'Hazırlık';
     return 'Tümü';
   }
   sayfaDegistir(s: SayfaTipi) {
