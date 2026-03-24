@@ -1403,7 +1403,43 @@
                           <span [class]="getAktifDosyaDurumSinifi()" class="rounded-full px-2.5 py-1 text-[10px] font-bold sm:px-3 sm:text-[11px]">{{ aktifDosya.durum }}</span>
                         </div>
                         <h3 class="text-xl font-black tracking-tight text-slate-900 sm:text-3xl">{{ getAktifDosyaReferansMetni() }}</h3>
-                        <p class="mt-2 text-xs font-medium leading-6 text-slate-700 sm:mt-3 sm:text-sm">{{ getAktifDosyaTarafOzeti() }}</p>
+                        @if (aktifSayfa === 'detay') {
+                          <div class="mt-3 space-y-2 text-xs sm:text-sm">
+                            <div class="flex flex-wrap items-center gap-2">
+                              <span class="font-bold text-emerald-700">Davacı</span>
+                              @for (taraf of getAktifDavaTarafListesi('davaci'); track taraf.id) {
+                                <button
+                                  type="button"
+                                  (click)="davaTarafDetayiAc('davaci', taraf.id)"
+                                  [class]="aktifDavaTarafDetayiAcikMi('davaci', taraf.id) ? 'border-emerald-300 bg-emerald-100 text-emerald-800 shadow-sm' : 'border-white/80 bg-white/80 text-slate-700 hover:border-emerald-200 hover:bg-white'"
+                                  class="rounded-full border px-3 py-1.5 text-xs font-bold transition-all"
+                                  title="Kişi kartını aç">
+                                  {{ taraf.isim }}
+                                </button>
+                              } @empty {
+                                <span class="text-xs font-medium text-slate-500">Belirtilmedi</span>
+                              }
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                              <span class="font-bold text-rose-700">Davalı</span>
+                              @for (taraf of getAktifDavaTarafListesi('davali'); track taraf.id) {
+                                <button
+                                  type="button"
+                                  (click)="davaTarafDetayiAc('davali', taraf.id)"
+                                  [class]="aktifDavaTarafDetayiAcikMi('davali', taraf.id) ? 'border-rose-300 bg-rose-100 text-rose-800 shadow-sm' : 'border-white/80 bg-white/80 text-slate-700 hover:border-rose-200 hover:bg-white'"
+                                  class="rounded-full border px-3 py-1.5 text-xs font-bold transition-all"
+                                  title="Kişi kartını aç">
+                                  {{ taraf.isim }}
+                                </button>
+                              } @empty {
+                                <span class="text-xs font-medium text-slate-500">Belirtilmedi</span>
+                              }
+                            </div>
+                            <p class="text-[11px] font-medium text-slate-500">Taraf adına tıklayarak kişi kartını ve bu kişiyle bağlantılı davaları açabilirsiniz.</p>
+                          </div>
+                        } @else {
+                          <p class="mt-2 text-xs font-medium leading-6 text-slate-700 sm:mt-3 sm:text-sm">{{ getAktifDosyaTarafOzeti() }}</p>
+                        }
 
                         <div class="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-3">
                           <div class="rounded-2xl border border-white/70 bg-white/85 px-3 py-3 shadow-sm sm:px-4">
@@ -1471,11 +1507,119 @@
                            <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Müvekkil</p><p class="font-medium text-slate-800">{{ aktifDosya.muvekkil }} @if(aktifDosya.muvekkilPozisyonu) { <span [class]="getPozisyonClass(aktifDosya.muvekkilPozisyonu)" class="text-[10px] px-1.5 py-0.5 rounded ml-1 uppercase font-bold">{{aktifDosya.muvekkilPozisyonu}}</span> }</p></div>
                            <div>
                              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Taraflar</p>
-                             <div class="space-y-1.5 font-medium text-slate-800">
-                               <p><span class="font-bold text-emerald-600">Davacı:</span> {{ getAktifDavaTarafMetni('davaci') }}</p>
-                               <p><span class="font-bold text-rose-600">Davalı:</span> {{ getAktifDavaTarafMetni('davali') }}</p>
+                             <div class="space-y-3">
+                               <div>
+                                 <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-600">Davacı</p>
+                                 <div class="mt-1.5 flex flex-wrap gap-2">
+                                   @for (taraf of getAktifDavaTarafListesi('davaci'); track taraf.id) {
+                                     <button
+                                       type="button"
+                                       (click)="davaTarafDetayiAc('davaci', taraf.id)"
+                                       [class]="aktifDavaTarafDetayiAcikMi('davaci', taraf.id) ? 'border-emerald-300 bg-emerald-100 text-emerald-800 shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:border-emerald-200 hover:bg-emerald-50/60'"
+                                       class="rounded-full border px-3 py-1.5 text-xs font-bold transition-all"
+                                       title="Kişi kartını aç">
+                                       {{ taraf.isim }}
+                                     </button>
+                                   } @empty {
+                                     <span class="text-xs font-medium text-slate-500">Belirtilmedi</span>
+                                   }
+                                 </div>
+                               </div>
+                               <div>
+                                 <p class="text-[11px] font-bold uppercase tracking-wider text-rose-600">Davalı</p>
+                                 <div class="mt-1.5 flex flex-wrap gap-2">
+                                   @for (taraf of getAktifDavaTarafListesi('davali'); track taraf.id) {
+                                     <button
+                                       type="button"
+                                       (click)="davaTarafDetayiAc('davali', taraf.id)"
+                                       [class]="aktifDavaTarafDetayiAcikMi('davali', taraf.id) ? 'border-rose-300 bg-rose-100 text-rose-800 shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:border-rose-200 hover:bg-rose-50/60'"
+                                       class="rounded-full border px-3 py-1.5 text-xs font-bold transition-all"
+                                       title="Kişi kartını aç">
+                                       {{ taraf.isim }}
+                                     </button>
+                                   } @empty {
+                                     <span class="text-xs font-medium text-slate-500">Belirtilmedi</span>
+                                   }
+                                 </div>
+                               </div>
                              </div>
                            </div>
+                           @if (getAktifDavaTarafDetayKaydi(); as seciliTaraf) {
+                             @if (getDavaTarafGosterimBilgisi(seciliTaraf); as tarafBilgisi) {
+                               @if (getDavaTarafIlgiliDavalar(seciliTaraf); as ilgiliDavalar) {
+                                 <div class="col-span-2 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+                                   <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                     <div>
+                                       <div class="flex flex-wrap items-center gap-2">
+                                         <span [class]="getPozisyonClass(getAktifDavaTarafDetayRolEtiketi())" class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]">{{ getAktifDavaTarafDetayRolEtiketi() }}</span>
+                                         @if (tarafBilgisi.bagliMuvekkil) {
+                                           <span class="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-blue-700">Kayıtlı kişi kartı</span>
+                                         }
+                                       </div>
+                                       <p class="mt-3 text-lg font-black text-slate-900">{{ tarafBilgisi.isim }}</p>
+                                       <p class="mt-1 text-xs font-medium text-slate-500">Kimlik, iletişim ve adres bilgileri bu kişi için burada tutulur. Aynı kişiyle ilgili diğer dava dosyaları da altta listelenir.</p>
+                                     </div>
+                                     <button type="button" (click)="davaTarafDetayiKapat()" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50">Kapat</button>
+                                   </div>
+
+                                   <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                                     <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                                       <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">TC / VKN</p>
+                                       <p class="mt-1 text-sm font-bold text-slate-800">{{ tarafBilgisi.tcKimlikVergiNo }}</p>
+                                     </div>
+                                     <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                                       <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Telefon</p>
+                                       <p class="mt-1 text-sm font-bold text-slate-800">{{ tarafBilgisi.telefon }}</p>
+                                     </div>
+                                     <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                                       <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">E-Posta</p>
+                                       <p class="mt-1 text-sm font-bold text-slate-800 break-all">{{ tarafBilgisi.eposta }}</p>
+                                     </div>
+                                     <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                                       <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Vergi Dairesi</p>
+                                       <p class="mt-1 text-sm font-bold text-slate-800">{{ tarafBilgisi.vergiDairesi }}</p>
+                                     </div>
+                                     <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 sm:col-span-2 xl:col-span-4">
+                                       <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Adres</p>
+                                       <p class="mt-1 text-sm font-bold leading-6 text-slate-800">{{ tarafBilgisi.adres }}</p>
+                                     </div>
+                                   </div>
+
+                                   <div class="mt-5">
+                                     <div class="flex flex-wrap items-center justify-between gap-2">
+                                       <div>
+                                         <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-700">İlgili Dava Listesi</p>
+                                         <p class="mt-1 text-xs font-medium text-slate-500">Aynı kişi veya şirketle ilişkili dava kayıtları burada toplanır.</p>
+                                       </div>
+                                       <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold text-slate-600">{{ ilgiliDavalar.length }} kayıt</span>
+                                     </div>
+                                     <div class="mt-3 space-y-2">
+                                       @for (dava of ilgiliDavalar; track dava.id) {
+                                         <button type="button" (click)="detayaGit(dava)" class="flex w-full flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-left transition-colors hover:border-slate-300 hover:bg-white">
+                                           <div class="flex flex-wrap items-center gap-2">
+                                             @for (etiket of getDavaTarafIlgiliRolEtiketleri(dava, seciliTaraf); track etiket) {
+                                               <span [class]="getDavaTarafRolRozetClass(etiket)" class="rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]">{{ etiket }}</span>
+                                             }
+                                             @if (getAktifDavaDosyasi()?.id === dava.id) {
+                                               <span class="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">Açık dosya</span>
+                                             }
+                                           </div>
+                                           <div>
+                                             <p class="text-sm font-black text-slate-900">{{ dava.dosyaNo || 'Dava dosyası' }}</p>
+                                             <p class="mt-1 text-xs font-medium text-slate-600">{{ dava.mahkeme || '-' }} • {{ dava.konu || '-' }}</p>
+                                             <p class="mt-2 text-[11px] text-slate-500">{{ getDavaTarafOzet(dava) }}</p>
+                                           </div>
+                                           <span class="text-[11px] font-bold text-blue-600">Dosyaya git</span>
+                                         </button>
+                                       } @empty {
+                                         <div class="rounded-2xl border border-dashed border-slate-200 px-4 py-6 text-center text-sm font-medium text-slate-500">Bu kişiyle ilişkili başka dava dosyası bulunamadı.</div>
+                                       }
+                                     </div>
+                                   </div>
+                                 </div>
+                               }
+                             }
+                           }
                             <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Mahkeme</p><p class="font-medium text-slate-800">{{ aktifDosya.mahkeme }}</p></div>
                             <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Konu</p><p class="font-medium text-slate-800">{{ aktifDosya.konu }}</p></div>
                             @if (aktifDosya.eskiMahkeme) {
@@ -2465,6 +2609,31 @@
                             </select>
                             <button type="button" (click)="davaTarafSil('davaci', $index)" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600">Sil</button>
                           </div>
+                          <div class="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                            <div>
+                              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">TC / VKN</label>
+                              <input [(ngModel)]="taraf.tcKimlikVergiNo" type="text" placeholder="Kimlik veya vergi no" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                            </div>
+                            <div>
+                              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Telefon</label>
+                              <input [(ngModel)]="taraf.telefon" type="text" placeholder="Telefon" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                            </div>
+                            <div>
+                              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">E-Posta</label>
+                              <input [(ngModel)]="taraf.eposta" type="email" placeholder="ornek@alan.com" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                            </div>
+                            <div>
+                              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Vergi Dairesi</label>
+                              <input [(ngModel)]="taraf.vergiDairesi" type="text" placeholder="Varsa vergi dairesi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                            </div>
+                            <div class="md:col-span-2 xl:col-span-4">
+                              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Adres</label>
+                              <textarea [(ngModel)]="taraf.adres" rows="2" placeholder="Adres bilgisi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white"></textarea>
+                            </div>
+                          </div>
+                          @if (taraf.muvekkilId) {
+                            <div class="mt-3 rounded-xl border border-blue-100 bg-blue-50/70 px-3 py-2 text-xs font-medium text-blue-700">Bu taraf kayıtlı kişi kartıyla eşleşiyor. Boş kalan alanlar kayıttaki iletişim ve adres bilgileriyle otomatik tamamlanır.</div>
+                          }
                         </div>
                       }
                     </div>
@@ -2485,6 +2654,31 @@
                             </select>
                             <button type="button" (click)="davaTarafSil('davali', $index)" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600">Sil</button>
                           </div>
+                          <div class="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                            <div>
+                              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">TC / VKN</label>
+                              <input [(ngModel)]="taraf.tcKimlikVergiNo" type="text" placeholder="Kimlik veya vergi no" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                            </div>
+                            <div>
+                              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Telefon</label>
+                              <input [(ngModel)]="taraf.telefon" type="text" placeholder="Telefon" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                            </div>
+                            <div>
+                              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">E-Posta</label>
+                              <input [(ngModel)]="taraf.eposta" type="email" placeholder="ornek@alan.com" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                            </div>
+                            <div>
+                              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Vergi Dairesi</label>
+                              <input [(ngModel)]="taraf.vergiDairesi" type="text" placeholder="Varsa vergi dairesi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                            </div>
+                            <div class="md:col-span-2 xl:col-span-4">
+                              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Adres</label>
+                              <textarea [(ngModel)]="taraf.adres" rows="2" placeholder="Adres bilgisi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white"></textarea>
+                            </div>
+                          </div>
+                          @if (taraf.muvekkilId) {
+                            <div class="mt-3 rounded-xl border border-rose-100 bg-rose-50/70 px-3 py-2 text-xs font-medium text-rose-700">Bu taraf kayıtlı kişi kartıyla eşleşiyor. Boş kalan alanlar kayıttaki iletişim ve adres bilgileriyle otomatik tamamlanır.</div>
+                          }
                         </div>
                       }
                     </div>

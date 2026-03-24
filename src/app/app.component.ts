@@ -118,6 +118,7 @@ export class AppComponent implements OnInit {
   duzenlenenMuvekkilGorusmeNotuId: number | null = null;
   duzenlenenMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = {};
   silinecekMuvekkilGorusmeNotuId: number | null = null;
+  aktifDavaTarafDetayi: { tur: 'davaci' | 'davali'; tarafId: number } | null = null;
 
   ngOnInit() { this.initFirebase(); }
 
@@ -281,13 +282,14 @@ export class AppComponent implements OnInit {
     if (s !== 'detay') this.seciliDava = null;
     if (s !== 'icraDetay') this.seciliIcra = null;
     if (s !== 'arabuluculukDetay') this.seciliArabuluculuk = null;
+    if (s !== 'detay') this.aktifDavaTarafDetayi = null;
     this.aramaMetni = '';
     if (s === 'davalar' || s === 'icralar' || s === 'arabuluculuk') {
       this.durumFiltresi = this.varsayilanDurumFiltresi(s);
     }
   }
 
-  detayaGit(d: DavaDosyasi) { this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.finansalIslemFormunuSifirla('Vekalet Ücreti'); this.finansalIslemDuzenlemeIptal(); this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' }; this.acikMuvekkilGorusmeNotlari = {}; this.duzenlenenMuvekkilGorusmeNotuId = null; this.duzenlenenMuvekkilGorusmeNotu = {}; this.silinecekMuvekkilGorusmeNotuId = null; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
+  detayaGit(d: DavaDosyasi) { this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.aktifDavaTarafDetayi = null; this.finansalIslemFormunuSifirla('Vekalet Ücreti'); this.finansalIslemDuzenlemeIptal(); this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' }; this.acikMuvekkilGorusmeNotlari = {}; this.duzenlenenMuvekkilGorusmeNotuId = null; this.duzenlenenMuvekkilGorusmeNotu = {}; this.silinecekMuvekkilGorusmeNotuId = null; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
   icraDetayinaGit(i: IcraDosyasi) { this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.finansalIslemFormunuSifirla('Vekalet Ücreti'); this.finansalIslemDuzenlemeIptal(); this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
   arabuluculukDetayinaGit(a: ArabuluculukDosyasi) { this.seciliArabuluculuk = a; this.aktifSayfa = 'arabuluculukDetay'; this.aktifDetaySekmesi = 'notlar'; this.finansalIslemFormunuSifirla('Ödeme'); this.finansalIslemDuzenlemeIptal(); this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
 
@@ -464,7 +466,7 @@ export class AppComponent implements OnInit {
     return this.degisenAlanMetni([
       { etiket: 'Dosya numarası', onceki: onceki?.dosyaNo, sonraki: sonraki.dosyaNo },
       { etiket: 'Müvekkil', onceki: onceki?.muvekkil, sonraki: sonraki.muvekkil },
-      { etiket: 'Taraflar', onceki: this.getDavaTarafOzet(onceki), sonraki: this.getDavaTarafOzet(sonraki) },
+      { etiket: 'Taraflar', onceki: this.getDavaTarafDetayKayitOzeti(onceki), sonraki: this.getDavaTarafDetayKayitOzeti(sonraki) },
       { etiket: 'Mahkeme', onceki: onceki?.mahkeme, sonraki: sonraki.mahkeme },
       { etiket: 'Eski mahkeme', onceki: onceki?.eskiMahkeme, sonraki: sonraki.eskiMahkeme },
       { etiket: 'Eski esas', onceki: onceki?.eskiEsasNo, sonraki: sonraki.eskiEsasNo },
@@ -517,6 +519,29 @@ export class AppComponent implements OnInit {
   davaTarafListesiKopyala(liste?: DavaTarafKaydi[]) {
     return Array.isArray(liste) ? liste.map(taraf => ({ ...taraf })) : [];
   }
+  davaTarafBosOlustur(id = Date.now()): DavaTarafKaydi {
+    return { id, isim: '', tcKimlikVergiNo: '', vergiDairesi: '', telefon: '', eposta: '', adres: '' };
+  }
+  davaTarafMuvekkilKaydiBul(taraf?: Partial<DavaTarafKaydi> | null) {
+    if (!taraf) return null;
+    if (taraf.muvekkilId) {
+      const idIleEslesen = this.muvekkiller.find(m => m.id == taraf.muvekkilId);
+      if (idIleEslesen) return idIleEslesen;
+    }
+    const isim = (taraf.isim || '').trim();
+    if (!isim) return null;
+    return this.muvekkiller.find(m => this.metinEsit(m.adSoyad, isim)) || null;
+  }
+  davaTarafBilgileriniMuvekkildenDoldur(taraf: DavaTarafKaydi, muvekkil?: Muvekkil | null, sadeceBos = false) {
+    if (!taraf || !muvekkil) return;
+    taraf.muvekkilId = muvekkil.id;
+    if (!sadeceBos || !(taraf.isim || '').trim()) taraf.isim = muvekkil.adSoyad;
+    if (!sadeceBos || !(taraf.tcKimlikVergiNo || '').trim()) taraf.tcKimlikVergiNo = this.duzMetinTrimle(muvekkil.tcKimlik) || '';
+    if (!sadeceBos || !(taraf.vergiDairesi || '').trim()) taraf.vergiDairesi = this.formatMetin(muvekkil.vergiDairesi) || '';
+    if (!sadeceBos || !(taraf.telefon || '').trim()) taraf.telefon = this.duzMetinTrimle(muvekkil.telefon) || '';
+    if (!sadeceBos || !(taraf.eposta || '').trim()) taraf.eposta = this.epostaDegeriniTemizle(muvekkil.eposta) || '';
+    if (!sadeceBos || !(taraf.adres || '').trim()) taraf.adres = this.formatMetin(muvekkil.adres) || '';
+  }
   davaMuvekkilleriVarsayilanOlustur(dava?: Partial<DavaDosyasi> | null) {
     let muvekkiller = this.davaTarafListesiKopyala(dava?.muvekkiller);
 
@@ -557,15 +582,38 @@ export class AppComponent implements OnInit {
       });
     }
 
-    if (!davacilar.length) davacilar = [{ id: Date.now(), isim: '' }];
-    if (!davalilar.length) davalilar = [{ id: Date.now() + 1, isim: '' }];
+    if (!davacilar.length) davacilar = [this.davaTarafBosOlustur(Date.now())];
+    if (!davalilar.length) davalilar = [this.davaTarafBosOlustur(Date.now() + 1)];
 
     return { davacilar, davalilar };
   }
-  davaTaraflariniHazirla(liste?: DavaTarafKaydi[]) {
+  davaTaraflariniHazirla(liste?: DavaTarafKaydi[]): DavaTarafKaydi[] {
     return (liste || [])
-      .map(taraf => ({ ...taraf, isim: (this.formatMetin(taraf.isim) || '').trim() }))
+      .map((taraf, index): DavaTarafKaydi => {
+        const secilen = this.davaTarafMuvekkilKaydiBul(taraf);
+        return {
+          ...taraf,
+          id: typeof taraf.id === 'number' ? taraf.id : Date.now() + index,
+          isim: (this.formatMetin(secilen?.adSoyad || taraf.isim) || '').trim(),
+          muvekkilId: secilen?.id ?? taraf.muvekkilId,
+          tcKimlikVergiNo: this.duzMetinTrimle(taraf.tcKimlikVergiNo || secilen?.tcKimlik) || '',
+          vergiDairesi: this.formatMetin(taraf.vergiDairesi || secilen?.vergiDairesi) || '',
+          telefon: this.duzMetinTrimle(taraf.telefon || secilen?.telefon) || '',
+          eposta: this.epostaDegeriniTemizle(taraf.eposta || secilen?.eposta) || '',
+          adres: this.formatMetin(taraf.adres || secilen?.adres) || ''
+        };
+      })
       .filter(taraf => taraf.isim !== '');
+  }
+  getDavaTarafKayitOzeti(liste?: DavaTarafKaydi[]) {
+    return (liste || [])
+      .map(taraf => [taraf.isim, taraf.tcKimlikVergiNo, taraf.telefon, taraf.eposta, taraf.vergiDairesi, taraf.adres, taraf.muvekkilId].filter(Boolean).join(':'))
+      .join('|');
+  }
+  getDavaTarafDetayKayitOzeti(dava?: Partial<DavaDosyasi> | null) {
+    if (!dava) return '';
+    const taraflar = this.getDavaTarafKayitlari(dava);
+    return `Davacı:${this.getDavaTarafKayitOzeti(taraflar.davacilar)};Davalı:${this.getDavaTarafKayitOzeti(taraflar.davalilar)}`;
   }
   getDavaTarafKayitlari(dava?: Partial<DavaDosyasi> | null) {
     if (!dava) return { davacilar: [], davalilar: [] };
@@ -578,7 +626,12 @@ export class AppComponent implements OnInit {
   davaMuvekkilTarafiniDahilEt(liste: DavaTarafKaydi[], isim: string, muvekkilId?: number) {
     if (!isim) return liste;
     if (!liste.some(taraf => taraf.isim.toLocaleLowerCase('tr-TR') === isim.toLocaleLowerCase('tr-TR'))) {
-      liste.unshift({ id: this.yeniGecmisKaydiId(), isim, muvekkilId });
+      const kayit = this.davaTarafBosOlustur(this.yeniGecmisKaydiId());
+      kayit.isim = isim;
+      kayit.muvekkilId = muvekkilId;
+      const secilen = this.davaTarafMuvekkilKaydiBul(kayit);
+      if (secilen) this.davaTarafBilgileriniMuvekkildenDoldur(kayit, secilen);
+      liste.unshift(kayit);
     }
     return liste;
   }
@@ -613,7 +666,7 @@ export class AppComponent implements OnInit {
   davaTarafEkle(tur: 'davaci' | 'davali') {
     const anahtar = tur === 'davaci' ? 'davacilar' : 'davalilar';
     if (!this.islemGorenDava[anahtar]) this.islemGorenDava[anahtar] = [];
-    this.islemGorenDava[anahtar]!.push({ id: Date.now(), isim: '' });
+    this.islemGorenDava[anahtar]!.push(this.davaTarafBosOlustur(Date.now()));
   }
   davaMuvekkilEkle() {
     if (!this.islemGorenDava.muvekkiller) this.islemGorenDava.muvekkiller = [];
@@ -631,14 +684,14 @@ export class AppComponent implements OnInit {
     if (this.islemGorenDava[anahtar]) {
       this.islemGorenDava[anahtar]!.splice(index, 1);
       if (this.islemGorenDava[anahtar]!.length === 0) {
-        this.islemGorenDava[anahtar] = [{ id: Date.now(), isim: '' }];
+        this.islemGorenDava[anahtar] = [this.davaTarafBosOlustur(Date.now())];
       }
     }
   }
   davaTarafSecimDegisti(taraf: DavaTarafKaydi, muvekkilId?: number) {
     const secilen = this.muvekkiller.find(m => m.id == muvekkilId);
     taraf.muvekkilId = secilen?.id;
-    if (secilen) taraf.isim = secilen.adSoyad;
+    if (secilen) this.davaTarafBilgileriniMuvekkildenDoldur(taraf, secilen);
   }
   davaMuvekkilSecimDegisti(kayit: DavaTarafKaydi, muvekkilId?: number) {
     const secilen = this.muvekkiller.find(m => m.id == muvekkilId);
@@ -649,6 +702,7 @@ export class AppComponent implements OnInit {
     taraf.isim = isim;
     const eslesen = this.muvekkiller.find(m => this.metinEsit(m.adSoyad, isim));
     taraf.muvekkilId = eslesen?.id;
+    if (eslesen) this.davaTarafBilgileriniMuvekkildenDoldur(taraf, eslesen, true);
   }
   davaMuvekkilMetniElleDegisti(kayit: DavaTarafKaydi, isim: string) {
     kayit.isim = isim;
@@ -2338,6 +2392,89 @@ export class AppComponent implements OnInit {
     const taraflar = this.getDavaTarafKayitlari(dava);
     const liste = tur === 'davaci' ? taraflar.davacilar : taraflar.davalilar;
     return liste.map(taraf => taraf.isim).join(', ') || '-';
+  }
+  getAktifDavaTarafListesi(tur: 'davaci' | 'davali') {
+    const dava = this.getAktifDavaDosyasi();
+    if (!dava) return [];
+    const taraflar = this.getDavaTarafKayitlari(dava);
+    return tur === 'davaci' ? taraflar.davacilar : taraflar.davalilar;
+  }
+  davaTarafDetayiAc(tur: 'davaci' | 'davali', tarafId: number) {
+    if (this.aktifDavaTarafDetayi?.tur === tur && this.aktifDavaTarafDetayi?.tarafId === tarafId) {
+      this.aktifDavaTarafDetayi = null;
+      return;
+    }
+    this.aktifDavaTarafDetayi = { tur, tarafId };
+  }
+  davaTarafDetayiKapat() {
+    this.aktifDavaTarafDetayi = null;
+  }
+  aktifDavaTarafDetayiAcikMi(tur: 'davaci' | 'davali', tarafId: number) {
+    return this.aktifDavaTarafDetayi?.tur === tur && this.aktifDavaTarafDetayi?.tarafId === tarafId;
+  }
+  getAktifDavaTarafDetayKaydi() {
+    if (!this.aktifDavaTarafDetayi) return null;
+    return this.getAktifDavaTarafListesi(this.aktifDavaTarafDetayi.tur).find(taraf => taraf.id === this.aktifDavaTarafDetayi!.tarafId) || null;
+  }
+  getAktifDavaTarafDetayRolEtiketi() {
+    if (!this.aktifDavaTarafDetayi) return '';
+    return this.aktifDavaTarafDetayi.tur === 'davaci' ? 'Davacı' : 'Davalı';
+  }
+  getDavaTarafGosterimBilgisi(taraf?: DavaTarafKaydi | null) {
+    const bagliMuvekkil = this.davaTarafMuvekkilKaydiBul(taraf);
+    return {
+      isim: this.formatMetin(bagliMuvekkil?.adSoyad || taraf?.isim) || '-',
+      tcKimlikVergiNo: this.duzMetinTrimle(taraf?.tcKimlikVergiNo || bagliMuvekkil?.tcKimlik) || '-',
+      vergiDairesi: this.formatMetin(taraf?.vergiDairesi || bagliMuvekkil?.vergiDairesi) || 'Belirtilmedi',
+      telefon: this.duzMetinTrimle(taraf?.telefon || bagliMuvekkil?.telefon) || 'Belirtilmedi',
+      eposta: this.epostaDegeriniTemizle(taraf?.eposta || bagliMuvekkil?.eposta) || 'Belirtilmedi',
+      adres: this.formatMetin(taraf?.adres || bagliMuvekkil?.adres) || 'Adres girilmedi',
+      bagliMuvekkil
+    };
+  }
+  davaTarafKayitlariEslesiyor(aranan?: DavaTarafKaydi | null, kayit?: DavaTarafKaydi | null) {
+    if (!aranan || !kayit) return false;
+    if ((aranan.tcKimlikVergiNo || '').trim() && (kayit.tcKimlikVergiNo || '').trim() && this.metinEsit(aranan.tcKimlikVergiNo, kayit.tcKimlikVergiNo)) return true;
+    if (aranan.muvekkilId && kayit.muvekkilId && aranan.muvekkilId === kayit.muvekkilId) return true;
+    const arananMuvekkil = this.davaTarafMuvekkilKaydiBul(aranan);
+    if (arananMuvekkil && this.iliskiDosyaylaEslesiyor(arananMuvekkil, kayit.isim, kayit.muvekkilId)) return true;
+    const kayitMuvekkil = this.davaTarafMuvekkilKaydiBul(kayit);
+    if (kayitMuvekkil && this.iliskiDosyaylaEslesiyor(kayitMuvekkil, aranan.isim, aranan.muvekkilId)) return true;
+    return this.metinEsit(aranan.isim, kayit.isim);
+  }
+  getDavaTarafIlgiliDavalar(taraf?: DavaTarafKaydi | null) {
+    if (!taraf) return [];
+    const bagliMuvekkil = this.davaTarafMuvekkilKaydiBul(taraf);
+    const tarafEslesiyor = (isim?: string, muvekkilId?: number) => {
+      if (bagliMuvekkil && this.iliskiDosyaylaEslesiyor(bagliMuvekkil, isim, muvekkilId)) return true;
+      if (taraf.muvekkilId && muvekkilId && taraf.muvekkilId === muvekkilId) return true;
+      return this.metinEsit(taraf.isim, isim);
+    };
+
+    return this.davalar
+      .filter(dava =>
+        tarafEslesiyor(dava.muvekkil, dava.muvekkilId)
+        || this.davaMuvekkilleriniHazirla(dava.muvekkiller).some(kayit => this.davaTarafKayitlariEslesiyor(taraf, kayit))
+        || this.getDavaTarafKayitlari(dava).davacilar.some(kayit => this.davaTarafKayitlariEslesiyor(taraf, kayit))
+        || this.getDavaTarafKayitlari(dava).davalilar.some(kayit => this.davaTarafKayitlariEslesiyor(taraf, kayit))
+      )
+      .sort((a, b) => b.id - a.id);
+  }
+  getDavaTarafIlgiliRolEtiketleri(dava: DavaDosyasi, taraf?: DavaTarafKaydi | null) {
+    if (!taraf) return [];
+    const etiketler: string[] = [];
+    if (this.davaMuvekkilleriniHazirla(dava.muvekkiller).some(kayit => this.davaTarafKayitlariEslesiyor(taraf, kayit)) || this.davaTarafKayitlariEslesiyor(taraf, { id: dava.id, isim: dava.muvekkil, muvekkilId: dava.muvekkilId })) {
+      etiketler.push('Müvekkil');
+    }
+    const taraflar = this.getDavaTarafKayitlari(dava);
+    if (taraflar.davacilar.some(kayit => this.davaTarafKayitlariEslesiyor(taraf, kayit))) etiketler.push('Davacı');
+    if (taraflar.davalilar.some(kayit => this.davaTarafKayitlariEslesiyor(taraf, kayit))) etiketler.push('Davalı');
+    return [...new Set(etiketler)];
+  }
+  getDavaTarafRolRozetClass(etiket: string) {
+    if (etiket === 'Davacı') return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    if (etiket === 'Davalı') return 'border-rose-200 bg-rose-50 text-rose-700';
+    return 'border-blue-200 bg-blue-50 text-blue-700';
   }
   getAktifDosyaBirincilEtiket() { return this.aktifSayfa === 'detay' ? 'Mahkeme' : this.aktifSayfa === 'icraDetay' ? 'İcra Dairesi' : 'Büro'; }
   getAktifDosyaBirincilDeger() {

@@ -18,7 +18,16 @@ export interface ArabuluculukTaraf {
   vekilBaroBilgisi?: string;
 }
 
-export interface DavaTarafKaydi { id: number; isim: string; muvekkilId?: number; }
+export interface DavaTarafKaydi {
+  id: number;
+  isim: string;
+  muvekkilId?: number;
+  tcKimlikVergiNo?: string;
+  vergiDairesi?: string;
+  telefon?: string;
+  eposta?: string;
+  adres?: string;
+}
 
 export interface DavaDosyasi { 
   id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; muvekkiller?: DavaTarafKaydi[]; karsiTaraf: string; mahkeme: string; eskiMahkeme?: string; eskiEsasNo?: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; notlar?: string; muvekkilGorusmeNotlari?: MuvekkilGorusmeNotu[]; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; baglantiliIcraIds?: number[]; baglantiliArabuluculukIds?: number[]; baglantiliTedbirDosyalari?: string[]; baglantiliDelilTespitiDosyalari?: string[]; baglantiliNoterlikDosyalari?: string[]; muvekkilPozisyonu?: string; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[]; davacilar?: DavaTarafKaydi[]; davalilar?: DavaTarafKaydi[];
