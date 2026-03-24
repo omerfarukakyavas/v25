@@ -763,6 +763,33 @@ export class AppComponent implements OnInit {
     });
   }
 
+  get filtrelenmisArabuluculukSureKayitlari() {
+    return this.filtrelenmisArabuluculuk
+      .map(dosya => this.getArabuluculukSureSayaci(dosya))
+      .filter((sayac): sayac is ArabuluculukSureSayaci => !!sayac && sayac.asama !== 'tamamlandi');
+  }
+
+  get filtrelenmisArabuluculukSureOzet() {
+    const kayitlar = this.filtrelenmisArabuluculukSureKayitlari;
+    return {
+      izlenen: kayitlar.length,
+      normal: kayitlar.filter(kayit => kayit.asama === 'normal').length,
+      uzatma: kayitlar.filter(kayit => kayit.asama === 'uzatma').length,
+      asildi: kayitlar.filter(kayit => kayit.asama === 'asildi').length
+    };
+  }
+
+  getArabuluculukSureListeDetayi(dosya?: Partial<ArabuluculukDosyasi> | null) {
+    if (!dosya) return 'Dosya bulunamadı.';
+    if (dosya.basvuruTuru !== 'Dava Şartı') return 'İhtiyari dosyada kanuni sayaç uygulanmaz.';
+
+    const sayac = this.getArabuluculukSureSayaci(dosya);
+    if (!sayac) return 'Görevlendirme tarihi girildiğinde sayaç başlayacak.';
+    if (sayac.asama === 'tamamlandi') return `Tutanak ${sayac.tamamlanmaGun || 0} günde düzenlendi.`;
+
+    return `Normal son: ${this.formatTarih(sayac.normalSonTarih)} • Azami son: ${this.formatTarih(sayac.azamiSonTarih)}`;
+  }
+
   get filtrelenmisArabuluculukMuvekkiller() {
     const s = this.arabuluculukMuvekkilArama.toLowerCase();
     return this.muvekkiller.filter(m => m.adSoyad.toLowerCase().includes(s) || (m.tcKimlik && m.tcKimlik.toLowerCase().includes(s)));
