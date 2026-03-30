@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, User, signInWithCustomToken, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 import { appId, getFirebaseConfig } from '../firebase.config';
 import { GOOGLE_DOCS_CONFIG } from '../google-docs.config';
@@ -22,6 +23,7 @@ import {
   DosyaNumarasi,
   EvrakBaglantisi,
   FinansalIslem,
+  GunlukOzetBildirimAyari,
   IcraDosyasi,
   IliskiDosyaKaydi,
   Muvekkil,
@@ -84,7 +86,7 @@ type GeriAlmaKaydi = {
 export class AppComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   
-  app: any; auth: any; db: any; user: User | null = null;
+  app: any; auth: any; db: any; functionsApi: any; user: User | null = null;
   authInitialized = false; yukleniyor = false; islemYapiyor = false; sistemHatasi = '';
   
   emailGiris = ''; sifreGiris = ''; authModu: 'giris' | 'kayit' = 'giris'; authHata = ''; authYukleniyor = false;
@@ -152,6 +154,10 @@ export class AppComponent implements OnInit {
   davetMektubuOlusturuluyor = false;
   bilgilendirmeTutanagiOlusturuluyor = false;
   googleDocsYetkiIstendi = false;
+  gunlukOzetAyari: GunlukOzetBildirimAyari = { aktif: false, aliciEpostalar: [], yaklasanGunSayisi: 30 };
+  gunlukOzetAliciMetni = '';
+  gunlukOzetKaydediliyor = false;
+  gunlukOzetTestGonderiliyor = false;
   yeniMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
   acikMuvekkilGorusmeNotlari: Record<number, boolean> = {};
   duzenlenenMuvekkilGorusmeNotuId: number | null = null;
@@ -169,11 +175,18 @@ export class AppComponent implements OnInit {
     try {
       this.sistemHatasi = '';
       const config = getFirebaseConfig();
-      this.app = initializeApp(config); this.auth = getAuth(this.app); this.db = getFirestore(this.app);
+      this.app = initializeApp(config); this.auth = getAuth(this.app); this.db = getFirestore(this.app); this.functionsApi = getFunctions(this.app, 'europe-west1');
       onAuthStateChanged(this.auth, (user: User | null) => {
         this.user = user; this.authInitialized = true;
         if (user) { this.verileriDinle(); }
-        else { this.davalar = []; this.icralar = []; this.arabuluculukDosyalar = []; this.muvekkiller = []; }
+        else {
+          this.davalar = [];
+          this.icralar = [];
+          this.arabuluculukDosyalar = [];
+          this.muvekkiller = [];
+          this.gunlukOzetAyari = this.varsayilanGunlukOzetAyari();
+          this.gunlukOzetAliciMetni = '';
+        }
         this.cdr.detectChanges();
       });
       if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -224,6 +237,10 @@ export class AppComponent implements OnInit {
     });
     onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'sablonlar'), (ds: any) => {
       if (ds.exists()) { this.sablonlar = ds.data(); } else { this.sablonlar = { avukatlik: [], arabuluculuk: [] }; }
+      this.cdr.detectChanges();
+    });
+    onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'bildirimler'), (ds: any) => {
+      this.gunlukOzetAyariUygula(ds.exists() ? ds.data() : null);
       this.cdr.detectChanges();
     });
   }
@@ -330,6 +347,148 @@ export class AppComponent implements OnInit {
     } catch (e: any) {
       this.bildirimGoster('error', 'Şablonlar kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
       return false;
+    }
+  }
+
+  varsayilanGunlukOzetAyari(email = this.user?.email || ''): GunlukOzetBildirimAyari {
+    return {
+      aktif: false,
+      aliciEpostalar: email ? [email] : [],
+      yaklasanGunSayisi: 30,
+      guncellenmeTarihi: '',
+      sonTestGonderimTarihi: '',
+      sonBasariliGonderimTarihi: '',
+      sonGonderimOzeti: ''
+    };
+  }
+
+  gunlukOzetGunSayisiniSinirla(deger: any) {
+    const sayi = Number(deger);
+    if (!Number.isFinite(sayi)) return 30;
+    return Math.min(60, Math.max(7, Math.round(sayi)));
+  }
+
+  gunlukOzetAlicilariniCoz(metin = this.gunlukOzetAliciMetni) {
+    const adaylar = String(metin || '')
+      .split(/[\s,;]+/)
+      .map(eposta => this.epostaDegeriniTemizle(eposta))
+      .filter(Boolean) as string[];
+    return [...new Set(adaylar)];
+  }
+
+  gecersizGunlukOzetAlicilari(liste: string[]) {
+    return liste.filter(eposta => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(eposta));
+  }
+
+  gunlukOzetAyariUygula(veri?: Partial<GunlukOzetBildirimAyari> | null) {
+    const varsayilan = this.varsayilanGunlukOzetAyari();
+    const alicilar = Array.isArray(veri?.aliciEpostalar)
+      ? veri!.aliciEpostalar.map(eposta => this.epostaDegeriniTemizle(eposta)).filter(Boolean) as string[]
+      : varsayilan.aliciEpostalar;
+    this.gunlukOzetAyari = {
+      ...varsayilan,
+      ...veri,
+      aktif: !!veri?.aktif,
+      aliciEpostalar: alicilar.length ? [...new Set(alicilar)] : varsayilan.aliciEpostalar,
+      yaklasanGunSayisi: this.gunlukOzetGunSayisiniSinirla(veri?.yaklasanGunSayisi ?? varsayilan.yaklasanGunSayisi)
+    };
+    this.gunlukOzetAliciMetni = this.gunlukOzetAyari.aliciEpostalar.join(', ');
+  }
+
+  async gunlukOzetAyariKaydetCloud(
+    ayar: GunlukOzetBildirimAyari,
+    basariBaslik = 'Günlük özet ayarları kaydedildi',
+    basariMesaji = 'Her gün sonunda gönderilecek mail özeti güncellendi.'
+  ): Promise<boolean> {
+    if (!this.user) return false;
+    try {
+      await setDoc(
+        doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'bildirimler'),
+        JSON.parse(JSON.stringify(ayar))
+      );
+      this.bildirimGoster('success', basariBaslik, basariMesaji);
+      return true;
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Günlük özet ayarları kaydedilemedi', e?.message || 'Ayar kaydı tamamlanamadı.');
+      return false;
+    }
+  }
+
+  hazirGunlukOzetAyari(aktifDurumu = this.gunlukOzetAyari.aktif) {
+    const alicilar = this.gunlukOzetAlicilariniCoz();
+    const yedekAlicilar = alicilar.length ? alicilar : (this.user?.email ? [this.user.email] : []);
+    return {
+      ...this.gunlukOzetAyari,
+      aktif: aktifDurumu,
+      aliciEpostalar: yedekAlicilar,
+      yaklasanGunSayisi: this.gunlukOzetGunSayisiniSinirla(this.gunlukOzetAyari.yaklasanGunSayisi),
+      guncellenmeTarihi: new Date().toISOString()
+    } as GunlukOzetBildirimAyari;
+  }
+
+  async gunlukOzetAyariKaydet() {
+    if (this.gunlukOzetKaydediliyor) return;
+    const alicilar = this.gunlukOzetAlicilariniCoz();
+    const gecersizler = this.gecersizGunlukOzetAlicilari(alicilar);
+    if (gecersizler.length) {
+      this.bildirimGoster('info', 'Geçerli e-posta gerekli', `Şu adresleri kontrol edin: ${gecersizler.join(', ')}`);
+      return;
+    }
+
+    const ayar = this.hazirGunlukOzetAyari();
+    if (ayar.aktif && !ayar.aliciEpostalar.length) {
+      this.bildirimGoster('info', 'Alıcı e-postası eksik', 'Günlük özet aktifken en az bir alıcı e-postası girilmelidir.');
+      return;
+    }
+
+    this.gunlukOzetKaydediliyor = true;
+    try {
+      const kaydedildi = await this.gunlukOzetAyariKaydetCloud(ayar);
+      if (kaydedildi) this.gunlukOzetAyariUygula(ayar);
+    } finally {
+      this.gunlukOzetKaydediliyor = false;
+    }
+  }
+
+  async gunlukOzetTestiGonder() {
+    if (this.gunlukOzetTestGonderiliyor) return;
+    if (!this.user || !this.functionsApi) {
+      this.bildirimGoster('error', 'Test maili gönderilemedi', 'Bulut fonksiyonları hazır değil. Sayfayı yenileyip tekrar deneyin.');
+      return;
+    }
+
+    const alicilar = this.gunlukOzetAlicilariniCoz();
+    const gecersizler = this.gecersizGunlukOzetAlicilari(alicilar);
+    if (gecersizler.length) {
+      this.bildirimGoster('info', 'Geçerli e-posta gerekli', `Şu adresleri kontrol edin: ${gecersizler.join(', ')}`);
+      return;
+    }
+
+    const hedefler = alicilar.length ? alicilar : (this.user.email ? [this.user.email] : []);
+    if (!hedefler.length) {
+      this.bildirimGoster('info', 'Alıcı e-postası eksik', 'Test maili için en az bir alıcı e-postası girin.');
+      return;
+    }
+
+    this.gunlukOzetTestGonderiliyor = true;
+    try {
+      const fonksiyon = httpsCallable(this.functionsApi, 'sendDailyDigestPreview');
+      const sonuc: any = await fonksiyon({
+        aliciEpostalar: hedefler,
+        yaklasanGunSayisi: this.gunlukOzetGunSayisiniSinirla(this.gunlukOzetAyari.yaklasanGunSayisi)
+      });
+      const veri = sonuc?.data || {};
+      const metin = [
+        `${veri.recipientCount || hedefler.length} alıcı`,
+        `${veri.overdueCount || 0} geciken`,
+        `${veri.todayCount || 0} bugün`,
+        `${veri.upcomingCount || 0} yaklaşan kayıt`
+      ].join(' • ');
+      this.bildirimGoster('success', 'Test maili gönderildi', metin);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Test maili gönderilemedi', e?.message || 'Fonksiyon kurulumu veya mail servis ayarları eksik olabilir.');
+    } finally {
+      this.gunlukOzetTestGonderiliyor = false;
     }
   }
 

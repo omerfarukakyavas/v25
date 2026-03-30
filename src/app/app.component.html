@@ -254,6 +254,84 @@
                     </div>
                   </div>
 
+                  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                    <div class="border-b border-slate-100 px-6 py-5">
+                      <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                          <h3 class="text-sm font-black uppercase tracking-[0.22em] text-slate-800">Günlük E-posta Özeti</h3>
+                          <p class="mt-2 text-sm leading-6 text-slate-500">Her gün <span class="font-bold text-slate-800">18:30</span> sonunda geciken kayıtlar, bugünlük işler ve önündeki seçilen gün aralığındaki dosyalar mail olarak gönderilir.</p>
+                        </div>
+                        <span [class]="gunlukOzetAyari.aktif ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-500'" class="inline-flex items-center rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em]">
+                          {{ gunlukOzetAyari.aktif ? 'Aktif' : 'Pasif' }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="p-6 space-y-5">
+                      <label class="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-4">
+                        <input [(ngModel)]="gunlukOzetAyari.aktif" type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400">
+                        <span class="block">
+                          <span class="block text-sm font-bold text-slate-800">Günlük özet otomatik gönderilsin</span>
+                          <span class="mt-1 block text-xs leading-5 text-slate-500">Bu açık olduğunda sistem her gün sonunda özet maili gönderir. Kapalıysa sadece test maili çalışır.</span>
+                        </span>
+                      </label>
+
+                      <div class="grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr,0.35fr]">
+                        <label class="block">
+                          <span class="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Alıcı E-posta</span>
+                          <input [(ngModel)]="gunlukOzetAliciMetni" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100" placeholder="Boş bırakırsan giriş yaptığın e-posta kullanılır">
+                          <span class="mt-2 block text-xs text-slate-400">Birden fazla alıcı için virgül veya boşluk kullanabilirsin.</span>
+                        </label>
+                        <label class="block">
+                          <span class="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Yaklaşan Gün</span>
+                          <input [(ngModel)]="gunlukOzetAyari.yaklasanGunSayisi" type="number" min="7" max="60" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100">
+                          <span class="mt-2 block text-xs text-slate-400">7 ile 60 gün arasında seçilebilir.</span>
+                        </label>
+                      </div>
+
+                      <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                        <div class="rounded-2xl border border-rose-100 bg-rose-50/80 p-4">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-rose-700">Mailde Yer Alır</p>
+                          <p class="mt-2 text-sm font-bold text-rose-800">Geciken Kayıtlar</p>
+                          <p class="mt-1 text-xs leading-5 text-rose-900/80">Süresi geçmiş ajanda ve evrak kalemleri ayrıca listelenir.</p>
+                        </div>
+                        <div class="rounded-2xl border border-amber-100 bg-amber-50/80 p-4">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">Mailde Yer Alır</p>
+                          <p class="mt-2 text-sm font-bold text-amber-800">Bugün ve Yaklaşanlar</p>
+                          <p class="mt-1 text-xs leading-5 text-amber-900/80">Bugüne ait kayıtlar ile seçilen gün aralığındaki işler tek mailde toplanır.</p>
+                        </div>
+                        <div class="rounded-2xl border border-violet-100 bg-violet-50/80 p-4">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-violet-700">Mailde Yer Alır</p>
+                          <p class="mt-2 text-sm font-bold text-violet-800">Arabuluculuk Sayaçları</p>
+                          <p class="mt-1 text-xs leading-5 text-violet-900/80">Uzatma penceresindeki ve aşımı yakın dosyalar özel blokta gösterilir.</p>
+                        </div>
+                      </div>
+
+                      <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                          <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Son Test Maili</p>
+                          <p class="mt-2 text-sm font-bold text-slate-800">{{ gunlukOzetAyari.sonTestGonderimTarihi ? formatTarihSaatKisa(gunlukOzetAyari.sonTestGonderimTarihi) : 'Henüz gönderilmedi' }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                          <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Son Otomatik Gönderim</p>
+                          <p class="mt-2 text-sm font-bold text-slate-800">{{ gunlukOzetAyari.sonBasariliGonderimTarihi ? formatTarihSaatKisa(gunlukOzetAyari.sonBasariliGonderimTarihi) : 'Henüz gönderilmedi' }}</p>
+                          @if (gunlukOzetAyari.sonGonderimOzeti) {
+                            <p class="mt-1 text-xs text-slate-500">{{ gunlukOzetAyari.sonGonderimOzeti }}</p>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="flex flex-wrap gap-3">
+                        <button (click)="gunlukOzetAyariKaydet()" [disabled]="gunlukOzetKaydediliyor" class="rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
+                          {{ gunlukOzetKaydediliyor ? 'Kaydediliyor...' : 'Ayarları Kaydet' }}
+                        </button>
+                        <button (click)="gunlukOzetTestiGonder()" [disabled]="gunlukOzetTestGonderiliyor" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">
+                          {{ gunlukOzetTestGonderiliyor ? 'Test Maili Gönderiliyor...' : 'Test Maili Gönder' }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                   <div class="rounded-2xl border border-violet-100 bg-gradient-to-r from-violet-50 via-white to-indigo-50 shadow-sm overflow-hidden">
                     <div class="border-b border-violet-100/80 px-6 py-5">
                       <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

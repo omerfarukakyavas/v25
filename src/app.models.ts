@@ -101,6 +101,16 @@ export interface AjandaKaydi {
 
 export type BildirimTur = 'success' | 'error' | 'info';
 
+export interface GunlukOzetBildirimAyari {
+  aktif: boolean;
+  aliciEpostalar: string[];
+  yaklasanGunSayisi: number;
+  guncellenmeTarihi?: string;
+  sonTestGonderimTarihi?: string;
+  sonBasariliGonderimTarihi?: string;
+  sonGonderimOzeti?: string;
+}
+
 export interface UygulamaBildirimi {
   id: number;
   tur: BildirimTur;
