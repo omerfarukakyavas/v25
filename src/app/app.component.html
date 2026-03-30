@@ -1,4 +1,4 @@
-    @if (!authInitialized) {
+﻿    @if (!authInitialized) {
       <div class="flex h-screen w-screen items-center justify-center bg-slate-900 text-white flex-col gap-4 font-sans">
          <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
          <h2 class="text-xl font-bold tracking-widest uppercase italic">Akyavaş HTS</h2>
@@ -23,7 +23,7 @@
           @if(authHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium mb-4 text-center">{{ authHata }}</div> }
           <div class="space-y-4">
             <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1 tracking-wider">E-Posta Adresiniz</label><input [(ngModel)]="emailGiris" type="email" placeholder="ornek@mail.com" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700 font-medium"></div>
-            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1 tracking-wider">Şifreniz</label><input [(ngModel)]="sifreGiris" (keyup.enter)="authIslemi()" type="password" placeholder="••••••••" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700 font-medium"></div>
+            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1 tracking-wider">Şifreniz</label><input [(ngModel)]="sifreGiris" (keyup.enter)="authIslemi()" type="password" placeholder="********" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700 font-medium"></div>
             <button (click)="authIslemi()" [disabled]="authYukleniyor" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-all">{{ authModu === 'giris' ? 'Giriş Yap' : 'Hesabımı Oluştur' }}</button>
           </div>
           <div class="mt-8 text-center pt-6 border-t border-slate-100">
@@ -112,12 +112,6 @@
               <!-- === YENİ: DASHBOARD (ÖZET EKRANI) === -->
               @case ('dashboard') {
                 <div class="app-page space-y-6 max-w-7xl mx-auto pb-10">
-                  <div class="hidden bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
-                    <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
-                    <h2 class="text-3xl font-black mb-2 relative z-10">Hoş Geldiniz.</h2>
-                    <p class="text-slate-300 font-medium relative z-10">Büronuzun güncel durumunu ve önemli gelişmeleri aşağıdan takip edebilirsiniz.</p>
-                  </div>
-
                   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                      <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex items-center gap-3 mb-2"><div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Toplam Bekleyen Alacak</p></div>
@@ -142,13 +136,13 @@
                       <div>
                         <h3 class="text-sm font-black text-slate-800 uppercase tracking-[0.22em] flex items-center gap-2">
                           <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.66 18h16.68a1 1 0 00.87-1.5l-7.5-13a1 1 0 00-1.74 0z"></path></svg>
-                          Akıllı Uyarı Merkezi
+                          Bildirim Merkezi
                         </h3>
-                        <p class="mt-2 text-sm leading-6 text-slate-500">Gecikmiş işler, bugün yapılacaklar, 7 gün içindeki kritik kayıtlar ve tahsilat bekleyen dosyalar tek merkezde toplandı.</p>
+                        <p class="mt-2 text-sm leading-6 text-slate-500">Geciken kayıtlar, bugün yapılacaklar, önümüzdeki ayın kritik işleri ve arabuluculuk sayaç alarmları burada toplanır. Aşağıdan günlük özeti oluşturup tek tıkla kopyalayabilirsin.</p>
                       </div>
-                      <div class="flex gap-3">
+                      <div class="flex flex-wrap gap-3">
                         <button (click)="sayfaDegistir('ajanda')" class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-colors shadow-sm">Ajandayı Aç</button>
-                        <button (click)="sayfaDegistir('muhasebe')" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors">Tahsilatı Gör</button>
+                        <button (click)="gunlukOzetiOlustur()" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors">Günlük Özeti Oluştur</button>
                       </div>
                     </div>
 
@@ -165,29 +159,29 @@
                           <p class="mt-2 text-sm font-medium leading-6 text-amber-900/80">Bugün takip edilmesi gereken kayıt</p>
                         </button>
                         <button (click)="sayfaDegistir('ajanda')" class="text-left rounded-2xl border border-blue-100 bg-blue-50/80 p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
-                          <p class="text-[11px] font-black uppercase tracking-[0.22em] text-blue-700">7 Gün İçinde</p>
-                          <p class="mt-3 text-3xl font-black text-blue-700">{{ dashboardUyariOzet.yediGun }}</p>
-                          <p class="mt-2 text-sm font-medium leading-6 text-blue-900/80">Yaklaşan duruşma, toplantı veya süreli iş</p>
+                          <p class="text-[11px] font-black uppercase tracking-[0.22em] text-blue-700">30 Gün İçinde</p>
+                          <p class="mt-3 text-3xl font-black text-blue-700">{{ dashboardUyariOzet.otuzGun }}</p>
+                          <p class="mt-2 text-sm font-medium leading-6 text-blue-900/80">Bir ay içindeki duruşma, toplantı ve süreli işler</p>
                         </button>
-                        <button (click)="sayfaDegistir('muhasebe')" class="text-left rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
-                          <p class="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-700">Tahsilat Bekleyen</p>
-                          <p class="mt-3 text-3xl font-black text-emerald-700">{{ dashboardUyariOzet.tahsilat }}</p>
-                          <p class="mt-2 text-sm font-medium leading-6 text-emerald-900/80">Toplam {{ formatPara(dashboardUyariOzet.tahsilatTutari) }} bekleyen alacak</p>
+                        <button (click)="sayfaDegistir('arabuluculuk')" class="text-left rounded-2xl border border-violet-100 bg-violet-50/80 p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                          <p class="text-[11px] font-black uppercase tracking-[0.22em] text-violet-700">Sayaç Alarmı</p>
+                          <p class="mt-3 text-3xl font-black text-violet-700">{{ dashboardUyariOzet.sureAlarm }}</p>
+                          <p class="mt-2 text-sm font-medium leading-6 text-violet-900/80">Uzatma penceresine giren veya kritik eşiğe yaklaşan arabuluculuk dosyaları</p>
                         </button>
                       </div>
 
-                      <div class="grid grid-cols-1 xl:grid-cols-[1.35fr,0.65fr] gap-6">
+                      <div class="grid grid-cols-1 xl:grid-cols-[1.25fr,0.75fr] gap-6">
                         <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
-                          <div class="flex items-center justify-between mb-4">
+                          <div class="flex items-center justify-between mb-4 gap-3">
                             <div>
-                              <h4 class="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Öncelikli Ajanda</h4>
-                              <p class="text-xs text-slate-500 mt-1">Önce gecikmiş, sonra bugün ve yakın tarihli kayıtlar listelenir.</p>
+                              <h4 class="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Öncelikli Bildirimler</h4>
+                              <p class="text-xs text-slate-500 mt-1">Geciken kayıtlar önce, ardından bugün ve önümüzdeki {{ gunlukOzetYakinGunSayisi }} gün listelenir.</p>
                             </div>
-                            <span class="px-3 py-1 rounded-full bg-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-wider">{{ oncelikliAjandaKayitlari.length }} kayıt</span>
+                            <span class="px-3 py-1 rounded-full bg-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-wider">{{ bildirimMerkeziAjandaKayitlari.length }} kayıt</span>
                           </div>
 
                           <div class="space-y-3">
-                            @for (kayit of oncelikliAjandaKayitlari; track kayit.id) {
+                            @for (kayit of bildirimMerkeziAjandaKayitlari; track kayit.id) {
                               <button (click)="ajandaKaydinaGit(kayit)" class="w-full text-left rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                                 <div class="flex flex-wrap items-center gap-2 mb-2">
                                   <span [class]="getAjandaTurClass(kayit.tur)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
@@ -199,12 +193,52 @@
                                 <p class="text-[11px] text-slate-400 mt-2">{{ kayit.altBaslik }}</p>
                               </button>
                             } @empty {
-                              <div class="rounded-2xl border border-emerald-100 border-dashed bg-emerald-50/70 p-5 text-sm font-medium text-emerald-700">Şu an kritik ajanda kaydı görünmüyor. Güzel gidiyorsunuz.</div>
+                              <div class="rounded-2xl border border-emerald-100 border-dashed bg-emerald-50/70 p-5 text-sm font-medium text-emerald-700">Şu an kritik bildirim görünmüyor. Güzel gidiyorsunuz.</div>
                             }
                           </div>
                         </div>
 
                         <div class="space-y-4">
+                          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                              <div>
+                                <h4 class="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Günlük Özet Oluştur</h4>
+                                <p class="text-xs text-slate-500 mt-1">Sistem içindeki kayıtları toparlar. Hazır metni e-posta veya WhatsApp ile kendin paylaşabilirsin.</p>
+                              </div>
+                              <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-600">{{ gunlukOzetYakinGunSayisi }} gün</span>
+                            </div>
+
+                            <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                              <label class="block">
+                                <span class="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Yaklaşan Gün</span>
+                                <input [ngModel]="gunlukOzetYakinGunSayisi" (ngModelChange)="gunlukOzetYakinGunSayisi = gunlukOzetGunSayisiniSinirla($event)" type="number" min="7" max="60" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100">
+                              </label>
+                              <div class="grid grid-cols-2 gap-3">
+                                <div class="rounded-2xl border border-rose-100 bg-rose-50/70 px-4 py-3">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.18em] text-rose-700">Geciken</p>
+                                  <p class="mt-2 text-2xl font-black text-rose-700">{{ dashboardUyariOzet.gecmis }}</p>
+                                </div>
+                                <div class="rounded-2xl border border-violet-100 bg-violet-50/70 px-4 py-3">
+                                  <p class="text-[10px] font-black uppercase tracking-[0.18em] text-violet-700">Sayaç</p>
+                                  <p class="mt-2 text-2xl font-black text-violet-700">{{ dashboardUyariOzet.sureAlarm }}</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="mt-4 flex flex-wrap gap-3">
+                              <button (click)="gunlukOzetiOlustur()" class="rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800">Özeti Hazırla</button>
+                              <button (click)="gunlukOzetiKopyala()" [disabled]="gunlukOzetKopyalaniyor" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">{{ gunlukOzetKopyalaniyor ? 'Kopyalaniyor...' : 'Özeti Kopyala' }}</button>
+                            </div>
+
+                            <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                              <div class="flex items-center justify-between gap-3">
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Hazır Metin</p>
+                                <span class="text-[11px] font-medium text-slate-400">{{ gunlukOzetOlusturulmaTarihi ? formatTarihSaatKisa(gunlukOzetOlusturulmaTarihi) : 'Henüz oluşturulmadı' }}</span>
+                              </div>
+                              <textarea [value]="gunlukOzetMetni" readonly rows="14" class="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition focus:border-slate-300 focus:ring-0"></textarea>
+                            </div>
+                          </div>
+
                           <div class="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
                             <div class="flex items-center justify-between mb-4">
                               <div>
@@ -250,84 +284,6 @@
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                    <div class="border-b border-slate-100 px-6 py-5">
-                      <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div>
-                          <h3 class="text-sm font-black uppercase tracking-[0.22em] text-slate-800">Günlük E-posta Özeti</h3>
-                          <p class="mt-2 text-sm leading-6 text-slate-500">Her gün <span class="font-bold text-slate-800">18:30</span> sonunda geciken kayıtlar, bugünlük işler ve önündeki seçilen gün aralığındaki dosyalar mail olarak gönderilir.</p>
-                        </div>
-                        <span [class]="gunlukOzetAyari.aktif ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-500'" class="inline-flex items-center rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em]">
-                          {{ gunlukOzetAyari.aktif ? 'Aktif' : 'Pasif' }}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div class="p-6 space-y-5">
-                      <label class="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-4">
-                        <input [(ngModel)]="gunlukOzetAyari.aktif" type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400">
-                        <span class="block">
-                          <span class="block text-sm font-bold text-slate-800">Günlük özet otomatik gönderilsin</span>
-                          <span class="mt-1 block text-xs leading-5 text-slate-500">Bu açık olduğunda sistem her gün sonunda özet maili gönderir. Kapalıysa sadece test maili çalışır.</span>
-                        </span>
-                      </label>
-
-                      <div class="grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr,0.35fr]">
-                        <label class="block">
-                          <span class="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Alıcı E-posta</span>
-                          <input [(ngModel)]="gunlukOzetAliciMetni" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100" placeholder="Boş bırakırsan giriş yaptığın e-posta kullanılır">
-                          <span class="mt-2 block text-xs text-slate-400">Birden fazla alıcı için virgül veya boşluk kullanabilirsin.</span>
-                        </label>
-                        <label class="block">
-                          <span class="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Yaklaşan Gün</span>
-                          <input [(ngModel)]="gunlukOzetAyari.yaklasanGunSayisi" type="number" min="7" max="60" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100">
-                          <span class="mt-2 block text-xs text-slate-400">7 ile 60 gün arasında seçilebilir.</span>
-                        </label>
-                      </div>
-
-                      <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <div class="rounded-2xl border border-rose-100 bg-rose-50/80 p-4">
-                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-rose-700">Mailde Yer Alır</p>
-                          <p class="mt-2 text-sm font-bold text-rose-800">Geciken Kayıtlar</p>
-                          <p class="mt-1 text-xs leading-5 text-rose-900/80">Süresi geçmiş ajanda ve evrak kalemleri ayrıca listelenir.</p>
-                        </div>
-                        <div class="rounded-2xl border border-amber-100 bg-amber-50/80 p-4">
-                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">Mailde Yer Alır</p>
-                          <p class="mt-2 text-sm font-bold text-amber-800">Bugün ve Yaklaşanlar</p>
-                          <p class="mt-1 text-xs leading-5 text-amber-900/80">Bugüne ait kayıtlar ile seçilen gün aralığındaki işler tek mailde toplanır.</p>
-                        </div>
-                        <div class="rounded-2xl border border-violet-100 bg-violet-50/80 p-4">
-                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-violet-700">Mailde Yer Alır</p>
-                          <p class="mt-2 text-sm font-bold text-violet-800">Arabuluculuk Sayaçları</p>
-                          <p class="mt-1 text-xs leading-5 text-violet-900/80">Uzatma penceresindeki ve aşımı yakın dosyalar özel blokta gösterilir.</p>
-                        </div>
-                      </div>
-
-                      <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                          <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Son Test Maili</p>
-                          <p class="mt-2 text-sm font-bold text-slate-800">{{ gunlukOzetAyari.sonTestGonderimTarihi ? formatTarihSaatKisa(gunlukOzetAyari.sonTestGonderimTarihi) : 'Henüz gönderilmedi' }}</p>
-                        </div>
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                          <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Son Otomatik Gönderim</p>
-                          <p class="mt-2 text-sm font-bold text-slate-800">{{ gunlukOzetAyari.sonBasariliGonderimTarihi ? formatTarihSaatKisa(gunlukOzetAyari.sonBasariliGonderimTarihi) : 'Henüz gönderilmedi' }}</p>
-                          @if (gunlukOzetAyari.sonGonderimOzeti) {
-                            <p class="mt-1 text-xs text-slate-500">{{ gunlukOzetAyari.sonGonderimOzeti }}</p>
-                          }
-                        </div>
-                      </div>
-
-                      <div class="flex flex-wrap gap-3">
-                        <button (click)="gunlukOzetAyariKaydet()" [disabled]="gunlukOzetKaydediliyor" class="rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
-                          {{ gunlukOzetKaydediliyor ? 'Kaydediliyor...' : 'Ayarları Kaydet' }}
-                        </button>
-                        <button (click)="gunlukOzetTestiGonder()" [disabled]="gunlukOzetTestGonderiliyor" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">
-                          {{ gunlukOzetTestGonderiliyor ? 'Test Maili Gönderiliyor...' : 'Test Maili Gönder' }}
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -483,7 +439,7 @@
                         </div>
                       }
                     </div>
-                  } @else { <div class="text-center py-6 bg-white rounded-lg border border-red-100 border-dashed text-red-500 font-medium text-sm">Şu an için süresi yaklaşan veya bekleyen bir işiniz bulunmuyor. Harika! 🎉</div> }
+                  } @else { <div class="text-center py-6 bg-white rounded-lg border border-red-100 border-dashed text-red-500 font-medium text-sm">Şu an için süresi yaklaşan veya bekleyen bir işiniz bulunmuyor. Harika! </div> }
                 </div>
 
                 <div class="bg-gradient-to-r from-blue-50 via-white to-sky-50 p-4 rounded-xl shadow-sm border border-blue-100 mb-6 flex flex-col sm:flex-row gap-4">
@@ -1256,8 +1212,8 @@
                                          }
                                        </div>
                                        <div class="flex flex-col bg-slate-100 rounded border border-slate-200 overflow-hidden">
-                                         <button (click)="evrakYukari(i)" [disabled]="i === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5">▲</button>
-                                         <button (click)="evrakAsagi(i)" [disabled]="i === sablonlar[aktifSablonSekmesi].length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5 border-t border-slate-200">▼</button>
+                                         <button (click)="evrakYukari(i)" [disabled]="i === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5">â–²</button>
+                                         <button (click)="evrakAsagi(i)" [disabled]="i === sablonlar[aktifSablonSekmesi].length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5 border-t border-slate-200">â–¼</button>
                                        </div>
                                        <p class="font-bold text-sm text-slate-800">{{ evrak.isim }}</p>
                                      </div>
@@ -1287,8 +1243,8 @@
                                         } @else {
                                            <div class="flex items-center gap-3">
                                              <div class="flex flex-col bg-slate-50 rounded border border-slate-200 overflow-hidden">
-                                               <button (click)="ekEvrakYukari(evrak, j)" [disabled]="j === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5">▲</button>
-                                               <button (click)="ekEvrakAsagi(evrak, j)" [disabled]="j === evrak.ekler.length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5 border-t border-slate-200">▼</button>
+                                               <button (click)="ekEvrakYukari(evrak, j)" [disabled]="j === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5">â–²</button>
+                                               <button (click)="ekEvrakAsagi(evrak, j)" [disabled]="j === evrak.ekler.length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5 border-t border-slate-200">â–¼</button>
                                              </div>
                                              <p class="font-bold text-xs text-slate-700">{{ ek.isim }}</p>
                                            </div>
@@ -1386,7 +1342,7 @@
                                 </button>
                               </td>
                             </tr>
-                          } @empty { <tr><td colspan="7" class="p-10 text-center text-slate-400 font-medium">Bu kriterlerde bekleyen bir alacak bulunmuyor. Harika! 🎉</td></tr> }
+                          } @empty { <tr><td colspan="7" class="p-10 text-center text-slate-400 font-medium">Bu kriterlerde bekleyen bir alacak bulunmuyor. Harika! </td></tr> }
                         </tbody>
                       </table>
                     </div>
@@ -1397,10 +1353,10 @@
               @case ('iliskiler') {
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
                   <div class="flex flex-wrap bg-slate-100 p-1 rounded-lg gap-1">
-                    <button (click)="aktifIliskiSekmesi = 'Müvekkil'" [class.bg-white]="aktifIliskiSekmesi === 'Müvekkil'" [class.shadow-sm]="aktifIliskiSekmesi === 'Müvekkil'" class="px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-700">Müvekkiller</button>
-                    <button (click)="aktifIliskiSekmesi = 'Şirketler'" [class.bg-white]="aktifIliskiSekmesi === 'Şirketler'" [class.shadow-sm]="aktifIliskiSekmesi === 'Şirketler'" class="px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-700">Şirketler</button>
-                    <button (click)="aktifIliskiSekmesi = 'Borçlular'" [class.bg-white]="aktifIliskiSekmesi === 'Borçlular'" [class.shadow-sm]="aktifIliskiSekmesi === 'Borçlular'" class="px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-700">Borçlular</button>
-                    <button (click)="aktifIliskiSekmesi = 'Diğer'" [class.bg-white]="aktifIliskiSekmesi === 'Diğer'" [class.shadow-sm]="aktifIliskiSekmesi === 'Diğer'" class="px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-700">Diğer</button>
+                <button (click)="aktifIliskiSekmesi = 'Müvekkil'" [class.bg-white]="aktifIliskiSekmesi === 'Müvekkil'" [class.shadow-sm]="aktifIliskiSekmesi === 'Müvekkil'" class="px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-700">Müvekkiller</button>
+                <button (click)="aktifIliskiSekmesi = 'Şirketler'" [class.bg-white]="aktifIliskiSekmesi === 'Şirketler'" [class.shadow-sm]="aktifIliskiSekmesi === 'Şirketler'" class="px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-700">Şirketler</button>
+                <button (click)="aktifIliskiSekmesi = 'Borçlular'" [class.bg-white]="aktifIliskiSekmesi === 'Borçlular'" [class.shadow-sm]="aktifIliskiSekmesi === 'Borçlular'" class="px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-700">Borçlular</button>
+                <button (click)="aktifIliskiSekmesi = 'Diğer'" [class.bg-white]="aktifIliskiSekmesi === 'Diğer'" [class.shadow-sm]="aktifIliskiSekmesi === 'Diğer'" class="px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-700">Diğer</button>
                   </div>
                   
                   <div class="flex-1 flex gap-3 w-full md:w-auto">
@@ -1485,7 +1441,7 @@
                               <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1.5">Yetkililer</p>
                               @for (y of muvekkil.yetkililer; track y.id) {
                                 <div class="text-[11px] font-medium text-slate-600 mb-1 flex flex-col justify-between">
-                                  <div class="flex justify-between"><span>• {{ y.adSoyad }} <span class="text-slate-400">({{y.pozisyon || 'N/A'}})</span></span><span>{{y.telefon}}</span></div>
+                                  <div class="flex justify-between"><span>* {{ y.adSoyad }} <span class="text-slate-400">({{y.pozisyon || 'N/A'}})</span></span><span>{{y.telefon}}</span></div>
                                   @if(y.eposta) { <div class="text-[9px] text-slate-400 pl-2.5">{{y.eposta}}</div> }
                                 </div>
                               }
@@ -1793,7 +1749,7 @@
                                          }
                                        </div>
                                        <p class="mt-3 text-lg font-black text-slate-900">{{ tarafBilgisi.isim }}</p>
-                                       <p class="mt-1 text-xs font-medium text-slate-500">Kimlik, iletişim ve adres bilgileri bu kişi için burada tutulur. Aynı kişiyle ilgili diğer dava dosyaları da altta listelenir.</p>
+                                        <p class="mt-1 text-xs font-medium text-slate-500">Kimlik, iletişim ve adres bilgileri bu kişi için burada tutulur. Aynı kişiyle ilgili diğer dava dosyaları da altta listelenir.</p>
                                      </div>
                                      <button type="button" (click)="davaTarafDetayiKapat()" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50">Kapat</button>
                                    </div>
@@ -1842,7 +1798,7 @@
                                            </div>
                                            <div>
                                              <p class="text-sm font-black text-slate-900">{{ dava.dosyaNo || 'Dava dosyası' }}</p>
-                                             <p class="mt-1 text-xs font-medium text-slate-600">{{ dava.mahkeme || '-' }} • {{ dava.konu || '-' }}</p>
+                                             <p class="mt-1 text-xs font-medium text-slate-600">{{ dava.mahkeme || '-' }} * {{ dava.konu || '-' }}</p>
                                              <p class="mt-2 text-[11px] text-slate-500">{{ getDavaTarafOzet(dava) }}</p>
                                            </div>
                                            <span class="text-[11px] font-bold text-blue-600">Dosyaya git</span>
@@ -1895,7 +1851,7 @@
                                      <div>
                                        <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">Bağlantılı İcra Dosyası</p>
                                        <p class="mt-1 font-bold text-slate-800">{{ icra.icraDairesi }} / {{ icra.dosyaNo }}</p>
-                                       <p class="mt-1 text-xs text-slate-500">{{ icra.alacakli || '-' }} • {{ icra.borclu || '-' }}</p>
+                                       <p class="mt-1 text-xs text-slate-500">{{ icra.alacakli || '-' }} * {{ icra.borclu || '-' }}</p>
                                      </div>
                                      <button (click)="icrayaGitId(icra.id)" class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700 sm:w-auto sm:py-1.5">İcraya Git</button>
                                    </div>
@@ -1905,7 +1861,7 @@
                                      <div>
                                        <p class="text-xs font-bold uppercase tracking-wider text-violet-700">Bağlantılı Arabuluculuk Dosyası</p>
                                        <p class="mt-1 font-bold text-slate-800">{{ arabuluculuk.buroNo ? arabuluculuk.buroNo + ' / ' : '' }}{{ arabuluculuk.arabuluculukNo }}</p>
-                                       <p class="mt-1 text-xs text-slate-500">{{ arabuluculuk.buro || '-' }} • {{ arabuluculuk.uyusmazlikTuru || '-' }}</p>
+                                       <p class="mt-1 text-xs text-slate-500">{{ arabuluculuk.buro || '-' }} * {{ arabuluculuk.uyusmazlikTuru || '-' }}</p>
                                      </div>
                                      <button (click)="arabuluculugaGitId(arabuluculuk.id)" class="w-full rounded-lg bg-violet-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-violet-700 sm:w-auto sm:py-1.5">Arabuluculuğa Git</button>
                                    </div>
@@ -2323,8 +2279,8 @@
                                                }
                                              </div>
                                              <div class="flex flex-col bg-slate-100 rounded border border-slate-200 overflow-hidden">
-                                               <button (click)="evrakYukari(i)" [disabled]="i === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5">▲</button>
-                                               <button (click)="evrakAsagi(i)" [disabled]="i === aktifDosya.evraklar!.length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5 border-t border-slate-200">▼</button>
+                                               <button (click)="evrakYukari(i)" [disabled]="i === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5">â–²</button>
+                                               <button (click)="evrakAsagi(i)" [disabled]="i === aktifDosya.evraklar!.length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5 border-t border-slate-200">â–¼</button>
                                              </div>
                                              <div class="min-w-0 flex flex-col">
                                                <div class="flex items-center gap-2">
@@ -2379,8 +2335,8 @@
                                               } @else {
                                                  <div class="flex min-w-0 items-center gap-3">
                                                    <div class="flex flex-col bg-slate-50 rounded border border-slate-200 overflow-hidden">
-                                                     <button (click)="ekEvrakYukari(evrak, j)" [disabled]="j === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5">▲</button>
-                                                     <button (click)="ekEvrakAsagi(evrak, j)" [disabled]="j === evrak.ekler.length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5 border-t border-slate-200">▼</button>
+                                                     <button (click)="ekEvrakYukari(evrak, j)" [disabled]="j === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5">â–²</button>
+                                                     <button (click)="ekEvrakAsagi(evrak, j)" [disabled]="j === evrak.ekler.length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5 border-t border-slate-200">â–¼</button>
                                                    </div>
                                                    <div class="flex min-w-0 items-center gap-2">
                                                      <span class="w-2 h-2 rounded-full border border-slate-200 shadow-sm" [style.backgroundColor]="getEvrakYaziRengi(ek.yaziRengi)"></span>
@@ -2537,7 +2493,7 @@
                                    <div><label class="block text-[10px] font-bold text-slate-500 mb-0.5">Tarih</label><input [(ngModel)]="yeniIslem.tarih" type="date" class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none"></div>
                                  </div>
                                  <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
-                                    <div class="w-full sm:w-1/3"><label class="block text-[10px] font-bold text-slate-500 mb-0.5">{{ aktifSayfa === 'arabuluculukDetay' ? 'Brüt Tutar (₺)' : 'Tutar (₺)' }}</label><input [(ngModel)]="yeniIslem.tutar" type="number" min="0" placeholder="0.00" class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none"></div>
+                                    <div class="w-full sm:w-1/3"><label class="block text-[10px] font-bold text-slate-500 mb-0.5">{{ aktifSayfa === 'arabuluculukDetay' ? 'Brüt Tutar (â‚º)' : 'Tutar (â‚º)' }}</label><input [(ngModel)]="yeniIslem.tutar" type="number" min="0" placeholder="0.00" class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none"></div>
                                     <div class="flex-1"><label class="block text-[10px] font-bold text-slate-500 mb-0.5">Açıklama</label><input [(ngModel)]="yeniIslem.aciklama" (keyup.enter)="finansalIslemEkle()" type="text" placeholder="Örn: Bilirkişi ücreti..." class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none"></div>
                                     <button (click)="finansalIslemEkle()" class="w-full rounded bg-slate-800 px-3 py-2 text-sm font-medium text-white sm:w-auto sm:py-1.5">Ekle</button>
                                  </div>
@@ -2589,7 +2545,7 @@
                                           </div>
                                           <div class="grid grid-cols-1 gap-2 sm:grid-cols-[140px_minmax(0,1fr)]">
                                             <div>
-                                              <label class="mb-0.5 block text-[10px] font-bold text-slate-500">{{ aktifSayfa === 'arabuluculukDetay' ? 'Brüt Tutar (₺)' : 'Tutar (₺)' }}</label>
+                                              <label class="mb-0.5 block text-[10px] font-bold text-slate-500">{{ aktifSayfa === 'arabuluculukDetay' ? 'Brüt Tutar (â‚º)' : 'Tutar (â‚º)' }}</label>
                                               <input [(ngModel)]="duzenlenenFinansalIslem.tutar" type="number" min="0" class="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none">
                                             </div>
                                             <div>
@@ -2721,7 +2677,7 @@
                 <div class="space-y-3">
                   @for(num of islemGorenDava.dosyaNumaralari; track $index) {
                     <div class="flex gap-2 items-center">
-                      <select [(ngModel)]="num.tur" class="w-1/3 px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-xs font-bold text-slate-700 shadow-sm"><option value="ESAS">ESAS</option><option value="KARAR">KARAR</option><option value="TALİMAT">TALİMAT</option><option value="DEĞİŞİK İŞ">DEĞİŞİK İŞ</option><option value="SORUŞTURMA">SORUŞTURMA</option><option value="HAZIRLIK">HAZIRLIK</option></select>
+                      <select [(ngModel)]="num.tur" class="w-1/3 px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-xs font-bold text-slate-700 shadow-sm"><option value="ESAS">ESAS</option><option value="KARAR">KARAR</option><option value="TALİMAT">TALİMAT</option><option value="DEÄİŞİK İŞ">DEÄİŞİK İŞ</option><option value="SORUŞTURMA">SORUŞTURMA</option><option value="HAZIRLIK">HAZIRLIK</option></select>
                       <input [(ngModel)]="num.no" type="text" placeholder="Örn: 2024/123" class="flex-1 px-3 py-2.5 border border-slate-300 rounded-lg outline-none text-sm shadow-sm">
                       <button (click)="dosyaNumarasiSil($index)" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg">Sil</button>
                     </div>
@@ -2830,7 +2786,7 @@
                           <div class="flex items-start justify-between gap-3 rounded-xl border border-emerald-100 bg-white px-3 py-2">
                             <div>
                               <p class="text-sm font-bold text-slate-800">{{ icra.icraDairesi }} / {{ icra.dosyaNo }}</p>
-                              <p class="mt-1 text-xs text-slate-500">{{ icra.alacakli || '-' }} • {{ icra.borclu || '-' }}</p>
+                              <p class="mt-1 text-xs text-slate-500">{{ icra.alacakli || '-' }} * {{ icra.borclu || '-' }}</p>
                             </div>
                             <button type="button" (click)="baglantiliIcraSil(icra.id)" class="rounded-lg px-2 py-1 text-[11px] font-bold text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600">Sil</button>
                           </div>
@@ -2858,7 +2814,7 @@
                           <div class="flex items-start justify-between gap-3 rounded-xl border border-violet-100 bg-white px-3 py-2">
                             <div>
                               <p class="text-sm font-bold text-slate-800">{{ arabuluculuk.buroNo ? arabuluculuk.buroNo + ' / ' : '' }}{{ arabuluculuk.arabuluculukNo }}</p>
-                              <p class="mt-1 text-xs text-slate-500">{{ arabuluculuk.buro || '-' }} • {{ arabuluculuk.uyusmazlikTuru || '-' }}</p>
+                              <p class="mt-1 text-xs text-slate-500">{{ arabuluculuk.buro || '-' }} * {{ arabuluculuk.uyusmazlikTuru || '-' }}</p>
                             </div>
                             <button type="button" (click)="baglantiliArabuluculukSil(arabuluculuk.id)" class="rounded-lg px-2 py-1 text-[11px] font-bold text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600">Sil</button>
                           </div>
@@ -2875,7 +2831,7 @@
                       </div>
                       <div class="mt-3 flex flex-wrap gap-2">
                         @for (dosya of getDavaBaglantiMetinListesi(islemGorenDava.baglantiliTedbirDosyalari); track dosya) {
-                          <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-amber-200">{{ dosya }}<button type="button" (click)="baglantiliMetinDosyaSil('baglantiliTedbirDosyalari', $index)" class="text-slate-400 transition-colors hover:text-red-500">×</button></span>
+                          <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-amber-200">{{ dosya }}<button type="button" (click)="baglantiliMetinDosyaSil('baglantiliTedbirDosyalari', $index)" class="text-slate-400 transition-colors hover:text-red-500">Ã—</button></span>
                         } @empty {
                           <span class="text-xs text-slate-500">Henüz tedbir dosyası eklenmedi.</span>
                         }
@@ -2889,7 +2845,7 @@
                       </div>
                       <div class="mt-3 flex flex-wrap gap-2">
                         @for (dosya of getDavaBaglantiMetinListesi(islemGorenDava.baglantiliDelilTespitiDosyalari); track dosya) {
-                          <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-sky-200">{{ dosya }}<button type="button" (click)="baglantiliMetinDosyaSil('baglantiliDelilTespitiDosyalari', $index)" class="text-slate-400 transition-colors hover:text-red-500">×</button></span>
+                          <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-sky-200">{{ dosya }}<button type="button" (click)="baglantiliMetinDosyaSil('baglantiliDelilTespitiDosyalari', $index)" class="text-slate-400 transition-colors hover:text-red-500">Ã—</button></span>
                         } @empty {
                           <span class="text-xs text-slate-500">Henüz delil tespiti dosyası eklenmedi.</span>
                         }
@@ -2903,7 +2859,7 @@
                       </div>
                       <div class="mt-3 flex flex-wrap gap-2">
                         @for (dosya of getDavaBaglantiMetinListesi(islemGorenDava.baglantiliNoterlikDosyalari); track dosya) {
-                          <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-rose-200">{{ dosya }}<button type="button" (click)="baglantiliMetinDosyaSil('baglantiliNoterlikDosyalari', $index)" class="text-slate-400 transition-colors hover:text-red-500">×</button></span>
+                          <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-rose-200">{{ dosya }}<button type="button" (click)="baglantiliMetinDosyaSil('baglantiliNoterlikDosyalari', $index)" class="text-slate-400 transition-colors hover:text-red-500">Ã—</button></span>
                         } @empty {
                           <span class="text-xs text-slate-500">Henüz noterlik dosyası eklenmedi.</span>
                         }
@@ -2929,7 +2885,7 @@
                             <input [(ngModel)]="taraf.isim" (ngModelChange)="davaTarafMetniElleDegisti(taraf, $event)" type="text" placeholder="Davacı adı / unvanı" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
                             <select [ngModel]="taraf.muvekkilId" (ngModelChange)="davaTarafSecimDegisti(taraf, $event)" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
                               <option [ngValue]="undefined">Listeden kişi / şirket seç</option>
-                              @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option> }
+                    @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option> }
                             </select>
                             <button type="button" (click)="davaTarafSil('davaci', $index)" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600">Sil</button>
                           </div>
@@ -2974,7 +2930,7 @@
                             <input [(ngModel)]="taraf.isim" (ngModelChange)="davaTarafMetniElleDegisti(taraf, $event)" type="text" placeholder="Davalı adı / unvanı" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
                             <select [ngModel]="taraf.muvekkilId" (ngModelChange)="davaTarafSecimDegisti(taraf, $event)" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
                               <option [ngValue]="undefined">Listeden kişi / şirket seç</option>
-                              @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option> }
+                    @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option> }
                             </select>
                             <button type="button" (click)="davaTarafSil('davali', $index)" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600">Sil</button>
                           </div>
@@ -3042,7 +2998,7 @@
                 <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg mt-4"><label class="block text-xs font-bold text-orange-800 uppercase mb-1">İstinaf Mahkemesi</label><input [(ngModel)]="islemGorenDava.istinafMahkemesi" type="text" class="w-full px-3 py-2 border border-orange-200 rounded-lg outline-none bg-white"></div>
               }
 
-                <div class="border-t border-slate-100 pt-4 mt-4"><label class="block text-xs font-bold text-blue-600 uppercase mb-1">Anlaşılan Vekalet Ücreti (₺)</label><input [(ngModel)]="islemGorenDava.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-blue-200 bg-blue-50 rounded-lg outline-none"></div>
+                <div class="border-t border-slate-100 pt-4 mt-4"><label class="block text-xs font-bold text-blue-600 uppercase mb-1">Anlaşılan Vekalet Ücreti (â‚º)</label><input [(ngModel)]="islemGorenDava.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-blue-200 bg-blue-50 rounded-lg outline-none"></div>
               </div>
               </div>
             </div>
@@ -3126,7 +3082,7 @@
                 </div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Takip Tarihi</label><input [(ngModel)]="islemGorenIcra.takipTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 </div>
-                <div class="border-t border-slate-100 pt-4 mt-4"><label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Anlaşılan Vekalet Ücreti (₺)</label><input [(ngModel)]="islemGorenIcra.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-emerald-200 bg-emerald-50 rounded-lg outline-none"></div>
+                <div class="border-t border-slate-100 pt-4 mt-4"><label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Anlaşılan Vekalet Ücreti (â‚º)</label><input [(ngModel)]="islemGorenIcra.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-emerald-200 bg-emerald-50 rounded-lg outline-none"></div>
               </div>
               </div>
             </div>
@@ -3157,7 +3113,7 @@
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-purple-700">Dosya Kimliği</p>
                 <p class="mt-2 text-sm leading-6 text-slate-500">Büro, dosya numarası ve kayıtlı muhatap bilgileri tek blokta görünerek ilk bakışı kolaylaştırır.</p>
                 <div class="mt-4 flex gap-4">
-                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Büro No @if(islemGorenArabuluculuk.basvuruTuru === 'Dava Şartı'){<span class="text-red-500">*</span>}</label><input [(ngModel)]="islemGorenArabuluculuk.buroNo" type="text" placeholder="Örn: 2024/123" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                  <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Büro No @if(islemGorenArabuluculuk.basvuruTuru === 'Dava Şartı'){<span class="text-red-500">*</span>}</label><input [(ngModel)]="islemGorenArabuluculuk.buroNo" type="text" placeholder="Örn: 2024/123" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arabuluculuk No <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenArabuluculuk.arabuluculukNo" type="text" placeholder="Örn: 2024/456" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 </div>
 
@@ -3306,7 +3262,7 @@
                     <option value="Hazırlık">Hazırlık</option><option value="Müzakere">Müzakere</option><option value="İmza">İmza</option><option value="Tahsilat">Tahsilat</option><option value="Kapalı">Kapalı</option>
                   </select>
                 </div>
-                <div><label class="block text-xs font-bold text-purple-600 uppercase mb-1">Brüt Hizmet Ücreti (₺)</label><input [(ngModel)]="islemGorenArabuluculuk.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-purple-200 bg-purple-50 rounded-lg outline-none"></div>
+                <div><label class="block text-xs font-bold text-purple-600 uppercase mb-1">Brüt Hizmet Ücreti (â‚º)</label><input [(ngModel)]="islemGorenArabuluculuk.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-purple-200 bg-purple-50 rounded-lg outline-none"></div>
                 </div>
               </div>
               </div>
@@ -3455,3 +3411,4 @@
       }
     }
   
+

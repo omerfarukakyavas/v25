@@ -1,10 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+﻿import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, User, signInWithCustomToken, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 
 import { appId, getFirebaseConfig } from '../firebase.config';
 import { GOOGLE_DOCS_CONFIG } from '../google-docs.config';
@@ -23,7 +22,6 @@ import {
   DosyaNumarasi,
   EvrakBaglantisi,
   FinansalIslem,
-  GunlukOzetBildirimAyari,
   IcraDosyasi,
   IliskiDosyaKaydi,
   Muvekkil,
@@ -86,7 +84,7 @@ type GeriAlmaKaydi = {
 export class AppComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   
-  app: any; auth: any; db: any; functionsApi: any; user: User | null = null;
+  app: any; auth: any; db: any; user: User | null = null;
   authInitialized = false; yukleniyor = false; islemYapiyor = false; sistemHatasi = '';
   
   emailGiris = ''; sifreGiris = ''; authModu: 'giris' | 'kayit' = 'giris'; authHata = ''; authYukleniyor = false;
@@ -154,10 +152,10 @@ export class AppComponent implements OnInit {
   davetMektubuOlusturuluyor = false;
   bilgilendirmeTutanagiOlusturuluyor = false;
   googleDocsYetkiIstendi = false;
-  gunlukOzetAyari: GunlukOzetBildirimAyari = { aktif: false, aliciEpostalar: [], yaklasanGunSayisi: 30 };
-  gunlukOzetAliciMetni = '';
-  gunlukOzetKaydediliyor = false;
-  gunlukOzetTestGonderiliyor = false;
+  gunlukOzetYakinGunSayisi = 30;
+  gunlukOzetMetni = '';
+  gunlukOzetOlusturulmaTarihi = '';
+  gunlukOzetKopyalaniyor = false;
   yeniMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
   acikMuvekkilGorusmeNotlari: Record<number, boolean> = {};
   duzenlenenMuvekkilGorusmeNotuId: number | null = null;
@@ -175,7 +173,7 @@ export class AppComponent implements OnInit {
     try {
       this.sistemHatasi = '';
       const config = getFirebaseConfig();
-      this.app = initializeApp(config); this.auth = getAuth(this.app); this.db = getFirestore(this.app); this.functionsApi = getFunctions(this.app, 'europe-west1');
+      this.app = initializeApp(config); this.auth = getAuth(this.app); this.db = getFirestore(this.app);
       onAuthStateChanged(this.auth, (user: User | null) => {
         this.user = user; this.authInitialized = true;
         if (user) { this.verileriDinle(); }
@@ -184,8 +182,8 @@ export class AppComponent implements OnInit {
           this.icralar = [];
           this.arabuluculukDosyalar = [];
           this.muvekkiller = [];
-          this.gunlukOzetAyari = this.varsayilanGunlukOzetAyari();
-          this.gunlukOzetAliciMetni = '';
+          this.gunlukOzetMetni = '';
+          this.gunlukOzetOlusturulmaTarihi = '';
         }
         this.cdr.detectChanges();
       });
@@ -237,10 +235,6 @@ export class AppComponent implements OnInit {
     });
     onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'sablonlar'), (ds: any) => {
       if (ds.exists()) { this.sablonlar = ds.data(); } else { this.sablonlar = { avukatlik: [], arabuluculuk: [] }; }
-      this.cdr.detectChanges();
-    });
-    onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'bildirimler'), (ds: any) => {
-      this.gunlukOzetAyariUygula(ds.exists() ? ds.data() : null);
       this.cdr.detectChanges();
     });
   }
@@ -350,147 +344,120 @@ export class AppComponent implements OnInit {
     }
   }
 
-  varsayilanGunlukOzetAyari(email = this.user?.email || ''): GunlukOzetBildirimAyari {
-    return {
-      aktif: false,
-      aliciEpostalar: email ? [email] : [],
-      yaklasanGunSayisi: 30,
-      guncellenmeTarihi: '',
-      sonTestGonderimTarihi: '',
-      sonBasariliGonderimTarihi: '',
-      sonGonderimOzeti: ''
-    };
-  }
-
   gunlukOzetGunSayisiniSinirla(deger: any) {
     const sayi = Number(deger);
     if (!Number.isFinite(sayi)) return 30;
     return Math.min(60, Math.max(7, Math.round(sayi)));
   }
 
-  gunlukOzetAlicilariniCoz(metin = this.gunlukOzetAliciMetni) {
-    const adaylar = String(metin || '')
-      .split(/[\s,;]+/)
-      .map(eposta => this.epostaDegeriniTemizle(eposta))
-      .filter(Boolean) as string[];
-    return [...new Set(adaylar)];
-  }
-
-  gecersizGunlukOzetAlicilari(liste: string[]) {
-    return liste.filter(eposta => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(eposta));
-  }
-
-  gunlukOzetAyariUygula(veri?: Partial<GunlukOzetBildirimAyari> | null) {
-    const varsayilan = this.varsayilanGunlukOzetAyari();
-    const alicilar = Array.isArray(veri?.aliciEpostalar)
-      ? veri!.aliciEpostalar.map(eposta => this.epostaDegeriniTemizle(eposta)).filter(Boolean) as string[]
-      : varsayilan.aliciEpostalar;
-    this.gunlukOzetAyari = {
-      ...varsayilan,
-      ...veri,
-      aktif: !!veri?.aktif,
-      aliciEpostalar: alicilar.length ? [...new Set(alicilar)] : varsayilan.aliciEpostalar,
-      yaklasanGunSayisi: this.gunlukOzetGunSayisiniSinirla(veri?.yaklasanGunSayisi ?? varsayilan.yaklasanGunSayisi)
-    };
-    this.gunlukOzetAliciMetni = this.gunlukOzetAyari.aliciEpostalar.join(', ');
-  }
-
-  async gunlukOzetAyariKaydetCloud(
-    ayar: GunlukOzetBildirimAyari,
-    basariBaslik = 'Günlük özet ayarları kaydedildi',
-    basariMesaji = 'Her gün sonunda gönderilecek mail özeti güncellendi.'
-  ): Promise<boolean> {
-    if (!this.user) return false;
-    try {
-      await setDoc(
-        doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'bildirimler'),
-        JSON.parse(JSON.stringify(ayar))
-      );
-      this.bildirimGoster('success', basariBaslik, basariMesaji);
-      return true;
-    } catch (e: any) {
-      this.bildirimGoster('error', 'Günlük özet ayarları kaydedilemedi', e?.message || 'Ayar kaydı tamamlanamadı.');
-      return false;
-    }
-  }
-
-  hazirGunlukOzetAyari(aktifDurumu = this.gunlukOzetAyari.aktif) {
-    const alicilar = this.gunlukOzetAlicilariniCoz();
-    const yedekAlicilar = alicilar.length ? alicilar : (this.user?.email ? [this.user.email] : []);
-    return {
-      ...this.gunlukOzetAyari,
-      aktif: aktifDurumu,
-      aliciEpostalar: yedekAlicilar,
-      yaklasanGunSayisi: this.gunlukOzetGunSayisiniSinirla(this.gunlukOzetAyari.yaklasanGunSayisi),
-      guncellenmeTarihi: new Date().toISOString()
-    } as GunlukOzetBildirimAyari;
-  }
-
-  async gunlukOzetAyariKaydet() {
-    if (this.gunlukOzetKaydediliyor) return;
-    const alicilar = this.gunlukOzetAlicilariniCoz();
-    const gecersizler = this.gecersizGunlukOzetAlicilari(alicilar);
-    if (gecersizler.length) {
-      this.bildirimGoster('info', 'Geçerli e-posta gerekli', `Şu adresleri kontrol edin: ${gecersizler.join(', ')}`);
-      return;
-    }
-
-    const ayar = this.hazirGunlukOzetAyari();
-    if (ayar.aktif && !ayar.aliciEpostalar.length) {
-      this.bildirimGoster('info', 'Alıcı e-postası eksik', 'Günlük özet aktifken en az bir alıcı e-postası girilmelidir.');
-      return;
-    }
-
-    this.gunlukOzetKaydediliyor = true;
-    try {
-      const kaydedildi = await this.gunlukOzetAyariKaydetCloud(ayar);
-      if (kaydedildi) this.gunlukOzetAyariUygula(ayar);
-    } finally {
-      this.gunlukOzetKaydediliyor = false;
-    }
-  }
-
-  async gunlukOzetTestiGonder() {
-    if (this.gunlukOzetTestGonderiliyor) return;
-    if (!this.user || !this.functionsApi) {
-      this.bildirimGoster('error', 'Test maili gönderilemedi', 'Bulut fonksiyonları hazır değil. Sayfayı yenileyip tekrar deneyin.');
-      return;
-    }
-
-    const alicilar = this.gunlukOzetAlicilariniCoz();
-    const gecersizler = this.gecersizGunlukOzetAlicilari(alicilar);
-    if (gecersizler.length) {
-      this.bildirimGoster('info', 'Geçerli e-posta gerekli', `Şu adresleri kontrol edin: ${gecersizler.join(', ')}`);
-      return;
-    }
-
-    const hedefler = alicilar.length ? alicilar : (this.user.email ? [this.user.email] : []);
-    if (!hedefler.length) {
-      this.bildirimGoster('info', 'Alıcı e-postası eksik', 'Test maili için en az bir alıcı e-postası girin.');
-      return;
-    }
-
-    this.gunlukOzetTestGonderiliyor = true;
-    try {
-      const fonksiyon = httpsCallable(this.functionsApi, 'sendDailyDigestPreview');
-      const sonuc: any = await fonksiyon({
-        aliciEpostalar: hedefler,
-        yaklasanGunSayisi: this.gunlukOzetGunSayisiniSinirla(this.gunlukOzetAyari.yaklasanGunSayisi)
+  getGunlukOzetAjandaKayitlari(gunSayisi = this.gunlukOzetGunSayisiniSinirla(this.gunlukOzetYakinGunSayisi)) {
+    return [...this.ajandaKayitlari]
+      .filter(kayit => {
+        const fark = this.ajandaGunFarki(kayit.tarih);
+        return fark < 0 || fark <= gunSayisi;
+      })
+      .sort((a, b) => {
+        const farkA = this.ajandaGunFarki(a.tarih);
+        const farkB = this.ajandaGunFarki(b.tarih);
+        const oncelikA = farkA < 0 ? 0 : (farkA === 0 ? 1 : 2);
+        const oncelikB = farkB < 0 ? 0 : (farkB === 0 ? 1 : 2);
+        if (oncelikA !== oncelikB) return oncelikA - oncelikB;
+        return this.ajandaTarihDamgasi(a.tarih) - this.ajandaTarihDamgasi(b.tarih);
       });
-      const veri = sonuc?.data || {};
-      const metin = [
-        `${veri.recipientCount || hedefler.length} alıcı`,
-        `${veri.overdueCount || 0} geciken`,
-        `${veri.todayCount || 0} bugün`,
-        `${veri.upcomingCount || 0} yaklaşan kayıt`
-      ].join(' • ');
-      this.bildirimGoster('success', 'Test maili gönderildi', metin);
+  }
+
+  gunlukOzetAjandaSatiri(kayit: AjandaKaydi) {
+    const etiket = `${this.getAjandaKaynakEtiketi(kayit.kaynak)} / ${this.getAjandaTurEtiketi(kayit.tur)}`;
+    const tarih = this.formatTarihSaatKisa(kayit.tarih, kayit.saat);
+    return `- [${etiket}] ${kayit.baslik} | ${kayit.taraflar} | ${tarih} | ${this.ajandaDurumMetni(kayit.tarih)}`;
+  }
+
+  gunlukOzetSureSatiri(sure: ArabuluculukSureSayaci) {
+    const referans = `${sure.dosya.buroNo ? sure.dosya.buroNo + ' / ' : ''}${sure.dosya.arabuluculukNo}`;
+    return `- [${sure.dosya.uyusmazlikTuru}] ${referans} | ${this.getArabuluculukTarafIsimMetni(sure.dosya)} | ${this.getArabuluculukSureKalanMetni(sure)} | Azami son: ${this.formatTarih(sure.azamiSonTarih)}`;
+  }
+
+  gunlukOzetiOlustur() {
+    this.gunlukOzetYakinGunSayisi = this.gunlukOzetGunSayisiniSinirla(this.gunlukOzetYakinGunSayisi);
+    const gecikenKayitlar = this.ajandaKayitlari.filter(kayit => this.ajandaGunFarki(kayit.tarih) < 0);
+    const bugunkuKayitlar = this.ajandaKayitlari.filter(kayit => this.ajandaGunFarki(kayit.tarih) === 0);
+    const yaklasanKayitlar = this.ajandaKayitlari
+      .filter(kayit => {
+        const fark = this.ajandaGunFarki(kayit.tarih);
+        return fark > 0 && fark <= this.gunlukOzetYakinGunSayisi;
+      })
+      .sort((a, b) => this.ajandaTarihDamgasi(a.tarih) - this.ajandaTarihDamgasi(b.tarih));
+    const sayacKayitlari = this.kritikArabuluculukSureKayitlari;
+
+    const satirlar = [
+      'Gunluk Bildirim Ozeti',
+      `Olusturma tarihi: ${this.formatTarihSaatKisa(new Date().toISOString())}`,
+      '',
+      `Geciken kayit: ${gecikenKayitlar.length}`,
+      `Bugun takip edilecek kayit: ${bugunkuKayitlar.length}`,
+      `Onumuzdeki ${this.gunlukOzetYakinGunSayisi} gun: ${yaklasanKayitlar.length}`,
+      `Arabuluculuk sure alarmi: ${sayacKayitlari.length}`,
+      `Tahsilat bekleyen dosya: ${this.dashboardUyariOzet.tahsilat} (${this.formatPara(this.dashboardUyariOzet.tahsilatTutari)})`
+    ];
+
+    const bolumEkle = (baslik: string, satirListesi: string[], bosMesaji: string) => {
+      satirlar.push('', baslik);
+      if (satirListesi.length) satirlar.push(...satirListesi);
+      else satirlar.push(`- ${bosMesaji}`);
+    };
+
+    bolumEkle('GECIKEN KAYITLAR', gecikenKayitlar.slice(0, 8).map(kayit => this.gunlukOzetAjandaSatiri(kayit)), 'Geciken kayit yok.');
+    bolumEkle('BUGUN', bugunkuKayitlar.slice(0, 8).map(kayit => this.gunlukOzetAjandaSatiri(kayit)), 'Bugune ait kayit yok.');
+    bolumEkle(
+      `ONUMUZDEKI ${this.gunlukOzetYakinGunSayisi} GUN`,
+      yaklasanKayitlar.slice(0, 12).map(kayit => this.gunlukOzetAjandaSatiri(kayit)),
+      'Bu aralikta planli kayit yok.'
+    );
+    bolumEkle(
+      'ARABULUCULUK SURE ALARMLARI',
+      sayacKayitlari.slice(0, 8).map(sure => this.gunlukOzetSureSatiri(sure)),
+      'Kritik sure alarmi gorunmuyor.'
+    );
+
+    this.gunlukOzetMetni = satirlar.join('\n');
+    this.gunlukOzetOlusturulmaTarihi = new Date().toISOString();
+    this.bildirimGoster(
+      'success',
+      'Gunluk ozet hazir',
+      `${gecikenKayitlar.length} geciken, ${bugunkuKayitlar.length} bugun ve ${yaklasanKayitlar.length} yaklasan kayit toparlandi.`
+    );
+  }
+
+  async gunlukOzetiKopyala() {
+    if (this.gunlukOzetKopyalaniyor) return;
+    if (!this.gunlukOzetMetni.trim()) this.gunlukOzetiOlustur();
+    if (!this.gunlukOzetMetni.trim()) return;
+
+    this.gunlukOzetKopyalaniyor = true;
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(this.gunlukOzetMetni);
+      } else if (typeof document !== 'undefined') {
+        const alan = document.createElement('textarea');
+        alan.value = this.gunlukOzetMetni;
+        alan.setAttribute('readonly', 'true');
+        alan.style.position = 'fixed';
+        alan.style.opacity = '0';
+        document.body.appendChild(alan);
+        alan.focus();
+        alan.select();
+        document.execCommand('copy');
+        document.body.removeChild(alan);
+      }
+      this.bildirimGoster('success', 'Ozet kopyalandi', 'Hazir metni e-posta, WhatsApp veya not uygulamasina yapistirabilirsin.');
     } catch (e: any) {
-      this.bildirimGoster('error', 'Test maili gönderilemedi', e?.message || 'Fonksiyon kurulumu veya mail servis ayarları eksik olabilir.');
+      this.bildirimGoster('error', 'Ozet kopyalanamadi', e?.message || 'Panoya kopyalama tamamlanamadi.');
     } finally {
-      this.gunlukOzetTestGonderiliyor = false;
+      this.gunlukOzetKopyalaniyor = false;
     }
   }
+
+
 
   veriKopyala<T>(veri: T): T {
     return JSON.parse(JSON.stringify(veri));
@@ -675,7 +642,7 @@ export class AppComponent implements OnInit {
     if (tedbirSayisi) parcalar.push(`${tedbirSayisi} tedbir`);
     if (delilSayisi) parcalar.push(`${delilSayisi} delil tespiti`);
     if (noterlikSayisi) parcalar.push(`${noterlikSayisi} noterlik`);
-    return parcalar.join(' • ');
+    return parcalar.join(' * ');
   }
   getDavaBaglantiKayitOzeti(dava?: Partial<DavaDosyasi> | DavaDosyasi | null) {
     return [
@@ -1028,7 +995,7 @@ export class AppComponent implements OnInit {
     if (!sayac) return 'Görevlendirme tarihi girildiğinde sayaç başlayacak.';
     if (sayac.asama === 'tamamlandi') return `Tutanak ${sayac.tamamlanmaGun || 0} günde düzenlendi.`;
 
-    return `Normal son: ${this.formatTarih(sayac.normalSonTarih)} • Azami son: ${this.formatTarih(sayac.azamiSonTarih)}`;
+    return `Normal son: ${this.formatTarih(sayac.normalSonTarih)} * Azami son: ${this.formatTarih(sayac.azamiSonTarih)}`;
   }
 
   get filtrelenmisArabuluculukMuvekkiller() {
@@ -1103,7 +1070,7 @@ export class AppComponent implements OnInit {
         id: `dava-${dava.id}`,
         tur: 'dava' as const,
         baslik: dava.dosyaNo || 'Dava dosyası',
-        altBaslik: `${dava.mahkeme || '-'} • ${dava.konu || '-'}`,
+        altBaslik: `${dava.mahkeme || '-'} * ${dava.konu || '-'}`,
         durum: dava.durum,
         referans: this.getDavaTarafOzet(dava),
         dosya: dava
@@ -1119,7 +1086,7 @@ export class AppComponent implements OnInit {
         id: `icra-${icra.id}`,
         tur: 'icra' as const,
         baslik: `${icra.icraDairesi || 'İcra'} / ${icra.dosyaNo || '-'}`,
-        altBaslik: `${icra.alacakli || '-'} • ${icra.borclu || '-'}`,
+        altBaslik: `${icra.alacakli || '-'} * ${icra.borclu || '-'}`,
         durum: icra.durum,
         referans: `Muhatap: ${icra.muvekkil || '-'}`,
         dosya: icra
@@ -1134,7 +1101,7 @@ export class AppComponent implements OnInit {
         id: `arabuluculuk-${arabuluculuk.id}`,
         tur: 'arabuluculuk' as const,
         baslik: `${arabuluculuk.arabuluculukNo || 'Arabuluculuk'}${arabuluculuk.buroNo ? ` / ${arabuluculuk.buroNo}` : ''}`,
-        altBaslik: `${arabuluculuk.buro || '-'} • ${arabuluculuk.uyusmazlikTuru || '-'}`,
+        altBaslik: `${arabuluculuk.buro || '-'} * ${arabuluculuk.uyusmazlikTuru || '-'}`,
         durum: arabuluculuk.durum,
         referans: (arabuluculuk.taraflar || []).map(taraf => taraf.isim).join(', ') || 'Taraf bilgisi yok',
         dosya: arabuluculuk
@@ -1352,6 +1319,18 @@ export class AppComponent implements OnInit {
       .slice(0, 6);
   }
 
+  get kritikArabuluculukSureKayitlari() {
+    return [...this.arabuluculukSureTakipKayitlari]
+      .filter(kayit => kayit.asama === 'asildi' || kayit.asama === 'uzatma' || kayit.azamiKalanGun <= 7)
+      .sort((a, b) => {
+        const oncelikA = a.asama === 'asildi' ? 0 : (a.asama === 'uzatma' ? 1 : 2);
+        const oncelikB = b.asama === 'asildi' ? 0 : (b.asama === 'uzatma' ? 1 : 2);
+        if (oncelikA !== oncelikB) return oncelikA - oncelikB;
+        if (a.azamiKalanGun !== b.azamiKalanGun) return a.azamiKalanGun - b.azamiKalanGun;
+        return this.ajandaGunDamgasi(a.azamiSonTarih) - this.ajandaGunDamgasi(b.azamiSonTarih);
+      });
+  }
+
   getArabuluculukSureAsamaClass(asama?: ArabuluculukSureAsamasi) {
     if (asama === 'asildi') return 'bg-rose-100 text-rose-700 border-rose-200';
     if (asama === 'uzatma') return 'bg-amber-100 text-amber-700 border-amber-200';
@@ -1438,7 +1417,7 @@ export class AppComponent implements OnInit {
     const kayitlar: AjandaKaydi[] = [];
 
     this.davalar.forEach(dava => {
-      if (dava.durum === 'KapalÄ±' || !dava.durusmaTarihi || dava.durusmaTamamlandiMi) return;
+      if (dava.durum === 'KapalÃ„Â±' || !dava.durusmaTarihi || dava.durusmaTamamlandiMi) return;
       kayitlar.push({
         id: `dava-durusma-${dava.id}`,
         tarih: this.birlestirTarihVeSaat(dava.durusmaTarihi, dava.durusmaSaati),
@@ -1453,7 +1432,7 @@ export class AppComponent implements OnInit {
     });
 
     this.arabuluculukDosyalar.forEach(arabuluculuk => {
-      if (arabuluculuk.durum === 'KapalÄ±' || !arabuluculuk.toplantiTarihi || arabuluculuk.toplantiTamamlandiMi) return;
+      if (arabuluculuk.durum === 'KapalÃ„Â±' || !arabuluculuk.toplantiTarihi || arabuluculuk.toplantiTamamlandiMi) return;
       kayitlar.push({
         id: `arabuluculuk-toplanti-${arabuluculuk.id}`,
         tarih: this.birlestirTarihVeSaat(arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati),
@@ -1589,31 +1568,28 @@ export class AppComponent implements OnInit {
       const fark = this.ajandaGunFarki(kayit.tarih);
       return fark > 0 && fark <= 7;
     }).length;
+    const otuzGun = kayitlar.filter(kayit => {
+      const fark = this.ajandaGunFarki(kayit.tarih);
+      return fark > 0 && fark <= this.gunlukOzetGunSayisiniSinirla(this.gunlukOzetYakinGunSayisi);
+    }).length;
 
     return {
       bugun,
       gecmis,
       yediGun,
+      otuzGun,
+      sureAlarm: this.kritikArabuluculukSureKayitlari.length,
       tahsilat: this.muhasebeListesi.length,
       tahsilatTutari: this.muhasebeOzet.toplam
     };
   }
 
+  get bildirimMerkeziAjandaKayitlari() {
+    return this.getGunlukOzetAjandaKayitlari().slice(0, 8);
+  }
+
   get oncelikliAjandaKayitlari() {
-    return [...this.ajandaKayitlari]
-      .filter(kayit => {
-        const fark = this.ajandaGunFarki(kayit.tarih);
-        return fark < 0 || fark <= 7;
-      })
-      .sort((a, b) => {
-        const farkA = this.ajandaGunFarki(a.tarih);
-        const farkB = this.ajandaGunFarki(b.tarih);
-        const oncelikA = farkA < 0 ? 0 : (farkA === 0 ? 1 : 2);
-        const oncelikB = farkB < 0 ? 0 : (farkB === 0 ? 1 : 2);
-        if (oncelikA !== oncelikB) return oncelikA - oncelikB;
-        return this.ajandaTarihDamgasi(a.tarih) - this.ajandaTarihDamgasi(b.tarih);
-      })
-      .slice(0, 6);
+    return this.getGunlukOzetAjandaKayitlari(7).slice(0, 6);
   }
 
   get oncelikliTahsilatKayitlari() {
@@ -1662,7 +1638,7 @@ export class AppComponent implements OnInit {
   getMuvekkilGorusmeKayitOzetMetni(kayit?: Partial<MuvekkilGorusmeNotu>) {
     if (!kayit?.tarih) return 'Tarih belirtilmedi';
     const temel = this.formatTarihSaat(kayit.tarih, kayit.saat);
-    return kayit.yontem ? `${temel} • ${kayit.yontem}` : temel;
+    return kayit.yontem ? `${temel} * ${kayit.yontem}` : temel;
   }
   muvekkilGorusmeNotuFormunuSifirla() {
     this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
@@ -1714,7 +1690,7 @@ export class AppComponent implements OnInit {
       k,
       'gorusme',
       'Müvekkil görüşme notu eklendi',
-      `${this.formatTarihSaat(tarih, saat)}${yontem ? ` • ${yontem}` : ''}`
+      `${this.formatTarihSaat(tarih, saat)}${yontem ? ` * ${yontem}` : ''}`
     );
     this.seciliDava = kayitli;
     this.acikMuvekkilGorusmeNotlari[yeniKayit.id] = false;
@@ -1882,7 +1858,7 @@ export class AppComponent implements OnInit {
       .toLocaleLowerCase('tr-TR');
   }
   getArabuluculukTarafIsimMetni(dosya?: Partial<ArabuluculukDosyasi> | null) {
-    return (dosya?.taraflar || []).map(taraf => taraf.isim).filter(Boolean).join(' • ') || 'Taraf bilgisi yok';
+    return (dosya?.taraflar || []).map(taraf => taraf.isim).filter(Boolean).join(' * ') || 'Taraf bilgisi yok';
   }
 
   dosyaFormunuAc(d?: DavaDosyasi) {
@@ -2437,7 +2413,7 @@ export class AppComponent implements OnInit {
     ];
     if (islem.aciklama) parcalar.push(islem.aciklama);
     if (islem.makbuzUrl) parcalar.push('Makbuz linki eklendi');
-    return parcalar.join(' • ');
+    return parcalar.join(' * ');
   }
   finansalIslemDuzenlemeBaslat(islem: FinansalIslem) {
     this.duzenlenenFinansalIslemId = islem.id;
@@ -2481,7 +2457,7 @@ export class AppComponent implements OnInit {
     const makbuzUrl = this.hazirBaglantiUrl(this.yeniIslem.makbuzUrl);
     const k: any = {...this.aktifDosya}; if (!k.finansalIslemler) k.finansalIslemler = [];
     k.finansalIslemler.unshift({ id: Date.now(), tarih: this.yeniIslem.tarih || new Date().toISOString().split('T')[0], tur: this.yeniIslem.tur as any, tutar: this.yeniIslem.tutar, aciklama: this.yeniIslem.aciklama || '', makbuzUrl });
-    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi eklendi', `${this.yeniIslem.tur}: ${this.formatPara(this.yeniIslem.tutar || 0)} • ${this.yeniIslem.aciklama || ''}${makbuzUrl ? ' • Makbuz linki eklendi' : ''}`);
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi eklendi', `${this.yeniIslem.tur}: ${this.formatPara(this.yeniIslem.tutar || 0)} * ${this.yeniIslem.aciklama || ''}${makbuzUrl ? ' * Makbuz linki eklendi' : ''}`);
     this.finansalIslemDuzenlemeIptal();
     this.aktifDosyaKaydet(kayitli, 'Finans hareketi dosyaya eklendi.');
     this.finansalIslemFormunuSifirla(this.yeniIslem.tur as string);
@@ -2493,7 +2469,7 @@ export class AppComponent implements OnInit {
     const k: any = {...this.aktifDosya};
     const silinen = (k.finansalIslemler || []).find((i:any) => i.id === id);
     k.finansalIslemler = k.finansalIslemler!.filter((i:any) => i.id !== id);
-    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi silindi', silinen ? `${silinen.tur}: ${this.formatPara(silinen.tutar || 0)} • ${silinen.aciklama || ''}${silinen.makbuzUrl ? ' • Makbuz linki vardı' : ''}` : 'Seçili finans hareketi kayıttan kaldırıldı.');
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi silindi', silinen ? `${silinen.tur}: ${this.formatPara(silinen.tutar || 0)} * ${silinen.aciklama || ''}${silinen.makbuzUrl ? ' * Makbuz linki vardı' : ''}` : 'Seçili finans hareketi kayıttan kaldırıldı.');
     if (this.duzenlenenFinansalIslemId === id) this.finansalIslemDuzenlemeIptal();
     const kaydedildi = await kaydetFonk(kayitli);
     if (!kaydedildi) return;
@@ -2855,7 +2831,7 @@ export class AppComponent implements OnInit {
     if (this.aktifSayfa === 'sablonlar') {
       this.sablonlar[this.aktifSablonSekmesi].unshift(yeni); this.sablonlariKaydetCloud('Yeni şablon listeye eklendi.');
     } else {
-      if (!this.aktifDosya) return; const k: any = {...this.aktifDosya}; if (!k.evraklar) k.evraklar = []; k.evraklar.unshift(yeni); const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak bağlantısı eklendi', `${yeni.isim}${yeni.sonEylemTarihi ? ' • Son eylem: ' + this.formatTarihKisa(yeni.sonEylemTarihi) : ''}`); this.aktifDosyaKaydet(kayitli, 'Evrak bağlantısı dosyaya eklendi.');
+      if (!this.aktifDosya) return; const k: any = {...this.aktifDosya}; if (!k.evraklar) k.evraklar = []; k.evraklar.unshift(yeni); const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak bağlantısı eklendi', `${yeni.isim}${yeni.sonEylemTarihi ? ' * Son eylem: ' + this.formatTarihKisa(yeni.sonEylemTarihi) : ''}`); this.aktifDosyaKaydet(kayitli, 'Evrak bağlantısı dosyaya eklendi.');
     }
     this.yeniEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi };
   }
@@ -3130,7 +3106,7 @@ export class AppComponent implements OnInit {
     if (!dosya) return 'Dosya bilgisi yok';
     if (this.aktifSayfa === 'detay') {
       const dava = dosya as DavaDosyasi;
-      if (dava.dosyaNumaralari && dava.dosyaNumaralari.length > 0) return dava.dosyaNumaralari.map(num => `${num.tur}: ${num.no}`).join(' • ');
+      if (dava.dosyaNumaralari && dava.dosyaNumaralari.length > 0) return dava.dosyaNumaralari.map(num => `${num.tur}: ${num.no}`).join(' * ');
       return dava.dosyaNo || 'Dava dosyası';
     }
     if (this.aktifSayfa === 'icraDetay') {
@@ -3388,15 +3364,15 @@ export class AppComponent implements OnInit {
     if (!tarih) return '';
     if (!saat && tarih.includes('T')) {
       const tamTarih = new Date(tarih);
-      return tamTarih.toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', ' •');
+      return tamTarih.toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', ' *');
     }
     const tarihMetni = this.formatTarihKisa(tarih);
-    return saat ? `${tarihMetni} • ${this.formatSaat(saat)}` : tarihMetni;
+    return saat ? `${tarihMetni} * ${this.formatSaat(saat)}` : tarihMetni;
   }
   formatTarihSaat(tarih?: string, saat?: string) {
     if (!tarih) return '-';
     const tarihMetni = this.formatTarih(tarih);
-    return saat ? `${tarihMetni} • ${this.formatSaat(saat)}` : tarihMetni;
+    return saat ? `${tarihMetni} * ${this.formatSaat(saat)}` : tarihMetni;
   }
   formatPara(miktar: number) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(miktar || 0); }
   hesaplaKalanGun(str?: string) { if (!str) return ''; const d = new Date(str); const b = new Date(); b.setHours(0,0,0,0); const f = Math.ceil((d.getTime() - b.getTime()) / (1000 * 3600 * 24)); return f < 0 ? 'Süresi Geçti!' : (f === 0 ? 'Bugün Son!' : `${f} Gün Kaldı`); }
@@ -3408,3 +3384,4 @@ export class AppComponent implements OnInit {
     return 'Bilinmeyen Dosya';
   }
 }
+
