@@ -187,6 +187,7 @@ export class AppComponent implements OnInit {
   gunlukOzetBolumleri: GunlukOzetBolum[] = [];
   yeniMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
   acikMuvekkilGorusmeNotlari: Record<number, boolean> = {};
+  mobilAcikKartlar: Record<string, boolean> = {};
   duzenlenenMuvekkilGorusmeNotuId: number | null = null;
   duzenlenenMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = {};
   silinecekMuvekkilGorusmeNotuId: number | null = null;
@@ -215,6 +216,7 @@ export class AppComponent implements OnInit {
           this.gunlukOzetOlusturulmaTarihi = '';
           this.gunlukOzetKartlari = [];
           this.gunlukOzetBolumleri = [];
+          this.mobilAcikKartlar = {};
         }
         this.cdr.detectChanges();
       });
@@ -1082,6 +1084,31 @@ export class AppComponent implements OnInit {
     return this.sayfaAktifMi(s)
       ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
       : 'border-slate-200 bg-white text-slate-600';
+  }
+
+  getMobilKayitAnahtari(tur: 'dava' | 'icra' | 'arabuluculuk', id?: number | string | null) {
+    return `${tur}-${id ?? 'kayit'}`;
+  }
+
+  mobilKayitAcikMi(tur: 'dava' | 'icra' | 'arabuluculuk', id?: number | string | null) {
+    return !!this.mobilAcikKartlar[this.getMobilKayitAnahtari(tur, id)];
+  }
+
+  mobilKayitGecis(tur: 'dava' | 'icra' | 'arabuluculuk', id?: number | string | null) {
+    const anahtar = this.getMobilKayitAnahtari(tur, id);
+    const acikMi = !!this.mobilAcikKartlar[anahtar];
+    Object.keys(this.mobilAcikKartlar)
+      .filter(kayit => kayit.startsWith(`${tur}-`))
+      .forEach(kayit => delete this.mobilAcikKartlar[kayit]);
+    if (!acikMi) this.mobilAcikKartlar[anahtar] = true;
+  }
+
+  getArabuluculukTarafOzet(dosya?: Partial<ArabuluculukDosyasi> | null, limit = 2) {
+    const isimler = (dosya?.taraflar || []).map(taraf => taraf.isim).filter(Boolean);
+    if (!isimler.length) return 'Taraf bilgisi yok';
+    const ozet = isimler.slice(0, limit).join(', ');
+    const kalan = isimler.length - limit;
+    return kalan > 0 ? `${ozet} + ${kalan} taraf` : ozet;
   }
 
   get filtrelenmisDavalar() { return this.davalar.filter(d => { const s = this.aramaMetni.toLowerCase(); const mS = d.dosyaNo.toLowerCase().includes(s) || d.muvekkil.toLowerCase().includes(s) || this.getDavaKarsiTarafOzet(d).toLowerCase().includes(s) || d.mahkeme.toLowerCase().includes(s) || (d.eskiMahkeme || '').toLowerCase().includes(s) || (d.eskiEsasNo || '').toLowerCase().includes(s); const mD = this.durumFiltresi === 'Tümü' || d.durum === this.durumFiltresi; return mS && mD; }); }
