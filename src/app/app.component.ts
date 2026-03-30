@@ -89,6 +89,8 @@ type GunlukOzetKayitOnizleme = {
   meta: string;
   rozet: string;
   ton: GunlukOzetTon;
+  eylem?: () => void;
+  eylemEtiketi?: string;
 };
 
 type GunlukOzetBolum = {
@@ -441,7 +443,9 @@ export class AppComponent implements OnInit {
       altBaslik: kayit.taraflar || `${this.getAjandaKaynakEtiketi(kayit.kaynak)} kaydı`,
       meta: `${this.getAjandaKaynakEtiketi(kayit.kaynak)} • ${this.getAjandaTurEtiketi(kayit.tur)} • ${this.formatTarihSaatKisa(kayit.tarih, kayit.saat)}`,
       rozet: this.ajandaDurumMetni(kayit.tarih),
-      ton
+      ton,
+      eylem: () => this.ajandaKaydinaGit(kayit),
+      eylemEtiketi: 'İşleme git'
     };
   }
 
@@ -452,7 +456,9 @@ export class AppComponent implements OnInit {
       altBaslik: this.getArabuluculukTarafIsimMetni(sure.dosya),
       meta: `${sure.dosya.uyusmazlikTuru} • Görevlendirme: ${this.formatTarih(sure.gorevlendirmeTarihi)} • Azami son: ${this.formatTarih(sure.azamiSonTarih)}`,
       rozet: this.getArabuluculukSureKalanMetni(sure),
-      ton
+      ton,
+      eylem: () => this.arabuluculukDetayinaGit(sure.dosya),
+      eylemEtiketi: 'Dosyaya git'
     };
   }
 

@@ -260,16 +260,19 @@
 
                                       <div class="mt-4 space-y-2.5">
                                         @for (kayit of bolum.kayitlar; track kayit.baslik + kayit.meta) {
-                                          <div class="rounded-2xl border border-white/80 bg-white/90 px-4 py-3 shadow-sm">
+                                          <button type="button" (click)="kayit.eylem?.()" class="w-full rounded-2xl border border-white/80 bg-white/90 px-4 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md">
                                             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                               <div class="min-w-0">
                                                 <p class="text-sm font-black text-slate-900">{{ kayit.baslik }}</p>
                                                 <p class="mt-1 text-xs font-semibold text-slate-600">{{ kayit.altBaslik }}</p>
                                                 <p class="mt-2 text-[11px] leading-5 text-slate-500">{{ kayit.meta }}</p>
+                                                @if (kayit.eylemEtiketi) {
+                                                  <p [class]="getGunlukOzetVurguClass(kayit.ton)" class="mt-3 text-[11px] font-black uppercase tracking-[0.16em]">{{ kayit.eylemEtiketi }}</p>
+                                                }
                                               </div>
                                               <span [class]="getGunlukOzetRozetClass(kayit.ton)" class="shrink-0 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em]">{{ kayit.rozet }}</span>
                                             </div>
-                                          </div>
+                                          </button>
                                         } @empty {
                                           <div class="rounded-2xl border border-dashed border-slate-200 bg-white/80 px-4 py-4 text-sm font-semibold text-slate-500">{{ bolum.bosMesaji }}</div>
                                         }
