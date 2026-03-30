@@ -1382,8 +1382,12 @@
                                          }
                                        </div>
                                        <div class="flex flex-col bg-slate-100 rounded border border-slate-200 overflow-hidden">
-                                         <button (click)="evrakYukari(i)" [disabled]="i === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5">â–²</button>
-                                         <button (click)="evrakAsagi(i)" [disabled]="i === sablonlar[aktifSablonSekmesi].length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5 border-t border-slate-200">â–¼</button>
+                                        <button (click)="evrakYukari(i)" [disabled]="i === 0" class="flex items-center justify-center px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5" title="Yukarı al">
+                                          <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                        </button>
+                                        <button (click)="evrakAsagi(i)" [disabled]="i === sablonlar[aktifSablonSekmesi].length - 1" class="flex items-center justify-center px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5 border-t border-slate-200" title="Aşağı al">
+                                          <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </button>
                                        </div>
                                        <p class="font-bold text-sm text-slate-800">{{ evrak.isim }}</p>
                                      </div>
@@ -1413,8 +1417,12 @@
                                         } @else {
                                            <div class="flex items-center gap-3">
                                              <div class="flex flex-col bg-slate-50 rounded border border-slate-200 overflow-hidden">
-                                               <button (click)="ekEvrakYukari(evrak, j)" [disabled]="j === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5">â–²</button>
-                                               <button (click)="ekEvrakAsagi(evrak, j)" [disabled]="j === evrak.ekler.length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5 border-t border-slate-200">â–¼</button>
+                                              <button (click)="ekEvrakYukari(evrak, j)" [disabled]="j === 0" class="flex items-center justify-center px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5" title="Yukarı al">
+                                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                              </button>
+                                              <button (click)="ekEvrakAsagi(evrak, j)" [disabled]="j === evrak.ekler.length - 1" class="flex items-center justify-center px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5 border-t border-slate-200" title="Aşağı al">
+                                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                              </button>
                                              </div>
                                              <p class="font-bold text-xs text-slate-700">{{ ek.isim }}</p>
                                            </div>
@@ -2449,8 +2457,12 @@
                                                }
                                              </div>
                                              <div class="flex flex-col bg-slate-100 rounded border border-slate-200 overflow-hidden">
-                                               <button (click)="evrakYukari(i)" [disabled]="i === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5">â–²</button>
-                                               <button (click)="evrakAsagi(i)" [disabled]="i === aktifDosya.evraklar!.length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5 border-t border-slate-200">â–¼</button>
+                                              <button (click)="evrakYukari(i)" [disabled]="i === 0" class="flex items-center justify-center px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5" title="Yukarı al">
+                                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                              </button>
+                                              <button (click)="evrakAsagi(i)" [disabled]="i === aktifDosya.evraklar!.length - 1" class="flex items-center justify-center px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 leading-none py-0.5 border-t border-slate-200" title="Aşağı al">
+                                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                              </button>
                                              </div>
                                              <div class="min-w-0 flex flex-col">
                                                <div class="flex items-center gap-2">
@@ -2505,8 +2517,12 @@
                                               } @else {
                                                  <div class="flex min-w-0 items-center gap-3">
                                                    <div class="flex flex-col bg-slate-50 rounded border border-slate-200 overflow-hidden">
-                                                     <button (click)="ekEvrakYukari(evrak, j)" [disabled]="j === 0" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5">â–²</button>
-                                                     <button (click)="ekEvrakAsagi(evrak, j)" [disabled]="j === evrak.ekler.length - 1" class="px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5 border-t border-slate-200">â–¼</button>
+                                                    <button (click)="ekEvrakYukari(evrak, j)" [disabled]="j === 0" class="flex items-center justify-center px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5" title="Yukarı al">
+                                                      <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                                    </button>
+                                                    <button (click)="ekEvrakAsagi(evrak, j)" [disabled]="j === evrak.ekler.length - 1" class="flex items-center justify-center px-1 hover:bg-slate-200 text-slate-400 disabled:opacity-20 text-[10px] leading-none py-0.5 border-t border-slate-200" title="Aşağı al">
+                                                      <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                                    </button>
                                                    </div>
                                                    <div class="flex min-w-0 items-center gap-2">
                                                      <span class="w-2 h-2 rounded-full border border-slate-200 shadow-sm" [style.backgroundColor]="getEvrakYaziRengi(ek.yaziRengi)"></span>
