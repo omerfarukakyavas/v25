@@ -232,10 +232,61 @@
 
                             <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
                               <div class="flex items-center justify-between gap-3">
-                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Hazır Metin</p>
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Özet Önizleme</p>
                                 <span class="text-[11px] font-medium text-slate-400">{{ gunlukOzetOlusturulmaTarihi ? formatTarihSaatKisa(gunlukOzetOlusturulmaTarihi) : 'Henüz oluşturulmadı' }}</span>
                               </div>
-                              <textarea [value]="gunlukOzetMetni" readonly rows="14" class="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition focus:border-slate-300 focus:ring-0"></textarea>
+
+                              @if (gunlukOzetBolumleri.length > 0) {
+                                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                  @for (kart of gunlukOzetKartlari; track kart.etiket) {
+                                    <div [class]="getGunlukOzetKartClass(kart.ton)" class="rounded-2xl p-4 shadow-sm">
+                                      <p [class]="getGunlukOzetVurguClass(kart.ton)" class="text-[10px] font-black uppercase tracking-[0.2em]">{{ kart.etiket }}</p>
+                                      <p [class]="getGunlukOzetVurguClass(kart.ton)" class="mt-3 text-2xl font-black">{{ kart.deger }}</p>
+                                      <p class="mt-2 text-xs font-semibold leading-5 text-slate-600">{{ kart.aciklama }}</p>
+                                    </div>
+                                  }
+                                </div>
+
+                                <div class="mt-4 space-y-3">
+                                  @for (bolum of gunlukOzetBolumleri; track bolum.baslik) {
+                                    <div [class]="getGunlukOzetKartClass(bolum.ton)" class="rounded-2xl p-4 shadow-sm">
+                                      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                        <div>
+                                          <p [class]="getGunlukOzetVurguClass(bolum.ton)" class="text-[11px] font-black uppercase tracking-[0.18em]">{{ bolum.baslik }}</p>
+                                          <p class="mt-1 text-xs leading-5 text-slate-600">{{ bolum.aciklama }}</p>
+                                        </div>
+                                        <span [class]="getGunlukOzetRozetClass(bolum.ton)" class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em]">{{ bolum.kayitlar.length }} kayıt</span>
+                                      </div>
+
+                                      <div class="mt-4 space-y-2.5">
+                                        @for (kayit of bolum.kayitlar; track kayit.baslik + kayit.meta) {
+                                          <div class="rounded-2xl border border-white/80 bg-white/90 px-4 py-3 shadow-sm">
+                                            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                              <div class="min-w-0">
+                                                <p class="text-sm font-black text-slate-900">{{ kayit.baslik }}</p>
+                                                <p class="mt-1 text-xs font-semibold text-slate-600">{{ kayit.altBaslik }}</p>
+                                                <p class="mt-2 text-[11px] leading-5 text-slate-500">{{ kayit.meta }}</p>
+                                              </div>
+                                              <span [class]="getGunlukOzetRozetClass(kayit.ton)" class="shrink-0 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em]">{{ kayit.rozet }}</span>
+                                            </div>
+                                          </div>
+                                        } @empty {
+                                          <div class="rounded-2xl border border-dashed border-slate-200 bg-white/80 px-4 py-4 text-sm font-semibold text-slate-500">{{ bolum.bosMesaji }}</div>
+                                        }
+                                      </div>
+                                    </div>
+                                  }
+                                </div>
+
+                                <details class="mt-4 rounded-2xl border border-slate-200 bg-white/90 p-4">
+                                  <summary class="cursor-pointer list-none text-[11px] font-black uppercase tracking-[0.18em] text-slate-600">Kopyalanacak Düz Metni Aç</summary>
+                                  <textarea [value]="gunlukOzetMetni" readonly rows="12" class="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition focus:border-slate-300 focus:ring-0"></textarea>
+                                </details>
+                              } @else {
+                                <div class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-white/80 px-4 py-8 text-center text-sm font-semibold text-slate-500">
+                                  Özeti hazırladığında burada kırmızı ve vurgu renkleriyle düzenlenmiş bir önizleme görünecek.
+                                </div>
+                              }
                             </div>
                           </div>
 

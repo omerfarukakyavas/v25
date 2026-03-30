@@ -74,6 +74,31 @@ type GeriAlmaKaydi = {
   isleniyor?: boolean;
 };
 
+type GunlukOzetTon = 'rose' | 'amber' | 'blue' | 'violet' | 'emerald' | 'slate';
+
+type GunlukOzetKart = {
+  etiket: string;
+  deger: string;
+  aciklama: string;
+  ton: GunlukOzetTon;
+};
+
+type GunlukOzetKayitOnizleme = {
+  baslik: string;
+  altBaslik: string;
+  meta: string;
+  rozet: string;
+  ton: GunlukOzetTon;
+};
+
+type GunlukOzetBolum = {
+  baslik: string;
+  aciklama: string;
+  ton: GunlukOzetTon;
+  bosMesaji: string;
+  kayitlar: GunlukOzetKayitOnizleme[];
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -156,6 +181,8 @@ export class AppComponent implements OnInit {
   gunlukOzetMetni = '';
   gunlukOzetOlusturulmaTarihi = '';
   gunlukOzetKopyalaniyor = false;
+  gunlukOzetKartlari: GunlukOzetKart[] = [];
+  gunlukOzetBolumleri: GunlukOzetBolum[] = [];
   yeniMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
   acikMuvekkilGorusmeNotlari: Record<number, boolean> = {};
   duzenlenenMuvekkilGorusmeNotuId: number | null = null;
@@ -184,6 +211,8 @@ export class AppComponent implements OnInit {
           this.muvekkiller = [];
           this.gunlukOzetMetni = '';
           this.gunlukOzetOlusturulmaTarihi = '';
+          this.gunlukOzetKartlari = [];
+          this.gunlukOzetBolumleri = [];
         }
         this.cdr.detectChanges();
       });
@@ -377,6 +406,56 @@ export class AppComponent implements OnInit {
     return `- [${sure.dosya.uyusmazlikTuru}] ${referans} | ${this.getArabuluculukTarafIsimMetni(sure.dosya)} | ${this.getArabuluculukSureKalanMetni(sure)} | Azami son: ${this.formatTarih(sure.azamiSonTarih)}`;
   }
 
+  getGunlukOzetKartClass(ton: GunlukOzetTon) {
+    if (ton === 'rose') return 'border border-rose-200 bg-gradient-to-br from-rose-50 via-white to-rose-100/70';
+    if (ton === 'amber') return 'border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-amber-100/70';
+    if (ton === 'blue') return 'border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-sky-100/70';
+    if (ton === 'violet') return 'border border-violet-200 bg-gradient-to-br from-violet-50 via-white to-fuchsia-100/60';
+    if (ton === 'emerald') return 'border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-100/70';
+    return 'border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-slate-100/80';
+  }
+
+  getGunlukOzetVurguClass(ton: GunlukOzetTon) {
+    if (ton === 'rose') return 'text-rose-700';
+    if (ton === 'amber') return 'text-amber-700';
+    if (ton === 'blue') return 'text-blue-700';
+    if (ton === 'violet') return 'text-violet-700';
+    if (ton === 'emerald') return 'text-emerald-700';
+    return 'text-slate-700';
+  }
+
+  getGunlukOzetRozetClass(ton: GunlukOzetTon) {
+    if (ton === 'rose') return 'border border-rose-200 bg-rose-100 text-rose-700';
+    if (ton === 'amber') return 'border border-amber-200 bg-amber-100 text-amber-700';
+    if (ton === 'blue') return 'border border-blue-200 bg-blue-100 text-blue-700';
+    if (ton === 'violet') return 'border border-violet-200 bg-violet-100 text-violet-700';
+    if (ton === 'emerald') return 'border border-emerald-200 bg-emerald-100 text-emerald-700';
+    return 'border border-slate-200 bg-slate-100 text-slate-700';
+  }
+
+  gunlukOzetAjandaOnizlemeKaydi(kayit: AjandaKaydi): GunlukOzetKayitOnizleme {
+    const gunFarki = this.ajandaGunFarki(kayit.tarih);
+    const ton: GunlukOzetTon = gunFarki < 0 ? 'rose' : (gunFarki === 0 ? 'amber' : 'blue');
+    return {
+      baslik: kayit.baslik,
+      altBaslik: kayit.taraflar || `${this.getAjandaKaynakEtiketi(kayit.kaynak)} kaydı`,
+      meta: `${this.getAjandaKaynakEtiketi(kayit.kaynak)} • ${this.getAjandaTurEtiketi(kayit.tur)} • ${this.formatTarihSaatKisa(kayit.tarih, kayit.saat)}`,
+      rozet: this.ajandaDurumMetni(kayit.tarih),
+      ton
+    };
+  }
+
+  gunlukOzetSureOnizlemeKaydi(sure: ArabuluculukSureSayaci): GunlukOzetKayitOnizleme {
+    const ton: GunlukOzetTon = sure.asama === 'asildi' ? 'rose' : sure.asama === 'uzatma' ? 'amber' : 'violet';
+    return {
+      baslik: `${sure.dosya.buroNo ? sure.dosya.buroNo + ' / ' : ''}${sure.dosya.arabuluculukNo}`,
+      altBaslik: this.getArabuluculukTarafIsimMetni(sure.dosya),
+      meta: `${sure.dosya.uyusmazlikTuru} • Görevlendirme: ${this.formatTarih(sure.gorevlendirmeTarihi)} • Azami son: ${this.formatTarih(sure.azamiSonTarih)}`,
+      rozet: this.getArabuluculukSureKalanMetni(sure),
+      ton
+    };
+  }
+
   gunlukOzetiOlustur() {
     this.gunlukOzetYakinGunSayisi = this.gunlukOzetGunSayisiniSinirla(this.gunlukOzetYakinGunSayisi);
     const gecikenKayitlar = this.ajandaKayitlari.filter(kayit => this.ajandaGunFarki(kayit.tarih) < 0);
@@ -388,6 +467,47 @@ export class AppComponent implements OnInit {
       })
       .sort((a, b) => this.ajandaTarihDamgasi(a.tarih) - this.ajandaTarihDamgasi(b.tarih));
     const sayacKayitlari = this.kritikArabuluculukSureKayitlari;
+    const tahsilatDosyaSayisi = this.dashboardUyariOzet.tahsilat;
+    const tahsilatTutari = this.dashboardUyariOzet.tahsilatTutari;
+
+    this.gunlukOzetKartlari = [
+      { etiket: 'Geciken', deger: `${gecikenKayitlar.length}`, aciklama: 'Süresi geçmiş ajanda ve evrak kaydı', ton: 'rose' },
+      { etiket: 'Bugün', deger: `${bugunkuKayitlar.length}`, aciklama: 'Bugün takip edilmesi gereken kayıt', ton: 'amber' },
+      { etiket: `Önümüzdeki ${this.gunlukOzetYakinGunSayisi} Gün`, deger: `${yaklasanKayitlar.length}`, aciklama: 'Yaklaşan duruşma, toplantı ve süreli işler', ton: 'blue' },
+      { etiket: 'Sayaç Alarmı', deger: `${sayacKayitlari.length}`, aciklama: 'Kritik arabuluculuk süre sayaçları', ton: 'violet' },
+      { etiket: 'Tahsilat Önceliği', deger: `${tahsilatDosyaSayisi} dosya`, aciklama: this.formatPara(tahsilatTutari), ton: 'emerald' }
+    ];
+
+    this.gunlukOzetBolumleri = [
+      {
+        baslik: 'Geciken Kayıtlar',
+        aciklama: 'Önce kırmızı alanları toparlamak en güvenli başlangıç olur.',
+        ton: 'rose',
+        bosMesaji: 'Geciken kayıt yok.',
+        kayitlar: gecikenKayitlar.slice(0, 8).map(kayit => this.gunlukOzetAjandaOnizlemeKaydi(kayit))
+      },
+      {
+        baslik: 'Bugün',
+        aciklama: 'Bugün yapılacak işler amber vurguyla öne çıkarıldı.',
+        ton: 'amber',
+        bosMesaji: 'Bugüne ait kayıt yok.',
+        kayitlar: bugunkuKayitlar.slice(0, 8).map(kayit => this.gunlukOzetAjandaOnizlemeKaydi(kayit))
+      },
+      {
+        baslik: `Önümüzdeki ${this.gunlukOzetYakinGunSayisi} Gün`,
+        aciklama: 'Yaklaşan işler tarih sırasına göre listelendi.',
+        ton: 'blue',
+        bosMesaji: 'Bu aralıkta planlı kayıt yok.',
+        kayitlar: yaklasanKayitlar.slice(0, 12).map(kayit => this.gunlukOzetAjandaOnizlemeKaydi(kayit))
+      },
+      {
+        baslik: 'Arabuluculuk Süre Alarmları',
+        aciklama: 'Uzatma penceresi ve aşılmış süreler renkli şekilde vurgulanır.',
+        ton: 'violet',
+        bosMesaji: 'Kritik süre alarmı görünmüyor.',
+        kayitlar: sayacKayitlari.slice(0, 8).map(sure => this.gunlukOzetSureOnizlemeKaydi(sure))
+      }
+    ];
 
     const satirlar = [
       'Gunluk Bildirim Ozeti',
