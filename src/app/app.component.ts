@@ -1979,24 +1979,58 @@ export class AppComponent implements OnInit {
     return typeof str === 'string' ? str.trim().toLocaleLowerCase('tr-TR') : str;
   }
   arabuluculukTarafBosOlustur(tip: ArabuluculukTaraf['tip'] = 'Diğer Taraf', id = Date.now()): ArabuluculukTaraf {
-    return { id, tip, isim: '', tcVergiNo: '', vergiDairesi: '', adres: '', telefon: '', eposta: '', vekil: '', vekilTelefon: '', vekilEposta: '', vekilBaroBilgisi: '' };
+    return { id, tip, isim: '', muvekkilId: undefined, tcVergiNo: '', vergiDairesi: '', adres: '', telefon: '', eposta: '', vekil: '', vekilTelefon: '', vekilEposta: '', vekilBaroBilgisi: '' };
+  }
+  arabuluculukTarafMuvekkilKaydiBul(taraf?: Partial<ArabuluculukTaraf> | null) {
+    if (!taraf) return null;
+    if (taraf.muvekkilId) {
+      const idIleEslesen = this.muvekkiller.find(m => m.id == taraf.muvekkilId);
+      if (idIleEslesen) return idIleEslesen;
+    }
+    const isim = (taraf.isim || '').trim();
+    if (!isim) return null;
+    return this.muvekkiller.find(m => this.metinEsit(m.adSoyad, isim)) || null;
+  }
+  arabuluculukTarafBilgileriniMuvekkildenDoldur(taraf: ArabuluculukTaraf, secilen: Muvekkil, isimKorunsun = false) {
+    taraf.muvekkilId = secilen.id;
+    if (!isimKorunsun || !(taraf.isim || '').trim()) taraf.isim = secilen.adSoyad || '';
+    taraf.tcVergiNo = this.duzMetinTrimle(taraf.tcVergiNo || secilen.tcKimlik) || '';
+    taraf.vergiDairesi = this.formatMetin(taraf.vergiDairesi || secilen.vergiDairesi) || '';
+    taraf.adres = this.formatMetin(taraf.adres || secilen.adres) || '';
+    taraf.telefon = this.duzMetinTrimle(taraf.telefon || secilen.telefon) || '';
+    taraf.eposta = this.epostaDegeriniTemizle(taraf.eposta || secilen.eposta) || '';
+  }
+  arabuluculukTarafSecimDegisti(taraf: ArabuluculukTaraf, muvekkilId?: number) {
+    const secilen = this.muvekkiller.find(m => m.id == muvekkilId);
+    taraf.muvekkilId = secilen?.id;
+    if (secilen) this.arabuluculukTarafBilgileriniMuvekkildenDoldur(taraf, secilen);
+  }
+  arabuluculukTarafMetniElleDegisti(taraf: ArabuluculukTaraf, isim: string) {
+    taraf.isim = isim;
+    const eslesen = this.muvekkiller.find(m => this.metinEsit(m.adSoyad, isim));
+    taraf.muvekkilId = eslesen?.id;
+    if (eslesen) this.arabuluculukTarafBilgileriniMuvekkildenDoldur(taraf, eslesen, true);
   }
   arabuluculukTaraflariniHazirla(liste?: ArabuluculukTaraf[]) {
     return (liste || [])
-      .map((taraf, index) => ({
-        ...taraf,
-        id: typeof taraf.id === 'number' ? taraf.id : Date.now() + index,
-        isim: this.formatMetin(taraf.isim),
-        tcVergiNo: this.duzMetinTrimle(taraf.tcVergiNo) || '',
-        vergiDairesi: this.formatMetin(taraf.vergiDairesi) || '',
-        adres: this.formatMetin(taraf.adres) || '',
-        telefon: this.duzMetinTrimle(taraf.telefon) || '',
-        eposta: this.epostaDegeriniTemizle(taraf.eposta) || '',
-        vekil: this.formatMetin(taraf.vekil) || '',
-        vekilTelefon: this.duzMetinTrimle(taraf.vekilTelefon) || '',
-        vekilEposta: this.epostaDegeriniTemizle(taraf.vekilEposta) || '',
-        vekilBaroBilgisi: this.formatMetin(taraf.vekilBaroBilgisi) || ''
-      }))
+      .map((taraf, index) => {
+        const secilen = this.arabuluculukTarafMuvekkilKaydiBul(taraf);
+        return {
+          ...taraf,
+          id: typeof taraf.id === 'number' ? taraf.id : Date.now() + index,
+          isim: this.formatMetin(secilen?.adSoyad || taraf.isim),
+          muvekkilId: secilen?.id ?? taraf.muvekkilId,
+          tcVergiNo: this.duzMetinTrimle(taraf.tcVergiNo || secilen?.tcKimlik) || '',
+          vergiDairesi: this.formatMetin(taraf.vergiDairesi || secilen?.vergiDairesi) || '',
+          adres: this.formatMetin(taraf.adres || secilen?.adres) || '',
+          telefon: this.duzMetinTrimle(taraf.telefon || secilen?.telefon) || '',
+          eposta: this.epostaDegeriniTemizle(taraf.eposta || secilen?.eposta) || '',
+          vekil: this.formatMetin(taraf.vekil) || '',
+          vekilTelefon: this.duzMetinTrimle(taraf.vekilTelefon) || '',
+          vekilEposta: this.epostaDegeriniTemizle(taraf.vekilEposta) || '',
+          vekilBaroBilgisi: this.formatMetin(taraf.vekilBaroBilgisi) || ''
+        };
+      })
       .filter(taraf => taraf.isim && taraf.isim.trim() !== '');
   }
   getArabuluculukTarafKayitOzeti(liste?: ArabuluculukTaraf[]) {

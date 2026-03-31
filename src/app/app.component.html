@@ -3419,7 +3419,15 @@
                     <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                       <div class="flex flex-col gap-3 lg:flex-row lg:items-start">
                         <select [(ngModel)]="taraf.tip" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 outline-none shadow-sm lg:w-40"><option value="Başvurucu">Başvurucu</option><option value="Diğer Taraf">Diğer Taraf</option></select>
-                        <input [(ngModel)]="taraf.isim" type="text" placeholder="Taraf İsmi/Unvanı" class="flex-1 rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none shadow-sm">
+                        <div class="flex-1 grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)]">
+                          <select [ngModel]="taraf.muvekkilId" (ngModelChange)="arabuluculukTarafSecimDegisti(taraf, $event)" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none shadow-sm">
+                            <option [ngValue]="undefined">Kayıtlı kişi / kurum seç</option>
+                            @for(m of muvekkiller; track m.id) {
+                              <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option>
+                            }
+                          </select>
+                          <input [ngModel]="taraf.isim" (ngModelChange)="arabuluculukTarafMetniElleDegisti(taraf, $event)" type="text" placeholder="Taraf İsmi/Unvanı" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none shadow-sm">
+                        </div>
                         <button (click)="tarafSil($index)" class="self-end rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 lg:self-auto">Sil</button>
                       </div>
                       <div class="mt-4 grid gap-3 md:grid-cols-2">

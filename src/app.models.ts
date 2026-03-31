@@ -7,6 +7,7 @@ export interface ArabuluculukTaraf {
   id: number;
   tip: 'Başvurucu' | 'Diğer Taraf';
   isim: string;
+  muvekkilId?: number;
   tcVergiNo?: string;
   vergiDairesi?: string;
   adres?: string;
