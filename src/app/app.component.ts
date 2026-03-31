@@ -197,6 +197,8 @@ export class AppComponent implements OnInit {
   private bildirimKapatmaTimerlari = new Map<number, ReturnType<typeof setTimeout>>();
   private geriAlmaKayitlari = new Map<number, GeriAlmaKaydi>();
   aktifGeriAlBildirimiId: number | null = null;
+  private readonly isciIsverenVarsayilanBasvuruKonusu = 'KIDEM TAZMİNATI- İHBAR TAZMİNATI –ÜCRET ALACAĞI – FAZLA MESAİ ÜCRETİ –YILLIK İZİN ÜCRETİ- HAFTA TATİLİ ÜCRETİ – ÜCRET FARKI - İKRAMİYE - PRİM – SENDİKAL TAZMİNAT - İŞ ARAMA İZİN ÜCRETİ - ULUSAL BAYRAM VE GENEL TATİL GÜNLERİ ÜCRETİ – MADDİ VE MANEVİ TAZMİNAT - AYRIMCILIK VE KÖTÜNİYET TAZMİNATI- CEZAİ ŞART ALACAĞI - TOPLU İŞ SÖZLEŞMESİNDEN KAYNAKLI ALACAKLAR - GECE VARDİYASI ZAMMI - TRANSFER ÜCRETİ - YARIM ÜCRET ALACAĞI - EĞİTİM ÖDENEĞİ - KIRTASİYE ÖDENEĞİ - ZAM FARKI ALACAĞI - ŞUA İZNİ ALACAĞI - ELEKTRİK, SU, KİRA, İNTERNET GİDER YARDIMI -  HAKSIZ REKABET-YOL ve YEMEK ÜCRETİ – AGİ (Asgari Geçim İndirimi) - AYNİ YARDIMLAR - ÖLÜM, DOĞUM VE EVLENME YARDIMLARI - GÖREV YOLLUĞU - SEYYAR GÖREV TAZMİNATI - İŞ SONU TAZMİNATI - KEŞİF ÜCRETİ - KASA TAZMİNATI - ÇOCUK VE AİLE YARDIMLARI -  İŞE İADE, BOŞTA GEÇEN SÜRE VE İŞE BAŞLATMAMA TAZMİNATI - MADDİ VE MANEVİ TAZMİNAT - İŞ KAZASI VE BUNDAN DOĞACAK ALACAK KALEMLERİ - MESLEK HASTALIĞI VE BUNDAN DOĞACAK ALACAK KALEMLERİ';
+  arabuluculukBasvuruKonusuOtomatikMi = false;
 
   ngOnInit() { this.initFirebase(); }
 
@@ -2229,6 +2231,7 @@ export class AppComponent implements OnInit {
 
   arabuluculukFormAc(a?: ArabuluculukDosyasi) {
     this.formHata = '';
+    this.arabuluculukBasvuruKonusuOtomatikMi = false;
     this.hizliMuvekkilFormAcik = false;
     this.hizliMuvekkilKayitBaglami = 'arabuluculuk';
     this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
@@ -2238,16 +2241,45 @@ export class AppComponent implements OnInit {
       this.formModu = 'duzenle'; 
       this.islemGorenArabuluculuk = { ...a, taraflar: Array.isArray(a.taraflar) ? a.taraflar.map(t => ({...t})) : [] }; 
     }
-    else { this.formModu = 'ekle'; this.islemGorenArabuluculuk = { durum: 'Hazırlık', basvuruTuru: 'Dava Şartı', uyusmazlikTuru: 'İşçi İşveren', basvuruKonusu: '', buro: 'İstanbul Anadolu', buroyaBasvuruTarihi: '', arabulucuGorevlendirmeTarihi: '', tutanakDuzenlemeTarihi: '', toplantiSaati: '', toplantiTamamlandiMi: false, taraflar: [this.arabuluculukTarafBosOlustur('Başvurucu', Date.now()), this.arabuluculukTarafBosOlustur('Diğer Taraf', Date.now() + 1)] }; }
+    else {
+      this.formModu = 'ekle';
+      this.islemGorenArabuluculuk = { durum: 'Hazırlık', basvuruTuru: 'Dava Şartı', uyusmazlikTuru: 'İşçi İşveren', basvuruKonusu: '', buro: 'İstanbul Anadolu', buroyaBasvuruTarihi: '', arabulucuGorevlendirmeTarihi: '', tutanakDuzenlemeTarihi: '', toplantiSaati: '', toplantiTamamlandiMi: false, taraflar: [this.arabuluculukTarafBosOlustur('Başvurucu', Date.now()), this.arabuluculukTarafBosOlustur('Diğer Taraf', Date.now() + 1)] };
+      this.arabuluculukUyusmazlikTuruDegisti(this.islemGorenArabuluculuk.uyusmazlikTuru as ArabuluculukDosyasi['uyusmazlikTuru']);
+    }
     this.arabuluculukFormAcik = true;
   }
   arabuluculukFormKapat() {
     this.arabuluculukFormAcik = false;
+    this.arabuluculukBasvuruKonusuOtomatikMi = false;
     this.arabuluculukMuvekkilDropdownAcik = false;
     this.arabuluculukMuvekkilArama = '';
     this.hizliMuvekkilFormAcik = false;
     this.hizliMuvekkilKayitBaglami = 'dava';
     this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
+  }
+  arabuluculukUyusmazlikTuruDegisti(tur: ArabuluculukDosyasi['uyusmazlikTuru']) {
+    this.islemGorenArabuluculuk.uyusmazlikTuru = tur;
+    if (this.formModu !== 'ekle') return;
+    const mevcutMetin = (this.islemGorenArabuluculuk.basvuruKonusu || '').trim();
+    const otomatikMetin = this.isciIsverenVarsayilanBasvuruKonusu.trim();
+    const otomatikAlanKullaniliyor = this.arabuluculukBasvuruKonusuOtomatikMi || mevcutMetin === otomatikMetin;
+
+    if (tur === 'İşçi İşveren') {
+      if (!mevcutMetin || otomatikAlanKullaniliyor) {
+        this.islemGorenArabuluculuk.basvuruKonusu = this.isciIsverenVarsayilanBasvuruKonusu;
+        this.arabuluculukBasvuruKonusuOtomatikMi = true;
+      }
+      return;
+    }
+
+    if (otomatikAlanKullaniliyor) {
+      this.islemGorenArabuluculuk.basvuruKonusu = '';
+      this.arabuluculukBasvuruKonusuOtomatikMi = false;
+    }
+  }
+  arabuluculukBasvuruKonusuDegisti(metin: string) {
+    this.islemGorenArabuluculuk.basvuruKonusu = metin;
+    this.arabuluculukBasvuruKonusuOtomatikMi = (metin || '').trim() === this.isciIsverenVarsayilanBasvuruKonusu.trim();
   }
   tarafEkle() { if (!this.islemGorenArabuluculuk.taraflar) this.islemGorenArabuluculuk.taraflar = []; this.islemGorenArabuluculuk.taraflar.push(this.arabuluculukTarafBosOlustur()); }
   tarafSil(i: number) { if (this.islemGorenArabuluculuk.taraflar) this.islemGorenArabuluculuk.taraflar.splice(i, 1); }
