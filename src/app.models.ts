@@ -8,6 +8,7 @@ export interface ArabuluculukTaraf {
   tip: 'Başvurucu' | 'Diğer Taraf';
   isim: string;
   muvekkilId?: number;
+  vekilMuvekkilId?: number;
   tcVergiNo?: string;
   vergiDairesi?: string;
   adres?: string;

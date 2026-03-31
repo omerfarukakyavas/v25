@@ -3423,21 +3423,25 @@
                           <select [(ngModel)]="taraf.tip" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 outline-none shadow-sm"><option value="Başvurucu">Başvurucu</option><option value="Diğer Taraf">Diğer Taraf</option></select>
                         </div>
                         <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500">
-                          Kayıtlı kişi seçebilir veya hemen yanındaki alandan manuel giriş yapabilirsiniz.
+                          Tarafı ve varsa vekili sistemden arayıp seçebilir, isterseniz manuel olarak da girebilirsiniz.
                         </div>
                         <button (click)="tarafSil($index)" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 md:self-end">Sil</button>
                       </div>
-                      <div class="mt-4 grid gap-3 md:grid-cols-2">
+                      <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                        <div>
+                          <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Kayıtlı Kişi Ara</label>
+                          <input [(ngModel)]="arabuluculukTarafAramaMetinleri[taraf.id]" type="text" placeholder="İsim, telefon veya TC/VKN ara" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none shadow-sm">
+                        </div>
                         <div>
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Kayıtlı Kişi / Kurum</label>
                           <select [ngModel]="taraf.muvekkilId" (ngModelChange)="arabuluculukTarafSecimDegisti(taraf, $event)" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none shadow-sm">
                               <option [ngValue]="undefined">Kayıtlı kişi / kurum seç</option>
-                              @for(m of muvekkiller; track m.id) {
+                              @for(m of getArabuluculukTarafSecenekleri(taraf); track m.id) {
                                 <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option>
                               }
                           </select>
                         </div>
-                        <div>
+                        <div class="md:col-span-2 xl:col-span-1">
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Manuel Kişi / Unvan</label>
                           <input [ngModel]="taraf.isim" (ngModelChange)="arabuluculukTarafMetniElleDegisti(taraf, $event)" type="text" placeholder="Taraf ismi veya unvanını yazın" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none shadow-sm">
                         </div>
@@ -3463,21 +3467,40 @@
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">E-posta</label>
                           <input [(ngModel)]="taraf.eposta" type="email" placeholder="ornek@alanadi.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                         </div>
-                        <div>
-                          <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil</label>
-                          <input [(ngModel)]="taraf.vekil" type="text" placeholder="Varsa vekil adı soyadı" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                      </div>
+                      <div class="mt-4 rounded-xl border border-violet-100 bg-violet-50/60 p-3">
+                        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                          <div>
+                            <label class="mb-1 block text-[10px] font-bold uppercase text-violet-700">Sistemden Vekil Ara</label>
+                            <input [(ngModel)]="arabuluculukTarafVekilAramaMetinleri[taraf.id]" type="text" placeholder="Vekil adı, telefon veya e-posta ara" class="w-full rounded-lg border border-violet-200 bg-white px-3 py-2.5 text-sm outline-none shadow-sm">
+                          </div>
+                          <div>
+                            <label class="mb-1 block text-[10px] font-bold uppercase text-violet-700">Sistemden Vekil Seç</label>
+                            <select [ngModel]="taraf.vekilMuvekkilId" (ngModelChange)="arabuluculukTarafVekilSecimDegisti(taraf, $event)" class="w-full rounded-lg border border-violet-200 bg-white px-3 py-2.5 text-sm outline-none shadow-sm">
+                              <option [ngValue]="undefined">Kayıtlı vekil / kişi seç</option>
+                              @for(m of getArabuluculukTarafVekilSecenekleri(taraf); track m.id) {
+                                <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option>
+                              }
+                            </select>
+                          </div>
+                          <div class="md:col-span-2 xl:col-span-1">
+                            <label class="mb-1 block text-[10px] font-bold uppercase text-violet-700">Manuel Vekil</label>
+                            <input [ngModel]="taraf.vekil" (ngModelChange)="arabuluculukTarafVekilMetniElleDegisti(taraf, $event)" type="text" placeholder="Varsa vekil adı soyadı" class="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm outline-none">
+                          </div>
                         </div>
-                        <div>
-                          <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil Baro Bilgisi</label>
-                          <input [(ngModel)]="taraf.vekilBaroBilgisi" type="text" placeholder="Örn: İstanbul Barosu Sicil No: 12345" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
-                        </div>
-                        <div>
-                          <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil Telefon</label>
-                          <input [(ngModel)]="taraf.vekilTelefon" type="text" placeholder="05xx xxx xx xx" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
-                        </div>
-                        <div>
-                          <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil E-posta</label>
-                          <input [(ngModel)]="taraf.vekilEposta" type="email" placeholder="vekil@alanadi.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                        <div class="mt-3 grid gap-3 md:grid-cols-2">
+                          <div>
+                            <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil Telefon</label>
+                            <input [(ngModel)]="taraf.vekilTelefon" type="text" placeholder="05xx xxx xx xx" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                          </div>
+                          <div>
+                            <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil E-posta</label>
+                            <input [(ngModel)]="taraf.vekilEposta" type="email" placeholder="vekil@alanadi.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                          </div>
+                          <div class="md:col-span-2">
+                            <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil Baro Bilgisi</label>
+                            <input [(ngModel)]="taraf.vekilBaroBilgisi" type="text" placeholder="Örn: İstanbul Barosu Sicil No: 12345" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                          </div>
                         </div>
                       </div>
                     </div>
