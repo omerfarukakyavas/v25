@@ -141,6 +141,7 @@ export class AppComponent implements OnInit {
   arabuluculukMuvekkilDropdownAcik = false;
   arabuluculukMuvekkilArama = '';
   hizliMuvekkilFormAcik = false;
+  hizliMuvekkilKayitBaglami: 'dava' | 'arabuluculuk' = 'dava';
   hizliMuvekkilKaydi: Partial<Muvekkil> = { tip: 'Müvekkil' };
 
   yetkiliSecimDropdownAcik = false;
@@ -2194,6 +2195,11 @@ export class AppComponent implements OnInit {
 
   arabuluculukFormAc(a?: ArabuluculukDosyasi) {
     this.formHata = '';
+    this.hizliMuvekkilFormAcik = false;
+    this.hizliMuvekkilKayitBaglami = 'arabuluculuk';
+    this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
+    this.arabuluculukMuvekkilDropdownAcik = false;
+    this.arabuluculukMuvekkilArama = '';
     if (a) { 
       this.formModu = 'duzenle'; 
       this.islemGorenArabuluculuk = { ...a, taraflar: Array.isArray(a.taraflar) ? a.taraflar.map(t => ({...t})) : [] }; 
@@ -2201,7 +2207,14 @@ export class AppComponent implements OnInit {
     else { this.formModu = 'ekle'; this.islemGorenArabuluculuk = { durum: 'Hazırlık', basvuruTuru: 'Dava Şartı', uyusmazlikTuru: 'İşçi İşveren', basvuruKonusu: '', buro: 'İstanbul Anadolu', buroyaBasvuruTarihi: '', arabulucuGorevlendirmeTarihi: '', tutanakDuzenlemeTarihi: '', toplantiSaati: '', toplantiTamamlandiMi: false, taraflar: [this.arabuluculukTarafBosOlustur('Başvurucu', Date.now()), this.arabuluculukTarafBosOlustur('Diğer Taraf', Date.now() + 1)] }; }
     this.arabuluculukFormAcik = true;
   }
-  arabuluculukFormKapat() { this.arabuluculukFormAcik = false; }
+  arabuluculukFormKapat() {
+    this.arabuluculukFormAcik = false;
+    this.arabuluculukMuvekkilDropdownAcik = false;
+    this.arabuluculukMuvekkilArama = '';
+    this.hizliMuvekkilFormAcik = false;
+    this.hizliMuvekkilKayitBaglami = 'dava';
+    this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
+  }
   tarafEkle() { if (!this.islemGorenArabuluculuk.taraflar) this.islemGorenArabuluculuk.taraflar = []; this.islemGorenArabuluculuk.taraflar.push(this.arabuluculukTarafBosOlustur()); }
   tarafSil(i: number) { if (this.islemGorenArabuluculuk.taraflar) this.islemGorenArabuluculuk.taraflar.splice(i, 1); }
   arabuluculukKaydet() {
@@ -2279,13 +2292,16 @@ export class AppComponent implements OnInit {
     this.muvekkilFormAcik = true; 
   }
   muvekkilFormKapat() { this.muvekkilFormAcik = false; this.yetkiliSecimDropdownAcik = false; this.yetkiliSecimArama = ''; }
-  hizliMuvekkilKaydiAc() {
+  hizliMuvekkilKaydiAc(hedef: 'dava' | 'arabuluculuk' = 'dava') {
     this.formHata = '';
+    this.hizliMuvekkilKayitBaglami = hedef;
     this.hizliMuvekkilFormAcik = true;
     this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
+    if (hedef === 'arabuluculuk') this.arabuluculukMuvekkilDropdownAcik = false;
   }
   hizliMuvekkilKaydiIptal() {
     this.hizliMuvekkilFormAcik = false;
+    this.hizliMuvekkilKayitBaglami = 'dava';
     this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
   }
   hizliMuvekkilKaydet() {
@@ -2305,18 +2321,27 @@ export class AppComponent implements OnInit {
       vekaletnameUrl: '',
       yetkililer: []
     };
-    this.muvekkilKaydetCloud(yeni, 'Yeni müvekkil dava ekranından oluşturuldu.');
-    if (!this.islemGorenDava.muvekkiller) this.islemGorenDava.muvekkiller = [];
-    const bosKayit = this.islemGorenDava.muvekkiller.find(kayit => !kayit.muvekkilId && !(kayit.isim || '').trim());
-    if (bosKayit) {
-      bosKayit.muvekkilId = yeni.id;
-      bosKayit.isim = adSoyad;
+    const basariMesaji = this.hizliMuvekkilKayitBaglami === 'arabuluculuk'
+      ? 'Yeni kişi veya kurum arabuluculuk ekranından oluşturuldu.'
+      : 'Yeni müvekkil dava ekranından oluşturuldu.';
+    this.muvekkilKaydetCloud(yeni, basariMesaji);
+    if (this.hizliMuvekkilKayitBaglami === 'arabuluculuk') {
+      this.islemGorenArabuluculuk.muvekkilId = yeni.id;
+      this.arabuluculukMuvekkilDropdownAcik = false;
+      this.arabuluculukMuvekkilArama = '';
     } else {
-      this.islemGorenDava.muvekkiller.push({ id: Date.now() + 1, isim: adSoyad, muvekkilId: yeni.id });
+      if (!this.islemGorenDava.muvekkiller) this.islemGorenDava.muvekkiller = [];
+      const bosKayit = this.islemGorenDava.muvekkiller.find(kayit => !kayit.muvekkilId && !(kayit.isim || '').trim());
+      if (bosKayit) {
+        bosKayit.muvekkilId = yeni.id;
+        bosKayit.isim = adSoyad;
+      } else {
+        this.islemGorenDava.muvekkiller.push({ id: Date.now() + 1, isim: adSoyad, muvekkilId: yeni.id });
+      }
+      const hazirMuvekkiller = this.davaMuvekkilleriniHazirla(this.islemGorenDava.muvekkiller);
+      this.islemGorenDava.muvekkilId = hazirMuvekkiller[0]?.muvekkilId;
+      this.islemGorenDava.muvekkil = hazirMuvekkiller.map(kayit => kayit.isim).join(', ');
     }
-    const hazirMuvekkiller = this.davaMuvekkilleriniHazirla(this.islemGorenDava.muvekkiller);
-    this.islemGorenDava.muvekkilId = hazirMuvekkiller[0]?.muvekkilId;
-    this.islemGorenDava.muvekkil = hazirMuvekkiller.map(kayit => kayit.isim).join(', ');
     this.formHata = '';
     this.hizliMuvekkilKaydiIptal();
   }
