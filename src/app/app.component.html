@@ -931,10 +931,10 @@
                       <span class="shrink-0 rounded-full border border-violet-200 bg-white px-3 py-1 text-xs font-bold text-violet-700">{{ filtrelenmisArabuluculuk.length }} kayıt</span>
                     </div>
                   </div>
-                  <div class="space-y-3 p-3 md:hidden">
-                    @for (arb of filtrelenmisArabuluculuk; track arb.id) {
-                      <div class="mobile-record-card mobile-record-card-violet">
-                        <button type="button" class="mobile-record-trigger" (click)="mobilKayitGecis('arabuluculuk', arb.id)" [attr.aria-expanded]="mobilKayitAcikMi('arabuluculuk', arb.id)">
+                    <div class="space-y-3 bg-black p-3 md:hidden">
+                      @for (arb of filtrelenmisArabuluculuk; track arb.id) {
+                      <div class="mobile-record-card arabuluculuk-liste-zemin-kart" [ngClass]="getArabuluculukListeZeminClass(arb.durum)">
+                          <button type="button" class="mobile-record-trigger" (click)="mobilKayitGecis('arabuluculuk', arb.id)" [attr.aria-expanded]="mobilKayitAcikMi('arabuluculuk', arb.id)">
                           <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
                               <span class="rounded-full bg-violet-100 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-violet-700">Arabuluculuk</span>
@@ -1082,13 +1082,13 @@
                             <th class="p-5">Numaralar</th><th class="p-5">Taraflar</th><th class="p-5">Büro / Türü</th><th class="p-5">Süre Sayacı</th><th class="p-5">Toplantı</th><th class="p-5">Durum</th><th class="p-5 text-right">İşlemler</th>
                           </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
-                          @for (arb of filtrelenmisArabuluculuk; track arb.id) {
-                            <tr class="hover:bg-violet-50/40 transition-colors group">
-                              <td class="p-5">
-                                 <div class="flex items-start gap-3">
-                                   <div class="w-1 self-stretch rounded-full bg-violet-500"></div>
-                                   <div>
+                          <tbody class="divide-y-[8px] divide-black bg-black">
+                           @for (arb of filtrelenmisArabuluculuk; track arb.id) {
+                            <tr [ngClass]="getArabuluculukListeZeminClass(arb.durum)" class="group">
+                                <td class="p-5">
+                                   <div class="flex items-start gap-3">
+                                    <div class="w-1.5 self-stretch rounded-full bg-black"></div>
+                                     <div>
                                      <div class="text-xs font-medium text-slate-700 flex items-center gap-1.5"><span class="text-[9px] font-bold text-violet-700 uppercase bg-violet-100 px-1.5 py-0.5 rounded">BÜRO</span><span>{{arb.buroNo || '-'}}</span></div>
                                      <div class="text-xs font-medium text-slate-700 flex items-center gap-1.5 mt-1.5"><span class="text-[9px] font-bold text-fuchsia-700 uppercase bg-fuchsia-100 px-1.5 py-0.5 rounded">ARB</span><span>{{arb.arabuluculukNo}}</span></div>
                                    </div>
