@@ -2848,7 +2848,7 @@
       <!-- BUTUN FORMLAR VE MODALLAR (HER ZAMAN VE HER SAYFADA CALISABILMESI ICIN DISARIYA ALINDI) -->
       @if (davaFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
+          <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-5xl overflow-hidden animate-fade-in-up">
             <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
               <h3 class="text-xl font-black tracking-tight text-slate-900">{{ formModu === 'ekle' ? 'Yeni dava dosyası oluştur' : 'Dava dosyasını güncelle' }}</h3>
               <button (click)="davaFormKapat()" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100">Kapat</button>
@@ -2856,7 +2856,7 @@
             <div class="bg-slate-50 p-6 space-y-5 max-h-[72vh] overflow-y-auto custom-scrollbar">
               @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium shadow-sm">{{ formHata }}</div> }
 
-              <div class="grid gap-4 items-start">
+              <div class="grid gap-5 items-start xl:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
 
               <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-3">Dosya Numaraları <span class="text-red-500">*</span></label>
@@ -3298,9 +3298,9 @@
               <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-purple-700">Dosya Kimliği</p>
                 <p class="mt-2 text-sm leading-6 text-slate-500">Büro, dosya numarası ve kayıtlı muhatap bilgileri tek blokta görünerek ilk bakışı kolaylaştırır.</p>
-                <div class="mt-4 flex gap-4">
-                  <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Büro No @if(islemGorenArabuluculuk.basvuruTuru === 'Dava Şartı'){<span class="text-red-500">*</span>}</label><input [(ngModel)]="islemGorenArabuluculuk.buroNo" type="text" placeholder="Örn: 2024/123" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arabuluculuk No <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenArabuluculuk.arabuluculukNo" type="text" placeholder="Örn: 2024/456" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+                  <div><label class="mb-1 block text-xs font-bold uppercase text-slate-500">Büro No @if(islemGorenArabuluculuk.basvuruTuru === 'Dava Şartı'){<span class="text-red-500">*</span>}</label><input [(ngModel)]="islemGorenArabuluculuk.buroNo" type="text" placeholder="Örn: 2024/123" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                  <div><label class="mb-1 block text-xs font-bold uppercase text-slate-500">Arabuluculuk No <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenArabuluculuk.arabuluculukNo" type="text" placeholder="Örn: 2024/456" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 </div>
 
                 <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Büro <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenArabuluculuk.buro" type="text" placeholder="Örn: İstanbul Arabuluculuk Bürosu" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
@@ -3379,14 +3379,14 @@
               <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-purple-700">Süreç ve Taraflar</p>
                 <p class="mt-2 text-sm leading-6 text-slate-500">Başvuru türü, uyuşmazlık başlığı ve taraf listesi daha net bir iş akışında sunulur.</p>
-                <div class="mt-4 flex gap-4">
-                <div class="flex-1">
+                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Başvuru Türü <span class="text-red-500">*</span></label>
                   <select [(ngModel)]="islemGorenArabuluculuk.basvuruTuru" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
                     <option value="Dava Şartı">Dava Şartı</option><option value="İhtiyari">İhtiyari</option>
                   </select>
                 </div>
-                <div class="flex-1">
+                <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Uyuşmazlık Türü <span class="text-red-500">*</span></label>
                   <select [(ngModel)]="islemGorenArabuluculuk.uyusmazlikTuru" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
                     <option value="Kira">Kira</option><option value="İşçi İşveren">İşçi İşveren</option><option value="Ticari">Ticari</option><option value="Boşanma">Boşanma</option><option value="Ortaklığın Giderilmesi">Ortaklığın Giderilmesi</option><option value="Tüketici">Tüketici</option>
@@ -3397,17 +3397,17 @@
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Başvuru Konusu</label>
                   <textarea [(ngModel)]="islemGorenArabuluculuk.basvuruKonusu" rows="3" placeholder="Örn: Ayıplı hizmet nedeniyle bedel iadesi ve zarar tazmini talebi" class="w-full resize-y px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white"></textarea>
                 </div>
-                <div class="mt-4 grid gap-4 md:grid-cols-3">
+                <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arabuluculuk Bürosuna Başvuru Tarihi <span class="text-red-500">*</span></label>
+                    <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Arabuluculuk Bürosuna Başvuru Tarihi <span class="text-red-500">*</span></label>
                     <input [(ngModel)]="islemGorenArabuluculuk.buroyaBasvuruTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
                   </div>
                   <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arabulucunun Görevlendirildiği Tarih <span class="text-red-500">*</span></label>
+                    <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Arabulucunun Görevlendirildiği Tarih <span class="text-red-500">*</span></label>
                     <input [(ngModel)]="islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
                   </div>
                   <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tutanağın Düzenlendiği Tarih</label>
+                    <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Tutanağın Düzenlendiği Tarih</label>
                     <input [(ngModel)]="islemGorenArabuluculuk.tutanakDuzenlemeTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
                   </div>
                 </div>
@@ -3416,19 +3416,17 @@
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-3">Taraflar <span class="text-red-500">*</span></label>
                 <div class="space-y-3">
                   @for(taraf of islemGorenArabuluculuk.taraflar; track $index) {
-                    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                      <div class="flex flex-col gap-3 lg:flex-row lg:items-start">
-                        <select [(ngModel)]="taraf.tip" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 outline-none shadow-sm lg:w-40"><option value="Başvurucu">Başvurucu</option><option value="Diğer Taraf">Diğer Taraf</option></select>
-                        <div class="flex-1 grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)]">
-                          <select [ngModel]="taraf.muvekkilId" (ngModelChange)="arabuluculukTarafSecimDegisti(taraf, $event)" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none shadow-sm">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div class="grid gap-3 xl:grid-cols-[150px_220px_minmax(0,1fr)_70px] xl:items-start">
+                        <select [(ngModel)]="taraf.tip" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 outline-none shadow-sm"><option value="Başvurucu">Başvurucu</option><option value="Diğer Taraf">Diğer Taraf</option></select>
+                        <select [ngModel]="taraf.muvekkilId" (ngModelChange)="arabuluculukTarafSecimDegisti(taraf, $event)" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none shadow-sm">
                             <option [ngValue]="undefined">Kayıtlı kişi / kurum seç</option>
                             @for(m of muvekkiller; track m.id) {
                               <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option>
                             }
-                          </select>
-                          <input [ngModel]="taraf.isim" (ngModelChange)="arabuluculukTarafMetniElleDegisti(taraf, $event)" type="text" placeholder="Taraf İsmi/Unvanı" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none shadow-sm">
-                        </div>
-                        <button (click)="tarafSil($index)" class="self-end rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 lg:self-auto">Sil</button>
+                        </select>
+                        <input [ngModel]="taraf.isim" (ngModelChange)="arabuluculukTarafMetniElleDegisti(taraf, $event)" type="text" placeholder="Taraf İsmi/Unvanı" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none shadow-sm">
+                        <button (click)="tarafSil($index)" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 xl:self-start">Sil</button>
                       </div>
                       <div class="mt-4 grid gap-3 md:grid-cols-2">
                         <div>
@@ -3478,7 +3476,7 @@
               <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-purple-700">Toplantı ve Finans</p>
                 <p class="mt-2 text-sm leading-6 text-slate-500">Toplantı, arşiv ve ücret bilgileri bir arada durarak dosyanın son durumunu daha rahat gösterir.</p>
-                <div class="mt-4 grid grid-cols-3 gap-4">
+                <div class="mt-4 grid gap-4 md:grid-cols-3">
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Toplantı Tarihi</label><input [(ngModel)]="islemGorenArabuluculuk.toplantiTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Toplantı Saati</label><input [(ngModel)]="islemGorenArabuluculuk.toplantiSaati" type="time" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white"></div>
                 <div>
@@ -3491,7 +3489,7 @@
 
                 <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label><input [(ngModel)]="islemGorenArabuluculuk.arsivYeri" type="text" placeholder="Örn: Mor Klasör, Çekmece 3" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
 
-                <div class="mt-4 grid grid-cols-2 gap-4">
+                <div class="mt-4 grid gap-4 md:grid-cols-2">
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Durum</label>
                   <select [(ngModel)]="islemGorenArabuluculuk.durum" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
