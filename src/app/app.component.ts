@@ -140,6 +140,9 @@ export class AppComponent implements OnInit {
   
   arabuluculukMuvekkilDropdownAcik = false;
   arabuluculukMuvekkilArama = '';
+  icraMuvekkilDropdownAcik = false;
+  icraMuvekkilArama = '';
+  icraMuvekkilRolu: 'Alacaklı' | 'Borçlu' | null = null;
   arabuluculukTarafAramaMetinleri: Record<number, string> = {};
   arabuluculukTarafVekilAramaMetinleri: Record<number, string> = {};
   hizliMuvekkilFormAcik = false;
@@ -1160,6 +1163,19 @@ export class AppComponent implements OnInit {
     const s = this.arabuluculukMuvekkilArama.toLowerCase();
     return this.muvekkiller.filter(m => m.adSoyad.toLowerCase().includes(s) || (m.tcKimlik && m.tcKimlik.toLowerCase().includes(s)));
   }
+  get filtrelenmisIcraMuvekkilleri() {
+    const arama = this.icraMuvekkilArama.toLocaleLowerCase('tr-TR').trim();
+    return [...this.muvekkiller]
+      .filter(m => {
+        if (!arama) return true;
+        return [m.adSoyad, m.tcKimlik, m.telefon, m.eposta]
+          .filter(Boolean)
+          .join(' ')
+          .toLocaleLowerCase('tr-TR')
+          .includes(arama);
+      })
+      .sort((a, b) => (a.adSoyad || '').localeCompare(b.adSoyad || '', 'tr-TR', { sensitivity: 'base' }));
+  }
   getArabuluculukTarafSecenekleri(taraf?: Partial<ArabuluculukTaraf> | null) {
     const arama = ((taraf?.id ? this.arabuluculukTarafAramaMetinleri[taraf.id] : '') || '').toLocaleLowerCase('tr-TR').trim();
     return this.muvekkiller.filter(m => !arama || [m.adSoyad, m.tcKimlik, m.telefon, m.eposta].filter(Boolean).join(' ').toLocaleLowerCase('tr-TR').includes(arama));
@@ -1197,6 +1213,45 @@ export class AppComponent implements OnInit {
   }
 
   secilenMuvekkilAd(id?: number) { return this.muvekkiller.find(m => m.id === id)?.adSoyad; }
+  icraMuvekkilSecimEtiketi() {
+    return this.secilenMuvekkilAd(this.islemGorenIcra.muvekkilId) || 'Müvekkil seçiniz';
+  }
+  icraMuvekkilRolunuAyarla(rol: 'Alacaklı' | 'Borçlu') {
+    const oncekiRol = this.icraMuvekkilRolu;
+    this.icraMuvekkilRolu = rol;
+    const seciliAd = this.secilenMuvekkilAd(this.islemGorenIcra.muvekkilId);
+    if (!seciliAd) return;
+    this.icraMuvekkiliTarafaUygula(seciliAd, oncekiRol);
+  }
+  icraMuvekkilSec(muvekkil: Muvekkil) {
+    if (!this.icraMuvekkilRolu) {
+      this.formHata = 'Önce seçtiğiniz müvekkilin alacaklı mı borçlu mu olacağını belirtin.';
+      return;
+    }
+    this.formHata = '';
+    const oncekiMuvekkilAdi = this.secilenMuvekkilAd(this.islemGorenIcra.muvekkilId);
+    this.islemGorenIcra.muvekkilId = muvekkil.id;
+    this.islemGorenIcra.muvekkil = muvekkil.adSoyad;
+    if (oncekiMuvekkilAdi && oncekiMuvekkilAdi !== muvekkil.adSoyad) {
+      if ((this.islemGorenIcra.alacakli || '').trim() === oncekiMuvekkilAdi) this.islemGorenIcra.alacakli = '';
+      if ((this.islemGorenIcra.borclu || '').trim() === oncekiMuvekkilAdi) this.islemGorenIcra.borclu = '';
+    }
+    this.icraMuvekkiliTarafaUygula(muvekkil.adSoyad);
+    this.icraMuvekkilDropdownAcik = false;
+    this.icraMuvekkilArama = '';
+  }
+  private icraMuvekkiliTarafaUygula(muvekkilAdi: string, oncekiRol?: 'Alacaklı' | 'Borçlu' | null) {
+    if (oncekiRol === 'Alacaklı' && (this.islemGorenIcra.alacakli || '').trim() === muvekkilAdi) this.islemGorenIcra.alacakli = '';
+    if (oncekiRol === 'Borçlu' && (this.islemGorenIcra.borclu || '').trim() === muvekkilAdi) this.islemGorenIcra.borclu = '';
+    if (this.icraMuvekkilRolu === 'Alacaklı') {
+      if ((this.islemGorenIcra.borclu || '').trim() === muvekkilAdi) this.islemGorenIcra.borclu = '';
+      this.islemGorenIcra.alacakli = muvekkilAdi;
+    }
+    if (this.icraMuvekkilRolu === 'Borçlu') {
+      if ((this.islemGorenIcra.alacakli || '').trim() === muvekkilAdi) this.islemGorenIcra.alacakli = '';
+      this.islemGorenIcra.borclu = muvekkilAdi;
+    }
+  }
 
   get filtrelenmisIliskiler() {
     const s = this.iliskiArama.toLowerCase();
@@ -2214,14 +2269,32 @@ export class AppComponent implements OnInit {
 
   icraFormunuAc(i?: IcraDosyasi) {
     this.formHata = '';
-    if (i) { this.formModu = 'duzenle'; this.islemGorenIcra = { ...i }; } 
-    else { this.formModu = 'ekle'; this.islemGorenIcra = { durum: 'Aktif', muvekkilId: undefined, takipTipi: 'İlamsız' }; }
+    this.icraMuvekkilDropdownAcik = false;
+    this.icraMuvekkilArama = '';
+    if (i) {
+      this.formModu = 'duzenle';
+      this.islemGorenIcra = { ...i };
+      this.icraMuvekkilRolu = i.muvekkilRolu
+        || ((i.alacakli || '').trim() === (i.muvekkil || '').trim() ? 'Alacaklı'
+          : (i.borclu || '').trim() === (i.muvekkil || '').trim() ? 'Borçlu'
+          : null);
+    } 
+    else {
+      this.formModu = 'ekle';
+      this.islemGorenIcra = { durum: 'Aktif', muvekkilId: undefined, takipTipi: 'İlamsız' };
+      this.icraMuvekkilRolu = null;
+    }
     this.icraFormAcik = true;
   }
-  icraFormKapat() { this.icraFormAcik = false; }
+  icraFormKapat() {
+    this.icraFormAcik = false;
+    this.icraMuvekkilDropdownAcik = false;
+    this.icraMuvekkilArama = '';
+    this.icraMuvekkilRolu = null;
+  }
   
   icraKaydet() {
-    if (!this.islemGorenIcra.icraDairesi || !this.islemGorenIcra.dosyaNo || !this.islemGorenIcra.muvekkilId || !this.islemGorenIcra.takipTipi) { this.formHata = "Daire, Dosya No, Muhatap ve Takip Tipi zorunludur."; return; }
+    if (!this.islemGorenIcra.icraDairesi || !this.islemGorenIcra.dosyaNo || !this.islemGorenIcra.muvekkilId || !this.icraMuvekkilRolu || !this.islemGorenIcra.takipTipi) { this.formHata = "Daire, Dosya No, Müvekkil, Müvekkil Rolü ve Takip Tipi zorunludur."; return; }
     
     this.islemGorenIcra.icraDairesi = this.formatMetin(this.islemGorenIcra.icraDairesi);
     this.islemGorenIcra.eskiMahkeme = this.formatMetin(this.islemGorenIcra.eskiMahkeme);
@@ -2232,11 +2305,11 @@ export class AppComponent implements OnInit {
 
     const m = this.muvekkiller.find(x => x.id == this.islemGorenIcra.muvekkilId);
     if (this.formModu === 'ekle') {
-      let y: IcraDosyasi = { id: Date.now(), icraDairesi: this.islemGorenIcra.icraDairesi || '', dosyaNo: this.islemGorenIcra.dosyaNo || '', eskiMahkeme: this.islemGorenIcra.eskiMahkeme || '', eskiEsasNo: this.islemGorenIcra.eskiEsasNo || '', muvekkilId: m?.id, muvekkil: m?.adSoyad || 'Bilinmiyor', alacakli: this.islemGorenIcra.alacakli || '-', borclu: this.islemGorenIcra.borclu || '-', takipTipi: this.islemGorenIcra.takipTipi || '', takipTarihi: this.islemGorenIcra.takipTarihi || '', durum: this.islemGorenIcra.durum as any, baglantiliDavaId: this.islemGorenIcra.baglantiliDavaId, arsivYeri: this.islemGorenIcra.arsivYeri || '', vekaletUcreti: this.islemGorenIcra.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      let y: IcraDosyasi = { id: Date.now(), icraDairesi: this.islemGorenIcra.icraDairesi || '', dosyaNo: this.islemGorenIcra.dosyaNo || '', eskiMahkeme: this.islemGorenIcra.eskiMahkeme || '', eskiEsasNo: this.islemGorenIcra.eskiEsasNo || '', muvekkilId: m?.id, muvekkil: m?.adSoyad || 'Bilinmiyor', muvekkilRolu: this.icraMuvekkilRolu, alacakli: this.islemGorenIcra.alacakli || '-', borclu: this.islemGorenIcra.borclu || '-', takipTipi: this.islemGorenIcra.takipTipi || '', takipTarihi: this.islemGorenIcra.takipTarihi || '', durum: this.islemGorenIcra.durum as any, baglantiliDavaId: this.islemGorenIcra.baglantiliDavaId, arsivYeri: this.islemGorenIcra.arsivYeri || '', vekaletUcreti: this.islemGorenIcra.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
       y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'İcra dosyası açıldı', `${y.icraDairesi} / ${y.dosyaNo} referansıyla yeni takip oluşturuldu.`);
       this.icraKaydetCloud(y, 'Yeni icra dosyası buluta eklendi.');
     } else {
-      let g = { ...this.islemGorenIcra, muvekkil: m?.adSoyad || this.islemGorenIcra.muvekkil } as IcraDosyasi;
+      let g = { ...this.islemGorenIcra, muvekkil: m?.adSoyad || this.islemGorenIcra.muvekkil, muvekkilRolu: this.icraMuvekkilRolu } as IcraDosyasi;
       const mevcut = this.icralar.find(x => x.id === this.islemGorenIcra.id);
       g = this.dosyayaIslemKaydiEkle(g, 'dosya', 'İcra dosyası güncellendi', this.icraGuncellemeOzeti(mevcut, g));
       this.icraKaydetCloud(g, 'İcra dosyasındaki bilgiler güncellendi.');

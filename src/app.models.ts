@@ -38,7 +38,7 @@ export interface DavaDosyasi {
 }
 
 export interface IcraDosyasi {
-  id: number; icraDairesi: string; dosyaNo: string; eskiMahkeme?: string; eskiEsasNo?: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkilId?: number; muvekkil: string; alacakli: string; borclu: string; takipTipi?: string; takipTarihi: string; durum: string; baglantiliDavaId?: number; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[];
+  id: number; icraDairesi: string; dosyaNo: string; eskiMahkeme?: string; eskiEsasNo?: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkilId?: number; muvekkil: string; muvekkilRolu?: 'Alacaklı' | 'Borçlu'; alacakli: string; borclu: string; takipTipi?: string; takipTarihi: string; durum: string; baglantiliDavaId?: number; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[];
   karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string;
   buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; basvuruKonusu?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: string;
 }

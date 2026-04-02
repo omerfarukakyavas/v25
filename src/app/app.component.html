@@ -3221,12 +3221,49 @@
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Eski Esas / Dosya No (Opsiyonel)</label><input [(ngModel)]="islemGorenIcra.eskiEsasNo" type="text" placeholder="Örn: 2022/9987" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
                 </div>
 
-                <div class="mt-4">
+                <div class="mt-4 space-y-3">
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Müvekkil <span class="text-red-500">*</span></label>
-                  <select [(ngModel)]="islemGorenIcra.muvekkilId" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
-                    <option [ngValue]="undefined" disabled>Müvekkil Seçiniz</option>
-                    @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Diğer' ? '(Diğer)' : '' }}</option> }
-                  </select>
+                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Seçilen müvekkil hangi tarafta yer alacak?</p>
+                    <div class="mt-2 grid grid-cols-2 gap-2">
+                      <button type="button" (click)="icraMuvekkilRolunuAyarla('Alacaklı')" class="rounded-lg border px-3 py-2 text-sm font-semibold transition-colors" [class.border-emerald-500]="icraMuvekkilRolu === 'Alacaklı'" [class.bg-emerald-600]="icraMuvekkilRolu === 'Alacaklı'" [class.text-white]="icraMuvekkilRolu === 'Alacaklı'" [class.border-slate-200]="icraMuvekkilRolu !== 'Alacaklı'" [class.bg-white]="icraMuvekkilRolu !== 'Alacaklı'" [class.text-slate-700]="icraMuvekkilRolu !== 'Alacaklı'">Alacaklı</button>
+                      <button type="button" (click)="icraMuvekkilRolunuAyarla('Borçlu')" class="rounded-lg border px-3 py-2 text-sm font-semibold transition-colors" [class.border-rose-500]="icraMuvekkilRolu === 'Borçlu'" [class.bg-rose-600]="icraMuvekkilRolu === 'Borçlu'" [class.text-white]="icraMuvekkilRolu === 'Borçlu'" [class.border-slate-200]="icraMuvekkilRolu !== 'Borçlu'" [class.bg-white]="icraMuvekkilRolu !== 'Borçlu'" [class.text-slate-700]="icraMuvekkilRolu !== 'Borçlu'">Borçlu</button>
+                    </div>
+                  </div>
+
+                  <div class="relative">
+                    <div (click)="icraMuvekkilRolu ? icraMuvekkilDropdownAcik = !icraMuvekkilDropdownAcik : formHata = 'Önce müvekkilin alacaklı mı borçlu mu olacağını seçin.'" class="w-full px-3 py-2 border rounded-lg outline-none text-sm font-medium flex justify-between items-center text-slate-800 transition-colors" [class.cursor-pointer]="icraMuvekkilRolu" [class.border-slate-300]="icraMuvekkilRolu" [class.bg-white]="icraMuvekkilRolu" [class.border-slate-200]="!icraMuvekkilRolu" [class.bg-slate-100]="!icraMuvekkilRolu" [class.text-slate-400]="!icraMuvekkilRolu">
+                      <span>{{ icraMuvekkilRolu ? icraMuvekkilSecimEtiketi() : 'Önce rol seçiniz' }}</span>
+                      <div class="flex items-center gap-2">
+                        @if (icraMuvekkilRolu) {
+                          <span class="rounded-full px-2 py-1 text-[11px] font-bold" [class.bg-emerald-50]="icraMuvekkilRolu === 'Alacaklı'" [class.text-emerald-700]="icraMuvekkilRolu === 'Alacaklı'" [class.bg-rose-50]="icraMuvekkilRolu === 'Borçlu'" [class.text-rose-700]="icraMuvekkilRolu === 'Borçlu'">{{ icraMuvekkilRolu }}</span>
+                        }
+                        <svg class="w-4 h-4" [class.text-slate-500]="icraMuvekkilRolu" [class.text-slate-300]="!icraMuvekkilRolu" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                      </div>
+                    </div>
+
+                    @if(icraMuvekkilDropdownAcik) {
+                      <div class="fixed inset-0 z-[55]" (click)="icraMuvekkilDropdownAcik = false"></div>
+                      <div class="absolute z-[60] mt-1 w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl">
+                        <div class="border-b border-slate-100 bg-slate-50 p-2">
+                          <input [(ngModel)]="icraMuvekkilArama" type="text" placeholder="Müvekkil adıyla ara..." class="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500" (click)="$event.stopPropagation()">
+                        </div>
+                        <div class="custom-scrollbar max-h-60 overflow-y-auto p-1">
+                          @for(m of filtrelenmisIcraMuvekkilleri; track m.id) {
+                            <div (click)="icraMuvekkilSec(m)" class="flex cursor-pointer items-center justify-between rounded px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700">
+                              <div class="min-w-0">
+                                <div class="truncate font-semibold">{{ m.adSoyad }}</div>
+                                <div class="truncate text-[11px] text-slate-400">{{ m.tcKimlik || m.telefon || m.eposta || 'Kayıtlı müvekkil' }}</div>
+                              </div>
+                              <span class="ml-3 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">{{ m.tip }}</span>
+                            </div>
+                          } @empty {
+                            <div class="px-3 py-4 text-center text-xs text-slate-400">Aradığınız isim bulunamadı</div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
                 </div>
               </div>
               
