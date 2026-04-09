@@ -314,59 +314,59 @@ textarea {
 
 .arabuluculuk-liste-zemin-hazirlik,
 .arabuluculuk-liste-zemin-hazirlik > td {
-  background: linear-gradient(180deg, rgba(240, 249, 255, 0.98) 0%, rgba(224, 242, 254, 0.94) 100%);
+  background: #dbeafe;
 }
 
 .arabuluculuk-liste-zemin-muzakere,
 .arabuluculuk-liste-zemin-muzakere > td {
-  background: linear-gradient(180deg, rgba(236, 253, 245, 0.98) 0%, rgba(209, 250, 229, 0.94) 100%);
+  background: #dcfce7;
 }
 
 .arabuluculuk-liste-zemin-imza,
 .arabuluculuk-liste-zemin-imza > td {
-  background: linear-gradient(180deg, rgba(255, 251, 235, 0.98) 0%, rgba(254, 240, 138, 0.28) 100%);
+  background: #fef3c7;
 }
 
 .arabuluculuk-liste-zemin-tahsilat,
 .arabuluculuk-liste-zemin-tahsilat > td {
-  background: linear-gradient(180deg, rgba(241, 245, 249, 0.98) 0%, rgba(15, 23, 42, 0.16) 100%);
+  background: #dbe4ff;
 }
 
 .arabuluculuk-liste-zemin-evrak,
 .arabuluculuk-liste-zemin-evrak > td {
-  background: linear-gradient(180deg, rgba(250, 245, 255, 0.98) 0%, rgba(237, 233, 254, 0.94) 100%);
+  background: #ede9fe;
 }
 
 .arabuluculuk-liste-zemin-kapali,
 .arabuluculuk-liste-zemin-kapali > td {
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(226, 232, 240, 0.94) 100%);
+  background: #e5e7eb;
 }
 
 .arabuluculuk-liste-satir > td {
-  border-top: 1px solid rgba(15, 23, 42, 0.16);
-  border-bottom: 1px solid rgba(15, 23, 42, 0.16);
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.12);
   vertical-align: top;
 }
 
 .arabuluculuk-liste-satir > td:first-child {
-  border-left: 1px solid rgba(15, 23, 42, 0.16);
+  border-left: 1px solid rgba(15, 23, 42, 0.12);
   border-top-left-radius: 1.15rem;
   border-bottom-left-radius: 1.15rem;
 }
 
 .arabuluculuk-liste-satir > td:last-child {
-  border-right: 1px solid rgba(15, 23, 42, 0.16);
+  border-right: 1px solid rgba(15, 23, 42, 0.12);
   border-top-right-radius: 1.15rem;
   border-bottom-right-radius: 1.15rem;
 }
 
 .arabuluculuk-liste-satir:hover > td {
-  filter: brightness(0.985);
+  filter: brightness(0.975);
 }
 
 .arabuluculuk-liste-zemin-kart {
-  border: 1px solid rgba(15, 23, 42, 0.18);
-  box-shadow: 0 16px 30px -28px rgba(15, 23, 42, 0.28), 0 8px 16px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  box-shadow: 0 14px 24px -24px rgba(15, 23, 42, 0.18), 0 6px 12px rgba(15, 23, 42, 0.05);
 }
 
 .mobile-record-trigger {

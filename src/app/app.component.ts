@@ -3798,7 +3798,7 @@ export class AppComponent implements OnInit {
   
   getDurumClass(d: string) { return d === 'Derdest' ? 'bg-green-100 text-green-700 border-green-200' : d === 'İstinaf/Temyiz' ? 'bg-orange-100 text-orange-700 border-orange-200' : 'bg-slate-100 text-slate-500 border-slate-200'; }
   getIcraDurumClass(d: string) { return d === 'Aktif' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : d === 'İtiraz Edildi' ? 'bg-orange-100 text-orange-700 border-orange-200' : d === 'Tehir-i İcra' ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-500 border-slate-200'; }
-  getArabuluculukDurumClass(d: string) { return d === 'Hazırlık' ? 'bg-sky-100 text-sky-800 border-sky-200' : d === 'Müzakere' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : d === 'İmza' ? 'bg-amber-100 text-amber-800 border-amber-200' : d === 'Tahsilat' ? 'bg-slate-900 text-white border-slate-800' : d === 'Evrak Yükleme' ? 'bg-violet-100 text-violet-800 border-violet-200' : 'bg-slate-200 text-slate-700 border-slate-300'; }
+  getArabuluculukDurumClass(d: string) { return d === 'Hazırlık' ? 'bg-sky-200 text-sky-950 border-sky-300' : d === 'Müzakere' ? 'bg-emerald-200 text-emerald-950 border-emerald-300' : d === 'İmza' ? 'bg-amber-200 text-amber-950 border-amber-300' : d === 'Tahsilat' ? 'bg-blue-800 text-white border-blue-900' : d === 'Evrak Yükleme' ? 'bg-violet-200 text-violet-950 border-violet-300' : 'bg-slate-300 text-slate-900 border-slate-400'; }
   getArabuluculukListeZeminClass(d: string) {
       if (d === 'Hazırlık') return 'arabuluculuk-liste-zemin arabuluculuk-liste-zemin-hazirlik';
       if (d === 'Müzakere') return 'arabuluculuk-liste-zemin arabuluculuk-liste-zemin-muzakere';
