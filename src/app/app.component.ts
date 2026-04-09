@@ -1,6 +1,7 @@
 ﻿import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ElementRef, ViewChild } from '@angular/core';
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, User, signInWithCustomToken, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
@@ -110,6 +111,12 @@ type GunlukOzetBolum = {
 })
 export class AppComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+  private dosyaNotEditorRef?: ElementRef<HTMLDivElement>;
+  @ViewChild('dosyaNotEditor')
+  set dosyaNotEditor(ref: ElementRef<HTMLDivElement> | undefined) {
+    this.dosyaNotEditorRef = ref;
+    if (ref) window.setTimeout(() => this.aktifDosyaNotEditorunuYukle(), 0);
+  }
   
   app: any; auth: any; db: any; user: User | null = null;
   authInitialized = false; yukleniyor = false; islemYapiyor = false; sistemHatasi = '';
@@ -1855,6 +1862,54 @@ export class AppComponent implements OnInit {
   }
 
   get aktifDosya() { return this.aktifSayfa === 'icraDetay' ? this.seciliIcra : (this.aktifSayfa === 'arabuluculukDetay' ? this.seciliArabuluculuk : this.seciliDava); }
+  aktifDosyaNotKomutuUygula(komut: 'bold' | 'italic' | 'underline' | 'insertUnorderedList' | 'insertOrderedList' | 'formatBlock' | 'removeFormat', deger?: string) {
+    if (typeof document === 'undefined' || !this.dosyaNotEditorRef?.nativeElement) return;
+    this.dosyaNotEditorRef.nativeElement.focus();
+    if (komut === 'removeFormat') {
+      document.execCommand('removeFormat', false);
+      document.execCommand('formatBlock', false, 'p');
+    } else if (komut === 'formatBlock' && deger) {
+      document.execCommand('formatBlock', false, deger);
+    } else {
+      document.execCommand(komut, false);
+    }
+    this.aktifDosyaNotEditorDegisti();
+  }
+  aktifDosyaNotEditorDegisti() {
+    if (!this.aktifDosya || !this.dosyaNotEditorRef?.nativeElement) return;
+    this.aktifDosya.notlar = this.aktifDosyaNotEditorHtmlAl();
+  }
+  aktifDosyaNotlariniKaydet() {
+    if (!this.aktifDosya) return;
+    this.aktifDosyaNotEditorDegisti();
+    this.aktifDosyaKaydet(this.aktifDosya);
+  }
+  private aktifDosyaNotEditorunuYukle() {
+    if (!this.dosyaNotEditorRef?.nativeElement) return;
+    const html = this.notIceriginiEditorIcinHazirla(this.aktifDosya?.notlar);
+    if (this.dosyaNotEditorRef.nativeElement.innerHTML !== html) {
+      this.dosyaNotEditorRef.nativeElement.innerHTML = html;
+    }
+  }
+  private aktifDosyaNotEditorHtmlAl() {
+    const editor = this.dosyaNotEditorRef?.nativeElement;
+    if (!editor || !editor.innerText.trim()) return '';
+    return editor.innerHTML.trim();
+  }
+  private notIceriginiEditorIcinHazirla(icerik?: string) {
+    const metin = (icerik || '').trim();
+    if (!metin) return '';
+    if (/<(p|div|br|ul|ol|li|strong|b|em|i|u|h1|h2|h3|blockquote)\b/i.test(metin)) return metin;
+    return this.htmlKacis(metin).replace(/\n/g, '<br>');
+  }
+  private htmlKacis(metin: string) {
+    return metin
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
   get aktifDosyaIslemGecmisi() {
     return [...(this.aktifDosya?.islemGecmisi || [])].sort((a, b) => new Date(b.tarih).getTime() - new Date(a.tarih).getTime());
   }

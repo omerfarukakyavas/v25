@@ -53,6 +53,43 @@
   transform: translateY(0);
 }
 
+.dosya-not-editor {
+  font-family: var(--app-font-sans);
+  white-space: normal;
+}
+
+.dosya-not-editor:empty::before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+}
+
+.dosya-not-editor h1,
+.dosya-not-editor h2,
+.dosya-not-editor h3 {
+  margin: 0.75rem 0 0.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.dosya-not-editor h2 {
+  font-size: 1.2rem;
+}
+
+.dosya-not-editor p {
+  margin: 0.35rem 0;
+}
+
+.dosya-not-editor ul,
+.dosya-not-editor ol {
+  margin: 0.5rem 0;
+  padding-left: 1.4rem;
+}
+
+.dosya-not-editor li {
+  margin: 0.2rem 0;
+}
+
 @media (max-width: 768px) {
   .detail-section-eyebrow {
     font-size: 0.68rem;
@@ -70,6 +107,10 @@
   .detail-edit-button {
     width: 100%;
     justify-content: center;
+  }
+
+  .dosya-not-editor h2 {
+    font-size: 1.05rem;
   }
 }
   
