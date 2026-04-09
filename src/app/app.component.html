@@ -2672,15 +2672,30 @@
                     <!-- FİNANS SÜTUNU -->
                     <div class="space-y-4 sm:space-y-6 lg:col-span-4 lg:self-start">
                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                         <div class="bg-slate-800 p-3 text-white sm:p-4"><h4 class="text-sm font-bold sm:text-base">Dosya Finans ve Masraf Takibi</h4></div>
+                         <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 p-3 text-white sm:p-4">
+                           <h4 class="text-sm font-bold tracking-[0.02em] text-white sm:text-base">Dosya Finans ve Masraf Takibi</h4>
+                           <p class="mt-1 text-[11px] font-medium text-slate-200">Tahsilat, emanet ve masraf hareketlerini tek blokta izleyin.</p>
+                         </div>
                          <div class="space-y-4 p-3 sm:space-y-5 sm:p-5">
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                               @if (aktifSayfa === 'arabuluculukDetay') {
-                                <div class="bg-purple-50 border border-purple-100 p-3 rounded-lg"><p class="text-[10px] font-bold text-purple-800 uppercase mb-1">Kalan Net Hizmet Ücreti</p><p class="text-lg font-bold text-purple-700">{{ formatPara(getDosyaFinans(aktifDosya).kalanVekalet) }}</p></div>
-                                <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-lg"><p class="text-[10px] font-bold text-emerald-800 uppercase mb-1">Net Tahsil Edilen</p><p class="text-lg font-bold text-emerald-700">{{ formatPara(getDosyaFinans(aktifDosya).toplamTahsilat) }}</p></div>
+                                <div class="rounded-lg border border-violet-200 bg-violet-50/90 p-3 shadow-sm">
+                                  <p class="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-violet-900">Kalan Net Hizmet Ücreti</p>
+                                  <p class="text-lg font-black text-violet-800">{{ formatPara(getDosyaFinans(aktifDosya).kalanVekalet) }}</p>
+                                </div>
+                                <div class="rounded-lg border border-emerald-200 bg-emerald-50/90 p-3 shadow-sm">
+                                  <p class="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-900">Net Tahsil Edilen</p>
+                                  <p class="text-lg font-black text-emerald-800">{{ formatPara(getDosyaFinans(aktifDosya).toplamTahsilat) }}</p>
+                                </div>
                               } @else {
-                                <div class="bg-rose-50 border border-rose-100 p-3 rounded-lg"><p class="text-[10px] font-bold text-rose-800 uppercase mb-1">Kalan Vekalet / Hizmet Ücreti</p><p class="text-lg font-bold text-rose-700">{{ formatPara(getDosyaFinans(aktifDosya).kalanVekalet) }}</p></div>
-                                <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-lg"><p class="text-[10px] font-bold text-emerald-800 uppercase mb-1">Emanet Masraf Kasası</p><p class="text-lg font-bold text-emerald-700">{{ formatPara(getDosyaFinans(aktifDosya).emanetBakiye) }}</p></div>
+                                <div class="rounded-lg border border-rose-200 bg-rose-50/90 p-3 shadow-sm">
+                                  <p class="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-rose-900">Kalan Vekalet / Hizmet Ücreti</p>
+                                  <p class="text-lg font-black text-rose-800">{{ formatPara(getDosyaFinans(aktifDosya).kalanVekalet) }}</p>
+                                </div>
+                                <div class="rounded-lg border border-emerald-200 bg-emerald-50/90 p-3 shadow-sm">
+                                  <p class="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-900">Emanet Masraf Kasası</p>
+                                  <p class="text-lg font-black text-emerald-800">{{ formatPara(getDosyaFinans(aktifDosya).emanetBakiye) }}</p>
+                                </div>
                               }
                             </div>
 
@@ -2701,7 +2716,7 @@
                                  <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
                                     <div class="w-full sm:w-1/3"><label class="block text-[10px] font-bold text-slate-500 mb-0.5">{{ aktifSayfa === 'arabuluculukDetay' ? 'Brüt Tutar (â‚º)' : 'Tutar (â‚º)' }}</label><input [(ngModel)]="yeniIslem.tutar" type="number" min="0" placeholder="0.00" class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none"></div>
                                     <div class="flex-1"><label class="block text-[10px] font-bold text-slate-500 mb-0.5">Açıklama</label><input [(ngModel)]="yeniIslem.aciklama" (keyup.enter)="finansalIslemEkle()" type="text" placeholder="Örn: Bilirkişi ücreti..." class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none"></div>
-                                    <button (click)="finansalIslemEkle()" class="w-full rounded bg-slate-800 px-3 py-2 text-sm font-medium text-white sm:w-auto sm:py-1.5">Ekle</button>
+                                    <button (click)="finansalIslemEkle()" class="w-full rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-800 sm:w-auto sm:py-1.5">Ekle</button>
                                  </div>
                                  <div>
                                    <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Makbuz / Evrak Linki (Opsiyonel)</label>
