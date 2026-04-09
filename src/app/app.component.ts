@@ -1176,13 +1176,29 @@ export class AppComponent implements OnInit {
       })
       .sort((a, b) => (a.adSoyad || '').localeCompare(b.adSoyad || '', 'tr-TR', { sensitivity: 'base' }));
   }
+  filtrelenmisMuvekkilListesi(aramaMetni?: string) {
+    const terimler = this.sablonAramaMetniHazirla(aramaMetni).split(' ').filter(Boolean);
+    return [...this.muvekkiller]
+      .filter(m => {
+        if (!terimler.length) return true;
+        const kaynak = this.sablonAramaMetniHazirla([m.adSoyad, m.tcKimlik, m.telefon, m.eposta, m.tip].filter(Boolean).join(' '));
+        return terimler.every(terim => kaynak.includes(terim));
+      })
+      .sort((a, b) => (a.adSoyad || '').localeCompare(b.adSoyad || '', 'tr-TR', { sensitivity: 'base' }));
+  }
   getArabuluculukTarafSecenekleri(taraf?: Partial<ArabuluculukTaraf> | null) {
-    const arama = ((taraf?.id ? this.arabuluculukTarafAramaMetinleri[taraf.id] : '') || '').toLocaleLowerCase('tr-TR').trim();
-    return this.muvekkiller.filter(m => !arama || [m.adSoyad, m.tcKimlik, m.telefon, m.eposta].filter(Boolean).join(' ').toLocaleLowerCase('tr-TR').includes(arama));
+    const arama = (taraf?.id ? this.arabuluculukTarafAramaMetinleri[taraf.id] : '') || '';
+    return this.filtrelenmisMuvekkilListesi(arama);
   }
   getArabuluculukTarafVekilSecenekleri(taraf?: Partial<ArabuluculukTaraf> | null) {
-    const arama = ((taraf?.id ? this.arabuluculukTarafVekilAramaMetinleri[taraf.id] : '') || '').toLocaleLowerCase('tr-TR').trim();
-    return this.muvekkiller.filter(m => !arama || [m.adSoyad, m.tcKimlik, m.telefon, m.eposta].filter(Boolean).join(' ').toLocaleLowerCase('tr-TR').includes(arama));
+    const arama = (taraf?.id ? this.arabuluculukTarafVekilAramaMetinleri[taraf.id] : '') || '';
+    return this.filtrelenmisMuvekkilListesi(arama);
+  }
+  getArabuluculukTarafVekilListeBoyutu(taraf?: Partial<ArabuluculukTaraf> | null) {
+    const arama = ((taraf?.id ? this.arabuluculukTarafVekilAramaMetinleri[taraf.id] : '') || '').trim();
+    if (!arama) return null;
+    const sonucSayisi = this.getArabuluculukTarafVekilSecenekleri(taraf).length;
+    return sonucSayisi ? Math.min(6, sonucSayisi + 1) : 2;
   }
   arabuluculukTarafAramalariniHazirla(liste?: ArabuluculukTaraf[]) {
     this.arabuluculukTarafAramaMetinleri = {};

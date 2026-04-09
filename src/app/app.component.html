@@ -3513,7 +3513,11 @@
                           </div>
                           <div>
                             <label class="mb-1 block text-[10px] font-bold uppercase text-violet-700">Sistemden Vekil Seç</label>
-                            <select [ngModel]="taraf.vekilMuvekkilId" (ngModelChange)="arabuluculukTarafVekilSecimDegisti(taraf, $event)" class="w-full rounded-lg border border-violet-200 bg-white px-3 py-2.5 text-sm outline-none shadow-sm">
+                            <div class="mb-1 flex items-center justify-between text-[11px] font-medium text-violet-500">
+                              <span>Arama yazdıkça listedeki vekiller daralır.</span>
+                              <span>{{ getArabuluculukTarafVekilSecenekleri(taraf).length }} sonuç</span>
+                            </div>
+                            <select [ngModel]="taraf.vekilMuvekkilId" (ngModelChange)="arabuluculukTarafVekilSecimDegisti(taraf, $event)" [attr.size]="getArabuluculukTarafVekilListeBoyutu(taraf)" class="w-full rounded-lg border border-violet-200 bg-white px-3 py-2.5 text-sm outline-none shadow-sm">
                               <option [ngValue]="undefined">Kayıtlı vekil / kişi seç</option>
                               @for(m of getArabuluculukTarafVekilSecenekleri(taraf); track m.id) {
                                 <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option>
