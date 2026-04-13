@@ -2217,14 +2217,19 @@
                     <div class="space-y-4 sm:space-y-6 lg:col-span-8">
                       <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden min-h-[320px]">
                         <div class="flex overflow-x-auto border-b border-slate-200 bg-slate-50 custom-scrollbar">
-                           <button (click)="aktifDetaySekmesi = 'notlar'" [class]="getDetayTabClass('notlar')" class="flex min-w-[110px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Notlar</button>
+                           @if (aktifSayfa === 'arabuluculukDetay') {
+                             <button (click)="aktifDetaySekmesi = 'notlar'" [class]="getDetayTabClass('notlar')" class="flex min-w-[110px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Notlar</button>
+                             <button (click)="aktifDetaySekmesi = 'evraklar'" [class]="getDetayTabClass('evraklar')" class="flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Evrak Bağlantıları</button>
+                           } @else {
+                             <button (click)="aktifDetaySekmesi = 'evraklar'" [class]="getDetayTabClass('evraklar')" class="flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Evrak Bağlantıları</button>
+                             <button (click)="aktifDetaySekmesi = 'notlar'" [class]="getDetayTabClass('notlar')" class="flex min-w-[110px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Notlar</button>
+                           }
                            @if (aktifSayfa === 'detay') {
                              <button (click)="aktifDetaySekmesi = 'muvekkilGorusmeleri'" [class]="getDetayTabClass('muvekkilGorusmeleri')" class="relative flex min-w-[180px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
                                Müvekkil Görüşme Notları
                                @if (aktifDavaMuvekkilGorusmeNotlari.length > 0) { <span class="absolute top-2 right-2 rounded-full bg-violet-700 px-1.5 py-0.5 text-[9px] font-black text-white">{{ aktifDavaMuvekkilGorusmeNotlari.length }}</span> }
                              </button>
                            }
-                           <button (click)="aktifDetaySekmesi = 'evraklar'" [class]="getDetayTabClass('evraklar')" class="flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Evrak Bağlantıları</button>
                            <button (click)="aktifDetaySekmesi = 'sureliIsler'" [class]="getDetayTabClass('sureliIsler')" class="relative flex min-w-[120px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
                              Süreli İşler
                              @if(aktifDosyaSureliIsleri.length > 0) { <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span> }
