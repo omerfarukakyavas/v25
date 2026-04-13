@@ -129,4 +129,5 @@ export interface ArabuluculukDosyasi {
   buroyaBasvuruTarihi?: string;
   arabulucuGorevlendirmeTarihi?: string;
   tutanakDuzenlemeTarihi?: string;
+  hizmetUcretiStopajli?: boolean;
 }

@@ -872,7 +872,8 @@ export class AppComponent implements OnInit {
       { etiket: 'Taraflar', onceki: this.getArabuluculukTarafKayitOzeti(onceki?.taraflar), sonraki: this.getArabuluculukTarafKayitOzeti(sonraki.taraflar) },
       { etiket: 'Toplantı', onceki: this.birlestirTarihVeSaat(onceki?.toplantiTarihi, onceki?.toplantiSaati), sonraki: this.birlestirTarihVeSaat(sonraki.toplantiTarihi, sonraki.toplantiSaati) },
       { etiket: 'Arşiv yeri', onceki: onceki?.arsivYeri, sonraki: sonraki.arsivYeri },
-      { etiket: 'Hizmet ücreti', onceki: onceki?.vekaletUcreti, sonraki: sonraki.vekaletUcreti }
+      { etiket: 'Hizmet ücreti', onceki: onceki?.vekaletUcreti, sonraki: sonraki.vekaletUcreti },
+      { etiket: 'Stopaj tercihi', onceki: onceki?.hizmetUcretiStopajli ? 'Stopajlı' : 'Stopajsız', sonraki: sonraki.hizmetUcretiStopajli ? 'Stopajlı' : 'Stopajsız' }
     ]);
   }
   takvimDegisimMetni(oncekiTarih?: string, oncekiSaat?: string, sonrakiTarih?: string, sonrakiSaat?: string) {
@@ -1390,10 +1391,12 @@ export class AppComponent implements OnInit {
     });
     this.arabuluculukDosyalar.forEach(a => {
       let odenen = 0; (a.finansalIslemler || []).forEach(islem => { 
-        if (islem.tur === 'Ödeme' || islem.tur === 'Ödeme Tarihi') odenen += islem.tutar; 
-        else if (islem.tur === 'Vekalet Ücreti') odenen += (islem.tutar / 1.2); 
+        if (islem.tur === 'Ödeme' || islem.tur === 'Ödeme Tarihi' || islem.tur === 'Vekalet Ücreti') {
+          const hesap = this.getArabuluculukMakbuzHesabi(islem, a);
+          odenen += hesap?.netTutar || 0;
+        }
       });
-      const netUcret = (a.vekaletUcreti || 0) / 1.2;
+      const netUcret = this.getArabuluculukHizmetUcretiHesabi(a)?.netTutar || 0;
       const kalan = Math.max(0, Number((netUcret - odenen).toFixed(2)));
       
       const taraflarStr = a.taraflar?.map((t:any) => t.isim).join(' vs ') || '';
@@ -2430,11 +2433,15 @@ export class AppComponent implements OnInit {
     this.arabuluculukMuvekkilArama = '';
     if (a) { 
       this.formModu = 'duzenle'; 
-      this.islemGorenArabuluculuk = { ...a, taraflar: Array.isArray(a.taraflar) ? a.taraflar.map(t => ({...t})) : [] }; 
+      this.islemGorenArabuluculuk = {
+        ...a,
+        hizmetUcretiStopajli: typeof a.hizmetUcretiStopajli === 'boolean' ? a.hizmetUcretiStopajli : this.getArabuluculukMakbuzTipOnerisi(a) === 'sirket',
+        taraflar: Array.isArray(a.taraflar) ? a.taraflar.map(t => ({...t})) : []
+      }; 
     }
     else {
       this.formModu = 'ekle';
-      this.islemGorenArabuluculuk = { durum: 'Hazırlık', basvuruTuru: 'Dava Şartı', uyusmazlikTuru: 'İşçi İşveren', basvuruKonusu: '', buro: 'İstanbul Anadolu', buroyaBasvuruTarihi: '', arabulucuGorevlendirmeTarihi: '', tutanakDuzenlemeTarihi: '', toplantiSaati: '', toplantiTamamlandiMi: false, taraflar: [this.arabuluculukTarafBosOlustur('Başvurucu', Date.now()), this.arabuluculukTarafBosOlustur('Diğer Taraf', Date.now() + 1)] };
+      this.islemGorenArabuluculuk = { durum: 'Hazırlık', basvuruTuru: 'Dava Şartı', uyusmazlikTuru: 'İşçi İşveren', basvuruKonusu: '', buro: 'İstanbul Anadolu', buroyaBasvuruTarihi: '', arabulucuGorevlendirmeTarihi: '', tutanakDuzenlemeTarihi: '', toplantiSaati: '', toplantiTamamlandiMi: false, hizmetUcretiStopajli: true, taraflar: [this.arabuluculukTarafBosOlustur('Başvurucu', Date.now()), this.arabuluculukTarafBosOlustur('Diğer Taraf', Date.now() + 1)] };
       this.arabuluculukUyusmazlikTuruDegisti(this.islemGorenArabuluculuk.uyusmazlikTuru as ArabuluculukDosyasi['uyusmazlikTuru']);
     }
     this.arabuluculukTarafAramalariniHazirla(this.islemGorenArabuluculuk.taraflar);
@@ -2500,7 +2507,7 @@ export class AppComponent implements OnInit {
     this.islemGorenArabuluculuk.arsivYeri = this.formatMetin(this.islemGorenArabuluculuk.arsivYeri);
 
     if (this.formModu === 'ekle') {
-      let y: ArabuluculukDosyasi = { id: Date.now(), buroNo: this.islemGorenArabuluculuk.buroNo || '', arabuluculukNo: this.islemGorenArabuluculuk.arabuluculukNo || '', buro: this.islemGorenArabuluculuk.buro || '', basvuruTuru: this.islemGorenArabuluculuk.basvuruTuru as any, uyusmazlikTuru: this.islemGorenArabuluculuk.uyusmazlikTuru as any, basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', taraflar: t, muvekkilId: this.islemGorenArabuluculuk.muvekkilId, buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', toplantiTarihi: this.islemGorenArabuluculuk.toplantiTarihi, toplantiSaati: this.islemGorenArabuluculuk.toplantiSaati || '', toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '', toplantiYontemi: this.islemGorenArabuluculuk.toplantiYontemi, durum: this.islemGorenArabuluculuk.durum as any, arsivYeri: this.islemGorenArabuluculuk.arsivYeri || '', vekaletUcreti: this.islemGorenArabuluculuk.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      let y: ArabuluculukDosyasi = { id: Date.now(), buroNo: this.islemGorenArabuluculuk.buroNo || '', arabuluculukNo: this.islemGorenArabuluculuk.arabuluculukNo || '', buro: this.islemGorenArabuluculuk.buro || '', basvuruTuru: this.islemGorenArabuluculuk.basvuruTuru as any, uyusmazlikTuru: this.islemGorenArabuluculuk.uyusmazlikTuru as any, basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', taraflar: t, muvekkilId: this.islemGorenArabuluculuk.muvekkilId, buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', toplantiTarihi: this.islemGorenArabuluculuk.toplantiTarihi, toplantiSaati: this.islemGorenArabuluculuk.toplantiSaati || '', toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '', toplantiYontemi: this.islemGorenArabuluculuk.toplantiYontemi, durum: this.islemGorenArabuluculuk.durum as any, arsivYeri: this.islemGorenArabuluculuk.arsivYeri || '', vekaletUcreti: this.islemGorenArabuluculuk.vekaletUcreti || 0, hizmetUcretiStopajli: !!this.islemGorenArabuluculuk.hizmetUcretiStopajli, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
       y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'Arabuluculuk dosyası açıldı', `${y.arabuluculukNo} referansıyla yeni arabuluculuk kaydı oluşturuldu.`);
       if (y.toplantiTarihi) {
         y = this.dosyayaTakvimKaydiEkle(y, 'Toplantı', 'Planlandı', y.toplantiTarihi, y.toplantiSaati, 'İlk toplantı planı kaydedildi.');
@@ -2510,7 +2517,7 @@ export class AppComponent implements OnInit {
     } else {
       const mevcut = this.arabuluculukDosyalar.find(x => x.id === this.islemGorenArabuluculuk.id);
       const toplantiDegisti = (mevcut?.toplantiTarihi || '') !== (this.islemGorenArabuluculuk.toplantiTarihi || '') || (mevcut?.toplantiSaati || '') !== (this.islemGorenArabuluculuk.toplantiSaati || '');
-      let g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', taraflar: t } as ArabuluculukDosyasi;
+      let g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', hizmetUcretiStopajli: !!this.islemGorenArabuluculuk.hizmetUcretiStopajli, taraflar: t } as ArabuluculukDosyasi;
       if (toplantiDegisti) { g.toplantiTamamlandiMi = false; g.toplantiTamamlanmaTarihi = ''; }
       g = this.dosyayaIslemKaydiEkle(g, 'dosya', 'Arabuluculuk dosyası güncellendi', this.arabuluculukGuncellemeOzeti(mevcut, g));
       if (toplantiDegisti) {
@@ -2871,22 +2878,42 @@ export class AppComponent implements OnInit {
     return this.muvekkiller.find(muvekkil => muvekkil.id === dosya.muvekkilId);
   }
   getArabuluculukMakbuzTipOnerisi(dosya?: ArabuluculukDosyasi | null) {
+    if (typeof dosya?.hizmetUcretiStopajli === 'boolean') return dosya.hizmetUcretiStopajli ? 'sirket' : 'sahis';
     const muhatap = this.getArabuluculukMakbuzMuhatapKaydi(dosya);
     return muhatap?.tip === 'Şirketler' ? 'sirket' : 'sahis';
   }
   getArabuluculukMakbuzTipEtiketi(tip: 'sirket' | 'sahis') {
     return tip === 'sirket' ? 'Şirket / Stopajlı' : 'Şahıs / Stopajsız';
   }
-  isArabuluculukMakbuzStopajli(islem?: Partial<FinansalIslem>) {
+  isArabuluculukMakbuzStopajli(islem?: Partial<FinansalIslem>, dosya?: Partial<ArabuluculukDosyasi> | null) {
     if (typeof islem?.makbuzStopajli === 'boolean') return islem.makbuzStopajli;
-    return this.getArabuluculukMakbuzTipOnerisi(this.getAktifArabuluculukDosyasi()) === 'sirket';
+    return this.getArabuluculukMakbuzTipOnerisi((dosya as ArabuluculukDosyasi | null) || this.getAktifArabuluculukDosyasi()) === 'sirket';
   }
-  getArabuluculukMakbuzHesabi(islem?: Partial<FinansalIslem>) {
+  getArabuluculukMakbuzHesabi(islem?: Partial<FinansalIslem>, dosya?: Partial<ArabuluculukDosyasi> | null) {
     const kdvDahilBrutTutar = Number(islem?.tutar || 0);
     if (!kdvDahilBrutTutar) return null;
     const brutTutar = kdvDahilBrutTutar / 1.2;
     const kdvTutari = kdvDahilBrutTutar - brutTutar;
-    const stopajli = this.isArabuluculukMakbuzStopajli(islem);
+    const stopajli = this.isArabuluculukMakbuzStopajli(islem, dosya);
+    const stopajTutari = stopajli ? brutTutar * 0.2 : 0;
+    const netTutar = kdvDahilBrutTutar - stopajTutari;
+    return {
+      stopajli,
+      brutTutar,
+      kdvTutari,
+      kdvDahilBrutTutar,
+      stopajTutari,
+      netTutar
+    };
+  }
+  getArabuluculukHizmetUcretiHesabi(dosya?: Partial<ArabuluculukDosyasi> | null) {
+    const kdvDahilBrutTutar = Number(dosya?.vekaletUcreti || 0);
+    if (!kdvDahilBrutTutar) return null;
+    const brutTutar = kdvDahilBrutTutar / 1.2;
+    const kdvTutari = kdvDahilBrutTutar - brutTutar;
+    const stopajli = typeof dosya?.hizmetUcretiStopajli === 'boolean'
+      ? !!dosya.hizmetUcretiStopajli
+      : this.getArabuluculukMakbuzTipOnerisi((dosya as ArabuluculukDosyasi | null) || null) === 'sirket';
     const stopajTutari = stopajli ? brutTutar * 0.2 : 0;
     const netTutar = kdvDahilBrutTutar - stopajTutari;
     return {
@@ -2923,7 +2950,7 @@ export class AppComponent implements OnInit {
   }
   ornekArabuluculukMakbuzuGoster(islem?: Partial<FinansalIslem>) {
     const dosya = this.getAktifArabuluculukDosyasi();
-    const hesap = this.getArabuluculukMakbuzHesabi(islem);
+    const hesap = this.getArabuluculukMakbuzHesabi(islem, dosya);
     if (!dosya || !hesap) {
       this.bildirimGoster('info', 'Örnek makbuz hazırlanamadı', 'Önce arabuluculuk tutarını girmeniz gerekiyor.');
       return;
@@ -3591,15 +3618,18 @@ export class AppComponent implements OnInit {
     let v = 0, g = 0, c = 0, t = 0;
     (dosya.finansalIslemler || []).forEach((i:any) => { 
       if (isArabuluculuk) {
-        if (i.tur === 'Ödeme' || i.tur === 'Ödeme Tarihi') { v += i.tutar; t += i.tutar; }
-        else if (i.tur === 'Vekalet Ücreti') { v += (i.tutar / 1.2); t += (i.tutar / 1.2); }
+        if (i.tur === 'Ödeme' || i.tur === 'Ödeme Tarihi' || i.tur === 'Vekalet Ücreti') {
+          const hesap = this.getArabuluculukMakbuzHesabi(i, dosya);
+          v += hesap?.netTutar || 0;
+          t += hesap?.netTutar || 0;
+        }
       } else {
         if (i.tur === 'Vekalet Ücreti') { v += i.tutar; t += i.tutar; } 
         if (i.tur === 'Masraf Avansı (Giriş)') g += i.tutar; 
         if (i.tur === 'Masraf Harcaması (Çıkış)') c += i.tutar; 
       }
     });
-    let anaUcret = dosya.vekaletUcreti || 0; if (isArabuluculuk) anaUcret = anaUcret / 1.2;
+    let anaUcret = dosya.vekaletUcreti || 0; if (isArabuluculuk) anaUcret = this.getArabuluculukHizmetUcretiHesabi(dosya)?.netTutar || 0;
     return { kalanVekalet: Math.max(0, anaUcret - v), emanetBakiye: g - c, toplamTahsilat: t };
   }
 
