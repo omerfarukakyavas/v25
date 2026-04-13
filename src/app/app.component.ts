@@ -2859,6 +2859,17 @@ export class AppComponent implements OnInit {
   ornekArabuluculukMakbuzuGosterilebilirMi(islem?: Partial<FinansalIslem>) {
     return this.aktifSayfa === 'arabuluculukDetay' && Number(islem?.tutar || 0) > 0;
   }
+  getArabuluculukMakbuzMuhatapKaydi(dosya?: ArabuluculukDosyasi | null) {
+    if (!dosya?.muvekkilId) return undefined;
+    return this.muvekkiller.find(muvekkil => muvekkil.id === dosya.muvekkilId);
+  }
+  getArabuluculukMakbuzTipOnerisi(dosya?: ArabuluculukDosyasi | null) {
+    const muhatap = this.getArabuluculukMakbuzMuhatapKaydi(dosya);
+    return muhatap?.tip === 'Şirketler' ? 'sirket' : 'sahis';
+  }
+  getArabuluculukMakbuzTipEtiketi(tip: 'sirket' | 'sahis') {
+    return tip === 'sirket' ? 'Şirket / Stopajlı' : 'Şahıs / Stopajsız';
+  }
   getFinansalIslemOzetMetni(islem?: Partial<FinansalIslem>) {
     if (!islem) return 'Finans kaydı';
     const parcalar = [
@@ -2877,19 +2888,23 @@ export class AppComponent implements OnInit {
     this.duzenlenenFinansalIslemId = null;
     this.duzenlenenFinansalIslem = {};
   }
-  ornekArabuluculukMakbuzuGoster(islem?: Partial<FinansalIslem>) {
+  ornekArabuluculukMakbuzuGoster(islem?: Partial<FinansalIslem>, tip: 'sirket' | 'sahis' = 'sirket') {
     const dosya = this.getAktifArabuluculukDosyasi();
-    const brutTutar = Number(islem?.tutar || 0);
-    if (!dosya || !brutTutar) {
+    const toplamTutar = Number(islem?.tutar || 0);
+    if (!dosya || !toplamTutar) {
       this.bildirimGoster('info', 'Örnek makbuz hazırlanamadı', 'Önce arabuluculuk tutarını girmeniz gerekiyor.');
       return;
     }
     if (typeof window === 'undefined') return;
 
-    const netTutar = brutTutar / 1.2;
-    const kdvTutari = brutTutar - netTutar;
+    const hizmetBedeli = toplamTutar / 1.2;
+    const kdvTutari = toplamTutar - hizmetBedeli;
+    const stopajTutari = tip === 'sirket' ? hizmetBedeli * 0.2 : 0;
+    const netTahsilat = toplamTutar - stopajTutari;
     const tarih = this.formatTarih(islem?.tarih || new Date().toISOString().split('T')[0]);
-    const muhatap = this.getArabuluculukMuvekkilAdi(dosya) || 'Belirtilmedi';
+    const muhatapKaydi = this.getArabuluculukMakbuzMuhatapKaydi(dosya);
+    const muhatap = muhatapKaydi?.adSoyad || this.getArabuluculukMuvekkilAdi(dosya) || 'Belirtilmedi';
+    const muhatapTipi = this.getArabuluculukMakbuzTipEtiketi(tip);
     const basvurucu = this.getArabuluculukTaraflari(dosya, 'Başvurucu') || '-';
     const digerTaraf = this.getArabuluculukTaraflari(dosya, 'Diğer Taraf') || '-';
     const islemTuru = islem?.tur || 'Ödeme';
@@ -2954,12 +2969,15 @@ export class AppComponent implements OnInit {
         <div class="grid">
           <div class="card"><div class="label">Düzenleme Tarihi</div><div class="value">${this.htmlKacis(tarih)}</div></div>
           <div class="card"><div class="label">İşlem Türü</div><div class="value">${this.htmlKacis(islemTuru)}</div></div>
+          <div class="card"><div class="label">Makbuz Senaryosu</div><div class="value">${this.htmlKacis(muhatapTipi)}</div></div>
           <div class="card"><div class="label">Arabuluculuk Referansı</div><div class="value">${this.htmlKacis(`${dosya.buroNo || '-'} / ${dosya.arabuluculukNo || '-'}`)}</div></div>
           <div class="card"><div class="label">Uyuşmazlık Türü</div><div class="value">${this.htmlKacis(dosya.uyusmazlikTuru || '-')}</div></div>
           <div class="card"><div class="label">Tahsilat Muhatabı</div><div class="value">${this.htmlKacis(muhatap)}</div></div>
           <div class="card"><div class="label">Büro</div><div class="value">${this.htmlKacis(dosya.buro || '-')}</div></div>
           <div class="card"><div class="label">Başvurucu</div><div class="value">${this.htmlKacis(basvurucu)}</div></div>
           <div class="card"><div class="label">Diğer Taraf</div><div class="value">${this.htmlKacis(digerTaraf)}</div></div>
+          <div class="card"><div class="label">Muhatap Vergi / TC No</div><div class="value">${this.htmlKacis(muhatapKaydi?.tcKimlik || '-')}</div></div>
+          <div class="card"><div class="label">Muhatap Vergi Dairesi</div><div class="value">${this.htmlKacis(muhatapKaydi?.vergiDairesi || '-')}</div></div>
         </div>
       </div>
       <div class="section">
@@ -2970,11 +2988,21 @@ export class AppComponent implements OnInit {
             <tr><th>Kalem</th><th>Tutar</th></tr>
           </thead>
           <tbody>
-            <tr><td>Net Hizmet Bedeli</td><td class="amount">${this.htmlKacis(this.formatPara(netTutar))}</td></tr>
+            <tr><td>Hizmet Bedeli (KDV Hariç)</td><td class="amount">${this.htmlKacis(this.formatPara(hizmetBedeli))}</td></tr>
             <tr><td>KDV (%20)</td><td class="amount">${this.htmlKacis(this.formatPara(kdvTutari))}</td></tr>
-            <tr><td>Brüt Tahsilat</td><td class="amount">${this.htmlKacis(this.formatPara(brutTutar))}</td></tr>
+            ${tip === 'sirket' ? `<tr><td>Stopaj (%20)</td><td class="amount">${this.htmlKacis(this.formatPara(stopajTutari))}</td></tr>` : ''}
+            <tr><td>KDV Dahil Toplam</td><td class="amount">${this.htmlKacis(this.formatPara(toplamTutar))}</td></tr>
+            <tr><td>${this.htmlKacis(tip === 'sirket' ? 'Net Tahsil Edilecek' : 'Tahsil Edilecek Toplam')}</td><td class="amount">${this.htmlKacis(this.formatPara(netTahsilat))}</td></tr>
           </tbody>
         </table>
+        <div class="card" style="margin-top:16px; background:#ffffff;">
+          <div class="label">Hesap Notu</div>
+          <div class="value" style="font-size:13px; font-weight:600;">
+            ${this.htmlKacis(tip === 'sirket'
+              ? 'Bu önizlemede girilen tutar KDV dahil toplam kabul edilir. Stopaj %20 olarak ayrıca gösterilir ve net tahsilat toplam tutardan stopaj düşülerek hesaplanır.'
+              : 'Bu önizlemede girilen tutar KDV dahil toplam kabul edilir. Şahıs tahsilatında stopaj düşülmez, toplam tahsilat doğrudan tahsil edilecek tutar olarak gösterilir.')}
+          </div>
+        </div>
       </div>
       <div class="footer">
         <div class="sign">
