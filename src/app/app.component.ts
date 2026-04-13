@@ -2885,6 +2885,9 @@ export class AppComponent implements OnInit {
   getArabuluculukMakbuzTipEtiketi(tip: 'sirket' | 'sahis') {
     return tip === 'sirket' ? 'Şirket / Stopajlı' : 'Şahıs / Stopajsız';
   }
+  hasArabuluculukMakbuzModuSecimi(islem?: Partial<FinansalIslem>, dosya?: Partial<ArabuluculukDosyasi> | null) {
+    return typeof islem?.makbuzStopajli === 'boolean' || typeof dosya?.hizmetUcretiStopajli === 'boolean';
+  }
   isArabuluculukMakbuzStopajli(islem?: Partial<FinansalIslem>, dosya?: Partial<ArabuluculukDosyasi> | null) {
     if (typeof islem?.makbuzStopajli === 'boolean') return islem.makbuzStopajli;
     return this.getArabuluculukMakbuzTipOnerisi((dosya as ArabuluculukDosyasi | null) || this.getAktifArabuluculukDosyasi()) === 'sirket';
@@ -2892,6 +2895,18 @@ export class AppComponent implements OnInit {
   getArabuluculukMakbuzHesabi(islem?: Partial<FinansalIslem>, dosya?: Partial<ArabuluculukDosyasi> | null) {
     const kdvDahilBrutTutar = Number(islem?.tutar || 0);
     if (!kdvDahilBrutTutar) return null;
+    if (!this.hasArabuluculukMakbuzModuSecimi(islem, dosya)) {
+      const legacyNetTutar = (islem?.tur === 'Vekalet Ücreti') ? (kdvDahilBrutTutar / 1.2) : kdvDahilBrutTutar;
+      return {
+        stopajli: false,
+        legacyMi: true,
+        brutTutar: legacyNetTutar,
+        kdvTutari: Math.max(0, kdvDahilBrutTutar - legacyNetTutar),
+        kdvDahilBrutTutar,
+        stopajTutari: 0,
+        netTutar: legacyNetTutar
+      };
+    }
     const brutTutar = kdvDahilBrutTutar / 1.2;
     const kdvTutari = kdvDahilBrutTutar - brutTutar;
     const stopajli = this.isArabuluculukMakbuzStopajli(islem, dosya);
@@ -2899,6 +2914,7 @@ export class AppComponent implements OnInit {
     const netTutar = kdvDahilBrutTutar - stopajTutari;
     return {
       stopajli,
+      legacyMi: false,
       brutTutar,
       kdvTutari,
       kdvDahilBrutTutar,
@@ -2909,6 +2925,18 @@ export class AppComponent implements OnInit {
   getArabuluculukHizmetUcretiHesabi(dosya?: Partial<ArabuluculukDosyasi> | null) {
     const kdvDahilBrutTutar = Number(dosya?.vekaletUcreti || 0);
     if (!kdvDahilBrutTutar) return null;
+    if (typeof dosya?.hizmetUcretiStopajli !== 'boolean') {
+      const legacyNetTutar = kdvDahilBrutTutar / 1.2;
+      return {
+        stopajli: false,
+        legacyMi: true,
+        brutTutar: legacyNetTutar,
+        kdvTutari: Math.max(0, kdvDahilBrutTutar - legacyNetTutar),
+        kdvDahilBrutTutar,
+        stopajTutari: 0,
+        netTutar: legacyNetTutar
+      };
+    }
     const brutTutar = kdvDahilBrutTutar / 1.2;
     const kdvTutari = kdvDahilBrutTutar - brutTutar;
     const stopajli = typeof dosya?.hizmetUcretiStopajli === 'boolean'
@@ -2918,6 +2946,7 @@ export class AppComponent implements OnInit {
     const netTutar = kdvDahilBrutTutar - stopajTutari;
     return {
       stopajli,
+      legacyMi: false,
       brutTutar,
       kdvTutari,
       kdvDahilBrutTutar,
