@@ -2854,7 +2854,14 @@ export class AppComponent implements OnInit {
     ];
   }
   finansalIslemFormunuSifirla(tur = this.getFinansalIslemTurSecenekleri()[0]?.value || 'Vekalet Ücreti') {
-    this.yeniIslem = { tur, tarih: new Date().toISOString().split('T')[0], tutar: undefined, aciklama: '', makbuzUrl: '' };
+    this.yeniIslem = {
+      tur,
+      tarih: new Date().toISOString().split('T')[0],
+      tutar: undefined,
+      aciklama: '',
+      makbuzUrl: '',
+      makbuzStopajli: this.getArabuluculukMakbuzTipOnerisi(this.getAktifArabuluculukDosyasi()) === 'sirket'
+    };
   }
   ornekArabuluculukMakbuzuGosterilebilirMi(islem?: Partial<FinansalIslem>) {
     return this.aktifSayfa === 'arabuluculukDetay' && Number(islem?.tutar || 0) > 0;
@@ -2870,6 +2877,27 @@ export class AppComponent implements OnInit {
   getArabuluculukMakbuzTipEtiketi(tip: 'sirket' | 'sahis') {
     return tip === 'sirket' ? 'Şirket / Stopajlı' : 'Şahıs / Stopajsız';
   }
+  isArabuluculukMakbuzStopajli(islem?: Partial<FinansalIslem>) {
+    if (typeof islem?.makbuzStopajli === 'boolean') return islem.makbuzStopajli;
+    return this.getArabuluculukMakbuzTipOnerisi(this.getAktifArabuluculukDosyasi()) === 'sirket';
+  }
+  getArabuluculukMakbuzHesabi(islem?: Partial<FinansalIslem>) {
+    const kdvDahilBrutTutar = Number(islem?.tutar || 0);
+    if (!kdvDahilBrutTutar) return null;
+    const brutTutar = kdvDahilBrutTutar / 1.2;
+    const kdvTutari = kdvDahilBrutTutar - brutTutar;
+    const stopajli = this.isArabuluculukMakbuzStopajli(islem);
+    const stopajTutari = stopajli ? brutTutar * 0.2 : 0;
+    const netTutar = kdvDahilBrutTutar - stopajTutari;
+    return {
+      stopajli,
+      brutTutar,
+      kdvTutari,
+      kdvDahilBrutTutar,
+      stopajTutari,
+      netTutar
+    };
+  }
   getFinansalIslemOzetMetni(islem?: Partial<FinansalIslem>) {
     if (!islem) return 'Finans kaydı';
     const parcalar = [
@@ -2878,33 +2906,35 @@ export class AppComponent implements OnInit {
     ];
     if (islem.aciklama) parcalar.push(islem.aciklama);
     if (islem.makbuzUrl) parcalar.push('Makbuz linki eklendi');
+    if (typeof islem.makbuzStopajli === 'boolean') parcalar.push(islem.makbuzStopajli ? 'Stopajlı makbuz' : 'Stopajsız makbuz');
     return parcalar.join(' * ');
   }
   finansalIslemDuzenlemeBaslat(islem: FinansalIslem) {
     this.duzenlenenFinansalIslemId = islem.id;
-    this.duzenlenenFinansalIslem = { ...islem, makbuzUrl: islem.makbuzUrl || '' };
+    this.duzenlenenFinansalIslem = {
+      ...islem,
+      makbuzUrl: islem.makbuzUrl || '',
+      makbuzStopajli: typeof islem.makbuzStopajli === 'boolean' ? islem.makbuzStopajli : this.getArabuluculukMakbuzTipOnerisi(this.getAktifArabuluculukDosyasi()) === 'sirket'
+    };
   }
   finansalIslemDuzenlemeIptal() {
     this.duzenlenenFinansalIslemId = null;
     this.duzenlenenFinansalIslem = {};
   }
-  ornekArabuluculukMakbuzuGoster(islem?: Partial<FinansalIslem>, tip: 'sirket' | 'sahis' = 'sirket') {
+  ornekArabuluculukMakbuzuGoster(islem?: Partial<FinansalIslem>) {
     const dosya = this.getAktifArabuluculukDosyasi();
-    const toplamTutar = Number(islem?.tutar || 0);
-    if (!dosya || !toplamTutar) {
+    const hesap = this.getArabuluculukMakbuzHesabi(islem);
+    if (!dosya || !hesap) {
       this.bildirimGoster('info', 'Örnek makbuz hazırlanamadı', 'Önce arabuluculuk tutarını girmeniz gerekiyor.');
       return;
     }
     if (typeof window === 'undefined') return;
 
-    const hizmetBedeli = toplamTutar / 1.2;
-    const kdvTutari = toplamTutar - hizmetBedeli;
-    const stopajTutari = tip === 'sirket' ? hizmetBedeli * 0.2 : 0;
-    const netTahsilat = toplamTutar - stopajTutari;
+    const { brutTutar, kdvTutari, kdvDahilBrutTutar, stopajTutari, netTutar, stopajli } = hesap;
     const tarih = this.formatTarih(islem?.tarih || new Date().toISOString().split('T')[0]);
     const muhatapKaydi = this.getArabuluculukMakbuzMuhatapKaydi(dosya);
     const muhatap = muhatapKaydi?.adSoyad || this.getArabuluculukMuvekkilAdi(dosya) || 'Belirtilmedi';
-    const muhatapTipi = this.getArabuluculukMakbuzTipEtiketi(tip);
+    const muhatapTipi = stopajli ? 'Stopajlı Makbuz' : 'Stopajsız Makbuz';
     const basvurucu = this.getArabuluculukTaraflari(dosya, 'Başvurucu') || '-';
     const digerTaraf = this.getArabuluculukTaraflari(dosya, 'Diğer Taraf') || '-';
     const islemTuru = islem?.tur || 'Ödeme';
@@ -2988,19 +3018,19 @@ export class AppComponent implements OnInit {
             <tr><th>Kalem</th><th>Tutar</th></tr>
           </thead>
           <tbody>
-            <tr><td>Hizmet Bedeli (KDV Hariç)</td><td class="amount">${this.htmlKacis(this.formatPara(hizmetBedeli))}</td></tr>
+            <tr><td>Brüt Tutar</td><td class="amount">${this.htmlKacis(this.formatPara(brutTutar))}</td></tr>
             <tr><td>KDV (%20)</td><td class="amount">${this.htmlKacis(this.formatPara(kdvTutari))}</td></tr>
-            ${tip === 'sirket' ? `<tr><td>Stopaj (%20)</td><td class="amount">${this.htmlKacis(this.formatPara(stopajTutari))}</td></tr>` : ''}
-            <tr><td>KDV Dahil Toplam</td><td class="amount">${this.htmlKacis(this.formatPara(toplamTutar))}</td></tr>
-            <tr><td>${this.htmlKacis(tip === 'sirket' ? 'Net Tahsil Edilecek' : 'Tahsil Edilecek Toplam')}</td><td class="amount">${this.htmlKacis(this.formatPara(netTahsilat))}</td></tr>
+            <tr><td>KDV Dahil Brüt Tutar</td><td class="amount">${this.htmlKacis(this.formatPara(kdvDahilBrutTutar))}</td></tr>
+            <tr><td>Stopaj (%20)</td><td class="amount">${this.htmlKacis(this.formatPara(stopajTutari))}</td></tr>
+            <tr><td><strong>Net Tutar</strong></td><td class="amount" style="font-size:18px; font-weight:900;">${this.htmlKacis(this.formatPara(netTutar))}</td></tr>
           </tbody>
         </table>
         <div class="card" style="margin-top:16px; background:#ffffff;">
           <div class="label">Hesap Notu</div>
           <div class="value" style="font-size:13px; font-weight:600;">
-            ${this.htmlKacis(tip === 'sirket'
-              ? 'Bu önizlemede girilen tutar KDV dahil toplam kabul edilir. Stopaj %20 olarak ayrıca gösterilir ve net tahsilat toplam tutardan stopaj düşülerek hesaplanır.'
-              : 'Bu önizlemede girilen tutar KDV dahil toplam kabul edilir. Şahıs tahsilatında stopaj düşülmez, toplam tahsilat doğrudan tahsil edilecek tutar olarak gösterilir.')}
+            ${this.htmlKacis(stopajli
+              ? 'Bu önizlemede girilen tutar KDV dahil toplam kabul edilir. Stopaj %20 olarak ayrıca gösterilir ve net tutar toplamdan stopaj düşülerek hesaplanır.'
+              : 'Bu önizlemede girilen tutar KDV dahil toplam kabul edilir. Stopaj uygulanmadığı için net tutar ile KDV dahil brüt tutar aynı kalır.')}
           </div>
         </div>
       </div>
@@ -3039,7 +3069,8 @@ export class AppComponent implements OnInit {
       tur: this.duzenlenenFinansalIslem.tur || this.getFinansalIslemTurSecenekleri()[0]?.value || 'Vekalet Ücreti',
       tutar,
       aciklama: this.formatMetin(aciklama),
-      makbuzUrl: this.hazirBaglantiUrl(this.duzenlenenFinansalIslem.makbuzUrl)
+      makbuzUrl: this.hazirBaglantiUrl(this.duzenlenenFinansalIslem.makbuzUrl),
+      makbuzStopajli: this.isArabuluculukMakbuzStopajli(this.duzenlenenFinansalIslem)
     };
     k.finansalIslemler[index] = guncellenenIslem;
 
@@ -3052,9 +3083,10 @@ export class AppComponent implements OnInit {
     if (!this.yeniIslem.tutar || !this.yeniIslem.aciklama || !this.aktifDosya) return;
     this.yeniIslem.aciklama = this.formatMetin(this.yeniIslem.aciklama);
     const makbuzUrl = this.hazirBaglantiUrl(this.yeniIslem.makbuzUrl);
+    const makbuzStopajli = this.isArabuluculukMakbuzStopajli(this.yeniIslem);
     const k: any = {...this.aktifDosya}; if (!k.finansalIslemler) k.finansalIslemler = [];
-    k.finansalIslemler.unshift({ id: Date.now(), tarih: this.yeniIslem.tarih || new Date().toISOString().split('T')[0], tur: this.yeniIslem.tur as any, tutar: this.yeniIslem.tutar, aciklama: this.yeniIslem.aciklama || '', makbuzUrl });
-    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi eklendi', `${this.yeniIslem.tur}: ${this.formatPara(this.yeniIslem.tutar || 0)} * ${this.yeniIslem.aciklama || ''}${makbuzUrl ? ' * Makbuz linki eklendi' : ''}`);
+    k.finansalIslemler.unshift({ id: Date.now(), tarih: this.yeniIslem.tarih || new Date().toISOString().split('T')[0], tur: this.yeniIslem.tur as any, tutar: this.yeniIslem.tutar, aciklama: this.yeniIslem.aciklama || '', makbuzUrl, makbuzStopajli });
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Finans hareketi eklendi', `${this.yeniIslem.tur}: ${this.formatPara(this.yeniIslem.tutar || 0)} * ${this.yeniIslem.aciklama || ''}${makbuzUrl ? ' * Makbuz linki eklendi' : ''}${makbuzStopajli ? ' * Stopajlı makbuz' : ' * Stopajsız makbuz'}`);
     this.finansalIslemDuzenlemeIptal();
     this.aktifDosyaKaydet(kayitli, 'Finans hareketi dosyaya eklendi.');
     this.finansalIslemFormunuSifirla(this.yeniIslem.tur as string);

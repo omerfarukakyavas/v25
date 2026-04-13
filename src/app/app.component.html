@@ -2719,7 +2719,7 @@
                                    <div><label class="block text-[10px] font-bold text-slate-500 mb-0.5">Tarih</label><input [(ngModel)]="yeniIslem.tarih" type="date" class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none"></div>
                                  </div>
                                  <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
-                                    <div class="w-full sm:w-1/3"><label class="block text-[10px] font-bold text-slate-500 mb-0.5">{{ aktifSayfa === 'arabuluculukDetay' ? 'Brüt Tutar (â‚º)' : 'Tutar (â‚º)' }}</label><input [(ngModel)]="yeniIslem.tutar" type="number" min="0" placeholder="0.00" class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none"></div>
+                                    <div class="w-full sm:w-1/3"><label class="block text-[10px] font-bold text-slate-500 mb-0.5">{{ aktifSayfa === 'arabuluculukDetay' ? 'KDV Dahil Brüt Tutar (₺)' : 'Tutar (₺)' }}</label><input [(ngModel)]="yeniIslem.tutar" type="number" min="0" placeholder="0.00" class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none"></div>
                                     <div class="flex-1"><label class="block text-[10px] font-bold text-slate-500 mb-0.5">Açıklama</label><input [(ngModel)]="yeniIslem.aciklama" (keyup.enter)="finansalIslemEkle()" type="text" placeholder="Örn: Bilirkişi ücreti..." class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none"></div>
                                     <button (click)="finansalIslemEkle()" class="w-full rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-800 sm:w-auto sm:py-1.5">Ekle</button>
                                  </div>
@@ -2728,32 +2728,39 @@
                                    <input [(ngModel)]="yeniIslem.makbuzUrl" (keyup.enter)="finansalIslemEkle()" type="text" placeholder="Örn: drive.google.com/... veya docs.google.com/..." class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none">
                                  </div>
                                  @if (aktifSayfa === 'arabuluculukDetay') {
-                                   <div class="flex flex-col gap-2 rounded-xl border border-violet-200 bg-violet-50/80 px-3 py-2.5">
-                                     <p class="text-[11px] font-semibold text-violet-700">
-                                       Girilen tutar KDV dahil toplam kabul edilir. Muhataba göre şirket / stopajlı veya şahıs / stopajsız örneği açabilirsiniz.
-                                       <span class="ml-1 font-black">Önerilen: {{ getArabuluculukMakbuzTipEtiketi(getArabuluculukMakbuzTipOnerisi(getAktifArabuluculukDosyasi())) }}</span>
-                                     </p>
-                                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                                       <button
-                                         type="button"
-                                         (click)="ornekArabuluculukMakbuzuGoster(yeniIslem, 'sirket')"
-                                         [disabled]="!ornekArabuluculukMakbuzuGosterilebilirMi(yeniIslem)"
-                                         class="inline-flex items-center gap-2 rounded-lg border border-violet-300 bg-white px-3 py-2 text-xs font-black text-violet-700 shadow-sm transition-colors hover:bg-violet-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">
-                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 9V4h12v5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18h12v2H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 14h12v4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"></path></svg>
-                                         Şirket Makbuzu
-                                       </button>
-                                       <button
-                                         type="button"
-                                         (click)="ornekArabuluculukMakbuzuGoster(yeniIslem, 'sahis')"
-                                         [disabled]="!ornekArabuluculukMakbuzuGosterilebilirMi(yeniIslem)"
-                                         class="inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-black text-emerald-700 shadow-sm transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">
-                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 9V4h12v5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18h12v2H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 14h12v4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"></path></svg>
-                                         Şahıs Makbuzu
-                                       </button>
-                                       @if (!ornekArabuluculukMakbuzuGosterilebilirMi(yeniIslem)) {
-                                         <span class="text-[11px] font-medium text-slate-500">Önce tutar girin.</span>
-                                       }
-                                     </div>
+                                    <div class="flex flex-col gap-2 rounded-xl border border-violet-200 bg-violet-50/80 px-3 py-2.5">
+                                      <div class="flex flex-wrap items-center justify-between gap-2">
+                                        <p class="text-[11px] font-semibold text-violet-700">
+                                          Stopaj tercihini seçip hesabı tek ekranda görebilirsin.
+                                          <span class="ml-1 font-black">Önerilen: {{ getArabuluculukMakbuzTipEtiketi(getArabuluculukMakbuzTipOnerisi(getAktifArabuluculukDosyasi())) }}</span>
+                                        </p>
+                                        <div class="inline-flex rounded-xl border border-violet-200 bg-white p-1 shadow-sm">
+                                          <button type="button" (click)="yeniIslem.makbuzStopajli = false" [class]="!isArabuluculukMakbuzStopajli(yeniIslem) ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'" class="rounded-lg px-3 py-1.5 text-[11px] font-black transition-colors">Stopajsız</button>
+                                          <button type="button" (click)="yeniIslem.makbuzStopajli = true" [class]="isArabuluculukMakbuzStopajli(yeniIslem) ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'" class="rounded-lg px-3 py-1.5 text-[11px] font-black transition-colors">Stopajlı</button>
+                                        </div>
+                                      </div>
+                                      @if (getArabuluculukMakbuzHesabi(yeniIslem); as hesap) {
+                                        <div class="overflow-hidden rounded-xl border border-violet-200 bg-white">
+                                          <table class="min-w-full divide-y divide-violet-100 text-sm">
+                                            <tbody class="divide-y divide-violet-100">
+                                              <tr><td class="px-3 py-2 font-semibold text-slate-600">Brüt Tutar</td><td class="px-3 py-2 text-right font-bold text-slate-800">{{ formatPara(hesap.brutTutar) }}</td></tr>
+                                              <tr><td class="px-3 py-2 font-semibold text-slate-600">KDV</td><td class="px-3 py-2 text-right font-bold text-slate-800">{{ formatPara(hesap.kdvTutari) }}</td></tr>
+                                              <tr><td class="px-3 py-2 font-semibold text-slate-600">KDV Dahil Brüt Tutar</td><td class="px-3 py-2 text-right font-bold text-slate-800">{{ formatPara(hesap.kdvDahilBrutTutar) }}</td></tr>
+                                              <tr><td class="px-3 py-2 font-semibold text-slate-600">Stopaj</td><td class="px-3 py-2 text-right font-bold" [class]="hesap.stopajli ? 'text-violet-700' : 'text-slate-400'">{{ formatPara(hesap.stopajTutari) }}</td></tr>
+                                              <tr class="bg-violet-50/70"><td class="px-3 py-3 text-sm font-black uppercase tracking-[0.12em] text-violet-800">Net Tutar</td><td class="px-3 py-3 text-right text-2xl font-black text-violet-900">{{ formatPara(hesap.netTutar) }}</td></tr>
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                        <button
+                                          type="button"
+                                          (click)="ornekArabuluculukMakbuzuGoster(yeniIslem)"
+                                          class="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-violet-300 bg-white px-3 py-2 text-xs font-black text-violet-700 shadow-sm transition-colors hover:bg-violet-100">
+                                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 9V4h12v5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18h12v2H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 14h12v4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"></path></svg>
+                                          Örnek Makbuzu Göster
+                                        </button>
+                                      } @else {
+                                        <span class="text-[11px] font-medium text-slate-500">Önce tutar girin.</span>
+                                      }
                                    </div>
                                  }
                                </div>
@@ -2800,7 +2807,7 @@
                                           </div>
                                           <div class="grid grid-cols-1 gap-2 sm:grid-cols-[140px_minmax(0,1fr)]">
                                             <div>
-                                              <label class="mb-0.5 block text-[10px] font-bold text-slate-500">{{ aktifSayfa === 'arabuluculukDetay' ? 'Brüt Tutar (â‚º)' : 'Tutar (â‚º)' }}</label>
+                                              <label class="mb-0.5 block text-[10px] font-bold text-slate-500">{{ aktifSayfa === 'arabuluculukDetay' ? 'KDV Dahil Brüt Tutar (₺)' : 'Tutar (₺)' }}</label>
                                               <input [(ngModel)]="duzenlenenFinansalIslem.tutar" type="number" min="0" class="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none">
                                             </div>
                                             <div>
@@ -2813,29 +2820,38 @@
                                             <input [(ngModel)]="duzenlenenFinansalIslem.makbuzUrl" (keyup.enter)="finansalIslemGuncelle()" type="text" class="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none">
                                           </div>
                                           @if (aktifSayfa === 'arabuluculukDetay') {
-                                            <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-violet-200 bg-violet-50/80 px-3 py-2.5">
-                                              <p class="text-[11px] font-semibold text-violet-700">
-                                                Bu kaydı iki ayrı senaryoda önizleyebilirsiniz.
-                                                <span class="ml-1 font-black">Önerilen: {{ getArabuluculukMakbuzTipEtiketi(getArabuluculukMakbuzTipOnerisi(getAktifArabuluculukDosyasi())) }}</span>
-                                              </p>
-                                              <div class="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-2">
-                                                <button
-                                                  type="button"
-                                                  (click)="ornekArabuluculukMakbuzuGoster(duzenlenenFinansalIslem, 'sirket')"
-                                                  [disabled]="!ornekArabuluculukMakbuzuGosterilebilirMi(duzenlenenFinansalIslem)"
-                                                  class="inline-flex items-center justify-center gap-2 rounded-lg border border-violet-300 bg-white px-3 py-2 text-[11px] font-black text-violet-700 shadow-sm transition-colors hover:bg-violet-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">
-                                                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 9V4h12v5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18h12v2H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 14h12v4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"></path></svg>
-                                                  Şirket Makbuzu
-                                                </button>
-                                                <button
-                                                  type="button"
-                                                  (click)="ornekArabuluculukMakbuzuGoster(duzenlenenFinansalIslem, 'sahis')"
-                                                  [disabled]="!ornekArabuluculukMakbuzuGosterilebilirMi(duzenlenenFinansalIslem)"
-                                                  class="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-300 bg-white px-3 py-2 text-[11px] font-black text-emerald-700 shadow-sm transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">
-                                                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 9V4h12v5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18h12v2H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 14h12v4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"></path></svg>
-                                                  Şahıs Makbuzu
-                                                </button>
+                                            <div class="flex flex-col gap-2 rounded-xl border border-violet-200 bg-violet-50/80 px-3 py-2.5">
+                                              <div class="flex flex-wrap items-center justify-between gap-2">
+                                                <p class="text-[11px] font-semibold text-violet-700">
+                                                  Stopaj tercihini burada değiştirip hesabı anında görebilirsin.
+                                                  <span class="ml-1 font-black">Önerilen: {{ getArabuluculukMakbuzTipEtiketi(getArabuluculukMakbuzTipOnerisi(getAktifArabuluculukDosyasi())) }}</span>
+                                                </p>
+                                                <div class="inline-flex rounded-xl border border-violet-200 bg-white p-1 shadow-sm">
+                                                  <button type="button" (click)="duzenlenenFinansalIslem.makbuzStopajli = false" [class]="!isArabuluculukMakbuzStopajli(duzenlenenFinansalIslem) ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'" class="rounded-lg px-3 py-1.5 text-[11px] font-black transition-colors">Stopajsız</button>
+                                                  <button type="button" (click)="duzenlenenFinansalIslem.makbuzStopajli = true" [class]="isArabuluculukMakbuzStopajli(duzenlenenFinansalIslem) ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'" class="rounded-lg px-3 py-1.5 text-[11px] font-black transition-colors">Stopajlı</button>
+                                                </div>
                                               </div>
+                                              @if (getArabuluculukMakbuzHesabi(duzenlenenFinansalIslem); as hesap) {
+                                                <div class="overflow-hidden rounded-xl border border-violet-200 bg-white">
+                                                  <table class="min-w-full divide-y divide-violet-100 text-sm">
+                                                    <tbody class="divide-y divide-violet-100">
+                                                      <tr><td class="px-3 py-2 font-semibold text-slate-600">Brüt Tutar</td><td class="px-3 py-2 text-right font-bold text-slate-800">{{ formatPara(hesap.brutTutar) }}</td></tr>
+                                                      <tr><td class="px-3 py-2 font-semibold text-slate-600">KDV</td><td class="px-3 py-2 text-right font-bold text-slate-800">{{ formatPara(hesap.kdvTutari) }}</td></tr>
+                                                      <tr><td class="px-3 py-2 font-semibold text-slate-600">KDV Dahil Brüt Tutar</td><td class="px-3 py-2 text-right font-bold text-slate-800">{{ formatPara(hesap.kdvDahilBrutTutar) }}</td></tr>
+                                                      <tr><td class="px-3 py-2 font-semibold text-slate-600">Stopaj</td><td class="px-3 py-2 text-right font-bold" [class]="hesap.stopajli ? 'text-violet-700' : 'text-slate-400'">{{ formatPara(hesap.stopajTutari) }}</td></tr>
+                                                      <tr class="bg-violet-50/70"><td class="px-3 py-3 text-sm font-black uppercase tracking-[0.12em] text-violet-800">Net Tutar</td><td class="px-3 py-3 text-right text-2xl font-black text-violet-900">{{ formatPara(hesap.netTutar) }}</td></tr>
+                                                    </tbody>
+                                                  </table>
+                                                </div>
+                                              }
+                                              <button
+                                                type="button"
+                                                (click)="ornekArabuluculukMakbuzuGoster(duzenlenenFinansalIslem)"
+                                                [disabled]="!ornekArabuluculukMakbuzuGosterilebilirMi(duzenlenenFinansalIslem)"
+                                                class="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-violet-300 bg-white px-3 py-2 text-[11px] font-black text-violet-700 shadow-sm transition-colors hover:bg-violet-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">
+                                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 9V4h12v5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18h12v2H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 14h12v4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"></path></svg>
+                                                Örnek Makbuzu Göster
+                                              </button>
                                             </div>
                                           }
                                           <div class="flex flex-wrap justify-end gap-2">
@@ -2855,18 +2871,17 @@
                                             }
                                             @if (aktifSayfa === 'arabuluculukDetay') {
                                               <div class="flex flex-wrap items-center gap-3">
+                                                <span [class]="isArabuluculukMakbuzStopajli(islem) ? 'bg-violet-100 text-violet-700 border-violet-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'" class="inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em]">
+                                                  {{ isArabuluculukMakbuzStopajli(islem) ? 'Stopajlı' : 'Stopajsız' }}
+                                                </span>
+                                                @if (getArabuluculukMakbuzHesabi(islem); as hesap) {
+                                                  <span class="text-[11px] font-semibold text-slate-500">Net Tutar: <span class="font-black text-slate-800">{{ formatPara(hesap.netTutar) }}</span></span>
+                                                }
                                                 <button
                                                   type="button"
-                                                  (click)="ornekArabuluculukMakbuzuGoster(islem, 'sirket')"
+                                                  (click)="ornekArabuluculukMakbuzuGoster(islem)"
                                                   class="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-violet-700 transition-colors hover:text-violet-800 hover:underline">
-                                                  Şirket Makbuzu
-                                                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4h12v5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18h12v2H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 14h12v4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"></path></svg>
-                                                </button>
-                                                <button
-                                                  type="button"
-                                                  (click)="ornekArabuluculukMakbuzuGoster(islem, 'sahis')"
-                                                  class="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-emerald-700 transition-colors hover:text-emerald-800 hover:underline">
-                                                  Şahıs Makbuzu
+                                                  Örnek Makbuzu Göster
                                                   <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4h12v5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18h12v2H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 14h12v4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"></path></svg>
                                                 </button>
                                               </div>
