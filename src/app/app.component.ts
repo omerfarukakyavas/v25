@@ -2856,6 +2856,9 @@ export class AppComponent implements OnInit {
   finansalIslemFormunuSifirla(tur = this.getFinansalIslemTurSecenekleri()[0]?.value || 'Vekalet Ücreti') {
     this.yeniIslem = { tur, tarih: new Date().toISOString().split('T')[0], tutar: undefined, aciklama: '', makbuzUrl: '' };
   }
+  ornekArabuluculukMakbuzuGosterilebilirMi(islem?: Partial<FinansalIslem>) {
+    return this.aktifSayfa === 'arabuluculukDetay' && Number(islem?.tutar || 0) > 0;
+  }
   getFinansalIslemOzetMetni(islem?: Partial<FinansalIslem>) {
     if (!islem) return 'Finans kaydı';
     const parcalar = [
@@ -2873,6 +2876,121 @@ export class AppComponent implements OnInit {
   finansalIslemDuzenlemeIptal() {
     this.duzenlenenFinansalIslemId = null;
     this.duzenlenenFinansalIslem = {};
+  }
+  ornekArabuluculukMakbuzuGoster(islem?: Partial<FinansalIslem>) {
+    const dosya = this.getAktifArabuluculukDosyasi();
+    const brutTutar = Number(islem?.tutar || 0);
+    if (!dosya || !brutTutar) {
+      this.bildirimGoster('info', 'Örnek makbuz hazırlanamadı', 'Önce arabuluculuk tutarını girmeniz gerekiyor.');
+      return;
+    }
+    if (typeof window === 'undefined') return;
+
+    const netTutar = brutTutar / 1.2;
+    const kdvTutari = brutTutar - netTutar;
+    const tarih = this.formatTarih(islem?.tarih || new Date().toISOString().split('T')[0]);
+    const muhatap = this.getArabuluculukMuvekkilAdi(dosya) || 'Belirtilmedi';
+    const basvurucu = this.getArabuluculukTaraflari(dosya, 'Başvurucu') || '-';
+    const digerTaraf = this.getArabuluculukTaraflari(dosya, 'Diğer Taraf') || '-';
+    const islemTuru = islem?.tur || 'Ödeme';
+    const aciklama = this.formatMetin(islem?.aciklama) || 'Arabuluculuk hizmet bedeli tahsilatı';
+
+    const pencere = window.open('', '_blank', 'width=980,height=760');
+    if (!pencere) {
+      this.bildirimGoster('info', 'Önizleme penceresi açılamadı', 'Tarayıcı açılır pencereyi engelledi. Tekrar deneyin.');
+      return;
+    }
+
+    const html = `<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Örnek Makbuz Önizlemesi</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f7fb; margin:0; color:#0f172a; }
+    .page { max-width: 920px; margin: 0 auto; padding: 28px 22px 48px; }
+    .toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+    .toolbar button { border:0; border-radius:10px; padding:10px 16px; font-weight:700; cursor:pointer; }
+    .print { background:#0f766e; color:white; }
+    .close { background:#e2e8f0; color:#0f172a; }
+    .sheet { background:white; border:1px solid #cbd5e1; border-radius:22px; box-shadow:0 18px 36px rgba(15,23,42,.08); overflow:hidden; }
+    .header { background:#ecfdf5; border-bottom:1px solid #a7f3d0; padding:24px 28px; }
+    .eyebrow { font-size:12px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:#047857; }
+    .title { margin:8px 0 0; font-size:30px; font-weight:800; color:#111827; }
+    .note { margin-top:10px; font-size:13px; color:#b91c1c; font-weight:700; }
+    .section { padding:24px 28px 0; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .card { border:1px solid #dbe4ee; border-radius:16px; padding:14px 16px; background:#f8fafc; }
+    .label { font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
+    .value { font-size:15px; line-height:1.6; font-weight:700; color:#0f172a; }
+    .table { width:100%; border-collapse:collapse; margin-top:18px; }
+    .table th, .table td { border:1px solid #dbe4ee; padding:12px 14px; text-align:left; }
+    .table th { background:#f8fafc; font-size:12px; font-weight:800; text-transform:uppercase; color:#475569; }
+    .table td.amount { text-align:right; font-weight:800; }
+    .footer { padding:24px 28px 28px; }
+    .sign { margin-top:32px; display:flex; justify-content:space-between; gap:18px; }
+    .sign-box { flex:1; border-top:1px solid #94a3b8; padding-top:10px; font-size:12px; color:#475569; }
+    @media print {
+      body { background:white; }
+      .toolbar { display:none; }
+      .page { padding:0; max-width:none; }
+      .sheet { box-shadow:none; border:0; border-radius:0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="toolbar">
+      <button class="print" onclick="window.print()">Yazdır</button>
+      <button class="close" onclick="window.close()">Kapat</button>
+    </div>
+    <div class="sheet">
+      <div class="header">
+        <div class="eyebrow">Akyavaş Hukuk Bürosu</div>
+        <div class="title">Örnek Makbuz Önizlemesi</div>
+        <div class="note">Bu belge örnektir, resmî mali belge yerine geçmez.</div>
+      </div>
+      <div class="section">
+        <div class="grid">
+          <div class="card"><div class="label">Düzenleme Tarihi</div><div class="value">${this.htmlKacis(tarih)}</div></div>
+          <div class="card"><div class="label">İşlem Türü</div><div class="value">${this.htmlKacis(islemTuru)}</div></div>
+          <div class="card"><div class="label">Arabuluculuk Referansı</div><div class="value">${this.htmlKacis(`${dosya.buroNo || '-'} / ${dosya.arabuluculukNo || '-'}`)}</div></div>
+          <div class="card"><div class="label">Uyuşmazlık Türü</div><div class="value">${this.htmlKacis(dosya.uyusmazlikTuru || '-')}</div></div>
+          <div class="card"><div class="label">Tahsilat Muhatabı</div><div class="value">${this.htmlKacis(muhatap)}</div></div>
+          <div class="card"><div class="label">Büro</div><div class="value">${this.htmlKacis(dosya.buro || '-')}</div></div>
+          <div class="card"><div class="label">Başvurucu</div><div class="value">${this.htmlKacis(basvurucu)}</div></div>
+          <div class="card"><div class="label">Diğer Taraf</div><div class="value">${this.htmlKacis(digerTaraf)}</div></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="label">Açıklama</div>
+        <div class="card" style="background:#ffffff;"><div class="value" style="font-size:14px; font-weight:600;">${this.htmlKacis(aciklama)}</div></div>
+        <table class="table">
+          <thead>
+            <tr><th>Kalem</th><th>Tutar</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Net Hizmet Bedeli</td><td class="amount">${this.htmlKacis(this.formatPara(netTutar))}</td></tr>
+            <tr><td>KDV (%20)</td><td class="amount">${this.htmlKacis(this.formatPara(kdvTutari))}</td></tr>
+            <tr><td>Brüt Tahsilat</td><td class="amount">${this.htmlKacis(this.formatPara(brutTutar))}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="footer">
+        <div class="sign">
+          <div class="sign-box">Düzenleyen<br><strong>Akyavaş Hukuk Bürosu</strong></div>
+          <div class="sign-box">Teslim Alan / Muhatap<br><strong>${this.htmlKacis(muhatap)}</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    pencere.document.open();
+    pencere.document.write(html);
+    pencere.document.close();
+    pencere.focus();
   }
   finansalIslemGuncelle() {
     if (!this.aktifDosya || !this.duzenlenenFinansalIslemId) return;

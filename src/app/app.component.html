@@ -2727,6 +2727,24 @@
                                    <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Makbuz / Evrak Linki (Opsiyonel)</label>
                                    <input [(ngModel)]="yeniIslem.makbuzUrl" (keyup.enter)="finansalIslemEkle()" type="text" placeholder="Örn: drive.google.com/... veya docs.google.com/..." class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none">
                                  </div>
+                                 @if (aktifSayfa === 'arabuluculukDetay') {
+                                   <div class="flex flex-col gap-2 rounded-xl border border-violet-200 bg-violet-50/80 px-3 py-2.5">
+                                     <p class="text-[11px] font-semibold text-violet-700">Girilen tutara göre yazdırılabilir örnek makbuz önizlemesi açılır.</p>
+                                     <div class="flex flex-wrap items-center gap-2">
+                                       <button
+                                         type="button"
+                                         (click)="ornekArabuluculukMakbuzuGoster(yeniIslem)"
+                                         [disabled]="!ornekArabuluculukMakbuzuGosterilebilirMi(yeniIslem)"
+                                         class="inline-flex items-center gap-2 rounded-lg border border-violet-300 bg-white px-3 py-2 text-xs font-black text-violet-700 shadow-sm transition-colors hover:bg-violet-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">
+                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 9V4h12v5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18h12v2H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 14h12v4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"></path></svg>
+                                         Örnek Makbuzu Göster
+                                       </button>
+                                       @if (!ornekArabuluculukMakbuzuGosterilebilirMi(yeniIslem)) {
+                                         <span class="text-[11px] font-medium text-slate-500">Önce tutar girin.</span>
+                                       }
+                                     </div>
+                                   </div>
+                                 }
                                </div>
                             </div>
 
@@ -2783,6 +2801,19 @@
                                             <label class="mb-0.5 block text-[10px] font-bold text-slate-500">Makbuz / Evrak Linki (Opsiyonel)</label>
                                             <input [(ngModel)]="duzenlenenFinansalIslem.makbuzUrl" (keyup.enter)="finansalIslemGuncelle()" type="text" class="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm outline-none">
                                           </div>
+                                          @if (aktifSayfa === 'arabuluculukDetay') {
+                                            <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-violet-200 bg-violet-50/80 px-3 py-2.5">
+                                              <p class="text-[11px] font-semibold text-violet-700">Bu kayda göre örnek makbuz önizlemesini açabilirsiniz.</p>
+                                              <button
+                                                type="button"
+                                                (click)="ornekArabuluculukMakbuzuGoster(duzenlenenFinansalIslem)"
+                                                [disabled]="!ornekArabuluculukMakbuzuGosterilebilirMi(duzenlenenFinansalIslem)"
+                                                class="inline-flex items-center gap-2 rounded-lg border border-violet-300 bg-white px-3 py-2 text-[11px] font-black text-violet-700 shadow-sm transition-colors hover:bg-violet-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">
+                                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 9V4h12v5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18h12v2H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 14h12v4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"></path></svg>
+                                                Örnek Makbuzu Göster
+                                              </button>
+                                            </div>
+                                          }
                                           <div class="flex flex-wrap justify-end gap-2">
                                             <button (click)="finansalIslemDuzenlemeIptal()" class="rounded bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-200">İptal</button>
                                             <button (click)="finansalIslemGuncelle()" class="rounded bg-slate-800 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-slate-900">Değişikliği Kaydet</button>
@@ -2797,6 +2828,15 @@
                                                 Makbuz Linki
                                                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5v14h14v-5"></path></svg>
                                               </a>
+                                            }
+                                            @if (aktifSayfa === 'arabuluculukDetay') {
+                                              <button
+                                                type="button"
+                                                (click)="ornekArabuluculukMakbuzuGoster(islem)"
+                                                class="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-violet-700 transition-colors hover:text-violet-800 hover:underline">
+                                                Örnek Makbuzu Göster
+                                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4h12v5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18h12v2H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 14h12v4H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1"></path></svg>
+                                              </button>
                                             }
                                           </div>
                                           <div class="flex items-center gap-2">
