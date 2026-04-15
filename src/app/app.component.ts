@@ -1021,7 +1021,7 @@ export class AppComponent implements OnInit {
     if (davacilar.length) bolumler.push(`Davacı: ${davacilar.map(taraf => taraf.isim).join(', ')}`);
     if (davalilar.length) bolumler.push(`Davalı: ${davalilar.map(taraf => taraf.isim).join(', ')}`);
     if (bolumler.length) return bolumler.join(' | ');
-    return `${dava.muvekkil || 'Müvekkil yok'} | ${dava.karsiTaraf || 'Karşı taraf belirtilmedi'}`;
+    return `${dava.muvekkil || 'Müvekkil yok'} | ${dava.karsiTaraf || '-'}`;
   }
   getDavaKarsiTarafOzet(dava?: Partial<DavaDosyasi> | null) {
     if (!dava) return '-';
@@ -1974,7 +1974,7 @@ export class AppComponent implements OnInit {
     this.acikMuvekkilGorusmeNotlari[id] = !this.acikMuvekkilGorusmeNotlari[id];
   }
   getMuvekkilGorusmeKayitOzetMetni(kayit?: Partial<MuvekkilGorusmeNotu>) {
-    if (!kayit?.tarih) return 'Tarih belirtilmedi';
+    if (!kayit?.tarih) return '-';
     const temel = this.formatTarihSaat(kayit.tarih, kayit.saat);
     return kayit.yontem ? `${temel} * ${kayit.yontem}` : temel;
   }
@@ -3024,7 +3024,7 @@ export class AppComponent implements OnInit {
     const { brutTutar, kdvTutari, kdvDahilBrutTutar, stopajTutari, netTutar, stopajli } = hesap;
     const tarih = this.formatTarih(islem?.tarih || new Date().toISOString().split('T')[0]);
     const muhatapKaydi = this.getArabuluculukMakbuzMuhatapKaydi(dosya);
-    const muhatap = muhatapKaydi?.adSoyad || this.getArabuluculukMuvekkilAdi(dosya) || 'Belirtilmedi';
+    const muhatap = muhatapKaydi?.adSoyad || this.getArabuluculukMuvekkilAdi(dosya) || '-';
     const muhatapTipi = stopajli ? 'Stopajlı Makbuz' : 'Stopajsız Makbuz';
     const basvurucu = this.getArabuluculukTaraflari(dosya, 'Başvurucu') || '-';
     const digerTaraf = this.getArabuluculukTaraflari(dosya, 'Diğer Taraf') || '-';
@@ -3306,15 +3306,15 @@ export class AppComponent implements OnInit {
     return taraflar.map((taraf, index) => {
       const baslik = `${index + 1}. ${tipEtiketi ? `${tipEtiketi}: ` : ''}${taraf.isim || '-'}`;
       const satirlar = [
-        `TC No / Vergi No: ${taraf.tcVergiNo || 'Belirtilmedi'}`,
-        `Vergi Dairesi: ${taraf.vergiDairesi || 'Belirtilmedi'}`,
-        `Adres: ${taraf.adres || 'Belirtilmedi'}`,
-        `Telefon: ${taraf.telefon || 'Belirtilmedi'}`,
-        `E-posta: ${taraf.eposta || 'Belirtilmedi'}`,
-        `Vekil: ${taraf.vekil || 'Belirtilmedi'}`,
-        `Vekil Telefon: ${taraf.vekilTelefon || 'Belirtilmedi'}`,
-        `Vekil E-posta: ${taraf.vekilEposta || 'Belirtilmedi'}`,
-        `Vekil Baro Bilgisi: ${taraf.vekilBaroBilgisi || 'Belirtilmedi'}`
+        `TC No / Vergi No: ${taraf.tcVergiNo || '-'}`,
+        `Vergi Dairesi: ${taraf.vergiDairesi || '-'}`,
+        `Adres: ${taraf.adres || '-'}`,
+        `Telefon: ${taraf.telefon || '-'}`,
+        `E-posta: ${taraf.eposta || '-'}`,
+        `Vekil: ${taraf.vekil || '-'}`,
+        `Vekil Telefon: ${taraf.vekilTelefon || '-'}`,
+        `Vekil E-posta: ${taraf.vekilEposta || '-'}`,
+        `Vekil Baro Bilgisi: ${taraf.vekilBaroBilgisi || '-'}`
       ];
       return [baslik, ...satirlar].join('\n');
     }).join('\n\n');
@@ -3344,9 +3344,9 @@ export class AppComponent implements OnInit {
         ...basvurucular.map(taraf => ({ ...taraf, isim: `Başvurucu - ${taraf.isim || '-'}` })),
         ...digerTaraflar.map(taraf => ({ ...taraf, isim: `Diğer Taraf - ${taraf.isim || '-'}` }))
       ]),
-      TOPLANTI_TARIHI: dosya.toplantiTarihi ? this.formatTarih(dosya.toplantiTarihi) : 'Belirtilmedi',
-      TOPLANTI_SAATI: dosya.toplantiSaati ? this.formatSaat(dosya.toplantiSaati) : 'Belirtilmedi',
-      TOPLANTI_YONTEMI: dosya.toplantiYontemi || 'Belirtilmedi',
+      TOPLANTI_TARIHI: dosya.toplantiTarihi ? this.formatTarih(dosya.toplantiTarihi) : '-',
+      TOPLANTI_SAATI: dosya.toplantiSaati ? this.formatSaat(dosya.toplantiSaati) : '-',
+      TOPLANTI_YONTEMI: dosya.toplantiYontemi || '-',
       ...this.arabuluculukTarafYerTutuculariniOlustur('BASVURUCU', basvurucular),
       ...this.arabuluculukTarafYerTutuculariniOlustur('DIGER_TARAF', digerTaraflar)
     };
@@ -3885,10 +3885,10 @@ export class AppComponent implements OnInit {
     return {
       isim: this.formatMetin(bagliMuvekkil?.adSoyad || taraf?.isim) || '-',
       tcKimlikVergiNo: this.duzMetinTrimle(taraf?.tcKimlikVergiNo || bagliMuvekkil?.tcKimlik) || '-',
-      vergiDairesi: this.formatMetin(taraf?.vergiDairesi || bagliMuvekkil?.vergiDairesi) || 'Belirtilmedi',
-      telefon: this.duzMetinTrimle(taraf?.telefon || bagliMuvekkil?.telefon) || 'Belirtilmedi',
-      eposta: this.epostaDegeriniTemizle(taraf?.eposta || bagliMuvekkil?.eposta) || 'Belirtilmedi',
-      adres: this.formatMetin(taraf?.adres || bagliMuvekkil?.adres) || 'Adres girilmedi',
+      vergiDairesi: this.formatMetin(taraf?.vergiDairesi || bagliMuvekkil?.vergiDairesi) || '-',
+      telefon: this.duzMetinTrimle(taraf?.telefon || bagliMuvekkil?.telefon) || '-',
+      eposta: this.epostaDegeriniTemizle(taraf?.eposta || bagliMuvekkil?.eposta) || '-',
+      adres: this.formatMetin(taraf?.adres || bagliMuvekkil?.adres) || '-',
       bagliMuvekkil
     };
   }
@@ -3949,7 +3949,7 @@ export class AppComponent implements OnInit {
     return this.aktifSayfa === 'detay'
       ? (dosya.konu || '-')
       : this.aktifSayfa === 'icraDetay'
-      ? (dosya.takipTipi || 'Belirtilmedi')
+      ? (dosya.takipTipi || '-')
       : `${dosya.basvuruTuru || '-'} / ${dosya.uyusmazlikTuru || '-'}`;
   }
   getAktifDosyaBaglantiOzeti() {
