@@ -101,23 +101,27 @@ textarea {
 
 .app-shell h2 {
   font-size: clamp(1.55rem, 1.2rem + 0.95vw, 2.25rem);
-  font-weight: 800;
+  font-weight: 750;
   letter-spacing: -0.03em;
   line-height: 1.12;
 }
 
 .app-shell h3 {
   font-size: clamp(1.04rem, 0.98rem + 0.3vw, 1.22rem);
-  font-weight: 800;
+  font-weight: 750;
   letter-spacing: -0.015em;
   line-height: 1.2;
 }
 
 .app-shell h4 {
   font-size: clamp(0.97rem, 0.94rem + 0.18vw, 1.08rem);
-  font-weight: 800;
+  font-weight: 750;
   letter-spacing: 0.01em;
   line-height: 1.25;
+}
+
+.app-shell [class*="font-black"] {
+  font-weight: 700 !important;
 }
 
 .app-shell p,
@@ -279,22 +283,26 @@ textarea {
 }
 
 @keyframes agenda-deadline-pulse {
-  0%, 100% {
+  0%, 46%, 100% {
     background-color: #dc2626;
     border-color: #fecaca;
-    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7), 0 8px 18px rgba(220, 38, 38, 0.22);
     color: #ffffff;
+    transform: scale(1);
   }
-  50% {
-    background-color: #991b1b;
-    border-color: #ffffff;
-    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.08);
-    color: #ffffff;
+  47%, 72% {
+    background-color: #fff1f2;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 5px rgba(220, 38, 38, 0.18), 0 10px 22px rgba(220, 38, 38, 0.24);
+    color: #991b1b;
+    transform: scale(1.045);
   }
 }
 
 .app-agenda-critical-pulse {
-  animation: agenda-deadline-pulse 1.05s ease-in-out infinite;
+  animation: agenda-deadline-pulse 0.95s ease-in-out infinite !important;
+  transform-origin: center;
+  will-change: background-color, color, transform, box-shadow;
 }
 
 .app-shell input,
@@ -326,7 +334,7 @@ textarea {
 
 .app-shell table thead th {
   color: #1e293b;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .app-shell table thead tr {
@@ -472,8 +480,8 @@ textarea {
 .mobile-record-section-title {
   margin: 0;
   font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
+  font-weight: 700;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: #475569;
 }
