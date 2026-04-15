@@ -235,6 +235,11 @@ textarea {
   border-width: 1.5px;
 }
 
+.app-shell .app-page [class*="shadow-sm"][class*="border"][class*="rounded"],
+.app-shell .app-page [class*="shadow-md"][class*="border"][class*="rounded"] {
+  border-width: 2px;
+}
+
 .app-shell [class*="text-xs"][class*="uppercase"],
 .app-shell [class*="text-[10px]"][class*="uppercase"],
 .app-shell [class*="text-[11px]"][class*="uppercase"] {
