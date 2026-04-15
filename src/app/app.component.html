@@ -69,7 +69,7 @@
 
         <main class="flex-1 min-w-0 flex flex-col h-screen overflow-hidden relative">
           <header class="app-topbar bg-white border-b border-slate-200 min-h-16 flex flex-col gap-3 px-4 py-3 shadow-sm flex-shrink-0 sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-            <h2 class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">
+            <h2 class="app-topbar-title text-lg sm:text-2xl font-bold text-slate-800 leading-tight">
               @switch (aktifSayfa) {
                 @case ('dashboard') { Genel Özet ve İstatistikler }
                 @case ('davalar') { Dava Dosyaları } @case ('icralar') { İcra Takipleri } @case ('arabuluculuk') { Arabuluculuk Dosyaları }
@@ -227,7 +227,7 @@
 
                             <div class="mt-4 flex flex-wrap gap-3">
                               <button (click)="gunlukOzetiOlustur()" class="rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800">Özeti Hazırla</button>
-                              <button (click)="gunlukOzetiKopyala()" [disabled]="gunlukOzetKopyalaniyor" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">{{ gunlukOzetKopyalaniyor ? 'Kopyalaniyor...' : 'Özeti Kopyala' }}</button>
+                              <button (click)="gunlukOzetiKopyala()" [disabled]="gunlukOzetKopyalaniyor" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">{{ gunlukOzetKopyalaniyor ? 'Kopyalanıyor...' : 'Özeti Kopyala' }}</button>
                             </div>
 
                             <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
@@ -1170,27 +1170,27 @@
               }
 
               @case ('ajanda') {
-                <div class="app-page space-y-6 max-w-7xl mx-auto pb-10">
+                <div class="app-page app-agenda-page space-y-6 max-w-7xl mx-auto pb-10">
                   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="bg-gradient-to-br from-slate-50 via-white to-slate-100 p-5 rounded-xl shadow-sm border border-slate-200">
                       <p class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Toplam Ajanda</p>
                       <p class="text-3xl font-black text-slate-900">{{ ajandaOzet.toplam }}</p>
-                      <p class="text-xs text-slate-500 mt-2">Dava, arabuluculuk ve sureli isler tek listede.</p>
+                      <p class="text-xs text-slate-500 mt-2">Dava, arabuluculuk ve süreli işler tek listede.</p>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-amber-100">
-                      <p class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Bugun</p>
+                      <p class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Bugün</p>
                       <p class="text-3xl font-black text-slate-800">{{ ajandaOzet.bugun }}</p>
-                      <p class="text-xs text-slate-500 mt-2">Bugune denk gelen kayit</p>
+                      <p class="text-xs text-slate-500 mt-2">Bugüne denk gelen kayıt</p>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
-                      <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">7 Gun Icinde</p>
+                      <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">7 Gün İçinde</p>
                       <p class="text-3xl font-black text-slate-800">{{ ajandaOzet.yakin }}</p>
-                      <p class="text-xs text-slate-500 mt-2">Yaklasan is ve toplanti</p>
+                      <p class="text-xs text-slate-500 mt-2">Yaklaşan iş ve toplantı</p>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-rose-100">
-                      <p class="text-xs font-bold text-rose-600 uppercase tracking-wider mb-1">Gecikmis</p>
+                      <p class="text-xs font-bold text-rose-600 uppercase tracking-wider mb-1">Gecikmiş</p>
                       <p class="text-3xl font-black text-slate-800">{{ ajandaOzet.gecmis }}</p>
-                      <p class="text-xs text-slate-500 mt-2">Tarihi gecmis kayit</p>
+                      <p class="text-xs text-slate-500 mt-2">Tarihi geçmiş kayıt</p>
                     </div>
                   </div>
 
@@ -1200,19 +1200,19 @@
                     </div>
                     <div class="lg:w-52">
                       <select [(ngModel)]="ajandaZamanFiltresi" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg outline-none bg-white font-medium text-slate-700">
-                        <option value="all">Tum Tarihler</option>
-                        <option value="today">Sadece Bugun</option>
-                        <option value="7days">7 Gun Icinde</option>
-                        <option value="30days">30 Gun Icinde</option>
-                        <option value="overdue">Gecikmisler</option>
+                        <option value="all">Tüm Tarihler</option>
+                        <option value="today">Sadece Bugün</option>
+                        <option value="7days">7 Gün İçinde</option>
+                        <option value="30days">30 Gün İçinde</option>
+                        <option value="overdue">Gecikmişler</option>
                       </select>
                     </div>
                     <div class="lg:w-52">
                       <select [(ngModel)]="ajandaTurFiltresi" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg outline-none bg-white font-medium text-slate-700">
-                        <option value="all">Tum Kayitlar</option>
-                        <option value="durusma">Durusmalar</option>
-                        <option value="toplanti">Toplantilar</option>
-                        <option value="sureliIs">Sureli Isler</option>
+                        <option value="all">Tüm Kayıtlar</option>
+                        <option value="durusma">Duruşmalar</option>
+                        <option value="toplanti">Toplantılar</option>
+                        <option value="sureliIs">Süreli İşler</option>
                       </select>
                     </div>
                   </div>
@@ -1221,11 +1221,11 @@
                     <div class="xl:col-span-8 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                       <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
-                          <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider">Ajanda Akisi</h3>
-                          <p class="text-xs text-slate-500 mt-1">Bir satira tiklayarak dogrudan ilgili dosya detayina gidebilirsiniz.</p>
+                          <h3 class="app-agenda-title text-slate-800">Ajanda Akışı</h3>
+                          <p class="text-xs text-slate-500 mt-1">Bir satıra tıklayarak doğrudan ilgili dosya detayına gidebilirsiniz.</p>
                         </div>
                         <div class="text-xs font-bold text-slate-500 bg-white border border-slate-200 rounded-full px-3 py-1.5 w-fit">
-                          {{ filtrelenmisAjandaKayitlari.length }} kayit
+                          {{ filtrelenmisAjandaKayitlari.length }} kayıt
                         </div>
                       </div>
 
@@ -1235,29 +1235,29 @@
                             <div class="flex flex-col lg:flex-row lg:items-center gap-4">
                               <div class="shrink-0 flex items-center gap-3">
                                 <div class="w-16 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center shadow-sm">
-                                  <div class="text-[10px] uppercase font-black text-slate-400">{{ formatTarihAy(kayit.tarih) }}</div>
+                                  <div class="text-[10px] font-bold text-slate-500">{{ formatTarihAy(kayit.tarih) }}</div>
                                   <div class="text-2xl font-black text-slate-800 leading-none mt-1">{{ formatTarihGun(kayit.tarih) }}</div>
                                 </div>
                                 <div class="hidden sm:flex flex-col gap-2 min-w-[120px]">
-                                  <span [class]="getAjandaTurClass(kayit.tur)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-center">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
-                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-center">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
+                                  <span [class]="getAjandaTurClass(kayit.tur)" class="app-agenda-pill px-2.5 py-1 rounded-full text-[10px] text-center">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
+                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="app-agenda-pill px-2.5 py-1 rounded-full text-[10px] text-center">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
                                 </div>
                               </div>
 
                               <div class="min-w-0 flex-1">
                                 <div class="flex flex-wrap items-center gap-2 mb-2">
-                                  <span [class]="getAjandaTurClass(kayit.tur)" class="sm:hidden px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
-                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="sm:hidden px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
-                                  <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ ajandaDurumMetni(kayit.tarih) }}</span>
+                                  <span [class]="getAjandaTurClass(kayit.tur)" class="app-agenda-pill sm:hidden px-2 py-1 rounded-full text-[10px]">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
+                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="app-agenda-pill sm:hidden px-2 py-1 rounded-full text-[10px]">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
+                                  <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="app-agenda-pill px-2.5 py-1 rounded-full text-[10px]">{{ ajandaDurumMetni(kayit.tarih) }}</span>
                                   @if (kayit.saat) {
-                                    <span class="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-black uppercase tracking-wider text-slate-600">Saat {{ formatSaat(kayit.saat) }}</span>
+                                    <span class="app-agenda-pill px-2.5 py-1 rounded-full bg-white border border-slate-200 text-[10px] text-slate-600">Saat {{ formatSaat(kayit.saat) }}</span>
                                   }
                                 </div>
-                                <h3 class="text-base font-black text-slate-800 group-hover:text-blue-700 transition-colors">{{ kayit.baslik }}</h3>
+                                <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-700 transition-colors">{{ kayit.baslik }}</h3>
                                 <p class="text-sm text-slate-600 font-medium mt-1">{{ kayit.taraflar }}</p>
                                 <p class="text-xs text-slate-500 mt-2">{{ kayit.altBaslik }}</p>
                                 @if (kayit.anaEvrakIsmi) {
-                                  <p class="text-xs text-slate-400 mt-1">Bagli evrak: {{ kayit.anaEvrakIsmi }}</p>
+                                  <p class="text-xs text-slate-400 mt-1">Bağlı evrak: {{ kayit.anaEvrakIsmi }}</p>
                                 }
                               </div>
 
@@ -1280,8 +1280,8 @@
                             <div class="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
                               <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             </div>
-                            <p class="text-lg font-bold text-slate-700">Bu filtrelerle gorunen bir ajanda kaydi yok.</p>
-                            <p class="text-sm text-slate-500 mt-2">Zaman filtresini genisletmeyi veya farkli bir arama yapmayi deneyin.</p>
+                            <p class="text-lg font-bold text-slate-700">Bu filtrelerle görünen bir ajanda kaydı yok.</p>
+                            <p class="text-sm text-slate-500 mt-2">Zaman filtresini genişletmeyi veya farklı bir arama yapmayı deneyin.</p>
                           </div>
                         }
                       </div>
@@ -1289,7 +1289,7 @@
 
                     <div class="xl:col-span-4 space-y-6">
                       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-4">Yaklasan 5 Kayit</h3>
+                        <h3 class="app-agenda-title mb-4 text-slate-800">Yaklaşan 5 Kayıt</h3>
                         <div class="space-y-3">
                           @for (kayit of yaklasanAjandaKayitlari; track kayit.id) {
                             <button (click)="ajandaKaydinaGit(kayit)" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-slate-50 transition-colors">
@@ -1299,7 +1299,7 @@
                                   <p class="text-[11px] text-slate-500 mt-1 truncate">{{ kayit.taraflar }}</p>
                                   @if (kayit.saat) { <p class="text-[10px] font-bold text-slate-400 mt-1">Saat {{ formatSaat(kayit.saat) }}</p> }
                                 </div>
-                                <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0">{{ ajandaDurumMetni(kayit.tarih) }}</span>
+                                <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="app-agenda-pill px-2 py-1 rounded-full text-[10px] shrink-0">{{ ajandaDurumMetni(kayit.tarih) }}</span>
                               </div>
                               <div class="flex items-center justify-between mt-3 text-[11px] text-slate-500">
                                 <span>{{ getAjandaTurEtiketi(kayit.tur) }}</span>
@@ -1307,31 +1307,31 @@
                               </div>
                             </button>
                           } @empty {
-                            <div class="text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-xl p-4">Yaklasan bir kayit bulunmuyor.</div>
+                            <div class="text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-xl p-4">Yaklaşan bir kayıt bulunmuyor.</div>
                           }
                         </div>
                       </div>
 
                       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-4">Dagilim</h3>
+                        <h3 class="app-agenda-title mb-4 text-slate-800">Dağılım</h3>
                         <div class="space-y-3">
                           <div class="flex items-center justify-between p-3 rounded-xl bg-blue-50 border border-blue-100">
                             <div>
-                              <p class="text-xs font-black text-blue-700 uppercase tracking-wider">Durusmalar</p>
-                              <p class="text-xs text-blue-600 mt-1">Dava dosyalarindaki durusma tarihleri</p>
+                              <p class="text-xs font-bold text-blue-700">Duruşmalar</p>
+                              <p class="text-xs text-blue-600 mt-1">Dava dosyalarındaki duruşma tarihleri</p>
                             </div>
                             <span class="text-2xl font-black text-blue-700">{{ ajandaOzet.durusma }}</span>
                           </div>
                           <div class="flex items-center justify-between p-3 rounded-xl bg-purple-50 border border-purple-100">
                             <div>
-                              <p class="text-xs font-black text-purple-700 uppercase tracking-wider">Toplantilar</p>
-                              <p class="text-xs text-purple-600 mt-1">Arabuluculuk gorusmeleri</p>
+                              <p class="text-xs font-bold text-purple-700">Toplantılar</p>
+                              <p class="text-xs text-purple-600 mt-1">Arabuluculuk görüşmeleri</p>
                             </div>
                             <span class="text-2xl font-black text-purple-700">{{ ajandaOzet.toplanti }}</span>
                           </div>
                           <div class="flex items-center justify-between p-3 rounded-xl bg-rose-50 border border-rose-100">
                             <div>
-                              <p class="text-xs font-black text-rose-700 uppercase tracking-wider">Sureli Isler</p>
+                              <p class="text-xs font-bold text-rose-700">Süreli İşler</p>
                               <p class="text-xs text-rose-600 mt-1">Son eylem tarihi girilen evraklar</p>
                             </div>
                             <span class="text-2xl font-black text-rose-700">{{ ajandaOzet.sureliIs }}</span>

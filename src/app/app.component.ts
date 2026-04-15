@@ -533,13 +533,13 @@ export class AppComponent implements OnInit {
     ];
 
     const satirlar = [
-      'Gunluk Bildirim Ozeti',
-      `Olusturma tarihi: ${this.formatTarihSaatKisa(new Date().toISOString())}`,
+      'Günlük Bildirim Özeti',
+      `Oluşturma tarihi: ${this.formatTarihSaatKisa(new Date().toISOString())}`,
       '',
-      `Geciken kayit: ${gecikenKayitlar.length}`,
-      `Bugun takip edilecek kayit: ${bugunkuKayitlar.length}`,
-      `Onumuzdeki ${this.gunlukOzetYakinGunSayisi} gun: ${yaklasanKayitlar.length}`,
-      `Arabuluculuk sure alarmi: ${sayacKayitlari.length}`,
+      `Geciken kayıt: ${gecikenKayitlar.length}`,
+      `Bugün takip edilecek kayıt: ${bugunkuKayitlar.length}`,
+      `Önümüzdeki ${this.gunlukOzetYakinGunSayisi} gün: ${yaklasanKayitlar.length}`,
+      `Arabuluculuk süre alarmı: ${sayacKayitlari.length}`,
       `Tahsilat bekleyen dosya: ${this.dashboardUyariOzet.tahsilat} (${this.formatPara(this.dashboardUyariOzet.tahsilatTutari)})`
     ];
 
@@ -549,25 +549,25 @@ export class AppComponent implements OnInit {
       else satirlar.push(`- ${bosMesaji}`);
     };
 
-    bolumEkle('GECIKEN KAYITLAR', gecikenKayitlar.slice(0, 8).map(kayit => this.gunlukOzetAjandaSatiri(kayit)), 'Geciken kayit yok.');
-    bolumEkle('BUGUN', bugunkuKayitlar.slice(0, 8).map(kayit => this.gunlukOzetAjandaSatiri(kayit)), 'Bugune ait kayit yok.');
+    bolumEkle('GECİKEN KAYITLAR', gecikenKayitlar.slice(0, 8).map(kayit => this.gunlukOzetAjandaSatiri(kayit)), 'Geciken kayıt yok.');
+    bolumEkle('BUGÜN', bugunkuKayitlar.slice(0, 8).map(kayit => this.gunlukOzetAjandaSatiri(kayit)), 'Bugüne ait kayıt yok.');
     bolumEkle(
-      `ONUMUZDEKI ${this.gunlukOzetYakinGunSayisi} GUN`,
+      `ÖNÜMÜZDEKİ ${this.gunlukOzetYakinGunSayisi} GÜN`,
       yaklasanKayitlar.slice(0, 12).map(kayit => this.gunlukOzetAjandaSatiri(kayit)),
-      'Bu aralikta planli kayit yok.'
+      'Bu aralıkta planlı kayıt yok.'
     );
     bolumEkle(
-      'ARABULUCULUK SURE ALARMLARI',
+      'ARABULUCULUK SÜRE ALARMLARI',
       sayacKayitlari.slice(0, 8).map(sure => this.gunlukOzetSureSatiri(sure)),
-      'Kritik sure alarmi gorunmuyor.'
+      'Kritik süre alarmı görünmüyor.'
     );
 
     this.gunlukOzetMetni = satirlar.join('\n');
     this.gunlukOzetOlusturulmaTarihi = new Date().toISOString();
     this.bildirimGoster(
       'success',
-      'Gunluk ozet hazir',
-      `${gecikenKayitlar.length} geciken, ${bugunkuKayitlar.length} bugun ve ${yaklasanKayitlar.length} yaklasan kayit toparlandi.`
+      'Günlük özet hazır',
+      `${gecikenKayitlar.length} geciken, ${bugunkuKayitlar.length} bugün ve ${yaklasanKayitlar.length} yaklaşan kayıt toparlandı.`
     );
   }
 
@@ -1473,10 +1473,10 @@ export class AppComponent implements OnInit {
   ajandaDurumMetni(str?: string) {
     const fark = this.ajandaGunFarki(str);
     if (!isFinite(fark)) return 'Tarih yok';
-    if (fark < 0) return `${Math.abs(fark)} gun gecmis`;
-    if (fark === 0) return 'Bugun';
-    if (fark === 1) return 'Yarin';
-    return `${fark} gun kaldi`;
+    if (fark < 0) return `${Math.abs(fark)} gün geçmiş`;
+    if (fark === 0) return 'Bugün';
+    if (fark === 1) return 'Yarın';
+    return `${fark} gün kaldı`;
   }
 
   getAjandaKalanGunClass(str?: string) {
@@ -1624,9 +1624,9 @@ export class AppComponent implements OnInit {
   }
 
   getAjandaTurEtiketi(tur: AjandaTur) {
-    if (tur === 'durusma') return 'Durusma';
-    if (tur === 'toplanti') return 'Toplanti';
-    return 'Sureli Is';
+    if (tur === 'durusma') return 'Duruşma';
+    if (tur === 'toplanti') return 'Toplantı';
+    return 'Süreli İş';
   }
 
   getAjandaTurClass(tur: AjandaTur) {
@@ -1637,7 +1637,7 @@ export class AppComponent implements OnInit {
 
   getAjandaKaynakEtiketi(kaynak: AjandaKaynak) {
     if (kaynak === 'dava') return 'Dava';
-    if (kaynak === 'icra') return 'Icra';
+    if (kaynak === 'icra') return 'İcra';
     return 'Arabuluculuk';
   }
 
@@ -1650,14 +1650,14 @@ export class AppComponent implements OnInit {
   getAjandaDosyaOzeti(kaynak: AjandaKaynak, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi) {
     if (kaynak === 'dava') {
       const dava = dosya as DavaDosyasi;
-      return dava.dosyaNo || 'Dava dosyasi';
+      return dava.dosyaNo || 'Dava dosyası';
     }
     if (kaynak === 'icra') {
       const icra = dosya as IcraDosyasi;
-      return `${icra.icraDairesi || ''} ${icra.dosyaNo || ''}`.trim() || 'Icra dosyasi';
+      return `${icra.icraDairesi || ''} ${icra.dosyaNo || ''}`.trim() || 'İcra dosyası';
     }
     const arabuluculuk = dosya as ArabuluculukDosyasi;
-    return `${arabuluculuk.buroNo ? arabuluculuk.buroNo + ' / ' : ''}${arabuluculuk.arabuluculukNo || ''}`.trim() || 'Arabuluculuk dosyasi';
+    return `${arabuluculuk.buroNo ? arabuluculuk.buroNo + ' / ' : ''}${arabuluculuk.arabuluculukNo || ''}`.trim() || 'Arabuluculuk dosyası';
   }
 
   ajandaKaydinaGit(kayit: AjandaKaydi) {
@@ -1672,7 +1672,7 @@ export class AppComponent implements OnInit {
     const kayitlar: AjandaKaydi[] = [];
 
     this.davalar.forEach(dava => {
-      if (dava.durum === 'KapalÃ„Â±' || !dava.durusmaTarihi || dava.durusmaTamamlandiMi) return;
+      if (dava.durum === 'Kapalı' || !dava.durusmaTarihi || dava.durusmaTamamlandiMi) return;
       kayitlar.push({
         id: `dava-durusma-${dava.id}`,
         tarih: this.birlestirTarihVeSaat(dava.durusmaTarihi, dava.durusmaSaati),
@@ -1680,14 +1680,14 @@ export class AppComponent implements OnInit {
         tur: 'durusma',
         kaynak: 'dava',
         dosya: dava,
-        baslik: dava.mahkeme || 'Dava Durusmasi',
+        baslik: dava.mahkeme || 'Dava Duruşması',
         altBaslik: dava.konu || this.getAjandaDosyaOzeti('dava', dava),
         taraflar: this.getDavaTarafOzet(dava)
       });
     });
 
     this.arabuluculukDosyalar.forEach(arabuluculuk => {
-      if (arabuluculuk.durum === 'KapalÃ„Â±' || !arabuluculuk.toplantiTarihi || arabuluculuk.toplantiTamamlandiMi) return;
+      if (arabuluculuk.durum === 'Kapalı' || !arabuluculuk.toplantiTarihi || arabuluculuk.toplantiTamamlandiMi) return;
       kayitlar.push({
         id: `arabuluculuk-toplanti-${arabuluculuk.id}`,
         tarih: this.birlestirTarihVeSaat(arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati),
@@ -1696,7 +1696,7 @@ export class AppComponent implements OnInit {
         kaynak: 'arabuluculuk',
         dosya: arabuluculuk,
         baslik: this.getAjandaDosyaOzeti('arabuluculuk', arabuluculuk),
-        altBaslik: arabuluculuk.toplantiYontemi ? `${arabuluculuk.buro || 'Arabuluculuk'} - ${arabuluculuk.toplantiYontemi}` : (arabuluculuk.buro || 'Arabuluculuk toplantisi'),
+        altBaslik: arabuluculuk.toplantiYontemi ? `${arabuluculuk.buro || 'Arabuluculuk'} - ${arabuluculuk.toplantiYontemi}` : (arabuluculuk.buro || 'Arabuluculuk toplantısı'),
         taraflar: arabuluculuk.taraflar?.map(t => t.isim).join(' - ') || 'Taraf bilgisi yok'
       });
     });
@@ -1708,7 +1708,7 @@ export class AppComponent implements OnInit {
         tur: 'sureliIs',
         kaynak: is.tur,
         dosya: is.dosya,
-        baslik: is.evrak.isim || 'Sureli is',
+        baslik: is.evrak.isim || 'Süreli iş',
         altBaslik: this.getAjandaDosyaOzeti(is.tur, is.dosya),
         taraflar: this.getTaraflarMetni(is),
         evrakId: is.evrak.id,
@@ -1732,7 +1732,7 @@ export class AppComponent implements OnInit {
         tur: 'durusma',
         kaynak: 'dava',
         dosya: dava,
-        baslik: dava.mahkeme || 'Dava Durusmasi',
+        baslik: dava.mahkeme || 'Dava Duruşması',
         altBaslik: dava.konu || this.getAjandaDosyaOzeti('dava', dava),
         taraflar: this.getDavaTarafOzet(dava)
       });
@@ -1748,7 +1748,7 @@ export class AppComponent implements OnInit {
         kaynak: 'arabuluculuk',
         dosya: arabuluculuk,
         baslik: this.getAjandaDosyaOzeti('arabuluculuk', arabuluculuk),
-        altBaslik: arabuluculuk.toplantiYontemi ? `${arabuluculuk.buro || 'Arabuluculuk'} - ${arabuluculuk.toplantiYontemi}` : (arabuluculuk.buro || 'Arabuluculuk toplantisi'),
+        altBaslik: arabuluculuk.toplantiYontemi ? `${arabuluculuk.buro || 'Arabuluculuk'} - ${arabuluculuk.toplantiYontemi}` : (arabuluculuk.buro || 'Arabuluculuk toplantısı'),
         taraflar: arabuluculuk.taraflar?.map(t => t.isim).join(' - ') || 'Taraf bilgisi yok'
       });
     });
@@ -1760,7 +1760,7 @@ export class AppComponent implements OnInit {
         tur: 'sureliIs',
         kaynak: is.tur,
         dosya: is.dosya,
-        baslik: is.evrak.isim || 'Sureli is',
+        baslik: is.evrak.isim || 'Süreli iş',
         altBaslik: this.getAjandaDosyaOzeti(is.tur, is.dosya),
         taraflar: this.getTaraflarMetni(is),
         evrakId: is.evrak.id,
