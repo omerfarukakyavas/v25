@@ -241,6 +241,23 @@ textarea {
   letter-spacing: 0.09em !important;
 }
 
+.app-shell .app-file-form-modal label,
+.app-shell .app-file-form-modal label[class*="text-"],
+.app-shell .app-file-form-modal p[class*="font-black"][class*="uppercase"],
+.app-shell .app-file-form-modal h4[class*="font-black"][class*="uppercase"] {
+  color: #050b16 !important;
+  font-weight: 700 !important;
+}
+
+.app-shell .app-file-form-modal label {
+  letter-spacing: 0.06em !important;
+}
+
+.app-shell .app-file-form-modal label .text-red-500,
+.app-shell .app-file-form-modal label [class*="text-red"] {
+  color: #dc2626 !important;
+}
+
 .app-agenda-page {
   font-variant-ligatures: common-ligatures;
   font-feature-settings: "kern" 1, "liga" 1;

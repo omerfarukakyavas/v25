@@ -2999,7 +2999,7 @@
       <!-- BUTUN FORMLAR VE MODALLAR (HER ZAMAN VE HER SAYFADA CALISABILMESI ICIN DISARIYA ALINDI) -->
       @if (davaFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
+          <div class="app-file-form-modal bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
             <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3.5">
               <h3 class="text-xl font-black tracking-tight text-slate-900">{{ formModu === 'ekle' ? 'Yeni dava dosyası oluştur' : 'Dava dosyasını güncelle' }}</h3>
               <button (click)="davaFormKapat()" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100">Kapat</button>
@@ -3352,7 +3352,7 @@
 
       @if (icraFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
+          <div class="app-file-form-modal bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
             <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3.5">
               <h3 class="text-xl font-black tracking-tight text-slate-900">{{ formModu === 'ekle' ? 'Yeni icra takibi oluştur' : 'İcra takibini güncelle' }}</h3>
               <button (click)="icraFormKapat()" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100">Kapat</button>
@@ -3473,7 +3473,7 @@
 
       @if (arabuluculukFormAcik) {
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div class="bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
+          <div class="app-file-form-modal bg-white rounded-[28px] shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up">
             <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3.5">
               <h3 class="text-xl font-black tracking-tight text-slate-900">{{ formModu === 'ekle' ? 'Yeni arabuluculuk dosyası oluştur' : 'Arabuluculuk dosyasını güncelle' }}</h3>
               <button (click)="arabuluculukFormKapat()" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100">Kapat</button>
