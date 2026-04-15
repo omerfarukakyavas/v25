@@ -247,6 +247,14 @@ textarea {
   color: #050b16 !important;
 }
 
+.app-shell .app-file-detail-info-card p[class*="uppercase"][class*="tracking"] {
+  font-family: var(--app-font-sans);
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.035em !important;
+  text-transform: none !important;
+}
+
 .app-shell [class*="text-xs"][class*="uppercase"],
 .app-shell [class*="text-[10px]"][class*="uppercase"],
 .app-shell [class*="text-[11px]"][class*="uppercase"] {
