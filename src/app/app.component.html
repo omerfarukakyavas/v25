@@ -2229,15 +2229,19 @@
                              <button (click)="aktifDetaySekmesi = 'evraklar'" [class]="getDetayTabClass('evraklar')" class="flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Evrak Bağlantıları</button>
                              <button (click)="aktifDetaySekmesi = 'notlar'" [class]="getDetayTabClass('notlar')" class="flex min-w-[110px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Notlar</button>
                            }
-                           @if (aktifSayfa === 'detay') {
-                             <button (click)="aktifDetaySekmesi = 'muvekkilGorusmeleri'" [class]="getDetayTabClass('muvekkilGorusmeleri')" class="relative flex min-w-[180px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
-                               Müvekkil Görüşme Notları
-                               @if (aktifDavaMuvekkilGorusmeNotlari.length > 0) { <span class="absolute top-2 right-2 rounded-full bg-violet-700 px-1.5 py-0.5 text-[9px] font-black text-white">{{ aktifDavaMuvekkilGorusmeNotlari.length }}</span> }
-                             </button>
-                           }
-                           <button (click)="aktifDetaySekmesi = 'sureliIsler'" [class]="getDetayTabClass('sureliIsler')" class="relative flex min-w-[120px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
-                             Süreli İşler
-                             @if(aktifDosyaSureliIsleri.length > 0) { <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span> }
+                            @if (aktifSayfa === 'detay') {
+                              <button (click)="aktifDetaySekmesi = 'muvekkilGorusmeleri'" [class]="getDetayTabClass('muvekkilGorusmeleri')" class="relative flex min-w-[180px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
+                                Müvekkil Görüşme Notları
+                                @if (aktifDavaMuvekkilGorusmeNotlari.length > 0) { <span class="absolute top-2 right-2 rounded-full bg-violet-700 px-1.5 py-0.5 text-[9px] font-black text-white">{{ aktifDavaMuvekkilGorusmeNotlari.length }}</span> }
+                              </button>
+                            }
+                            <button (click)="aktifDetaySekmesi = 'finans'" [class]="getDetayTabClass('finans')" class="relative flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
+                              Finans ve Masraf
+                              @if ((aktifDosya.finansalIslemler || []).length > 0) { <span class="absolute top-2 right-2 rounded-full bg-emerald-700 px-1.5 py-0.5 text-[9px] font-black text-white">{{ (aktifDosya.finansalIslemler || []).length }}</span> }
+                            </button>
+                            <button (click)="aktifDetaySekmesi = 'sureliIsler'" [class]="getDetayTabClass('sureliIsler')" class="relative flex min-w-[120px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
+                              Süreli İşler
+                              @if(aktifDosyaSureliIsleri.length > 0) { <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span> }
                            </button>
                            <button (click)="aktifDetaySekmesi = 'gecmis'" [class]="getDetayTabClass('gecmis')" class="relative flex min-w-[120px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
                              Geçmiş
@@ -2675,16 +2679,12 @@
                               </div>
                             </div>
                           }
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- FİNANS SÜTUNU -->
-                    <div class="space-y-4 sm:space-y-6 lg:col-span-12">
-                       <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                         <div class="border-b border-emerald-200 bg-emerald-50 p-3 sm:p-4">
-                           <h4 class="text-sm font-bold tracking-[0.02em] text-emerald-900 sm:text-base">Dosya Finans ve Masraf Takibi</h4>
-                           <p class="mt-1 text-[11px] font-medium text-emerald-800">Tahsilat, emanet ve masraf hareketlerini tek blokta izleyin.</p>
+                           @if (aktifDetaySekmesi === 'finans') {
+                             <div class="space-y-4">
+                               <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                          <div class="border-b border-emerald-200 bg-emerald-50 p-3 sm:p-4">
+                            <h4 class="text-sm font-bold tracking-[0.02em] text-emerald-900 sm:text-base">Dosya Finans ve Masraf Takibi</h4>
+                            <p class="mt-1 text-[11px] font-medium text-emerald-800">Tahsilat, emanet ve masraf hareketlerini tek blokta izleyin.</p>
                          </div>
                          <div class="space-y-4 p-3 sm:space-y-5 sm:p-5">
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -2923,7 +2923,11 @@
                             </div>
                          </div>
                        </div>
-                    </div>
+                             </div>
+                           }
+                         </div>
+                       </div>
+                     </div>
                   </div>
                 </div>
               }

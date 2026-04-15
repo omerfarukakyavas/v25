@@ -123,7 +123,7 @@ export interface IliskiDosyaKaydi {
 }
 
 export type SayfaTipi = 'dashboard' | 'davalar' | 'icralar' | 'arabuluculuk' | 'sablonlar' | 'muhasebe' | 'iliskiler' | 'ajanda' | 'detay' | 'icraDetay' | 'arabuluculukDetay';
-export type DetaySekmesi = 'notlar' | 'muvekkilGorusmeleri' | 'evraklar' | 'sureliIsler' | 'gecmis';
+export type DetaySekmesi = 'notlar' | 'muvekkilGorusmeleri' | 'evraklar' | 'finans' | 'sureliIsler' | 'gecmis';
 
 export interface ArabuluculukDosyasi {
   buroyaBasvuruTarihi?: string;
