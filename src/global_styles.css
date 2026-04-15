@@ -240,6 +240,13 @@ textarea {
   border-width: 2px;
 }
 
+.app-shell .app-file-detail-info-card [class*="text-slate-400"],
+.app-shell .app-file-detail-info-card [class*="text-slate-500"],
+.app-shell .app-file-detail-info-card [class*="text-slate-600"],
+.app-shell .app-file-detail-info-card [class*="text-slate-700"] {
+  color: #050b16 !important;
+}
+
 .app-shell [class*="text-xs"][class*="uppercase"],
 .app-shell [class*="text-[10px]"][class*="uppercase"],
 .app-shell [class*="text-[11px]"][class*="uppercase"] {
