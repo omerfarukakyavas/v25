@@ -186,7 +186,7 @@
                                 <div class="flex flex-wrap items-center gap-2 mb-2">
                                   <span [class]="getAjandaTurClass(kayit.tur)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
                                   <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
-                                  <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ ajandaDurumMetni(kayit.tarih) }}</span>
+                                  <span [class]="getAjandaDurumClass(kayit)" class="app-agenda-pill px-2.5 py-1 rounded-full border text-[10px]">{{ getAjandaDurumMetni(kayit) }}</span>
                                 </div>
                                 <p class="text-sm font-bold text-slate-800">{{ kayit.baslik }}</p>
                                 <p class="text-xs text-slate-500 mt-1">{{ kayit.taraflar }}</p>
@@ -1174,22 +1174,22 @@
                   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="bg-gradient-to-br from-slate-50 via-white to-slate-100 p-5 rounded-xl shadow-sm border border-slate-200">
                       <p class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Toplam Ajanda</p>
-                      <p class="text-3xl font-black text-slate-900">{{ ajandaOzet.toplam }}</p>
+                      <p class="app-agenda-count text-3xl text-slate-900">{{ ajandaOzet.toplam }}</p>
                       <p class="text-xs text-slate-500 mt-2">Dava, arabuluculuk ve süreli işler tek listede.</p>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-amber-100">
                       <p class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Bugün</p>
-                      <p class="text-3xl font-black text-slate-800">{{ ajandaOzet.bugun }}</p>
+                      <p class="app-agenda-count text-3xl text-slate-800">{{ ajandaOzet.bugun }}</p>
                       <p class="text-xs text-slate-500 mt-2">Bugüne denk gelen kayıt</p>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
                       <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">7 Gün İçinde</p>
-                      <p class="text-3xl font-black text-slate-800">{{ ajandaOzet.yakin }}</p>
+                      <p class="app-agenda-count text-3xl text-slate-800">{{ ajandaOzet.yakin }}</p>
                       <p class="text-xs text-slate-500 mt-2">Yaklaşan iş ve toplantı</p>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-rose-100">
                       <p class="text-xs font-bold text-rose-600 uppercase tracking-wider mb-1">Gecikmiş</p>
-                      <p class="text-3xl font-black text-slate-800">{{ ajandaOzet.gecmis }}</p>
+                      <p class="app-agenda-count text-3xl text-slate-800">{{ ajandaOzet.gecmis }}</p>
                       <p class="text-xs text-slate-500 mt-2">Tarihi geçmiş kayıt</p>
                     </div>
                   </div>
@@ -1236,7 +1236,7 @@
                               <div class="shrink-0 flex items-center gap-3">
                                 <div class="w-16 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center shadow-sm">
                                   <div class="text-[10px] font-bold text-slate-500">{{ formatTarihAy(kayit.tarih) }}</div>
-                                  <div class="text-2xl font-black text-slate-800 leading-none mt-1">{{ formatTarihGun(kayit.tarih) }}</div>
+                                  <div class="app-agenda-date-day text-2xl text-slate-800 leading-none mt-1">{{ formatTarihGun(kayit.tarih) }}</div>
                                 </div>
                                 <div class="hidden sm:flex flex-col gap-2 min-w-[120px]">
                                   <span [class]="getAjandaTurClass(kayit.tur)" class="app-agenda-pill px-2.5 py-1 rounded-full text-[10px] text-center">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
@@ -1248,14 +1248,19 @@
                                 <div class="flex flex-wrap items-center gap-2 mb-2">
                                   <span [class]="getAjandaTurClass(kayit.tur)" class="app-agenda-pill sm:hidden px-2 py-1 rounded-full text-[10px]">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
                                   <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="app-agenda-pill sm:hidden px-2 py-1 rounded-full text-[10px]">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
-                                  <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="app-agenda-pill px-2.5 py-1 rounded-full text-[10px]">{{ ajandaDurumMetni(kayit.tarih) }}</span>
+                                  <span [class]="getAjandaDurumClass(kayit)" class="app-agenda-pill px-2.5 py-1 rounded-full border text-[10px]">{{ getAjandaDurumMetni(kayit) }}</span>
                                   @if (kayit.saat) {
                                     <span class="app-agenda-pill px-2.5 py-1 rounded-full bg-white border border-slate-200 text-[10px] text-slate-600">Saat {{ formatSaat(kayit.saat) }}</span>
                                   }
                                 </div>
-                                <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-700 transition-colors">{{ kayit.baslik }}</h3>
+                                <h3 class="app-agenda-record-title text-slate-900 group-hover:text-blue-700 transition-colors">{{ kayit.baslik }}</h3>
                                 <p class="text-sm text-slate-600 font-medium mt-1">{{ kayit.taraflar }}</p>
                                 <p class="text-xs text-slate-500 mt-2">{{ kayit.altBaslik }}</p>
+                                @if (getSureliIsUyariMetni(kayit)) {
+                                  <p [class]="getSureliIsUyariClass(kayit)" class="mt-2 inline-flex rounded-full border px-3 py-1 text-[11px] font-bold">
+                                    {{ getSureliIsUyariMetni(kayit) }}
+                                  </p>
+                                }
                                 @if (kayit.anaEvrakIsmi) {
                                   <p class="text-xs text-slate-400 mt-1">Bağlı evrak: {{ kayit.anaEvrakIsmi }}</p>
                                 }
@@ -1295,11 +1300,11 @@
                             <button (click)="ajandaKaydinaGit(kayit)" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-slate-50 transition-colors">
                               <div class="flex items-start justify-between gap-3">
                                 <div class="min-w-0">
-                                  <p class="text-xs font-black text-slate-800 truncate">{{ kayit.baslik }}</p>
+                                  <p class="app-agenda-record-title text-sm text-slate-900 truncate">{{ kayit.baslik }}</p>
                                   <p class="text-[11px] text-slate-500 mt-1 truncate">{{ kayit.taraflar }}</p>
                                   @if (kayit.saat) { <p class="text-[10px] font-bold text-slate-400 mt-1">Saat {{ formatSaat(kayit.saat) }}</p> }
                                 </div>
-                                <span [class]="getAjandaKalanGunClass(kayit.tarih)" class="app-agenda-pill px-2 py-1 rounded-full text-[10px] shrink-0">{{ ajandaDurumMetni(kayit.tarih) }}</span>
+                                <span [class]="getAjandaDurumClass(kayit)" class="app-agenda-pill px-2 py-1 rounded-full border text-[10px] shrink-0">{{ getAjandaDurumMetni(kayit) }}</span>
                               </div>
                               <div class="flex items-center justify-between mt-3 text-[11px] text-slate-500">
                                 <span>{{ getAjandaTurEtiketi(kayit.tur) }}</span>

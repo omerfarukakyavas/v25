@@ -417,7 +417,7 @@ export class AppComponent implements OnInit {
   gunlukOzetAjandaSatiri(kayit: AjandaKaydi) {
     const etiket = `${this.getAjandaKaynakEtiketi(kayit.kaynak)} / ${this.getAjandaTurEtiketi(kayit.tur)}`;
     const tarih = this.formatTarihSaatKisa(kayit.tarih, kayit.saat);
-    return `- [${etiket}] ${kayit.baslik} | ${kayit.taraflar} | ${tarih} | ${this.ajandaDurumMetni(kayit.tarih)}`;
+    return `- [${etiket}] ${kayit.baslik} | ${kayit.taraflar} | ${tarih} | ${this.getAjandaDurumMetni(kayit)}`;
   }
 
   gunlukOzetSureSatiri(sure: ArabuluculukSureSayaci) {
@@ -459,7 +459,7 @@ export class AppComponent implements OnInit {
       baslik: kayit.baslik,
       altBaslik: kayit.taraflar || `${this.getAjandaKaynakEtiketi(kayit.kaynak)} kaydı`,
       meta: `${this.getAjandaKaynakEtiketi(kayit.kaynak)} • ${this.getAjandaTurEtiketi(kayit.tur)} • ${this.formatTarihSaatKisa(kayit.tarih, kayit.saat)}`,
-      rozet: this.ajandaDurumMetni(kayit.tarih),
+      rozet: this.getAjandaDurumMetni(kayit),
       ton,
       eylem: () => this.ajandaKaydinaGit(kayit),
       eylemEtiketi: 'İşleme git'
@@ -1485,6 +1485,41 @@ export class AppComponent implements OnInit {
     if (fark === 0) return 'bg-amber-100 text-amber-700';
     if (fark <= 7) return 'bg-blue-100 text-blue-700';
     return 'bg-slate-100 text-slate-600';
+  }
+
+  getAjandaDurumMetni(kayit: AjandaKaydi) {
+    const fark = this.ajandaGunFarki(kayit.tarih);
+    if (kayit.tur !== 'sureliIs') return this.ajandaDurumMetni(kayit.tarih);
+    if (!isFinite(fark)) return 'Tarih yok';
+    if (fark < 0) return `${Math.abs(fark)} gün geçti`;
+    if (fark === 0) return 'Bugün son gün';
+    if (fark <= 5) return `${fark} gün kaldı`;
+    return `${fark} gün kaldı`;
+  }
+
+  getAjandaDurumClass(kayit: AjandaKaydi) {
+    const fark = this.ajandaGunFarki(kayit.tarih);
+    if (kayit.tur === 'sureliIs') {
+      if (fark < 0) return 'app-agenda-critical-pulse border-red-200 bg-red-600 text-white';
+      if (fark <= 2) return 'app-agenda-critical-pulse border-red-200 bg-red-600 text-white';
+      if (fark <= 5) return 'border-amber-300 bg-amber-100 text-amber-800';
+    }
+    return `${this.getAjandaKalanGunClass(kayit.tarih)} border-transparent`;
+  }
+
+  getSureliIsUyariMetni(kayit: AjandaKaydi) {
+    if (kayit.tur !== 'sureliIs') return '';
+    const fark = this.ajandaGunFarki(kayit.tarih);
+    if (fark < 0) return `Süreli iş ${Math.abs(fark)} gün gecikti`;
+    if (fark === 0) return 'Bugün son gün';
+    if (fark <= 5) return `Süreli iş için ${fark} gün kaldı`;
+    return '';
+  }
+
+  getSureliIsUyariClass(kayit: AjandaKaydi) {
+    const fark = this.ajandaGunFarki(kayit.tarih);
+    if (fark < 0 || fark <= 2) return 'app-agenda-critical-pulse border-red-200 bg-red-600 text-white';
+    return 'border-amber-300 bg-amber-50 text-amber-800';
   }
 
   getArabuluculukSureKurali(dosya?: Partial<ArabuluculukDosyasi> | null) {
