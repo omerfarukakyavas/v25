@@ -3608,13 +3608,23 @@
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-3">Taraflar <span class="text-red-500">*</span></label>
                 <div class="space-y-3">
                   @for(taraf of islemGorenArabuluculuk.taraflar; track $index) {
-                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div
+                      [class]="taraf.tip === 'Başvurucu' ? 'app-arb-party-card app-arb-party-card--basvurucu rounded-2xl border p-4 shadow-sm' : 'app-arb-party-card app-arb-party-card--diger rounded-2xl border p-4 shadow-sm'">
+                      <div class="app-arb-party-card__header">
+                        <div class="app-arb-party-card__header-main">
+                          <span class="app-arb-party-card__badge">{{ taraf.tip }}</span>
+                          <div class="app-arb-party-card__header-copy">
+                            <p class="app-arb-party-card__title">{{ taraf.tip === 'Başvurucu' ? 'Başvuru sahibi blok' : 'Karşı taraf blok' }}</p>
+                            <p class="app-arb-party-card__subtitle">Taraf {{ $index + 1 }} · Kart içindeki bilgiler bu tarafa aittir.</p>
+                          </div>
+                        </div>
+                      </div>
                       <div class="grid gap-3 md:grid-cols-[170px_minmax(0,1fr)_72px] md:items-end">
                         <div>
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Taraf Tipi</label>
                           <select [(ngModel)]="taraf.tip" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 outline-none shadow-sm"><option value="Başvurucu">Başvurucu</option><option value="Diğer Taraf">Diğer Taraf</option></select>
                         </div>
-                        <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500">
+                        <div class="app-arb-party-card__guide rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500">
                           Tarafı ve varsa vekili sistemden arayıp seçebilir, isterseniz manuel olarak da girebilirsiniz.
                         </div>
                         <button (click)="tarafSil($index)" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 md:self-end">Sil</button>
@@ -3660,7 +3670,7 @@
                           <input [(ngModel)]="taraf.eposta" type="email" placeholder="ornek@alanadi.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                         </div>
                       </div>
-                      <div class="mt-4 rounded-xl border border-violet-100 bg-violet-50/60 p-3">
+                      <div class="app-arb-party-card__proxy mt-4 rounded-xl border border-violet-100 bg-violet-50/60 p-3">
                         <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                           <div>
                             <label class="mb-1 block text-[10px] font-bold uppercase text-violet-700">Sistemden Vekil Ara</label>
