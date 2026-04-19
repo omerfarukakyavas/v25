@@ -3289,6 +3289,15 @@ export class AppComponent implements OnInit {
     const hedef = this.sablonAramaMetniHazirla(isim);
     return (this.aktifDosya?.evraklar || []).some(evrak => this.sablonAramaMetniHazirla(evrak.isim) === hedef);
   }
+  aktifDosyadaEvrakAdlarindanBiriVarMi(isimler: string[]) {
+    const hedefler = new Set(
+      (isimler || [])
+        .map(isim => this.sablonAramaMetniHazirla(isim))
+        .filter(Boolean)
+    );
+    if (!hedefler.size) return false;
+    return (this.aktifDosya?.evraklar || []).some(evrak => hedefler.has(this.sablonAramaMetniHazirla(evrak.isim)));
+  }
   arabuluculukSablonuBul(isim: string) {
     const hedef = this.sablonAramaMetniHazirla(isim);
     return this.sablonlar.arabuluculuk.find(sablon => this.sablonAramaMetniHazirla(sablon.isim) === hedef)
@@ -3331,23 +3340,48 @@ export class AppComponent implements OnInit {
   getBilgilendirmeTutanagiSeciliSablonIsmi() {
     return this.getBilgilendirmeTutanagiSablonu()?.isim || GOOGLE_DOCS_CONFIG.bilgilendirmeTutanagiTemplateName;
   }
+  getAktifArabuluculukTarafSayisi() {
+    return (this.getAktifArabuluculukDosyasi()?.taraflar || []).length;
+  }
+  getArabuluculukCokTarafliSablonAdaylari(temelIsim: string, tarafSayisi = this.getAktifArabuluculukTarafSayisi()) {
+    const sablonTarafSayisi = tarafSayisi >= 4 ? 4 : tarafSayisi;
+    const adaylar = [temelIsim];
+    if (sablonTarafSayisi >= 3) {
+      adaylar.unshift(`${temelIsim} - ${sablonTarafSayisi} Taraflı`);
+    }
+    return [...new Set(adaylar)];
+  }
+  getArabuluculukCokTarafliSablonBeklentisi(temelIsim: string, tarafSayisi = this.getAktifArabuluculukTarafSayisi()) {
+    return this.getArabuluculukCokTarafliSablonAdaylari(temelIsim, tarafSayisi)[0] || temelIsim;
+  }
+  getArabuluculukCokTarafliSablonu(temelIsim: string, tarafSayisi = this.getAktifArabuluculukTarafSayisi()) {
+    for (const aday of this.getArabuluculukCokTarafliSablonAdaylari(temelIsim, tarafSayisi)) {
+      const sablon = this.arabuluculukSablonuBul(aday);
+      if (sablon) return sablon;
+    }
+    return null;
+  }
+  getArabuluculukCokTarafliSeciliSablonIsmi(temelIsim: string, tarafSayisi = this.getAktifArabuluculukTarafSayisi()) {
+    return this.getArabuluculukCokTarafliSablonu(temelIsim, tarafSayisi)?.isim
+      || this.getArabuluculukCokTarafliSablonBeklentisi(temelIsim, tarafSayisi);
+  }
   getArabuluculukBelirlemeTutanagiSablonu() {
-    return this.arabuluculukSablonuBul(GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName);
+    return this.getArabuluculukCokTarafliSablonu(GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName);
   }
   getArabuluculukBelirlemeTutanagiSeciliSablonIsmi() {
-    return this.getArabuluculukBelirlemeTutanagiSablonu()?.isim || GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName;
+    return this.getArabuluculukCokTarafliSeciliSablonIsmi(GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName);
   }
   getSonTutanakIhtiyariAnlasmaSablonu() {
-    return this.arabuluculukSablonuBul(GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName);
+    return this.getArabuluculukCokTarafliSablonu(GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName);
   }
   getSonTutanakIhtiyariAnlasmaSeciliSablonIsmi() {
-    return this.getSonTutanakIhtiyariAnlasmaSablonu()?.isim || GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName;
+    return this.getArabuluculukCokTarafliSeciliSablonIsmi(GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName);
   }
   getIhtiyariAnlasmaBelgesiSablonu() {
-    return this.arabuluculukSablonuBul(GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName);
+    return this.getArabuluculukCokTarafliSablonu(GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName);
   }
   getIhtiyariAnlasmaBelgesiSeciliSablonIsmi() {
-    return this.getIhtiyariAnlasmaBelgesiSablonu()?.isim || GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName;
+    return this.getArabuluculukCokTarafliSeciliSablonIsmi(GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName);
   }
   aktifArabuluculukDosyasiIhtiyariMi() {
     return this.getAktifArabuluculukDosyasi()?.basvuruTuru === 'İhtiyari';
@@ -3365,9 +3399,6 @@ export class AppComponent implements OnInit {
   }
   getArabuluculukTopluDosyaSeciliSablonIsmi(tarafSayisi: number) {
     return this.getArabuluculukTopluDosyaSablonu(tarafSayisi)?.isim || this.getArabuluculukTopluDosyaSablonBeklentisi(tarafSayisi);
-  }
-  getAktifArabuluculukTarafSayisi() {
-    return (this.getAktifArabuluculukDosyasi()?.taraflar || []).length;
   }
   turkceTutarSayisinaCevir(deger?: string | number | null) {
     if (typeof deger === 'number') return Number.isFinite(deger) ? deger : 0;
@@ -3888,11 +3919,11 @@ export class AppComponent implements OnInit {
 
     const sablon = this.getArabuluculukBelirlemeTutanagiSablonu();
     if (!sablon?.url) {
-      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName}" adlı Google Docs şablonunu ekleyin.`);
+      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${this.getArabuluculukCokTarafliSablonBeklentisi(GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName)}" adlı Google Docs şablonunu ekleyin. İsterseniz standart "${GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName}" şablonu da kullanılabilir.`);
       return;
     }
 
-    if (this.aktifDosyadaEvrakAdiVarMi(this.getArabuluculukBelirlemeTutanagiSeciliSablonIsmi())) {
+    if (this.aktifDosyadaEvrakAdlarindanBiriVarMi(this.getArabuluculukCokTarafliSablonAdaylari(GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName))) {
       this.bildirimGoster('info', 'Arabuluculuk belirleme tutanağı zaten var', 'Bu dosyada arabuluculuk belirleme tutanağı bağlantısı zaten bulunuyor.');
       return;
     }
@@ -3929,11 +3960,11 @@ export class AppComponent implements OnInit {
 
     const sablon = this.getSonTutanakIhtiyariAnlasmaSablonu();
     if (!sablon?.url) {
-      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName}" adlı Google Docs şablonunu ekleyin.`);
+      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${this.getArabuluculukCokTarafliSablonBeklentisi(GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName)}" adlı Google Docs şablonunu ekleyin. İsterseniz standart "${GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName}" şablonu da kullanılabilir.`);
       return;
     }
 
-    if (this.aktifDosyadaEvrakAdiVarMi(this.getSonTutanakIhtiyariAnlasmaSeciliSablonIsmi())) {
+    if (this.aktifDosyadaEvrakAdlarindanBiriVarMi(this.getArabuluculukCokTarafliSablonAdaylari(GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName))) {
       this.bildirimGoster('info', 'Son tutanak zaten var', 'Bu dosyada Son Tutanak İhtiyari Anlaşma bağlantısı zaten bulunuyor.');
       return;
     }
@@ -3970,11 +4001,11 @@ export class AppComponent implements OnInit {
 
     const sablon = this.getIhtiyariAnlasmaBelgesiSablonu();
     if (!sablon?.url) {
-      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName}" adlı Google Docs şablonunu ekleyin.`);
+      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${this.getArabuluculukCokTarafliSablonBeklentisi(GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName)}" adlı Google Docs şablonunu ekleyin. İsterseniz standart "${GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName}" şablonu da kullanılabilir.`);
       return;
     }
 
-    if (this.aktifDosyadaEvrakAdiVarMi(this.getIhtiyariAnlasmaBelgesiSeciliSablonIsmi())) {
+    if (this.aktifDosyadaEvrakAdlarindanBiriVarMi(this.getArabuluculukCokTarafliSablonAdaylari(GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName))) {
       this.bildirimGoster('info', 'Anlaşma belgesi zaten var', 'Bu dosyada ihtiyari anlaşma belgesi bağlantısı zaten bulunuyor.');
       return;
     }

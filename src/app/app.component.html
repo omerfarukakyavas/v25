@@ -1075,45 +1075,45 @@
                     }
                   </div>
                   <div class="hidden md:block">
-                      <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full min-w-max border-separate text-left [border-spacing:0_10px]">
+                      <div class="overflow-x-hidden">
+                        <table class="w-full table-fixed border-separate text-left [border-spacing:0_10px]">
                         <thead>
                           <tr class="bg-violet-50/80 border-b border-violet-100 text-violet-700 uppercase text-xs font-semibold tracking-wider">
-                            <th class="p-5">Numaralar</th><th class="p-5">Taraflar</th><th class="p-5">Büro / Türü</th><th class="p-5">Süre Sayacı</th><th class="p-5">Toplantı</th><th class="p-5">Durum</th><th class="p-5 text-right">İşlemler</th>
+                            <th class="w-[12%] p-4">Numaralar</th><th class="w-[22%] p-4">Taraflar</th><th class="w-[16%] p-4">Büro / Türü</th><th class="w-[20%] p-4">Süre Sayacı</th><th class="w-[14%] p-4">Toplantı</th><th class="w-[8%] p-4">Durum</th><th class="w-[8%] p-4 text-right">İşlemler</th>
                           </tr>
                         </thead>
                           <tbody>
                            @for (arb of filtrelenmisArabuluculuk; track arb.id) {
                             <tr [ngClass]="getArabuluculukListeZeminClass(arb.durum)" class="group arabuluculuk-liste-satir">
-                                <td class="p-5">
-                                   <div class="flex items-start gap-3">
-                                    <div class="w-1 self-stretch rounded-full bg-black/70"></div>
-                                     <div>
+                                <td class="p-4 align-top">
+                                   <div class="flex items-start gap-2">
+                                    <div class="w-px self-stretch rounded-full bg-slate-900/55"></div>
+                                     <div class="min-w-0">
                                      <div class="text-xs font-medium text-slate-700 flex items-center gap-1.5"><span class="text-[9px] font-bold text-violet-700 uppercase bg-violet-100 px-1.5 py-0.5 rounded">BÜRO</span><span>{{arb.buroNo || '-'}}</span></div>
                                      <div class="text-xs font-medium text-slate-700 flex items-center gap-1.5 mt-1.5"><span class="text-[9px] font-bold text-fuchsia-700 uppercase bg-fuchsia-100 px-1.5 py-0.5 rounded">ARB</span><span>{{arb.arabuluculukNo}}</span></div>
                                    </div>
                                  </div>
                               </td>
-                              <td class="p-5">
-                                <div class="flex flex-col gap-1 rounded-xl border border-violet-100 bg-violet-50/60 px-3 py-2">
+                              <td class="p-4 align-top">
+                                <div class="flex flex-col gap-1.5 rounded-xl border border-violet-100 bg-violet-50/60 px-3 py-2.5">
                                   @for (taraf of arb.taraflar; track taraf.id) {
-                                    <div class="flex items-center gap-1.5 text-sm">
+                                    <div class="flex items-start gap-1.5 text-sm">
                                       <span [class]="taraf.tip === 'Başvurucu' ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'" class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">{{taraf.tip}}</span>
-                                      <span class="text-slate-700 font-medium truncate max-w-[150px]">{{ taraf.isim }}</span>
+                                      <span class="break-words text-[13px] font-medium leading-5 text-slate-700">{{ taraf.isim }}</span>
                                     </div>
                                   }
                                 </div>
                               </td>
-                              <td class="p-5">
-                                <div class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 px-3 py-2">
-                                  <div class="text-slate-800 font-bold text-sm">{{ arb.buro }}</div>
-                                  <div class="text-xs font-medium text-slate-500 mt-1">{{ arb.basvuruTuru }} - {{ arb.uyusmazlikTuru }}</div>
+                              <td class="p-4 align-top">
+                                <div class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 px-3 py-2.5">
+                                  <div class="break-words text-sm font-bold text-slate-800">{{ arb.buro }}</div>
+                                  <div class="mt-1 break-words text-xs font-medium leading-5 text-slate-500">{{ arb.basvuruTuru }} - {{ arb.uyusmazlikTuru }}</div>
                                 </div>
                               </td>
-                              <td class="p-5">
+                              <td class="p-4 align-top">
                                 @if (arb.basvuruTuru === 'Dava Şartı') {
                                   @if (getArabuluculukSureSayaci(arb); as sureSayaci) {
-                                    <div class="min-w-[220px] rounded-xl border border-violet-100 bg-white px-3 py-2 shadow-sm">
+                                    <div class="w-full rounded-xl border border-violet-100 bg-white px-3 py-2.5 shadow-sm">
                                       <div class="flex flex-wrap items-center gap-2">
                                         <span [class]="getArabuluculukSureAsamaClass(sureSayaci.asama)" class="rounded-full border px-2.5 py-1 text-[10px] font-black">{{ getArabuluculukSureAsamaEtiketi(sureSayaci) }}</span>
                                       </div>
@@ -1121,25 +1121,25 @@
                                       <p class="mt-1 text-[11px] leading-5 text-slate-500">{{ getArabuluculukSureListeDetayi(arb) }}</p>
                                     </div>
                                   } @else {
-                                    <div class="min-w-[220px] rounded-xl border border-dashed border-violet-200 bg-violet-50/60 px-3 py-2">
+                                    <div class="w-full rounded-xl border border-dashed border-violet-200 bg-violet-50/60 px-3 py-2.5">
                                       <p class="text-sm font-semibold text-violet-700">Görevlendirme tarihi bekleniyor</p>
                                       <p class="mt-1 text-[11px] leading-5 text-violet-700/80">{{ getArabuluculukSureListeDetayi(arb) }}</p>
                                     </div>
                                   }
                                 } @else {
-                                  <div class="min-w-[220px] rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2">
+                                  <div class="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5">
                                     <p class="text-sm font-semibold text-slate-800">İhtiyari dosya</p>
                                     <p class="mt-1 text-[11px] leading-5 text-slate-500">{{ getArabuluculukSureListeDetayi(arb) }}</p>
                                   </div>
                                 }
                               </td>
-                              <td class="p-5 text-slate-600">
+                              <td class="p-4 align-top text-slate-600">
                                  @if(arb.toplantiTarihi) { 
-                                 <span class="inline-flex items-center gap-1.5 rounded-xl border border-violet-200 bg-white px-3 py-2 text-sm font-semibold text-violet-700 shadow-sm"><svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {{ formatTarihSaat(arb.toplantiTarihi, arb.toplantiSaati) }}</span> 
+                                 <span class="inline-flex max-w-full items-center gap-1.5 rounded-xl border border-violet-200 bg-white px-3 py-2 text-xs font-semibold leading-5 text-violet-700 shadow-sm"><svg class="h-4 w-4 shrink-0 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> <span class="break-words">{{ formatTarihSaat(arb.toplantiTarihi, arb.toplantiSaati) }}</span></span> 
                                    @if(arb.toplantiYontemi) { <div class="text-[10px] text-purple-600 font-bold bg-purple-50 inline-block px-1.5 py-0.5 rounded mt-1">{{ arb.toplantiYontemi }}</div> }
                                  } @else { <span class="text-slate-400 text-sm">-</span> }
                               </td>
-                              <td class="p-5">
+                              <td class="p-4 align-top">
                                 <div class="relative inline-block">
                                   <select [ngModel]="arb.durum" (ngModelChange)="arabuluculukDurumGuncelle(arb, $event)" [class]="getArabuluculukDurumClass(arb.durum)" class="pl-3 pr-7 py-1 rounded-full text-xs font-bold border cursor-pointer hover:shadow-md transition-all outline-none appearance-none">
                                     <option value="Hazırlık" class="text-slate-700 bg-white">Hazırlık</option><option value="Müzakere" class="text-slate-700 bg-white">Müzakere</option><option value="İmza" class="text-slate-700 bg-white">İmza</option><option value="Tahsilat" class="text-slate-700 bg-white">Tahsilat</option><option value="Evrak Yükleme" class="text-slate-700 bg-white">Evrak Yükleme</option><option value="Kapalı" class="text-slate-700 bg-white">Kapalı</option>
@@ -1147,16 +1147,16 @@
                                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 opacity-60"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
                                 </div>
                               </td>
-                              <td class="p-5 text-right">
-                                <div class="flex items-center justify-end gap-1">
+                              <td class="p-4 align-top text-right">
+                                <div class="flex flex-wrap items-center justify-end gap-0.5">
                                   @if (silinecekArabuluculukId === arb.id) {
                                     <span class="text-xs font-medium text-red-500 mr-2">Silinsin mi?</span>
                                     <button (click)="arabuluculukSil(arb.id)" class="bg-red-500 text-white hover:bg-red-600 p-1.5 rounded transition-colors">Onayla</button>
                                     <button (click)="silmeIptal()" class="bg-slate-200 text-slate-700 hover:bg-slate-300 p-1.5 rounded transition-colors">İptal</button>
                                   } @else {
-                                    <button (click)="arabuluculukDetayinaGit(arb)" class="text-purple-600 hover:bg-purple-50 p-2 rounded-lg transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg></button>
-                                    <button (click)="arabuluculukFormAc(arb)" class="text-amber-500 hover:bg-amber-50 p-2 rounded-lg transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
-                                    <button (click)="silmeOnayiIste(arb.id, 'arabuluculuk')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                                    <button (click)="arabuluculukDetayinaGit(arb)" class="rounded-lg p-1.5 text-purple-600 transition-colors hover:bg-purple-50"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg></button>
+                                    <button (click)="arabuluculukFormAc(arb)" class="rounded-lg p-1.5 text-amber-500 transition-colors hover:bg-amber-50"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
+                                    <button (click)="silmeOnayiIste(arb.id, 'arabuluculuk')" class="rounded-lg p-1.5 text-red-500 transition-colors hover:bg-red-50"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                                   }
                                 </div>
                               </td>
@@ -2138,14 +2138,14 @@
                               }
                             </div>
                           </div>
-                          <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Başvuru Türü</p><p class="font-medium text-slate-800">{{ aktifDosya.basvuruTuru }}</p></div>
-                          <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Uyuşmazlık Türü</p><p class="font-medium text-slate-800">{{ aktifDosya.uyusmazlikTuru }}</p></div>
-                          <div class="col-span-2"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Başvuru Konusu</p><p class="font-medium text-slate-800 whitespace-pre-line">{{ aktifDosya.basvuruKonusu || '-' }}</p></div>
-                          <div class="col-span-2"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Anlaşma Şartları</p><p class="font-medium text-slate-800 whitespace-pre-line">{{ getAktifArabuluculukDosyasi()?.anlasmaSartlari || '-' }}</p></div>
+                          <div class="col-span-2 sm:col-span-1"><p class="mb-1 text-sm font-black tracking-[0.08em] text-slate-900">Başvuru Türü</p><p class="text-[13px] font-normal text-slate-800">{{ aktifDosya.basvuruTuru }}</p></div>
+                          <div class="col-span-2 sm:col-span-1"><p class="mb-1 text-sm font-black tracking-[0.08em] text-slate-900">Uyuşmazlık Türü</p><p class="text-[13px] font-normal text-slate-800">{{ aktifDosya.uyusmazlikTuru }}</p></div>
+                          <div class="col-span-2"><p class="mb-1 text-sm font-black tracking-[0.08em] text-slate-900">Başvuru Konusu</p><p class="whitespace-pre-line text-[13px] font-normal leading-6 text-slate-800">{{ aktifDosya.basvuruKonusu || '-' }}</p></div>
+                          <div class="col-span-2"><p class="mb-1 text-sm font-black tracking-[0.08em] text-slate-900">Anlaşma Şartları</p><p class="whitespace-pre-line text-[13px] font-normal leading-6 text-slate-800">{{ getAktifArabuluculukDosyasi()?.anlasmaSartlari || '-' }}</p></div>
                           <div class="col-span-2 grid gap-3 sm:grid-cols-3">
-                            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Büroya Başvuru Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.buroyaBasvuruTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.buroyaBasvuruTarihi) : '-' }}</p></div>
-                            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Görevlendirme Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi) : '-' }}</p></div>
-                            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Tutanak Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi) : '-' }}</p></div>
+                            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="mb-1 text-xs font-black tracking-[0.08em] text-slate-900">Büroya Başvuru Tarihi</p><p class="text-[13px] font-normal text-slate-800">{{ getAktifArabuluculukDosyasi()?.buroyaBasvuruTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.buroyaBasvuruTarihi) : '-' }}</p></div>
+                            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="mb-1 text-xs font-black tracking-[0.08em] text-slate-900">Görevlendirme Tarihi</p><p class="text-[13px] font-normal text-slate-800">{{ getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi) : '-' }}</p></div>
+                            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="mb-1 text-xs font-black tracking-[0.08em] text-slate-900">Tutanak Tarihi</p><p class="text-[13px] font-normal text-slate-800">{{ getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi) : '-' }}</p></div>
                           </div>
                           @if (arabuluculukAnlasmaOdemeBilgileriVarMi(getAktifArabuluculukDosyasi())) {
                             <div class="col-span-2 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
@@ -3671,24 +3671,24 @@
                 <p class="mt-2 text-sm leading-6 text-slate-500">Başvuru türü, uyuşmazlık başlığı ve taraf listesi daha net bir iş akışında sunulur.</p>
                 <div class="mt-4 grid gap-4 md:grid-cols-2">
                 <div>
-                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Başvuru Türü <span class="text-red-500">*</span></label>
+                  <label class="mb-1 block text-[13px] font-black uppercase tracking-[0.08em] text-slate-900">Başvuru Türü <span class="text-red-500">*</span></label>
                   <select [(ngModel)]="islemGorenArabuluculuk.basvuruTuru" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
                     <option value="Dava Şartı">Dava Şartı</option><option value="İhtiyari">İhtiyari</option>
                   </select>
                 </div>
                 <div>
-                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Uyuşmazlık Türü <span class="text-red-500">*</span></label>
+                  <label class="mb-1 block text-[13px] font-black uppercase tracking-[0.08em] text-slate-900">Uyuşmazlık Türü <span class="text-red-500">*</span></label>
                   <select [ngModel]="islemGorenArabuluculuk.uyusmazlikTuru" (ngModelChange)="arabuluculukUyusmazlikTuruDegisti($event)" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
                     <option value="Kira">Kira</option><option value="İşçi İşveren">İşçi İşveren</option><option value="Ticari">Ticari</option><option value="Boşanma">Boşanma</option><option value="Ortaklığın Giderilmesi">Ortaklığın Giderilmesi</option><option value="Tüketici">Tüketici</option>
                   </select>
                 </div>
                 </div>
                 <div class="mt-4">
-                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Başvuru Konusu</label>
+                  <label class="mb-1 block text-[13px] font-black uppercase tracking-[0.08em] text-slate-900">Başvuru Konusu</label>
                   <textarea [ngModel]="islemGorenArabuluculuk.basvuruKonusu" (ngModelChange)="arabuluculukBasvuruKonusuDegisti($event)" rows="3" placeholder="Örn: Ayıplı hizmet nedeniyle bedel iadesi ve zarar tazmini talebi" class="w-full resize-y px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white"></textarea>
                 </div>
                 <div class="mt-4">
-                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Anlaşma Şartları</label>
+                  <label class="mb-1 block text-[13px] font-black uppercase tracking-[0.08em] text-slate-900">Anlaşma Şartları</label>
                   <textarea [(ngModel)]="islemGorenArabuluculuk.anlasmaSartlari" rows="4" [attr.placeholder]="'Tarafların hangi şartlarda anlaştığını yazın. Bu metin Google Docs içinde {{ANLASMA_SARTLARI}} yer tutucusuna aktarılır.'" class="w-full resize-y px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white"></textarea>
                 </div>
                 <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
