@@ -198,6 +198,7 @@ export class AppComponent implements OnInit {
   topluDosyaOlusturuluyor = false;
   topluDosyaOlusturulanTarafSayisi: number | null = null;
   topluDosyaSecenekleriAcik = false;
+  arabuluculukBelgeSecenekMenusu: 'belirleme' | 'sonTutanak' | 'anlasmaBelgesi' | null = null;
   googleDocsYetkiIstendi = false;
   gunlukOzetYakinGunSayisi = 30;
   gunlukOzetMetni = '';
@@ -670,6 +671,7 @@ export class AppComponent implements OnInit {
   sayfaDegistir(s: SayfaTipi) {
     this.aktifSayfa = s;
     this.topluDosyaSecenekleriAcik = false;
+    this.arabuluculukBelgeSecenekMenusu = null;
     if (s !== 'detay') this.seciliDava = null;
     if (s !== 'icraDetay') this.seciliIcra = null;
     if (s !== 'arabuluculukDetay') this.seciliArabuluculuk = null;
@@ -3346,7 +3348,7 @@ export class AppComponent implements OnInit {
   getArabuluculukCokTarafliSablonAdaylari(temelIsim: string, tarafSayisi = this.getAktifArabuluculukTarafSayisi()) {
     const sablonTarafSayisi = tarafSayisi >= 4 ? 4 : tarafSayisi;
     const adaylar = [temelIsim];
-    if (sablonTarafSayisi >= 3) {
+    if (sablonTarafSayisi >= 2) {
       adaylar.unshift(`${temelIsim} - ${sablonTarafSayisi} Taraflı`);
     }
     return [...new Set(adaylar)];
@@ -3399,6 +3401,13 @@ export class AppComponent implements OnInit {
   }
   getArabuluculukTopluDosyaSeciliSablonIsmi(tarafSayisi: number) {
     return this.getArabuluculukTopluDosyaSablonu(tarafSayisi)?.isim || this.getArabuluculukTopluDosyaSablonBeklentisi(tarafSayisi);
+  }
+  arabuluculukBelgeSecenekMenusunuAcKapat(menu: 'belirleme' | 'sonTutanak' | 'anlasmaBelgesi') {
+    this.topluDosyaSecenekleriAcik = false;
+    this.arabuluculukBelgeSecenekMenusu = this.arabuluculukBelgeSecenekMenusu === menu ? null : menu;
+  }
+  arabuluculukBelgeSecenekMenusunuKapat() {
+    this.arabuluculukBelgeSecenekMenusu = null;
   }
   turkceTutarSayisinaCevir(deger?: string | number | null) {
     if (typeof deger === 'number') return Number.isFinite(deger) ? deger : 0;
@@ -3908,7 +3917,7 @@ export class AppComponent implements OnInit {
       this.cdr.detectChanges();
     }
   }
-  async arabuluculukBelirlemeTutanagiOlustur() {
+  async arabuluculukBelirlemeTutanagiOlustur(tarafSayisi = this.getAktifArabuluculukTarafSayisi()) {
     if (this.arabuluculukBelirlemeTutanagiOlusturuluyor) return;
 
     const dosya = this.getAktifArabuluculukDosyasi();
@@ -3917,13 +3926,13 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    const sablon = this.getArabuluculukBelirlemeTutanagiSablonu();
+    const sablon = this.getArabuluculukCokTarafliSablonu(GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName, tarafSayisi);
     if (!sablon?.url) {
-      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${this.getArabuluculukCokTarafliSablonBeklentisi(GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName)}" adlı Google Docs şablonunu ekleyin. İsterseniz standart "${GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName}" şablonu da kullanılabilir.`);
+      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${this.getArabuluculukCokTarafliSablonBeklentisi(GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName, tarafSayisi)}" adlı Google Docs şablonunu ekleyin. İsterseniz standart "${GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName}" şablonu da kullanılabilir.`);
       return;
     }
 
-    if (this.aktifDosyadaEvrakAdlarindanBiriVarMi(this.getArabuluculukCokTarafliSablonAdaylari(GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName))) {
+    if (this.aktifDosyadaEvrakAdlarindanBiriVarMi(this.getArabuluculukCokTarafliSablonAdaylari(GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName, tarafSayisi))) {
       this.bildirimGoster('info', 'Arabuluculuk belirleme tutanağı zaten var', 'Bu dosyada arabuluculuk belirleme tutanağı bağlantısı zaten bulunuyor.');
       return;
     }
@@ -3937,6 +3946,7 @@ export class AppComponent implements OnInit {
         GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName,
         'Arabuluculuk Belirleme Tutanağı'
       );
+      this.arabuluculukBelgeSecenekMenusunuKapat();
     } catch (e: any) {
       this.bildirimGoster('error', 'Arabuluculuk belirleme tutanağı oluşturulamadı', e?.message || 'Google Docs bağlantısını kontrol edip tekrar deneyin.');
     } finally {
@@ -3944,7 +3954,7 @@ export class AppComponent implements OnInit {
       this.cdr.detectChanges();
     }
   }
-  async sonTutanakIhtiyariAnlasmaOlustur() {
+  async sonTutanakIhtiyariAnlasmaOlustur(tarafSayisi = this.getAktifArabuluculukTarafSayisi()) {
     if (this.sonTutanakIhtiyariAnlasmaOlusturuluyor) return;
 
     const dosya = this.getAktifArabuluculukDosyasi();
@@ -3958,13 +3968,13 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    const sablon = this.getSonTutanakIhtiyariAnlasmaSablonu();
+    const sablon = this.getArabuluculukCokTarafliSablonu(GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName, tarafSayisi);
     if (!sablon?.url) {
-      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${this.getArabuluculukCokTarafliSablonBeklentisi(GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName)}" adlı Google Docs şablonunu ekleyin. İsterseniz standart "${GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName}" şablonu da kullanılabilir.`);
+      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${this.getArabuluculukCokTarafliSablonBeklentisi(GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName, tarafSayisi)}" adlı Google Docs şablonunu ekleyin. İsterseniz standart "${GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName}" şablonu da kullanılabilir.`);
       return;
     }
 
-    if (this.aktifDosyadaEvrakAdlarindanBiriVarMi(this.getArabuluculukCokTarafliSablonAdaylari(GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName))) {
+    if (this.aktifDosyadaEvrakAdlarindanBiriVarMi(this.getArabuluculukCokTarafliSablonAdaylari(GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName, tarafSayisi))) {
       this.bildirimGoster('info', 'Son tutanak zaten var', 'Bu dosyada Son Tutanak İhtiyari Anlaşma bağlantısı zaten bulunuyor.');
       return;
     }
@@ -3978,6 +3988,7 @@ export class AppComponent implements OnInit {
         GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName,
         'Son Tutanak İhtiyari Anlaşma'
       );
+      this.arabuluculukBelgeSecenekMenusunuKapat();
     } catch (e: any) {
       this.bildirimGoster('error', 'Son tutanak oluşturulamadı', e?.message || 'Google Docs bağlantısını kontrol edip tekrar deneyin.');
     } finally {
@@ -3985,7 +3996,7 @@ export class AppComponent implements OnInit {
       this.cdr.detectChanges();
     }
   }
-  async ihtiyariAnlasmaBelgesiOlustur() {
+  async ihtiyariAnlasmaBelgesiOlustur(tarafSayisi = this.getAktifArabuluculukTarafSayisi()) {
     if (this.ihtiyariAnlasmaBelgesiOlusturuluyor) return;
 
     const dosya = this.getAktifArabuluculukDosyasi();
@@ -3999,13 +4010,13 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    const sablon = this.getIhtiyariAnlasmaBelgesiSablonu();
+    const sablon = this.getArabuluculukCokTarafliSablonu(GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName, tarafSayisi);
     if (!sablon?.url) {
-      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${this.getArabuluculukCokTarafliSablonBeklentisi(GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName)}" adlı Google Docs şablonunu ekleyin. İsterseniz standart "${GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName}" şablonu da kullanılabilir.`);
+      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${this.getArabuluculukCokTarafliSablonBeklentisi(GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName, tarafSayisi)}" adlı Google Docs şablonunu ekleyin. İsterseniz standart "${GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName}" şablonu da kullanılabilir.`);
       return;
     }
 
-    if (this.aktifDosyadaEvrakAdlarindanBiriVarMi(this.getArabuluculukCokTarafliSablonAdaylari(GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName))) {
+    if (this.aktifDosyadaEvrakAdlarindanBiriVarMi(this.getArabuluculukCokTarafliSablonAdaylari(GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName, tarafSayisi))) {
       this.bildirimGoster('info', 'Anlaşma belgesi zaten var', 'Bu dosyada ihtiyari anlaşma belgesi bağlantısı zaten bulunuyor.');
       return;
     }
@@ -4019,6 +4030,7 @@ export class AppComponent implements OnInit {
         GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName,
         'İhtiyari Anlaşma Belgesi'
       );
+      this.arabuluculukBelgeSecenekMenusunuKapat();
     } catch (e: any) {
       this.bildirimGoster('error', 'Anlaşma belgesi oluşturulamadı', e?.message || 'Google Docs bağlantısını kontrol edip tekrar deneyin.');
     } finally {
