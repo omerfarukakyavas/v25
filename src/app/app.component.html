@@ -2147,6 +2147,33 @@
                             <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Görevlendirme Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi) : '-' }}</p></div>
                             <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Tutanak Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi) : '-' }}</p></div>
                           </div>
+                          @if (arabuluculukAnlasmaOdemeBilgileriVarMi(getAktifArabuluculukDosyasi())) {
+                            <div class="col-span-2 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
+                              <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                  <p class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Anlaşma ve Ödeme Kalemleri</p>
+                                  <p class="mt-1 text-sm font-medium text-slate-700">Bu blok, şablonlarda kullanılan ek ödeme ve işçilik kalemlerini topluca gösterir.</p>
+                                </div>
+                                <span class="inline-flex rounded-full border border-emerald-200 bg-white px-3 py-1 text-[11px] font-bold text-emerald-700">Yer tutucuya hazır</span>
+                              </div>
+                              <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">İşe Giriş Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.iseGirisTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.iseGirisTarihi) : '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">İşten Çıkış Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.istenCikisTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.istenCikisTarihi) : '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Ödeme Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.odemeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.odemeTarihi) : '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Ödenecek Toplam Tutar Rakamla</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.odenecekToplamTutarRakamla || '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3 sm:col-span-2"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Ödenecek Toplam Tutar Yazıyla</p><p class="font-medium text-slate-800 whitespace-pre-line">{{ getAktifArabuluculukDosyasi()?.odenecekToplamTutarYaziyla || '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Arabulucu Ücreti Tutarı</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.arabulucuUcretiTutari || '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Arabulucu Ücreti Ödeme Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.arabulucuUcretiOdemeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.arabulucuUcretiOdemeTarihi) : '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Kıdem Tazminatı Tutarı</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.kidemTazminatiTutari || '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">İhbar Tazminatı Tutarı</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.ihbarTazminatiTutari || '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Yıllık Ücretli İzin Tutarı</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.yillikUcretliIzinTutari || '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Bakiye Ücret Alacağı</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.bakiyeUcretAlacagi || '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Prim Alacağı</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.primAlacagi || '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">İşe Başlatmama ve Boşta Geçen Süre Alacağı</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.iseBaslatmamaVeBostaGecenSureAlacagi || '-' }}</p></div>
+                                <div class="rounded-lg border border-emerald-100 bg-white p-3"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Ek Ödeme</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.ekOdeme || '-' }}</p></div>
+                              </div>
+                            </div>
+                          }
                           @if (getAktifArabuluculukDosyasi()?.basvuruTuru !== 'Dava Şartı') {
                             <div class="col-span-2 rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm">
                               <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -3627,6 +3654,73 @@
                   <div>
                     <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Tutanağın Düzenlendiği Tarih</label>
                     <input [(ngModel)]="islemGorenArabuluculuk.tutanakDuzenlemeTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                  </div>
+                </div>
+                <div class="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 shadow-sm">
+                  <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p class="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Anlaşma ve Ödeme Kalemleri</p>
+                      <p class="mt-1 text-sm leading-6 text-slate-600">Bu alanlar özellikle işçilik ve ihtiyari anlaşma belgelerinde kullanılacak ek verileri tutar.</p>
+                    </div>
+                    <span class="inline-flex rounded-full border border-emerald-200 bg-white px-3 py-1 text-[11px] font-bold text-emerald-700">Yer tutucuya bağlı</span>
+                  </div>
+                  <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">İşe Giriş Tarihi</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.iseGirisTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">İşten Çıkış Tarihi</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.istenCikisTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Ödeme Tarihi</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.odemeTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Ödenecek Toplam Tutar Rakamla</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.odenecekToplamTutarRakamla" type="text" placeholder="Örn: 125.000,00 TL" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div class="sm:col-span-2 xl:col-span-2">
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Ödenecek Toplam Tutar Yazıyla</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.odenecekToplamTutarYaziyla" type="text" placeholder="Örn: Yüz yirmi beş bin Türk lirası" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Arabulucu Ücreti Tutarı</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.arabulucuUcretiTutari" type="text" placeholder="Örn: 18.000,00 TL" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Arabulucu Ücreti Ödeme Tarihi</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.arabulucuUcretiOdemeTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Kıdem Tazminatı Tutarı</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.kidemTazminatiTutari" type="text" placeholder="Örn: 45.000,00 TL" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">İhbar Tazminatı Tutarı</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.ihbarTazminatiTutari" type="text" placeholder="Örn: 22.500,00 TL" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Yıllık Ücretli İzin Tutarı</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.yillikUcretliIzinTutari" type="text" placeholder="Örn: 8.500,00 TL" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Bakiye Ücret Alacağı</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.bakiyeUcretAlacagi" type="text" placeholder="Örn: 6.250,00 TL" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Prim Alacağı</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.primAlacagi" type="text" placeholder="Örn: 4.000,00 TL" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">İşe Başlatmama ve Boşta Geçen Süre Alacağı</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.iseBaslatmamaVeBostaGecenSureAlacagi" type="text" placeholder="Örn: 30.000,00 TL" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
+                    <div>
+                      <label class="mb-1 flex min-h-[2.5rem] items-end text-xs font-bold uppercase text-slate-500">Ek Ödeme</label>
+                      <input [(ngModel)]="islemGorenArabuluculuk.ekOdeme" type="text" placeholder="Örn: 5.000,00 TL" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    </div>
                   </div>
                 </div>
 

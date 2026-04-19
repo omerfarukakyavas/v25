@@ -131,4 +131,18 @@ export interface ArabuluculukDosyasi {
   tutanakDuzenlemeTarihi?: string;
   hizmetUcretiStopajli?: boolean;
   anlasmaSartlari?: string;
+  iseGirisTarihi?: string;
+  istenCikisTarihi?: string;
+  odemeTarihi?: string;
+  odenecekToplamTutarRakamla?: string;
+  odenecekToplamTutarYaziyla?: string;
+  arabulucuUcretiTutari?: string;
+  arabulucuUcretiOdemeTarihi?: string;
+  kidemTazminatiTutari?: string;
+  ihbarTazminatiTutari?: string;
+  yillikUcretliIzinTutari?: string;
+  bakiyeUcretAlacagi?: string;
+  primAlacagi?: string;
+  iseBaslatmamaVeBostaGecenSureAlacagi?: string;
+  ekOdeme?: string;
 }
