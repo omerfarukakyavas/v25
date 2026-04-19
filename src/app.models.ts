@@ -20,6 +20,13 @@ export interface ArabuluculukTaraf {
   vekilBaroBilgisi?: string;
 }
 
+export interface ArabuluculukTaksit {
+  id: number;
+  sira: number;
+  tutar?: string;
+  odemeTarihi?: string;
+}
+
 export interface DavaTarafKaydi {
   id: number;
   isim: string;
@@ -139,10 +146,20 @@ export interface ArabuluculukDosyasi {
   arabulucuUcretiTutari?: string;
   arabulucuUcretiOdemeTarihi?: string;
   kidemTazminatiTutari?: string;
+  kidemTazminatiOdemeTarihi?: string;
   ihbarTazminatiTutari?: string;
+  ihbarTazminatiOdemeTarihi?: string;
   yillikUcretliIzinTutari?: string;
+  yillikUcretliIzinOdemeTarihi?: string;
   bakiyeUcretAlacagi?: string;
+  bakiyeUcretAlacagiOdemeTarihi?: string;
   primAlacagi?: string;
+  primAlacagiOdemeTarihi?: string;
   iseBaslatmamaVeBostaGecenSureAlacagi?: string;
+  iseBaslatmamaVeBostaGecenSureOdemeTarihi?: string;
   ekOdeme?: string;
+  ekOdemeOdemeTarihi?: string;
+  taksitleOdeme?: boolean;
+  taksitSayisi?: number;
+  taksitler?: ArabuluculukTaksit[];
 }

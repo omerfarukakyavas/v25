@@ -8,5 +8,8 @@ export const GOOGLE_DOCS_CONFIG = {
   bilgilendirmeTutanagiTemplateName: 'Bilgilendirme Tutanağı',
   arabuluculukBelirlemeTutanagiTemplateName: 'Arabuluculuk Belirleme Tutanağı',
   sonTutanakIhtiyariAnlasmaTemplateName: 'Son Tutanak İhtiyari Anlaşma',
-  ihtiyariAnlasmaBelgesiTemplateName: 'İhtiyari Anlaşma Belgesi'
+  ihtiyariAnlasmaBelgesiTemplateName: 'İhtiyari Anlaşma Belgesi',
+  topluDosyaIkiTarafliTemplateName: 'Toplu Dosya Oluştur - 2 Taraflı',
+  topluDosyaUcTarafliTemplateName: 'Toplu Dosya Oluştur - 3 Taraflı',
+  topluDosyaDortTarafliTemplateName: 'Toplu Dosya Oluştur - 4 Taraflı'
 };
