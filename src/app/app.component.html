@@ -2415,15 +2415,18 @@
                                        <button (click)="sonTutanakIhtiyariAnlasmaOlustur()" [disabled]="sonTutanakIhtiyariAnlasmaOlusturuluyor || !aktifArabuluculukDosyasiIhtiyariMi() || aktifDosyadaEvrakAdiVarMi(getSonTutanakIhtiyariAnlasmaSeciliSablonIsmi())" class="inline-flex items-center justify-center rounded-lg bg-rose-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-300">
                                          {{ sonTutanakIhtiyariAnlasmaOlusturuluyor ? 'Oluşturuluyor...' : 'Son Tutanak İhtiyari Anlaşma Oluştur' }}
                                        </button>
+                                       <button (click)="ihtiyariAnlasmaBelgesiOlustur()" [disabled]="ihtiyariAnlasmaBelgesiOlusturuluyor || !aktifArabuluculukDosyasiIhtiyariMi() || aktifDosyadaEvrakAdiVarMi(getIhtiyariAnlasmaBelgesiSeciliSablonIsmi())" class="inline-flex items-center justify-center rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-amber-300">
+                                         {{ ihtiyariAnlasmaBelgesiOlusturuluyor ? 'Oluşturuluyor...' : 'Anlaşma Belgesi Oluştur' }}
+                                       </button>
                                      </div>
                                    </div>
-                                   @if (!googleDocsEntegrasyonuHazirMi() || !aktifArabuluculukDosyasiIhtiyariMi() || aktifDosyadaEvrakAdiVarMi(getDavetMektubuSeciliSablonIsmi()) || aktifDosyadaEvrakAdiVarMi(getBilgilendirmeTutanagiSeciliSablonIsmi()) || aktifDosyadaEvrakAdiVarMi(getArabuluculukBelirlemeTutanagiSeciliSablonIsmi()) || aktifDosyadaEvrakAdiVarMi(getSonTutanakIhtiyariAnlasmaSeciliSablonIsmi())) {
+                                   @if (!googleDocsEntegrasyonuHazirMi() || !aktifArabuluculukDosyasiIhtiyariMi() || aktifDosyadaEvrakAdiVarMi(getDavetMektubuSeciliSablonIsmi()) || aktifDosyadaEvrakAdiVarMi(getBilgilendirmeTutanagiSeciliSablonIsmi()) || aktifDosyadaEvrakAdiVarMi(getArabuluculukBelirlemeTutanagiSeciliSablonIsmi()) || aktifDosyadaEvrakAdiVarMi(getSonTutanakIhtiyariAnlasmaSeciliSablonIsmi()) || aktifDosyadaEvrakAdiVarMi(getIhtiyariAnlasmaBelgesiSeciliSablonIsmi())) {
                                      <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
                                        @if (!googleDocsEntegrasyonuHazirMi()) {
                                          <span class="inline-flex rounded-full bg-rose-50 px-2.5 py-1 font-semibold text-rose-600 ring-1 ring-rose-200">Google yetki ayarı eksik</span>
                                        }
                                        @if (!aktifArabuluculukDosyasiIhtiyariMi()) {
-                                         <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700 ring-1 ring-slate-200">Son tutanak butonu yalnız ihtiyari dosyalarda aktif</span>
+                                         <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700 ring-1 ring-slate-200">İhtiyari belge butonları yalnız ihtiyari dosyalarda aktif</span>
                                        }
                                        @if (aktifDosyadaEvrakAdiVarMi(getDavetMektubuSeciliSablonIsmi())) {
                                          <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-700 ring-1 ring-amber-200">Davet mektubu zaten var</span>
@@ -2436,6 +2439,9 @@
                                        }
                                        @if (aktifDosyadaEvrakAdiVarMi(getSonTutanakIhtiyariAnlasmaSeciliSablonIsmi())) {
                                          <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-700 ring-1 ring-amber-200">Son Tutanak İhtiyari Anlaşma zaten var</span>
+                                       }
+                                       @if (aktifDosyadaEvrakAdiVarMi(getIhtiyariAnlasmaBelgesiSeciliSablonIsmi())) {
+                                         <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-700 ring-1 ring-amber-200">Anlaşma belgesi zaten var</span>
                                        }
                                      </div>
                                    }

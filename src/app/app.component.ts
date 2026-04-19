@@ -193,6 +193,7 @@ export class AppComponent implements OnInit {
   bilgilendirmeTutanagiOlusturuluyor = false;
   arabuluculukBelirlemeTutanagiOlusturuluyor = false;
   sonTutanakIhtiyariAnlasmaOlusturuluyor = false;
+  ihtiyariAnlasmaBelgesiOlusturuluyor = false;
   googleDocsYetkiIstendi = false;
   gunlukOzetYakinGunSayisi = 30;
   gunlukOzetMetni = '';
@@ -3267,6 +3268,12 @@ export class AppComponent implements OnInit {
   getSonTutanakIhtiyariAnlasmaSeciliSablonIsmi() {
     return this.getSonTutanakIhtiyariAnlasmaSablonu()?.isim || GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName;
   }
+  getIhtiyariAnlasmaBelgesiSablonu() {
+    return this.arabuluculukSablonuBul(GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName);
+  }
+  getIhtiyariAnlasmaBelgesiSeciliSablonIsmi() {
+    return this.getIhtiyariAnlasmaBelgesiSablonu()?.isim || GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName;
+  }
   aktifArabuluculukDosyasiIhtiyariMi() {
     return this.getAktifArabuluculukDosyasi()?.basvuruTuru === 'İhtiyari';
   }
@@ -3635,6 +3642,47 @@ export class AppComponent implements OnInit {
       this.bildirimGoster('error', 'Son tutanak oluşturulamadı', e?.message || 'Google Docs bağlantısını kontrol edip tekrar deneyin.');
     } finally {
       this.sonTutanakIhtiyariAnlasmaOlusturuluyor = false;
+      this.cdr.detectChanges();
+    }
+  }
+  async ihtiyariAnlasmaBelgesiOlustur() {
+    if (this.ihtiyariAnlasmaBelgesiOlusturuluyor) return;
+
+    const dosya = this.getAktifArabuluculukDosyasi();
+    if (!dosya) {
+      this.bildirimGoster('error', 'Arabuluculuk dosyası bulunamadı', 'Önce bir arabuluculuk dosyası açın.');
+      return;
+    }
+
+    if (dosya.basvuruTuru !== 'İhtiyari') {
+      this.bildirimGoster('info', 'Belge tipi uygun değil', 'Anlaşma belgesi yalnız ihtiyari arabuluculuk dosyalarında oluşturulabilir.');
+      return;
+    }
+
+    const sablon = this.getIhtiyariAnlasmaBelgesiSablonu();
+    if (!sablon?.url) {
+      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName}" adlı Google Docs şablonunu ekleyin.`);
+      return;
+    }
+
+    if (this.aktifDosyadaEvrakAdiVarMi(this.getIhtiyariAnlasmaBelgesiSeciliSablonIsmi())) {
+      this.bildirimGoster('info', 'Anlaşma belgesi zaten var', 'Bu dosyada ihtiyari anlaşma belgesi bağlantısı zaten bulunuyor.');
+      return;
+    }
+
+    this.ihtiyariAnlasmaBelgesiOlusturuluyor = true;
+
+    try {
+      await this.arabuluculukGoogleBelgesiOlustur(
+        dosya,
+        sablon,
+        GOOGLE_DOCS_CONFIG.ihtiyariAnlasmaBelgesiTemplateName,
+        'İhtiyari Anlaşma Belgesi'
+      );
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Anlaşma belgesi oluşturulamadı', e?.message || 'Google Docs bağlantısını kontrol edip tekrar deneyin.');
+    } finally {
+      this.ihtiyariAnlasmaBelgesiOlusturuluyor = false;
       this.cdr.detectChanges();
     }
   }

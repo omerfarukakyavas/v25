@@ -7,5 +7,6 @@ export const GOOGLE_DOCS_CONFIG = {
   davetMektubuTemplateName: 'Davet Mektubu',
   bilgilendirmeTutanagiTemplateName: 'Bilgilendirme Tutanağı',
   arabuluculukBelirlemeTutanagiTemplateName: 'Arabuluculuk Belirleme Tutanağı',
-  sonTutanakIhtiyariAnlasmaTemplateName: 'Son Tutanak İhtiyari Anlaşma'
+  sonTutanakIhtiyariAnlasmaTemplateName: 'Son Tutanak İhtiyari Anlaşma',
+  ihtiyariAnlasmaBelgesiTemplateName: 'İhtiyari Anlaşma Belgesi'
 };
