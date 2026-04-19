@@ -871,6 +871,7 @@ export class AppComponent implements OnInit {
       { etiket: 'Tutanak tarihi', onceki: onceki?.tutanakDuzenlemeTarihi, sonraki: sonraki.tutanakDuzenlemeTarihi },
       { etiket: 'Uyuşmazlık türü', onceki: onceki?.uyusmazlikTuru, sonraki: sonraki.uyusmazlikTuru },
       { etiket: 'Başvuru konusu', onceki: onceki?.basvuruKonusu, sonraki: sonraki.basvuruKonusu },
+      { etiket: 'Anlaşma şartları', onceki: onceki?.anlasmaSartlari, sonraki: sonraki.anlasmaSartlari },
       { etiket: 'Taraflar', onceki: this.getArabuluculukTarafKayitOzeti(onceki?.taraflar), sonraki: this.getArabuluculukTarafKayitOzeti(sonraki.taraflar) },
       { etiket: 'Toplantı', onceki: this.birlestirTarihVeSaat(onceki?.toplantiTarihi, onceki?.toplantiSaati), sonraki: this.birlestirTarihVeSaat(sonraki.toplantiTarihi, sonraki.toplantiSaati) },
       { etiket: 'Arşiv yeri', onceki: onceki?.arsivYeri, sonraki: sonraki.arsivYeri },
@@ -2478,7 +2479,7 @@ export class AppComponent implements OnInit {
     }
     else {
       this.formModu = 'ekle';
-      this.islemGorenArabuluculuk = { durum: 'Hazırlık', basvuruTuru: 'Dava Şartı', uyusmazlikTuru: 'İşçi İşveren', basvuruKonusu: '', buro: 'İstanbul Anadolu', buroyaBasvuruTarihi: '', arabulucuGorevlendirmeTarihi: '', tutanakDuzenlemeTarihi: '', toplantiSaati: '', toplantiTamamlandiMi: false, hizmetUcretiStopajli: true, taraflar: [this.arabuluculukTarafBosOlustur('Başvurucu', Date.now()), this.arabuluculukTarafBosOlustur('Diğer Taraf', Date.now() + 1)] };
+      this.islemGorenArabuluculuk = { durum: 'Hazırlık', basvuruTuru: 'Dava Şartı', uyusmazlikTuru: 'İşçi İşveren', basvuruKonusu: '', anlasmaSartlari: '', buro: 'İstanbul Anadolu', buroyaBasvuruTarihi: '', arabulucuGorevlendirmeTarihi: '', tutanakDuzenlemeTarihi: '', toplantiSaati: '', toplantiTamamlandiMi: false, hizmetUcretiStopajli: true, taraflar: [this.arabuluculukTarafBosOlustur('Başvurucu', Date.now()), this.arabuluculukTarafBosOlustur('Diğer Taraf', Date.now() + 1)] };
       this.arabuluculukUyusmazlikTuruDegisti(this.islemGorenArabuluculuk.uyusmazlikTuru as ArabuluculukDosyasi['uyusmazlikTuru']);
     }
     this.arabuluculukTarafAramalariniHazirla(this.islemGorenArabuluculuk.taraflar);
@@ -2541,10 +2542,11 @@ export class AppComponent implements OnInit {
     
     this.islemGorenArabuluculuk.buro = this.formatMetin(this.islemGorenArabuluculuk.buro);
     this.islemGorenArabuluculuk.basvuruKonusu = this.formatMetin(this.islemGorenArabuluculuk.basvuruKonusu);
+    this.islemGorenArabuluculuk.anlasmaSartlari = this.formatMetin(this.islemGorenArabuluculuk.anlasmaSartlari);
     this.islemGorenArabuluculuk.arsivYeri = this.formatMetin(this.islemGorenArabuluculuk.arsivYeri);
 
     if (this.formModu === 'ekle') {
-      let y: ArabuluculukDosyasi = { id: Date.now(), buroNo: this.islemGorenArabuluculuk.buroNo || '', arabuluculukNo: this.islemGorenArabuluculuk.arabuluculukNo || '', buro: this.islemGorenArabuluculuk.buro || '', basvuruTuru: this.islemGorenArabuluculuk.basvuruTuru as any, uyusmazlikTuru: this.islemGorenArabuluculuk.uyusmazlikTuru as any, basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', taraflar: t, muvekkilId: this.islemGorenArabuluculuk.muvekkilId, buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', toplantiTarihi: this.islemGorenArabuluculuk.toplantiTarihi, toplantiSaati: this.islemGorenArabuluculuk.toplantiSaati || '', toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '', toplantiYontemi: this.islemGorenArabuluculuk.toplantiYontemi, durum: this.islemGorenArabuluculuk.durum as any, arsivYeri: this.islemGorenArabuluculuk.arsivYeri || '', vekaletUcreti: this.islemGorenArabuluculuk.vekaletUcreti || 0, hizmetUcretiStopajli: !!this.islemGorenArabuluculuk.hizmetUcretiStopajli, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      let y: ArabuluculukDosyasi = { id: Date.now(), buroNo: this.islemGorenArabuluculuk.buroNo || '', arabuluculukNo: this.islemGorenArabuluculuk.arabuluculukNo || '', buro: this.islemGorenArabuluculuk.buro || '', basvuruTuru: this.islemGorenArabuluculuk.basvuruTuru as any, uyusmazlikTuru: this.islemGorenArabuluculuk.uyusmazlikTuru as any, basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', anlasmaSartlari: this.islemGorenArabuluculuk.anlasmaSartlari || '', taraflar: t, muvekkilId: this.islemGorenArabuluculuk.muvekkilId, buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', toplantiTarihi: this.islemGorenArabuluculuk.toplantiTarihi, toplantiSaati: this.islemGorenArabuluculuk.toplantiSaati || '', toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '', toplantiYontemi: this.islemGorenArabuluculuk.toplantiYontemi, durum: this.islemGorenArabuluculuk.durum as any, arsivYeri: this.islemGorenArabuluculuk.arsivYeri || '', vekaletUcreti: this.islemGorenArabuluculuk.vekaletUcreti || 0, hizmetUcretiStopajli: !!this.islemGorenArabuluculuk.hizmetUcretiStopajli, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
       y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'Arabuluculuk dosyası açıldı', `${y.arabuluculukNo} referansıyla yeni arabuluculuk kaydı oluşturuldu.`);
       if (y.toplantiTarihi) {
         y = this.dosyayaTakvimKaydiEkle(y, 'Toplantı', 'Planlandı', y.toplantiTarihi, y.toplantiSaati, 'İlk toplantı planı kaydedildi.');
@@ -2554,7 +2556,7 @@ export class AppComponent implements OnInit {
     } else {
       const mevcut = this.arabuluculukDosyalar.find(x => x.id === this.islemGorenArabuluculuk.id);
       const toplantiDegisti = (mevcut?.toplantiTarihi || '') !== (this.islemGorenArabuluculuk.toplantiTarihi || '') || (mevcut?.toplantiSaati || '') !== (this.islemGorenArabuluculuk.toplantiSaati || '');
-      let g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', hizmetUcretiStopajli: !!this.islemGorenArabuluculuk.hizmetUcretiStopajli, taraflar: t } as ArabuluculukDosyasi;
+      let g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', anlasmaSartlari: this.islemGorenArabuluculuk.anlasmaSartlari || '', buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', hizmetUcretiStopajli: !!this.islemGorenArabuluculuk.hizmetUcretiStopajli, taraflar: t } as ArabuluculukDosyasi;
       if (toplantiDegisti) { g.toplantiTamamlandiMi = false; g.toplantiTamamlanmaTarihi = ''; }
       g = this.dosyayaIslemKaydiEkle(g, 'dosya', 'Arabuluculuk dosyası güncellendi', this.arabuluculukGuncellemeOzeti(mevcut, g));
       if (toplantiDegisti) {
@@ -3350,6 +3352,7 @@ export class AppComponent implements OnInit {
       BURO: dosya.buro || '-',
       BASVURU_TURU: dosya.basvuruTuru || '-',
       BASVURU_KONUSU: dosya.basvuruKonusu || '-',
+      ANLASMA_SARTLARI: dosya.anlasmaSartlari || '-',
       UYUSMAZLIK_TURU: dosya.uyusmazlikTuru || '-',
       MUVEKKIL: this.getArabuluculukMuvekkilAdi(dosya) || '-',
       BASVURUCU: this.getArabuluculukTaraflari(dosya, 'Başvurucu'),

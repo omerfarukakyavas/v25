@@ -2141,6 +2141,7 @@
                           <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Başvuru Türü</p><p class="font-medium text-slate-800">{{ aktifDosya.basvuruTuru }}</p></div>
                           <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Uyuşmazlık Türü</p><p class="font-medium text-slate-800">{{ aktifDosya.uyusmazlikTuru }}</p></div>
                           <div class="col-span-2"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Başvuru Konusu</p><p class="font-medium text-slate-800 whitespace-pre-line">{{ aktifDosya.basvuruKonusu || '-' }}</p></div>
+                          <div class="col-span-2"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Anlaşma Şartları</p><p class="font-medium text-slate-800 whitespace-pre-line">{{ getAktifArabuluculukDosyasi()?.anlasmaSartlari || '-' }}</p></div>
                           <div class="col-span-2 grid gap-3 sm:grid-cols-3">
                             <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Büroya Başvuru Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.buroyaBasvuruTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.buroyaBasvuruTarihi) : '-' }}</p></div>
                             <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Görevlendirme Tarihi</p><p class="font-medium text-slate-800">{{ getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi) : '-' }}</p></div>
@@ -3603,6 +3604,10 @@
                 <div class="mt-4">
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Başvuru Konusu</label>
                   <textarea [ngModel]="islemGorenArabuluculuk.basvuruKonusu" (ngModelChange)="arabuluculukBasvuruKonusuDegisti($event)" rows="3" placeholder="Örn: Ayıplı hizmet nedeniyle bedel iadesi ve zarar tazmini talebi" class="w-full resize-y px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white"></textarea>
+                </div>
+                <div class="mt-4">
+                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Anlaşma Şartları</label>
+                  <textarea [(ngModel)]="islemGorenArabuluculuk.anlasmaSartlari" rows="4" placeholder="Tarafların hangi şartlarda anlaştığını yazın. Bu metin Google Docs içinde ANLASMA_SARTLARI yer tutucusuna aktarılır." class="w-full resize-y px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white"></textarea>
                 </div>
                 <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   <div>
