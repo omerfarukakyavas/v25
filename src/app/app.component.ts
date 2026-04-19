@@ -192,6 +192,7 @@ export class AppComponent implements OnInit {
   davetMektubuOlusturuluyor = false;
   bilgilendirmeTutanagiOlusturuluyor = false;
   arabuluculukBelirlemeTutanagiOlusturuluyor = false;
+  sonTutanakIhtiyariAnlasmaOlusturuluyor = false;
   googleDocsYetkiIstendi = false;
   gunlukOzetYakinGunSayisi = 30;
   gunlukOzetMetni = '';
@@ -3258,6 +3259,15 @@ export class AppComponent implements OnInit {
   getArabuluculukBelirlemeTutanagiSeciliSablonIsmi() {
     return this.getArabuluculukBelirlemeTutanagiSablonu()?.isim || GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName;
   }
+  getSonTutanakIhtiyariAnlasmaSablonu() {
+    return this.arabuluculukSablonuBul(GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName);
+  }
+  getSonTutanakIhtiyariAnlasmaSeciliSablonIsmi() {
+    return this.getSonTutanakIhtiyariAnlasmaSablonu()?.isim || GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName;
+  }
+  aktifArabuluculukDosyasiIhtiyariMi() {
+    return this.getAktifArabuluculukDosyasi()?.basvuruTuru === 'İhtiyari';
+  }
   googleDosyaIdAyikla(girdi?: string) {
     const deger = (girdi || '').trim();
     if (!deger) return '';
@@ -3581,6 +3591,47 @@ export class AppComponent implements OnInit {
       this.bildirimGoster('error', 'Arabuluculuk belirleme tutanağı oluşturulamadı', e?.message || 'Google Docs bağlantısını kontrol edip tekrar deneyin.');
     } finally {
       this.arabuluculukBelirlemeTutanagiOlusturuluyor = false;
+      this.cdr.detectChanges();
+    }
+  }
+  async sonTutanakIhtiyariAnlasmaOlustur() {
+    if (this.sonTutanakIhtiyariAnlasmaOlusturuluyor) return;
+
+    const dosya = this.getAktifArabuluculukDosyasi();
+    if (!dosya) {
+      this.bildirimGoster('error', 'Arabuluculuk dosyası bulunamadı', 'Önce bir arabuluculuk dosyası açın.');
+      return;
+    }
+
+    if (dosya.basvuruTuru !== 'İhtiyari') {
+      this.bildirimGoster('info', 'Belge tipi uygun değil', 'Son Tutanak İhtiyari Anlaşma yalnız ihtiyari arabuluculuk dosyalarında oluşturulabilir.');
+      return;
+    }
+
+    const sablon = this.getSonTutanakIhtiyariAnlasmaSablonu();
+    if (!sablon?.url) {
+      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName}" adlı Google Docs şablonunu ekleyin.`);
+      return;
+    }
+
+    if (this.aktifDosyadaEvrakAdiVarMi(this.getSonTutanakIhtiyariAnlasmaSeciliSablonIsmi())) {
+      this.bildirimGoster('info', 'Son tutanak zaten var', 'Bu dosyada Son Tutanak İhtiyari Anlaşma bağlantısı zaten bulunuyor.');
+      return;
+    }
+
+    this.sonTutanakIhtiyariAnlasmaOlusturuluyor = true;
+
+    try {
+      await this.arabuluculukGoogleBelgesiOlustur(
+        dosya,
+        sablon,
+        GOOGLE_DOCS_CONFIG.sonTutanakIhtiyariAnlasmaTemplateName,
+        'Son Tutanak İhtiyari Anlaşma'
+      );
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Son tutanak oluşturulamadı', e?.message || 'Google Docs bağlantısını kontrol edip tekrar deneyin.');
+    } finally {
+      this.sonTutanakIhtiyariAnlasmaOlusturuluyor = false;
       this.cdr.detectChanges();
     }
   }
