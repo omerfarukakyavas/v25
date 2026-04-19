@@ -191,6 +191,7 @@ export class AppComponent implements OnInit {
   acikKlasorler: Record<number, boolean> = {}; 
   davetMektubuOlusturuluyor = false;
   bilgilendirmeTutanagiOlusturuluyor = false;
+  arabuluculukBelirlemeTutanagiOlusturuluyor = false;
   googleDocsYetkiIstendi = false;
   gunlukOzetYakinGunSayisi = 30;
   gunlukOzetMetni = '';
@@ -3251,6 +3252,12 @@ export class AppComponent implements OnInit {
   getBilgilendirmeTutanagiSeciliSablonIsmi() {
     return this.getBilgilendirmeTutanagiSablonu()?.isim || GOOGLE_DOCS_CONFIG.bilgilendirmeTutanagiTemplateName;
   }
+  getArabuluculukBelirlemeTutanagiSablonu() {
+    return this.arabuluculukSablonuBul(GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName);
+  }
+  getArabuluculukBelirlemeTutanagiSeciliSablonIsmi() {
+    return this.getArabuluculukBelirlemeTutanagiSablonu()?.isim || GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName;
+  }
   googleDosyaIdAyikla(girdi?: string) {
     const deger = (girdi || '').trim();
     if (!deger) return '';
@@ -3538,6 +3545,42 @@ export class AppComponent implements OnInit {
       this.bildirimGoster('error', 'Bilgilendirme tutanağı oluşturulamadı', e?.message || 'Google Docs bağlantısını kontrol edip tekrar deneyin.');
     } finally {
       this.bilgilendirmeTutanagiOlusturuluyor = false;
+      this.cdr.detectChanges();
+    }
+  }
+  async arabuluculukBelirlemeTutanagiOlustur() {
+    if (this.arabuluculukBelirlemeTutanagiOlusturuluyor) return;
+
+    const dosya = this.getAktifArabuluculukDosyasi();
+    if (!dosya) {
+      this.bildirimGoster('error', 'Arabuluculuk dosyası bulunamadı', 'Önce bir arabuluculuk dosyası açın.');
+      return;
+    }
+
+    const sablon = this.getArabuluculukBelirlemeTutanagiSablonu();
+    if (!sablon?.url) {
+      this.bildirimGoster('error', 'Şablon eksik', `Şablonlar > Arabuluculuk bölümüne "${GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName}" adlı Google Docs şablonunu ekleyin.`);
+      return;
+    }
+
+    if (this.aktifDosyadaEvrakAdiVarMi(this.getArabuluculukBelirlemeTutanagiSeciliSablonIsmi())) {
+      this.bildirimGoster('info', 'Arabuluculuk belirleme tutanağı zaten var', 'Bu dosyada arabuluculuk belirleme tutanağı bağlantısı zaten bulunuyor.');
+      return;
+    }
+
+    this.arabuluculukBelirlemeTutanagiOlusturuluyor = true;
+
+    try {
+      await this.arabuluculukGoogleBelgesiOlustur(
+        dosya,
+        sablon,
+        GOOGLE_DOCS_CONFIG.arabuluculukBelirlemeTutanagiTemplateName,
+        'Arabuluculuk Belirleme Tutanağı'
+      );
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Arabuluculuk belirleme tutanağı oluşturulamadı', e?.message || 'Google Docs bağlantısını kontrol edip tekrar deneyin.');
+    } finally {
+      this.arabuluculukBelirlemeTutanagiOlusturuluyor = false;
       this.cdr.detectChanges();
     }
   }

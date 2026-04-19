@@ -2408,9 +2408,12 @@
                                        <button (click)="bilgilendirmeTutanagiOlustur()" [disabled]="bilgilendirmeTutanagiOlusturuluyor || aktifDosyadaEvrakAdiVarMi(getBilgilendirmeTutanagiSeciliSablonIsmi())" class="inline-flex items-center justify-center rounded-lg bg-sky-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-sky-300">
                                          {{ bilgilendirmeTutanagiOlusturuluyor ? 'Oluşturuluyor...' : 'Bilgilendirme Tutanağı Oluştur' }}
                                        </button>
+                                       <button (click)="arabuluculukBelirlemeTutanagiOlustur()" [disabled]="arabuluculukBelirlemeTutanagiOlusturuluyor || aktifDosyadaEvrakAdiVarMi(getArabuluculukBelirlemeTutanagiSeciliSablonIsmi())" class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300">
+                                         {{ arabuluculukBelirlemeTutanagiOlusturuluyor ? 'Oluşturuluyor...' : 'Arabuluculuk Belirleme Tutanağı Oluştur' }}
+                                       </button>
                                      </div>
                                    </div>
-                                   @if (!googleDocsEntegrasyonuHazirMi() || aktifDosyadaEvrakAdiVarMi(getDavetMektubuSeciliSablonIsmi()) || aktifDosyadaEvrakAdiVarMi(getBilgilendirmeTutanagiSeciliSablonIsmi())) {
+                                   @if (!googleDocsEntegrasyonuHazirMi() || aktifDosyadaEvrakAdiVarMi(getDavetMektubuSeciliSablonIsmi()) || aktifDosyadaEvrakAdiVarMi(getBilgilendirmeTutanagiSeciliSablonIsmi()) || aktifDosyadaEvrakAdiVarMi(getArabuluculukBelirlemeTutanagiSeciliSablonIsmi())) {
                                      <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
                                        @if (!googleDocsEntegrasyonuHazirMi()) {
                                          <span class="inline-flex rounded-full bg-rose-50 px-2.5 py-1 font-semibold text-rose-600 ring-1 ring-rose-200">Google yetki ayarı eksik</span>
@@ -2420,6 +2423,9 @@
                                        }
                                        @if (aktifDosyadaEvrakAdiVarMi(getBilgilendirmeTutanagiSeciliSablonIsmi())) {
                                          <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-700 ring-1 ring-amber-200">Bilgilendirme tutanağı zaten var</span>
+                                       }
+                                       @if (aktifDosyadaEvrakAdiVarMi(getArabuluculukBelirlemeTutanagiSeciliSablonIsmi())) {
+                                         <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-700 ring-1 ring-amber-200">Arabuluculuk belirleme tutanağı zaten var</span>
                                        }
                                      </div>
                                    }

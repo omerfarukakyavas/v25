@@ -5,5 +5,6 @@ export const GOOGLE_DOCS_CONFIG = {
     'https://www.googleapis.com/auth/drive'
   ],
   davetMektubuTemplateName: 'Davet Mektubu',
-  bilgilendirmeTutanagiTemplateName: 'Bilgilendirme Tutanağı'
+  bilgilendirmeTutanagiTemplateName: 'Bilgilendirme Tutanağı',
+  arabuluculukBelirlemeTutanagiTemplateName: 'Arabuluculuk Belirleme Tutanağı'
 };
