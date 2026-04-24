@@ -105,7 +105,7 @@ type GunlukOzetBolum = {
 
 type ArabuluculukSablonBolumAnahtari = 'ihtiyari' | 'dava_sarti';
 
-type ArabuluculukSablonKategoriAnahtari = 'davet' | 'bilgilendirme' | 'belirleme' | 'son_tutanak' | 'anlasma';
+type ArabuluculukSablonKategoriAnahtari = 'toplu' | 'anlasma' | 'son_tutanak' | 'belirleme' | 'bilgilendirme' | 'davet';
 
 type ArabuluculukSablonListeKaydi = {
   evrak: EvrakBaglantisi;
@@ -231,9 +231,9 @@ export class AppComponent implements OnInit {
     { etiket: 'Mavi', deger: '#2563eb' },
     { etiket: 'Mor', deger: '#7c3aed' }
   ];
-  yeniEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi, sablonBolumu: 'ihtiyari', sablonKategori: 'davet' }; ekEklenenEvrakId: number | null = null;
+  yeniEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi, sablonBolumu: 'ihtiyari', sablonKategori: 'toplu' }; ekEklenenEvrakId: number | null = null;
   yeniEkEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi }; duzenlenenEvrakId: number | null = null;
-  duzenlenenEvrakParentId: number | null = null; duzenlenenEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi, sablonBolumu: 'ihtiyari', sablonKategori: 'davet' };
+  duzenlenenEvrakParentId: number | null = null; duzenlenenEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi, sablonBolumu: 'ihtiyari', sablonKategori: 'toplu' };
   duzenlenenEvrakOrijinalSonEylemTarihi = '';
   acikKlasorler: Record<number, boolean> = {}; 
   davetMektubuOlusturuluyor = false;
@@ -266,12 +266,17 @@ export class AppComponent implements OnInit {
     }
   ];
   acikArabuluculukSablonBolumu: ArabuluculukSablonBolumAnahtari | 'siniflandirilmamis' | null = null;
+  acikArabuluculukSablonAltBolumleri: Partial<Record<ArabuluculukSablonBolumAnahtari, ArabuluculukSablonKategoriAnahtari | null>> = {
+    ihtiyari: 'toplu',
+    dava_sarti: 'toplu'
+  };
   readonly arabuluculukSablonAltBolumTanimlari: Array<{ key: ArabuluculukSablonKategoriAnahtari; baslik: string; aciklama: string; }> = [
-    { key: 'davet', baslik: 'Davet Mektupları', aciklama: 'Taraflara gönderilen davet yazıları.' },
-    { key: 'bilgilendirme', baslik: 'Bilgilendirme Metinleri', aciklama: 'Tarafların bilgilendirilmesine yönelik metinler.' },
-    { key: 'belirleme', baslik: 'Belirleme Tutanakları', aciklama: 'Görevlendirme ve ilk tespit kayıtları.' },
-    { key: 'son_tutanak', baslik: 'Son Tutanaklar', aciklama: 'Sürecin kapanışına dair tutanaklar.' },
-    { key: 'anlasma', baslik: 'Anlaşma Belgeleri', aciklama: 'Tarafların anlaşma hükümlerini içeren belgeler.' }
+    { key: 'toplu', baslik: 'Toplu Belgeler', aciklama: 'Birden çok belgeyi tek akışta oluşturan şablonlar.' },
+    { key: 'anlasma', baslik: 'Anlaşma Belgesi', aciklama: 'Tarafların anlaşma hükümlerini içeren belgeler.' },
+    { key: 'son_tutanak', baslik: 'Son Tutanak', aciklama: 'Sürecin kapanışına dair tutanaklar.' },
+    { key: 'belirleme', baslik: 'Belirleme', aciklama: 'Görevlendirme ve ilk tespit kayıtları.' },
+    { key: 'bilgilendirme', baslik: 'Bilgilendirme', aciklama: 'Tarafların bilgilendirilmesine yönelik metinler.' },
+    { key: 'davet', baslik: 'Davet Mektubu', aciklama: 'Taraflara gönderilen davet yazıları.' }
   ];
   acikMuvekkilGorusmeNotlari: Record<number, boolean> = {};
   readonly maksimumArabuluculukTaksitSayisi = 12;
@@ -3469,7 +3474,7 @@ export class AppComponent implements OnInit {
     return deger === 'ihtiyari' || deger === 'dava_sarti';
   }
   private isArabuluculukSablonKategoriDegeri(deger?: string | null): deger is ArabuluculukSablonKategoriAnahtari {
-    return deger === 'davet' || deger === 'bilgilendirme' || deger === 'belirleme' || deger === 'son_tutanak' || deger === 'anlasma';
+    return deger === 'toplu' || deger === 'davet' || deger === 'bilgilendirme' || deger === 'belirleme' || deger === 'son_tutanak' || deger === 'anlasma';
   }
   private getVarsayilanArabuluculukSablonBolumu() {
     return this.acikArabuluculukSablonBolumu === 'ihtiyari' || this.acikArabuluculukSablonBolumu === 'dava_sarti'
@@ -3477,7 +3482,9 @@ export class AppComponent implements OnInit {
       : 'ihtiyari';
   }
   private getVarsayilanArabuluculukSablonKategorisi() {
-    return 'davet' as ArabuluculukSablonKategoriAnahtari;
+    const bolum = this.getVarsayilanArabuluculukSablonBolumu();
+    const seciliAltBolum = this.acikArabuluculukSablonAltBolumleri[bolum];
+    return this.isArabuluculukSablonKategoriDegeri(seciliAltBolum) ? seciliAltBolum : 'toplu';
   }
   private getEvrakSablonBolumu(evrak?: Partial<EvrakBaglantisi> | null): ArabuluculukSablonBolumAnahtari | null {
     if (this.isArabuluculukSablonBolumuDegeri(evrak?.sablonBolumu)) return evrak!.sablonBolumu;
@@ -3496,6 +3503,7 @@ export class AppComponent implements OnInit {
   private getArabuluculukSablonKategoriAnahtari(isim?: string): ArabuluculukSablonKategoriAnahtari | null {
     const hedef = this.sablonAramaMetniHazirla(isim);
     if (!hedef) return null;
+    if (hedef.includes('toplu belge') || hedef.includes('toplu dosya')) return 'toplu';
     if (hedef.includes('davet mektup')) return 'davet';
     if (hedef.includes('bilgilendirme')) return 'bilgilendirme';
     if (hedef.includes('belirleme')) return 'belirleme';
@@ -3545,8 +3553,17 @@ export class AppComponent implements OnInit {
   toggleArabuluculukSablonBolumu(bolum: ArabuluculukSablonBolumAnahtari | 'siniflandirilmamis') {
     this.acikArabuluculukSablonBolumu = this.acikArabuluculukSablonBolumu === bolum ? null : bolum;
     if (bolum === 'ihtiyari' || bolum === 'dava_sarti') {
+      if (!this.acikArabuluculukSablonAltBolumleri[bolum]) {
+        this.acikArabuluculukSablonAltBolumleri[bolum] = 'toplu';
+      }
       this.yeniEvrak.sablonBolumu = bolum;
+      this.yeniEvrak.sablonKategori = this.acikArabuluculukSablonAltBolumleri[bolum] || 'toplu';
     }
+  }
+  toggleArabuluculukSablonAltBolumu(bolum: ArabuluculukSablonBolumAnahtari, kategori: ArabuluculukSablonKategoriAnahtari) {
+    this.acikArabuluculukSablonAltBolumleri[bolum] = this.acikArabuluculukSablonAltBolumleri[bolum] === kategori ? null : kategori;
+    this.yeniEvrak.sablonBolumu = bolum;
+    this.yeniEvrak.sablonKategori = this.acikArabuluculukSablonAltBolumleri[bolum] || kategori;
   }
   getArabuluculukSablonBolumKayitSayisi(bolum: ArabuluculukSablonBolumGorunumu) {
     return bolum.altBasliklar.reduce((toplam, altBaslik) => toplam + altBaslik.kayitlar.length, 0);
