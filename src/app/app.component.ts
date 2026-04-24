@@ -103,6 +103,30 @@ type GunlukOzetBolum = {
   kayitlar: GunlukOzetKayitOnizleme[];
 };
 
+type ArabuluculukSablonBolumAnahtari = 'ihtiyari' | 'dava_sarti';
+
+type ArabuluculukSablonKategoriAnahtari = 'davet' | 'bilgilendirme' | 'belirleme' | 'son_tutanak' | 'anlasma';
+
+type ArabuluculukSablonListeKaydi = {
+  evrak: EvrakBaglantisi;
+  index: number;
+  ortakMi: boolean;
+};
+
+type ArabuluculukSablonAltBolumGorunumu = {
+  key: ArabuluculukSablonKategoriAnahtari;
+  baslik: string;
+  aciklama: string;
+  kayitlar: ArabuluculukSablonListeKaydi[];
+};
+
+type ArabuluculukSablonBolumGorunumu = {
+  key: ArabuluculukSablonBolumAnahtari;
+  baslik: string;
+  aciklama: string;
+  altBasliklar: ArabuluculukSablonAltBolumGorunumu[];
+};
+
 type UygulamaGezinmeDurumu = {
   sayfa: SayfaTipi;
   seciliDavaId: number | null;
@@ -229,6 +253,25 @@ export class AppComponent implements OnInit {
   gunlukOzetKartlari: GunlukOzetKart[] = [];
   gunlukOzetBolumleri: GunlukOzetBolum[] = [];
   yeniMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
+  readonly arabuluculukSablonBolumTanimlari: Array<{ key: ArabuluculukSablonBolumAnahtari; baslik: string; aciklama: string; }> = [
+    {
+      key: 'ihtiyari',
+      baslik: 'İhtiyari Tutanaklar',
+      aciklama: 'İhtiyari arabuluculuk akışına ait şablonları bu başlık altında takip edin.'
+    },
+    {
+      key: 'dava_sarti',
+      baslik: 'Dava Şartı Tutanaklar',
+      aciklama: 'Dava şartı süreçlerinde kullanılan arabuluculuk şablonları burada gruplanır.'
+    }
+  ];
+  readonly arabuluculukSablonAltBolumTanimlari: Array<{ key: ArabuluculukSablonKategoriAnahtari; baslik: string; aciklama: string; }> = [
+    { key: 'davet', baslik: 'Davet Mektupları', aciklama: 'Taraflara gönderilen davet yazıları.' },
+    { key: 'bilgilendirme', baslik: 'Bilgilendirme Metinleri', aciklama: 'Tarafların bilgilendirilmesine yönelik metinler.' },
+    { key: 'belirleme', baslik: 'Belirleme Tutanakları', aciklama: 'Görevlendirme ve ilk tespit kayıtları.' },
+    { key: 'son_tutanak', baslik: 'Son Tutanaklar', aciklama: 'Sürecin kapanışına dair tutanaklar.' },
+    { key: 'anlasma', baslik: 'Anlaşma Belgeleri', aciklama: 'Tarafların anlaşma hükümlerini içeren belgeler.' }
+  ];
   acikMuvekkilGorusmeNotlari: Record<number, boolean> = {};
   readonly maksimumArabuluculukTaksitSayisi = 12;
   readonly arabuluculukAnlasmaKalemleri: { tutarAlan: keyof ArabuluculukDosyasi; tarihAlan: keyof ArabuluculukDosyasi; etiket: string; yerTutucuOnEki: string; }[] = [
@@ -3421,6 +3464,57 @@ export class AppComponent implements OnInit {
   klasorGecis(id: number) { this.acikKlasorler[id] = !this.acikKlasorler[id]; }
   googleDocsEntegrasyonuHazirMi() { return GOOGLE_DOCS_CONFIG.clientId.trim() !== ''; }
   sablonAramaMetniHazirla(metin?: string) { return (metin || '').toLocaleLowerCase('tr-TR').replace(/\s+/g, ' ').trim(); }
+  private getArabuluculukSablonKategoriAnahtari(isim?: string): ArabuluculukSablonKategoriAnahtari | null {
+    const hedef = this.sablonAramaMetniHazirla(isim);
+    if (!hedef) return null;
+    if (hedef.includes('davet mektup')) return 'davet';
+    if (hedef.includes('bilgilendirme')) return 'bilgilendirme';
+    if (hedef.includes('belirleme')) return 'belirleme';
+    if (hedef.includes('son tutanak')) return 'son_tutanak';
+    if (hedef.includes('anlasma belge') || hedef.includes('anlaşma belge')) return 'anlasma';
+    return null;
+  }
+  private getArabuluculukSablonBolumAnahtari(isim: string, kategori: ArabuluculukSablonKategoriAnahtari | null): ArabuluculukSablonBolumAnahtari | 'ortak' {
+    const hedef = this.sablonAramaMetniHazirla(isim);
+    if (!hedef) return 'ortak';
+    if (hedef.includes('ihtiyari')) return 'ihtiyari';
+    if (hedef.includes('dava şart') || hedef.includes('dava sart')) return 'dava_sarti';
+    if (kategori === 'davet') return 'dava_sarti';
+    if (kategori === 'son_tutanak' && (hedef.includes('anlaşmama') || hedef.includes('anlasmama'))) return 'dava_sarti';
+    return 'ortak';
+  }
+  private getArabuluculukSablonKayitlari() {
+    return this.sablonlar.arabuluculuk.map((evrak, index) => {
+      const kategori = this.getArabuluculukSablonKategoriAnahtari(evrak.isim);
+      const bolum = this.getArabuluculukSablonBolumAnahtari(evrak.isim || '', kategori);
+      return { evrak, index, kategori, bolum };
+    });
+  }
+  get arabuluculukSablonBolumGorunumu(): ArabuluculukSablonBolumGorunumu[] {
+    const kayitlar = this.getArabuluculukSablonKayitlari();
+    return this.arabuluculukSablonBolumTanimlari.map((bolum) => ({
+      ...bolum,
+      altBasliklar: this.arabuluculukSablonAltBolumTanimlari.map((altBaslik) => ({
+        ...altBaslik,
+        kayitlar: kayitlar
+          .filter((kayit) => kayit.kategori === altBaslik.key && (kayit.bolum === bolum.key || kayit.bolum === 'ortak'))
+          .map((kayit) => ({
+            evrak: kayit.evrak,
+            index: kayit.index,
+            ortakMi: kayit.bolum === 'ortak'
+          }))
+      }))
+    }));
+  }
+  get siniflandirilmamisArabuluculukSablonlari(): ArabuluculukSablonListeKaydi[] {
+    return this.getArabuluculukSablonKayitlari()
+      .filter((kayit) => !kayit.kategori)
+      .map((kayit) => ({
+        evrak: kayit.evrak,
+        index: kayit.index,
+        ortakMi: false
+      }));
+  }
   aktifDosyadaEvrakAdiVarMi(isim: string) {
     const hedef = this.sablonAramaMetniHazirla(isim);
     return (this.aktifDosya?.evraklar || []).some(evrak => this.sablonAramaMetniHazirla(evrak.isim) === hedef);
