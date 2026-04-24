@@ -231,9 +231,9 @@ export class AppComponent implements OnInit {
     { etiket: 'Mavi', deger: '#2563eb' },
     { etiket: 'Mor', deger: '#7c3aed' }
   ];
-  yeniEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi }; ekEklenenEvrakId: number | null = null;
+  yeniEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi, sablonBolumu: 'ihtiyari', sablonKategori: 'davet' }; ekEklenenEvrakId: number | null = null;
   yeniEkEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi }; duzenlenenEvrakId: number | null = null;
-  duzenlenenEvrakParentId: number | null = null; duzenlenenEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi };
+  duzenlenenEvrakParentId: number | null = null; duzenlenenEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi, sablonBolumu: 'ihtiyari', sablonKategori: 'davet' };
   duzenlenenEvrakOrijinalSonEylemTarihi = '';
   acikKlasorler: Record<number, boolean> = {}; 
   davetMektubuOlusturuluyor = false;
@@ -3465,6 +3465,34 @@ export class AppComponent implements OnInit {
   klasorGecis(id: number) { this.acikKlasorler[id] = !this.acikKlasorler[id]; }
   googleDocsEntegrasyonuHazirMi() { return GOOGLE_DOCS_CONFIG.clientId.trim() !== ''; }
   sablonAramaMetniHazirla(metin?: string) { return (metin || '').toLocaleLowerCase('tr-TR').replace(/\s+/g, ' ').trim(); }
+  private isArabuluculukSablonBolumuDegeri(deger?: string | null): deger is ArabuluculukSablonBolumAnahtari {
+    return deger === 'ihtiyari' || deger === 'dava_sarti';
+  }
+  private isArabuluculukSablonKategoriDegeri(deger?: string | null): deger is ArabuluculukSablonKategoriAnahtari {
+    return deger === 'davet' || deger === 'bilgilendirme' || deger === 'belirleme' || deger === 'son_tutanak' || deger === 'anlasma';
+  }
+  private getVarsayilanArabuluculukSablonBolumu() {
+    return this.acikArabuluculukSablonBolumu === 'ihtiyari' || this.acikArabuluculukSablonBolumu === 'dava_sarti'
+      ? this.acikArabuluculukSablonBolumu
+      : 'ihtiyari';
+  }
+  private getVarsayilanArabuluculukSablonKategorisi() {
+    return 'davet' as ArabuluculukSablonKategoriAnahtari;
+  }
+  private getEvrakSablonBolumu(evrak?: Partial<EvrakBaglantisi> | null): ArabuluculukSablonBolumAnahtari | null {
+    if (this.isArabuluculukSablonBolumuDegeri(evrak?.sablonBolumu)) return evrak!.sablonBolumu;
+    return this.getArabuluculukSablonBolumAnahtari(evrak?.isim || '');
+  }
+  private getEvrakSablonKategorisi(evrak?: Partial<EvrakBaglantisi> | null): ArabuluculukSablonKategoriAnahtari | null {
+    if (this.isArabuluculukSablonKategoriDegeri(evrak?.sablonKategori)) return evrak!.sablonKategori;
+    return this.getArabuluculukSablonKategoriAnahtari(evrak?.isim);
+  }
+  private hazirlaArabuluculukSablonAlanlari(evrak?: Partial<EvrakBaglantisi> | null) {
+    return {
+      sablonBolumu: this.getEvrakSablonBolumu(evrak) || this.getVarsayilanArabuluculukSablonBolumu(),
+      sablonKategori: this.getEvrakSablonKategorisi(evrak) || this.getVarsayilanArabuluculukSablonKategorisi()
+    };
+  }
   private getArabuluculukSablonKategoriAnahtari(isim?: string): ArabuluculukSablonKategoriAnahtari | null {
     const hedef = this.sablonAramaMetniHazirla(isim);
     if (!hedef) return null;
@@ -3484,8 +3512,8 @@ export class AppComponent implements OnInit {
   }
   private getArabuluculukSablonKayitlari() {
     return this.sablonlar.arabuluculuk.map((evrak, index) => {
-      const kategori = this.getArabuluculukSablonKategoriAnahtari(evrak.isim);
-      const bolum = this.getArabuluculukSablonBolumAnahtari(evrak.isim || '');
+      const kategori = this.getEvrakSablonKategorisi(evrak);
+      const bolum = this.getEvrakSablonBolumu(evrak);
       return { evrak, index, kategori, bolum };
     });
   }
@@ -3516,6 +3544,9 @@ export class AppComponent implements OnInit {
   }
   toggleArabuluculukSablonBolumu(bolum: ArabuluculukSablonBolumAnahtari | 'siniflandirilmamis') {
     this.acikArabuluculukSablonBolumu = this.acikArabuluculukSablonBolumu === bolum ? null : bolum;
+    if (bolum === 'ihtiyari' || bolum === 'dava_sarti') {
+      this.yeniEvrak.sablonBolumu = bolum;
+    }
   }
   getArabuluculukSablonBolumKayitSayisi(bolum: ArabuluculukSablonBolumGorunumu) {
     return bolum.altBasliklar.reduce((toplam, altBaslik) => toplam + altBaslik.kayitlar.length, 0);
@@ -4316,22 +4347,28 @@ export class AppComponent implements OnInit {
     this.yeniEvrak.isim = this.formatMetin(this.yeniEvrak.isim);
     let url = (this.yeniEvrak.url || '').trim();
     if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
-    const yeni = { id: Date.now(), isim: this.yeniEvrak.isim || 'İsimsiz', url: url, tarih: new Date().toISOString(), ekler: [], tebligTarihi: this.yeniEvrak.tebligTarihi, sonEylemTarihi: this.yeniEvrak.sonEylemTarihi, tamamlandiMi: false, tamamlanmaTarihi: '', yaziRengi: this.getEvrakYaziRengi(this.yeniEvrak.yaziRengi) };
+    const arabuluculukSablonAlanlari = this.aktifSayfa === 'sablonlar' && this.aktifSablonSekmesi === 'arabuluculuk'
+      ? this.hazirlaArabuluculukSablonAlanlari(this.yeniEvrak)
+      : {};
+    const yeni = { id: Date.now(), isim: this.yeniEvrak.isim || 'İsimsiz', url: url, tarih: new Date().toISOString(), ekler: [], tebligTarihi: this.yeniEvrak.tebligTarihi, sonEylemTarihi: this.yeniEvrak.sonEylemTarihi, tamamlandiMi: false, tamamlanmaTarihi: '', yaziRengi: this.getEvrakYaziRengi(this.yeniEvrak.yaziRengi), ...arabuluculukSablonAlanlari };
     if (this.aktifSayfa === 'sablonlar') {
       this.sablonlar[this.aktifSablonSekmesi].unshift(yeni); this.sablonlariKaydetCloud('Yeni şablon listeye eklendi.');
     } else {
       if (!this.aktifDosya) return; const k: any = {...this.aktifDosya}; if (!k.evraklar) k.evraklar = []; k.evraklar.unshift(yeni); const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak bağlantısı eklendi', `${yeni.isim}${yeni.sonEylemTarihi ? ' * Son eylem: ' + this.formatTarihKisa(yeni.sonEylemTarihi) : ''}`); this.aktifDosyaKaydet(kayitli, 'Evrak bağlantısı dosyaya eklendi.');
     }
-    this.yeniEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi };
+    this.yeniEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi, ...this.hazirlaArabuluculukSablonAlanlari() };
   }
   
-  evrakDuzenleBaslat(evrak: EvrakBaglantisi, parentId: number | null = null) { this.duzenlenenEvrakId = evrak.id; this.duzenlenenEvrakParentId = parentId; this.duzenlenenEvrakOrijinalSonEylemTarihi = evrak.sonEylemTarihi || ''; this.duzenlenenEvrak = { ...evrak, yaziRengi: this.getEvrakYaziRengi(evrak.yaziRengi) }; }
-  evrakDuzenleIptal() { this.duzenlenenEvrakId = null; this.duzenlenenEvrakParentId = null; this.duzenlenenEvrakOrijinalSonEylemTarihi = ''; this.duzenlenenEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi }; }
+  evrakDuzenleBaslat(evrak: EvrakBaglantisi, parentId: number | null = null) { this.duzenlenenEvrakId = evrak.id; this.duzenlenenEvrakParentId = parentId; this.duzenlenenEvrakOrijinalSonEylemTarihi = evrak.sonEylemTarihi || ''; this.duzenlenenEvrak = { ...evrak, yaziRengi: this.getEvrakYaziRengi(evrak.yaziRengi), ...(this.aktifSayfa === 'sablonlar' && this.aktifSablonSekmesi === 'arabuluculuk' && !parentId ? this.hazirlaArabuluculukSablonAlanlari(evrak) : {}) }; }
+  evrakDuzenleIptal() { this.duzenlenenEvrakId = null; this.duzenlenenEvrakParentId = null; this.duzenlenenEvrakOrijinalSonEylemTarihi = ''; this.duzenlenenEvrak = { yaziRengi: this.varsayilanEvrakYaziRengi, ...this.hazirlaArabuluculukSablonAlanlari() }; }
   
   evrakGuncelleKaydet() {
     if (!this.duzenlenenEvrak.isim) return;
     this.duzenlenenEvrak.isim = this.formatMetin(this.duzenlenenEvrak.isim);
     let url = (this.duzenlenenEvrak.url || '').trim(); if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url; this.duzenlenenEvrak.url = url; this.duzenlenenEvrak.yaziRengi = this.getEvrakYaziRengi(this.duzenlenenEvrak.yaziRengi);
+    if (this.aktifSayfa === 'sablonlar' && this.aktifSablonSekmesi === 'arabuluculuk' && !this.duzenlenenEvrakParentId) {
+      Object.assign(this.duzenlenenEvrak, this.hazirlaArabuluculukSablonAlanlari(this.duzenlenenEvrak));
+    }
     if ((this.duzenlenenEvrak.sonEylemTarihi || '') !== this.duzenlenenEvrakOrijinalSonEylemTarihi) { this.duzenlenenEvrak.tamamlandiMi = false; this.duzenlenenEvrak.tamamlanmaTarihi = ''; }
     if (this.aktifSayfa === 'sablonlar') {
       const sl = this.sablonlar[this.aktifSablonSekmesi];

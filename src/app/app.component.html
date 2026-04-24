@@ -1365,6 +1365,26 @@
                               <input [(ngModel)]="yeniEvrak.url" (keyup.enter)="evrakEkle()" type="text" placeholder="Bağlantı URL (Google Drive, vs)" class="flex-1 px-3 py-2.5 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
                               <button (click)="evrakEkle()" class="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-sm shrink-0 h-[42px]">Listeye Ekle</button>
                             </div>
+                            @if (aktifSablonSekmesi === 'arabuluculuk') {
+                              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <label class="flex flex-col gap-1">
+                                  <span class="text-[11px] font-black uppercase tracking-wider text-slate-700">Ana Başlık</span>
+                                  <select [(ngModel)]="yeniEvrak.sablonBolumu" class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                    @for (bolum of arabuluculukSablonBolumTanimlari; track bolum.key) {
+                                      <option [ngValue]="bolum.key">{{ bolum.baslik }}</option>
+                                    }
+                                  </select>
+                                </label>
+                                <label class="flex flex-col gap-1">
+                                  <span class="text-[11px] font-black uppercase tracking-wider text-slate-700">Belge Türü</span>
+                                  <select [(ngModel)]="yeniEvrak.sablonKategori" class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                    @for (altBaslik of arabuluculukSablonAltBolumTanimlari; track altBaslik.key) {
+                                      <option [ngValue]="altBaslik.key">{{ altBaslik.baslik }}</option>
+                                    }
+                                  </select>
+                                </label>
+                              </div>
+                            }
                          </div>
                          <div class="flex-1 overflow-y-auto space-y-4 pr-1 pb-4 custom-scrollbar">
                             <ng-template #sablonKart let-evrak="evrak" let-i="index" let-ortakMi="ortakMi">
@@ -1378,6 +1398,26 @@
                                           <button (click)="evrakGuncelleKaydet()" class="px-4 py-1.5 bg-green-500 text-white rounded text-xs font-bold shadow-sm">Kaydet</button>
                                           <button (click)="evrakDuzenleIptal()" class="px-4 py-1.5 bg-slate-300 text-slate-700 rounded text-xs font-bold">İptal</button>
                                         </div>
+                                        @if (aktifSablonSekmesi === 'arabuluculuk') {
+                                          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            <label class="flex flex-col gap-1">
+                                              <span class="text-[10px] font-black uppercase tracking-wider text-slate-700">Ana Başlık</span>
+                                              <select [(ngModel)]="duzenlenenEvrak.sablonBolumu" class="w-full px-2 py-1.5 text-xs border border-blue-300 rounded outline-none focus:ring-1 focus:ring-blue-500 bg-white">
+                                                @for (bolum of arabuluculukSablonBolumTanimlari; track bolum.key) {
+                                                  <option [ngValue]="bolum.key">{{ bolum.baslik }}</option>
+                                                }
+                                              </select>
+                                            </label>
+                                            <label class="flex flex-col gap-1">
+                                              <span class="text-[10px] font-black uppercase tracking-wider text-slate-700">Belge Türü</span>
+                                              <select [(ngModel)]="duzenlenenEvrak.sablonKategori" class="w-full px-2 py-1.5 text-xs border border-blue-300 rounded outline-none focus:ring-1 focus:ring-blue-500 bg-white">
+                                                @for (altBaslik of arabuluculukSablonAltBolumTanimlari; track altBaslik.key) {
+                                                  <option [ngValue]="altBaslik.key">{{ altBaslik.baslik }}</option>
+                                                }
+                                              </select>
+                                            </label>
+                                          </div>
+                                        }
                                      </div>
                                   } @else {
                                      <div class="flex items-center gap-3">
