@@ -103,6 +103,28 @@ type GunlukOzetBolum = {
   kayitlar: GunlukOzetKayitOnizleme[];
 };
 
+type UygulamaGezinmeDurumu = {
+  sayfa: SayfaTipi;
+  seciliDavaId: number | null;
+  seciliIcraId: number | null;
+  seciliArabuluculukId: number | null;
+  aktifDetaySekmesi: DetaySekmesi;
+  aktifDavaTarafDetayi: { tur: 'davaci' | 'davali'; tarafId: number } | null;
+  aramaMetni: string;
+  durumFiltresi: string;
+  muhasebeArama: string;
+  muhasebeFiltre: string;
+  aktifIliskiSekmesi: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer';
+  iliskiGorunumModu: 'kart' | 'liste';
+  iliskiArama: string;
+  iliskiFiltre: string;
+  iliskiSiralama: string;
+  ajandaArama: string;
+  ajandaZamanFiltresi: 'all' | 'today' | '7days' | '30days' | 'overdue';
+  ajandaTurFiltresi: 'all' | AjandaTur;
+  aktifSablonSekmesi: 'avukatlik' | 'arabuluculuk';
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -232,6 +254,7 @@ export class AppComponent implements OnInit {
   private bildirimKapatmaTimerlari = new Map<number, ReturnType<typeof setTimeout>>();
   private geriAlmaKayitlari = new Map<number, GeriAlmaKaydi>();
   aktifGeriAlBildirimiId: number | null = null;
+  navigasyonGecmisi: UygulamaGezinmeDurumu[] = [];
   private readonly isciIsverenVarsayilanBasvuruKonusu = 'KIDEM TAZMİNATI- İHBAR TAZMİNATI –ÜCRET ALACAĞI – FAZLA MESAİ ÜCRETİ –YILLIK İZİN ÜCRETİ- HAFTA TATİLİ ÜCRETİ – ÜCRET FARKI - İKRAMİYE - PRİM – SENDİKAL TAZMİNAT - İŞ ARAMA İZİN ÜCRETİ - ULUSAL BAYRAM VE GENEL TATİL GÜNLERİ ÜCRETİ – MADDİ VE MANEVİ TAZMİNAT - AYRIMCILIK VE KÖTÜNİYET TAZMİNATI- CEZAİ ŞART ALACAĞI - TOPLU İŞ SÖZLEŞMESİNDEN KAYNAKLI ALACAKLAR - GECE VARDİYASI ZAMMI - TRANSFER ÜCRETİ - YARIM ÜCRET ALACAĞI - EĞİTİM ÖDENEĞİ - KIRTASİYE ÖDENEĞİ - ZAM FARKI ALACAĞI - ŞUA İZNİ ALACAĞI - ELEKTRİK, SU, KİRA, İNTERNET GİDER YARDIMI -  HAKSIZ REKABET-YOL ve YEMEK ÜCRETİ – AGİ (Asgari Geçim İndirimi) - AYNİ YARDIMLAR - ÖLÜM, DOĞUM VE EVLENME YARDIMLARI - GÖREV YOLLUĞU - SEYYAR GÖREV TAZMİNATI - İŞ SONU TAZMİNATI - KEŞİF ÜCRETİ - KASA TAZMİNATI - ÇOCUK VE AİLE YARDIMLARI -  İŞE İADE, BOŞTA GEÇEN SÜRE VE İŞE BAŞLATMAMA TAZMİNATI - MADDİ VE MANEVİ TAZMİNAT - İŞ KAZASI VE BUNDAN DOĞACAK ALACAK KALEMLERİ - MESLEK HASTALIĞI VE BUNDAN DOĞACAK ALACAK KALEMLERİ';
   arabuluculukBasvuruKonusuOtomatikMi = false;
 
@@ -668,7 +691,115 @@ export class AppComponent implements OnInit {
     if (s === 'davalar') return 'Derdest';
     return 'Tümü';
   }
-  sayfaDegistir(s: SayfaTipi) {
+  aktifGezinmeDurumunuOlustur(): UygulamaGezinmeDurumu {
+    return {
+      sayfa: this.aktifSayfa,
+      seciliDavaId: this.seciliDava?.id || null,
+      seciliIcraId: this.seciliIcra?.id || null,
+      seciliArabuluculukId: this.seciliArabuluculuk?.id || null,
+      aktifDetaySekmesi: this.aktifDetaySekmesi,
+      aktifDavaTarafDetayi: this.aktifDavaTarafDetayi ? { ...this.aktifDavaTarafDetayi } : null,
+      aramaMetni: this.aramaMetni,
+      durumFiltresi: this.durumFiltresi,
+      muhasebeArama: this.muhasebeArama,
+      muhasebeFiltre: this.muhasebeFiltre,
+      aktifIliskiSekmesi: this.aktifIliskiSekmesi,
+      iliskiGorunumModu: this.iliskiGorunumModu,
+      iliskiArama: this.iliskiArama,
+      iliskiFiltre: this.iliskiFiltre,
+      iliskiSiralama: this.iliskiSiralama,
+      ajandaArama: this.ajandaArama,
+      ajandaZamanFiltresi: this.ajandaZamanFiltresi,
+      ajandaTurFiltresi: this.ajandaTurFiltresi,
+      aktifSablonSekmesi: this.aktifSablonSekmesi
+    };
+  }
+  gezinmeDurumlariAyniMi(a: UygulamaGezinmeDurumu, b: UygulamaGezinmeDurumu) {
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+  gezinmeGecmisineEkle() {
+    const mevcut = this.aktifGezinmeDurumunuOlustur();
+    const son = this.navigasyonGecmisi[this.navigasyonGecmisi.length - 1];
+    if (!son || !this.gezinmeDurumlariAyniMi(son, mevcut)) {
+      this.navigasyonGecmisi.push(mevcut);
+    }
+  }
+  detayGecisiIcinArayuzuHazirla(finansTuru: FinansalIslem['tur']) {
+    this.topluDosyaSecenekleriAcik = false;
+    this.arabuluculukBelgeSecenekMenusu = null;
+    this.finansalIslemFormunuSifirla(finansTuru);
+    this.finansalIslemDuzenlemeIptal();
+    this.evrakDuzenleIptal();
+    this.ekEvrakFormKapat();
+    this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
+    this.acikMuvekkilGorusmeNotlari = {};
+    this.duzenlenenMuvekkilGorusmeNotuId = null;
+    this.duzenlenenMuvekkilGorusmeNotu = {};
+    this.silinecekMuvekkilGorusmeNotuId = null;
+  }
+  gezinmeDurumunuUygula(durum: UygulamaGezinmeDurumu) {
+    const seciliDava = durum.seciliDavaId ? this.davalar.find(dava => dava.id === durum.seciliDavaId) || null : null;
+    const seciliIcra = durum.seciliIcraId ? this.icralar.find(icra => icra.id === durum.seciliIcraId) || null : null;
+    const seciliArabuluculuk = durum.seciliArabuluculukId ? this.arabuluculukDosyalar.find(arabuluculuk => arabuluculuk.id === durum.seciliArabuluculukId) || null : null;
+    let hedefSayfa = durum.sayfa;
+
+    if (hedefSayfa === 'detay' && !seciliDava) hedefSayfa = 'davalar';
+    if (hedefSayfa === 'icraDetay' && !seciliIcra) hedefSayfa = 'icralar';
+    if (hedefSayfa === 'arabuluculukDetay' && !seciliArabuluculuk) hedefSayfa = 'arabuluculuk';
+
+    this.topluDosyaSecenekleriAcik = false;
+    this.arabuluculukBelgeSecenekMenusu = null;
+    this.aktifSayfa = hedefSayfa;
+    this.seciliDava = hedefSayfa === 'detay' ? seciliDava : null;
+    this.seciliIcra = hedefSayfa === 'icraDetay' ? seciliIcra : null;
+    this.seciliArabuluculuk = hedefSayfa === 'arabuluculukDetay' ? seciliArabuluculuk : null;
+    this.aktifDetaySekmesi = durum.aktifDetaySekmesi;
+    this.aktifDavaTarafDetayi = hedefSayfa === 'detay' ? (durum.aktifDavaTarafDetayi ? { ...durum.aktifDavaTarafDetayi } : null) : null;
+    this.aramaMetni = durum.aramaMetni;
+    this.durumFiltresi = durum.durumFiltresi;
+    this.muhasebeArama = durum.muhasebeArama;
+    this.muhasebeFiltre = durum.muhasebeFiltre;
+    this.aktifIliskiSekmesi = durum.aktifIliskiSekmesi;
+    this.iliskiGorunumModu = durum.iliskiGorunumModu;
+    this.iliskiArama = durum.iliskiArama;
+    this.iliskiFiltre = durum.iliskiFiltre;
+    this.iliskiSiralama = durum.iliskiSiralama;
+    this.ajandaArama = durum.ajandaArama;
+    this.ajandaZamanFiltresi = durum.ajandaZamanFiltresi;
+    this.ajandaTurFiltresi = durum.ajandaTurFiltresi;
+    this.aktifSablonSekmesi = durum.aktifSablonSekmesi;
+
+    if (hedefSayfa === 'detay') this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti');
+    if (hedefSayfa === 'icraDetay') this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti');
+    if (hedefSayfa === 'arabuluculukDetay') this.detayGecisiIcinArayuzuHazirla('Ödeme');
+  }
+  geriGidilebilirMi() {
+    return this.navigasyonGecmisi.length > 0;
+  }
+  geriGit() {
+    const onceki = this.navigasyonGecmisi.pop();
+    if (onceki) {
+      this.gezinmeDurumunuUygula(onceki);
+      return;
+    }
+
+    const hedefSayfa: SayfaTipi = this.aktifSayfa === 'detay'
+      ? 'davalar'
+      : this.aktifSayfa === 'icraDetay'
+        ? 'icralar'
+        : this.aktifSayfa === 'arabuluculukDetay'
+          ? 'arabuluculuk'
+          : 'dashboard';
+
+    if (hedefSayfa !== this.aktifSayfa) {
+      this.sayfaDegistir(hedefSayfa, false);
+    }
+  }
+  sayfaDegistir(s: SayfaTipi, gecmiseKaydet = true) {
+    if (gecmiseKaydet && this.aktifSayfa !== s) {
+      this.gezinmeGecmisineEkle();
+    }
+
     this.aktifSayfa = s;
     this.topluDosyaSecenekleriAcik = false;
     this.arabuluculukBelgeSecenekMenusu = null;
@@ -682,9 +813,9 @@ export class AppComponent implements OnInit {
     }
   }
 
-  detayaGit(d: DavaDosyasi) { this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.aktifDavaTarafDetayi = null; this.finansalIslemFormunuSifirla('Vekalet Ücreti'); this.finansalIslemDuzenlemeIptal(); this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' }; this.acikMuvekkilGorusmeNotlari = {}; this.duzenlenenMuvekkilGorusmeNotuId = null; this.duzenlenenMuvekkilGorusmeNotu = {}; this.silinecekMuvekkilGorusmeNotuId = null; this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
-  icraDetayinaGit(i: IcraDosyasi) { this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.finansalIslemFormunuSifirla('Vekalet Ücreti'); this.finansalIslemDuzenlemeIptal(); this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
-  arabuluculukDetayinaGit(a: ArabuluculukDosyasi) { this.seciliArabuluculuk = a; this.aktifSayfa = 'arabuluculukDetay'; this.aktifDetaySekmesi = 'notlar'; this.finansalIslemFormunuSifirla('Ödeme'); this.finansalIslemDuzenlemeIptal(); this.evrakDuzenleIptal(); this.ekEvrakFormKapat(); }
+  detayaGit(d: DavaDosyasi) { this.gezinmeGecmisineEkle(); this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.aktifDavaTarafDetayi = null; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
+  icraDetayinaGit(i: IcraDosyasi) { this.gezinmeGecmisineEkle(); this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
+  arabuluculukDetayinaGit(a: ArabuluculukDosyasi) { this.gezinmeGecmisineEkle(); this.seciliArabuluculuk = a; this.aktifSayfa = 'arabuluculukDetay'; this.aktifDetaySekmesi = 'notlar'; this.detayGecisiIcinArayuzuHazirla('Ödeme'); }
 
   davayaGitId(id?: number) { if(!id) return; const d = this.davalar.find(x=>x.id===id); if(d) this.detayaGit(d); }
   icrayaGitId(id?: number) { if(!id) return; const i = this.icralar.find(x=>x.id===id); if(i) this.icraDetayinaGit(i); }
