@@ -265,6 +265,7 @@ export class AppComponent implements OnInit {
       aciklama: 'Dava şartı süreçlerinde kullanılan arabuluculuk şablonları burada gruplanır.'
     }
   ];
+  acikArabuluculukSablonBolumu: ArabuluculukSablonBolumAnahtari | 'siniflandirilmamis' | null = null;
   readonly arabuluculukSablonAltBolumTanimlari: Array<{ key: ArabuluculukSablonKategoriAnahtari; baslik: string; aciklama: string; }> = [
     { key: 'davet', baslik: 'Davet Mektupları', aciklama: 'Taraflara gönderilen davet yazıları.' },
     { key: 'bilgilendirme', baslik: 'Bilgilendirme Metinleri', aciklama: 'Tarafların bilgilendirilmesine yönelik metinler.' },
@@ -3474,19 +3475,17 @@ export class AppComponent implements OnInit {
     if (hedef.includes('anlasma belge') || hedef.includes('anlaşma belge')) return 'anlasma';
     return null;
   }
-  private getArabuluculukSablonBolumAnahtari(isim: string, kategori: ArabuluculukSablonKategoriAnahtari | null): ArabuluculukSablonBolumAnahtari | 'ortak' {
+  private getArabuluculukSablonBolumAnahtari(isim: string): ArabuluculukSablonBolumAnahtari | null {
     const hedef = this.sablonAramaMetniHazirla(isim);
-    if (!hedef) return 'ortak';
+    if (!hedef) return null;
     if (hedef.includes('ihtiyari')) return 'ihtiyari';
     if (hedef.includes('dava şart') || hedef.includes('dava sart')) return 'dava_sarti';
-    if (kategori === 'davet') return 'dava_sarti';
-    if (kategori === 'son_tutanak' && (hedef.includes('anlaşmama') || hedef.includes('anlasmama'))) return 'dava_sarti';
-    return 'ortak';
+    return null;
   }
   private getArabuluculukSablonKayitlari() {
     return this.sablonlar.arabuluculuk.map((evrak, index) => {
       const kategori = this.getArabuluculukSablonKategoriAnahtari(evrak.isim);
-      const bolum = this.getArabuluculukSablonBolumAnahtari(evrak.isim || '', kategori);
+      const bolum = this.getArabuluculukSablonBolumAnahtari(evrak.isim || '');
       return { evrak, index, kategori, bolum };
     });
   }
@@ -3497,23 +3496,29 @@ export class AppComponent implements OnInit {
       altBasliklar: this.arabuluculukSablonAltBolumTanimlari.map((altBaslik) => ({
         ...altBaslik,
         kayitlar: kayitlar
-          .filter((kayit) => kayit.kategori === altBaslik.key && (kayit.bolum === bolum.key || kayit.bolum === 'ortak'))
+          .filter((kayit) => kayit.kategori === altBaslik.key && kayit.bolum === bolum.key)
           .map((kayit) => ({
             evrak: kayit.evrak,
             index: kayit.index,
-            ortakMi: kayit.bolum === 'ortak'
+            ortakMi: false
           }))
       }))
     }));
   }
   get siniflandirilmamisArabuluculukSablonlari(): ArabuluculukSablonListeKaydi[] {
     return this.getArabuluculukSablonKayitlari()
-      .filter((kayit) => !kayit.kategori)
+      .filter((kayit) => !kayit.kategori || !kayit.bolum)
       .map((kayit) => ({
         evrak: kayit.evrak,
         index: kayit.index,
         ortakMi: false
       }));
+  }
+  toggleArabuluculukSablonBolumu(bolum: ArabuluculukSablonBolumAnahtari | 'siniflandirilmamis') {
+    this.acikArabuluculukSablonBolumu = this.acikArabuluculukSablonBolumu === bolum ? null : bolum;
+  }
+  getArabuluculukSablonBolumKayitSayisi(bolum: ArabuluculukSablonBolumGorunumu) {
+    return bolum.altBasliklar.reduce((toplam, altBaslik) => toplam + altBaslik.kayitlar.length, 0);
   }
   aktifDosyadaEvrakAdiVarMi(isim: string) {
     const hedef = this.sablonAramaMetniHazirla(isim);

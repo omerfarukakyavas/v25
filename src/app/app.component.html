@@ -1467,51 +1467,67 @@
                               } @else {
                                 <div class="rounded-2xl border border-purple-100 bg-gradient-to-r from-purple-50 via-white to-blue-50 px-4 py-3 shadow-sm">
                                   <p class="text-sm font-black text-slate-900">Arabuluculuk Şablonları</p>
-                                  <p class="text-xs text-slate-600 mt-1">Şablonlar isimlerine göre otomatik başlıklandırılır. Mevcut belgeler korunur; eşleşmeyenler altta ayrı listelenir.</p>
+                                  <p class="text-xs text-slate-600 mt-1">Başlıklara tıklayarak ilgili bölümü açabilirsiniz. Aynı anda yalnızca seçtiğiniz bölüm görünür.</p>
                                 </div>
 
                                 @for (bolum of arabuluculukSablonBolumGorunumu; track bolum.key) {
                                   <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                                    <div class="px-4 py-4 border-b border-slate-200 bg-slate-50">
-                                      <p class="text-lg font-black text-slate-900">{{ bolum.baslik }}</p>
-                                      <p class="text-xs text-slate-600 mt-1">{{ bolum.aciklama }}</p>
-                                    </div>
-                                    <div class="p-4 grid grid-cols-1 xl:grid-cols-2 gap-4">
-                                      @for (altBaslik of bolum.altBasliklar; track altBaslik.key) {
-                                        <div class="rounded-2xl border border-slate-200 bg-slate-50/70 overflow-hidden">
-                                          <div class="px-4 py-3 border-b border-slate-200 bg-white">
-                                            <div class="flex items-start justify-between gap-3">
-                                              <div>
-                                                <p class="text-sm font-black text-slate-900">{{ altBaslik.baslik }}</p>
-                                                <p class="text-[11px] text-slate-500 mt-1">{{ altBaslik.aciklama }}</p>
+                                    <button type="button" (click)="toggleArabuluculukSablonBolumu(bolum.key)" class="w-full px-4 py-4 bg-slate-50 hover:bg-slate-100 transition-colors flex items-center justify-between gap-4 text-left">
+                                      <div>
+                                        <p class="text-lg font-black text-slate-900">{{ bolum.baslik }}</p>
+                                        <p class="text-xs text-slate-600 mt-1">{{ bolum.aciklama }}</p>
+                                      </div>
+                                      <div class="flex items-center gap-3 shrink-0">
+                                        <span class="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-600 text-[10px] font-bold">{{ getArabuluculukSablonBolumKayitSayisi(bolum) }}</span>
+                                        <svg class="w-5 h-5 text-slate-500 transition-transform" [class.rotate-180]="acikArabuluculukSablonBolumu === bolum.key" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 9l-7 7-7-7"></path></svg>
+                                      </div>
+                                    </button>
+                                    @if (acikArabuluculukSablonBolumu === bolum.key) {
+                                      <div class="p-4 border-t border-slate-200 space-y-4">
+                                        @for (altBaslik of bolum.altBasliklar; track altBaslik.key) {
+                                          <div class="rounded-2xl border border-slate-200 bg-slate-50/70 overflow-hidden">
+                                            <div class="px-4 py-3 border-b border-slate-200 bg-white">
+                                              <div class="flex items-start justify-between gap-3">
+                                                <div>
+                                                  <p class="text-sm font-black text-slate-900">{{ altBaslik.baslik }}</p>
+                                                  <p class="text-[11px] text-slate-500 mt-1">{{ altBaslik.aciklama }}</p>
+                                                </div>
+                                                <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">{{ altBaslik.kayitlar.length }}</span>
                                               </div>
-                                              <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">{{ altBaslik.kayitlar.length }}</span>
+                                            </div>
+                                            <div class="p-3 space-y-3">
+                                              @for (kayit of altBaslik.kayitlar; track kayit.evrak.id) {
+                                                <ng-container [ngTemplateOutlet]="sablonKart" [ngTemplateOutletContext]="{ evrak: kayit.evrak, index: kayit.index, ortakMi: kayit.ortakMi }"></ng-container>
+                                              } @empty {
+                                                <div class="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-5 text-center text-xs font-medium text-slate-400">Bu başlık altında henüz eşleşen şablon görünmüyor.</div>
+                                              }
                                             </div>
                                           </div>
-                                          <div class="p-3 space-y-3">
-                                            @for (kayit of altBaslik.kayitlar; track kayit.evrak.id) {
-                                              <ng-container [ngTemplateOutlet]="sablonKart" [ngTemplateOutletContext]="{ evrak: kayit.evrak, index: kayit.index, ortakMi: kayit.ortakMi }"></ng-container>
-                                            } @empty {
-                                              <div class="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-5 text-center text-xs font-medium text-slate-400">Bu başlık altında henüz eşleşen şablon görünmüyor.</div>
-                                            }
-                                          </div>
-                                        </div>
-                                      }
-                                    </div>
+                                        }
+                                      </div>
+                                    }
                                   </div>
                                 }
 
                                 @if (siniflandirilmamisArabuluculukSablonlari.length > 0) {
                                   <div class="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden">
-                                    <div class="px-4 py-4 border-b border-amber-100 bg-amber-50">
-                                      <p class="text-lg font-black text-slate-900">Yerleştirilmemiş Mevcut Belgeler</p>
-                                      <p class="text-xs text-slate-600 mt-1">İsmi henüz üst başlıklardan biriyle eşleşmeyen eski veya serbest şablonlar burada tutulur.</p>
-                                    </div>
-                                    <div class="p-4 space-y-3">
-                                      @for (kayit of siniflandirilmamisArabuluculukSablonlari; track kayit.evrak.id) {
-                                        <ng-container [ngTemplateOutlet]="sablonKart" [ngTemplateOutletContext]="{ evrak: kayit.evrak, index: kayit.index, ortakMi: false }"></ng-container>
-                                      }
-                                    </div>
+                                    <button type="button" (click)="toggleArabuluculukSablonBolumu('siniflandirilmamis')" class="w-full px-4 py-4 bg-amber-50 hover:bg-amber-100 transition-colors flex items-center justify-between gap-4 text-left">
+                                      <div>
+                                        <p class="text-lg font-black text-slate-900">Yerleştirilmemiş Mevcut Belgeler</p>
+                                        <p class="text-xs text-slate-600 mt-1">Henüz isimden otomatik yerleşmeyen eski veya serbest şablonlar burada durur.</p>
+                                      </div>
+                                      <div class="flex items-center gap-3 shrink-0">
+                                        <span class="px-2.5 py-1 rounded-full bg-white border border-amber-200 text-slate-600 text-[10px] font-bold">{{ siniflandirilmamisArabuluculukSablonlari.length }}</span>
+                                        <svg class="w-5 h-5 text-slate-500 transition-transform" [class.rotate-180]="acikArabuluculukSablonBolumu === 'siniflandirilmamis'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 9l-7 7-7-7"></path></svg>
+                                      </div>
+                                    </button>
+                                    @if (acikArabuluculukSablonBolumu === 'siniflandirilmamis') {
+                                      <div class="p-4 border-t border-amber-100 space-y-3">
+                                        @for (kayit of siniflandirilmamisArabuluculukSablonlari; track kayit.evrak.id) {
+                                          <ng-container [ngTemplateOutlet]="sablonKart" [ngTemplateOutletContext]="{ evrak: kayit.evrak, index: kayit.index, ortakMi: false }"></ng-container>
+                                        }
+                                      </div>
+                                    }
                                   </div>
                                 }
                               }
