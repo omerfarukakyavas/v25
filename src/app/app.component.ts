@@ -2569,6 +2569,9 @@ export class AppComponent implements OnInit {
     this.islemGorenArabuluculuk.basvuruKonusu = metin;
     this.arabuluculukBasvuruKonusuOtomatikMi = (metin || '').trim() === this.isciIsverenVarsayilanBasvuruKonusu.trim();
   }
+  arabuluculukDosyasiIsciIsverenMi(dosya?: Partial<ArabuluculukDosyasi> | null) {
+    return (dosya?.uyusmazlikTuru || '') === 'İşçi İşveren';
+  }
   tarafEkle() {
     if (!this.islemGorenArabuluculuk.taraflar) this.islemGorenArabuluculuk.taraflar = [];
     const yeniTaraf = this.arabuluculukTarafBosOlustur();

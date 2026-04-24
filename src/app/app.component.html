@@ -2147,7 +2147,7 @@
                             <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="mb-1 text-xs font-black tracking-[0.08em] text-slate-900">Görevlendirme Tarihi</p><p class="text-[13px] font-normal text-slate-800">{{ getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.arabulucuGorevlendirmeTarihi) : '-' }}</p></div>
                             <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3"><p class="mb-1 text-xs font-black tracking-[0.08em] text-slate-900">Tutanak Tarihi</p><p class="text-[13px] font-normal text-slate-800">{{ getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi ? formatTarih(getAktifArabuluculukDosyasi()?.tutanakDuzenlemeTarihi) : '-' }}</p></div>
                           </div>
-                          @if (arabuluculukAnlasmaOdemeBilgileriVarMi(getAktifArabuluculukDosyasi())) {
+                          @if (arabuluculukDosyasiIsciIsverenMi(getAktifArabuluculukDosyasi()) && arabuluculukAnlasmaOdemeBilgileriVarMi(getAktifArabuluculukDosyasi())) {
                             <div class="col-span-2 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
                               <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
@@ -3750,6 +3750,7 @@
                     <input [(ngModel)]="islemGorenArabuluculuk.tutanakDuzenlemeTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
                   </div>
                 </div>
+                @if (arabuluculukDosyasiIsciIsverenMi(islemGorenArabuluculuk)) {
                 <div class="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 shadow-sm">
                   <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
@@ -3843,6 +3844,7 @@
                     }
                   </div>
                 </div>
+                }
 
                 <div class="mt-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-3">Taraflar <span class="text-red-500">*</span></label>
