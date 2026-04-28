@@ -23,6 +23,7 @@ import {
   DosyaIslemKategori,
   DosyaNumarasi,
   EvrakBaglantisi,
+  EvrakGorevi,
   FinansalIslem,
   IcraDosyasi,
   IliskiDosyaKaydi,
@@ -236,6 +237,8 @@ export class AppComponent implements OnInit {
   duzenlenenEvrakParentId: number | null = null; duzenlenenEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi, sablonBolumu: 'ihtiyari', sablonKategori: 'toplu' };
   duzenlenenEvrakOrijinalSonEylemTarihi = '';
   yeniEvrakGorevMetinleri: Record<number, string> = {};
+  acikEvrakGorevFormlari: Record<number, boolean> = {};
+  duzenlenenEvrakGorevi: { evrakId: number; gorevId: number; metin: string } | null = null;
   acikKlasorler: Record<number, boolean> = {}; 
   davetMektubuOlusturuluyor = false;
   bilgilendirmeTutanagiOlusturuluyor = false;
@@ -3113,7 +3116,17 @@ export class AppComponent implements OnInit {
     }
     return false;
   }
-  evrakGoreviEkle(evrakId: number) {
+  evrakGorevFormunuAc(evrakId: number) {
+    this.acikEvrakGorevFormlari[evrakId] = true;
+    this.yeniEvrakGorevMetinleri[evrakId] = this.yeniEvrakGorevMetinleri[evrakId] || '';
+    if (this.duzenlenenEvrakGorevi?.evrakId !== evrakId) this.duzenlenenEvrakGorevi = null;
+  }
+  evrakGorevFormunuKapat(evrakId: number) {
+    this.acikEvrakGorevFormlari[evrakId] = false;
+    this.yeniEvrakGorevMetinleri[evrakId] = '';
+    if (this.duzenlenenEvrakGorevi?.evrakId === evrakId) this.duzenlenenEvrakGorevi = null;
+  }
+  async evrakGoreviEkle(evrakId: number) {
     if (!this.aktifDosya) return;
     const metin = this.formatMetin(this.yeniEvrakGorevMetinleri[evrakId])?.trim();
     if (!metin) return;
@@ -3125,9 +3138,72 @@ export class AppComponent implements OnInit {
       evrak.gorevler.push({ id: Date.now(), metin, tamamlandiMi: false, tamamlanmaTarihi: '' });
     });
     if (!bulundu) return;
-    this.yeniEvrakGorevMetinleri[evrakId] = '';
     const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak görevi eklendi', `${evrakIsmi}: ${metin}`);
-    this.aktifDosyaKaydet(kayitli, 'Evrak görevi eklendi.');
+    const kaydedildi = await this.aktifDosyaKaydet(kayitli, 'Evrak görevi eklendi.');
+    if (!kaydedildi) return;
+    this.yeniEvrakGorevMetinleri[evrakId] = '';
+    this.acikEvrakGorevFormlari[evrakId] = false;
+  }
+  evrakGoreviDuzenleBaslat(evrakId: number, gorev: EvrakGorevi) {
+    this.acikEvrakGorevFormlari[evrakId] = true;
+    this.yeniEvrakGorevMetinleri[evrakId] = '';
+    this.duzenlenenEvrakGorevi = { evrakId, gorevId: gorev.id, metin: gorev.metin || '' };
+  }
+  evrakGoreviDuzenlemeIptal() {
+    this.duzenlenenEvrakGorevi = null;
+  }
+  async evrakGoreviDuzenlemeKaydet() {
+    if (!this.aktifDosya || !this.duzenlenenEvrakGorevi) return;
+    const duzenleme = this.duzenlenenEvrakGorevi;
+    const metin = this.formatMetin(duzenleme.metin)?.trim();
+    if (!metin) return;
+    const k: any = this.veriKopyala(this.aktifDosya);
+    let evrakIsmi = 'Evrak';
+    let gorevBulundu = false;
+    const bulundu = this.evrakKaydiniGuncelle(k.evraklar, duzenleme.evrakId, (evrak) => {
+      evrakIsmi = evrak.isim || evrakIsmi;
+      const gorev = (evrak.gorevler || []).find((item) => item.id === duzenleme.gorevId);
+      if (!gorev) return;
+      gorev.metin = metin;
+      gorevBulundu = true;
+    });
+    if (!bulundu || !gorevBulundu) return;
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak görevi güncellendi', `${evrakIsmi}: ${metin}`);
+    const kaydedildi = await this.aktifDosyaKaydet(kayitli, 'Evrak görevi güncellendi.');
+    if (!kaydedildi) return;
+    this.duzenlenenEvrakGorevi = null;
+    this.acikEvrakGorevFormlari[duzenleme.evrakId] = false;
+  }
+  async evrakGoreviSil(evrakId: number, gorevId: number) {
+    if (!this.aktifDosya) return;
+    const oncekiKayit = this.veriKopyala(this.aktifDosya);
+    const kaydetFonk = this.aktifDetayKaydetFonksiyonu();
+    const k: any = this.veriKopyala(this.aktifDosya);
+    let evrakIsmi = 'Evrak';
+    let gorevMetni = 'Görev';
+    let silindi = false;
+    const bulundu = this.evrakKaydiniGuncelle(k.evraklar, evrakId, (evrak) => {
+      evrakIsmi = evrak.isim || evrakIsmi;
+      const gorev = (evrak.gorevler || []).find((item) => item.id === gorevId);
+      if (!gorev) return;
+      gorevMetni = gorev.metin || gorevMetni;
+      evrak.gorevler = (evrak.gorevler || []).filter((item) => item.id !== gorevId);
+      silindi = true;
+    });
+    if (!bulundu || !silindi) return;
+    if (this.duzenlenenEvrakGorevi?.evrakId === evrakId && this.duzenlenenEvrakGorevi.gorevId === gorevId) {
+      this.duzenlenenEvrakGorevi = null;
+    }
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak görevi silindi', `${evrakIsmi}: ${gorevMetni}`);
+    const kaydedildi = await kaydetFonk(kayitli as any);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Evrak görevi silindi',
+      'Görev evrak listesinden kaldırıldı.',
+      () => kaydetFonk(this.veriKopyala(oncekiKayit) as any),
+      'Evrak görevi geri yüklendi',
+      'Silinen görev tekrar evrakın altına eklendi.'
+    );
   }
   evrakGoreviDurumDegistir(evrakId: number, gorevId: number, tamamlandiMi: boolean) {
     if (!this.aktifDosya) return;
