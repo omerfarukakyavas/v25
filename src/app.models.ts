@@ -1,7 +1,8 @@
 // Shared application models extracted from the legacy single-file component.
 
 export interface FinansalIslem { id: number; tarih: string; tur: string; tutar: number; aciklama: string; makbuzUrl?: string; makbuzStopajli?: boolean; }
-export interface EvrakBaglantisi { id: number; isim: string; url: string; tarih: string; tebligTarihi?: string; sonEylemTarihi?: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; yaziRengi?: string; ekler?: EvrakBaglantisi[]; sablonBolumu?: string; sablonKategori?: string; } 
+export interface EvrakGorevi { id: number; metin: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; }
+export interface EvrakBaglantisi { id: number; isim: string; url: string; tarih: string; tebligTarihi?: string; sonEylemTarihi?: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; yaziRengi?: string; ekler?: EvrakBaglantisi[]; gorevler?: EvrakGorevi[]; sablonBolumu?: string; sablonKategori?: string; } 
 export interface DosyaNumarasi { tur: string; no: string; }
 export interface ArabuluculukTaraf {
   id: number;

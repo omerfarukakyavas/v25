@@ -235,6 +235,7 @@ export class AppComponent implements OnInit {
   yeniEkEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi }; duzenlenenEvrakId: number | null = null;
   duzenlenenEvrakParentId: number | null = null; duzenlenenEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi, sablonBolumu: 'ihtiyari', sablonKategori: 'toplu' };
   duzenlenenEvrakOrijinalSonEylemTarihi = '';
+  yeniEvrakGorevMetinleri: Record<number, string> = {};
   acikKlasorler: Record<number, boolean> = {}; 
   davetMektubuOlusturuluyor = false;
   bilgilendirmeTutanagiOlusturuluyor = false;
@@ -3111,6 +3112,44 @@ export class AppComponent implements OnInit {
       if (this.evrakKaydiniGuncelle(evrak.ekler, evrakId, updater)) return true;
     }
     return false;
+  }
+  evrakGoreviEkle(evrakId: number) {
+    if (!this.aktifDosya) return;
+    const metin = this.formatMetin(this.yeniEvrakGorevMetinleri[evrakId])?.trim();
+    if (!metin) return;
+    const k: any = this.veriKopyala(this.aktifDosya);
+    let evrakIsmi = 'Evrak';
+    const bulundu = this.evrakKaydiniGuncelle(k.evraklar, evrakId, (evrak) => {
+      evrakIsmi = evrak.isim || evrakIsmi;
+      if (!evrak.gorevler) evrak.gorevler = [];
+      evrak.gorevler.push({ id: Date.now(), metin, tamamlandiMi: false, tamamlanmaTarihi: '' });
+    });
+    if (!bulundu) return;
+    this.yeniEvrakGorevMetinleri[evrakId] = '';
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak görevi eklendi', `${evrakIsmi}: ${metin}`);
+    this.aktifDosyaKaydet(kayitli, 'Evrak görevi eklendi.');
+  }
+  evrakGoreviDurumDegistir(evrakId: number, gorevId: number, tamamlandiMi: boolean) {
+    if (!this.aktifDosya) return;
+    const k: any = this.veriKopyala(this.aktifDosya);
+    let evrakIsmi = 'Evrak';
+    let gorevMetni = 'Görev';
+    const bulundu = this.evrakKaydiniGuncelle(k.evraklar, evrakId, (evrak) => {
+      evrakIsmi = evrak.isim || evrakIsmi;
+      const gorev = (evrak.gorevler || []).find((item) => item.id === gorevId);
+      if (!gorev) return;
+      gorevMetni = gorev.metin || gorevMetni;
+      gorev.tamamlandiMi = tamamlandiMi;
+      gorev.tamamlanmaTarihi = tamamlandiMi ? new Date().toISOString() : '';
+    });
+    if (!bulundu) return;
+    const kayitli = this.dosyayaIslemKaydiEkle(
+      k,
+      'evrak',
+      tamamlandiMi ? 'Evrak görevi tamamlandı' : 'Evrak görevi yeniden açıldı',
+      `${evrakIsmi}: ${gorevMetni}`
+    );
+    this.aktifDosyaKaydet(kayitli);
   }
   async sureliIsiTamamlandiIsaretle(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null | undefined, kaynak: AjandaKaynak, evrakId: number, event?: Event) {
     event?.stopPropagation();
