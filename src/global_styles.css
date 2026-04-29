@@ -198,6 +198,135 @@ textarea {
   border-radius: 0.95rem !important;
 }
 
+.app-list-alert,
+.app-list-filter,
+.app-list-card,
+.app-list-stats > div {
+  border-radius: 1rem !important;
+  border-width: 1.25px !important;
+  box-shadow: 0 16px 34px -30px rgba(15, 23, 42, 0.22), 0 5px 14px rgba(148, 163, 184, 0.06) !important;
+}
+
+.app-list-alert {
+  background: #fff7f7 !important;
+  border-color: #fecaca !important;
+  padding: 1rem !important;
+}
+
+.app-list-alert h3 {
+  letter-spacing: 0.055em !important;
+}
+
+.app-list-filter {
+  background: #ffffff !important;
+  border-color: var(--app-border) !important;
+  gap: 0.75rem !important;
+  margin-bottom: 1rem !important;
+  padding: 0.85rem !important;
+}
+
+.app-list-filter-blue {
+  box-shadow: 0 14px 30px -28px rgba(37, 99, 235, 0.25), 0 5px 14px rgba(148, 163, 184, 0.06) !important;
+}
+
+.app-list-filter-emerald {
+  box-shadow: 0 14px 30px -28px rgba(5, 150, 105, 0.25), 0 5px 14px rgba(148, 163, 184, 0.06) !important;
+}
+
+.app-list-filter-violet {
+  box-shadow: 0 14px 30px -28px rgba(124, 58, 237, 0.25), 0 5px 14px rgba(148, 163, 184, 0.06) !important;
+}
+
+.app-list-filter input,
+.app-list-filter select {
+  border-color: var(--app-border-strong) !important;
+  border-radius: 0.8rem !important;
+  font-size: 0.9rem !important;
+  min-height: 2.65rem;
+  padding-bottom: 0.55rem !important;
+  padding-top: 0.55rem !important;
+}
+
+.app-list-card {
+  border-color: var(--app-border-strong) !important;
+  overflow: hidden;
+}
+
+.app-list-card > .md\:hidden:first-child {
+  background: #f8fafc !important;
+  border-color: var(--app-border) !important;
+}
+
+.app-list-card > .md\:hidden:first-child p {
+  letter-spacing: 0.055em !important;
+}
+
+.app-shell .app-list-table {
+  color: var(--app-body);
+}
+
+.app-shell .app-list-table thead tr {
+  background: #f8fafc !important;
+  border-bottom-color: var(--app-border) !important;
+}
+
+.app-shell .app-list-table thead th {
+  color: #334155 !important;
+  font-size: 0.72rem !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.06em !important;
+  padding: 0.85rem 1rem !important;
+}
+
+.app-shell .app-list-table tbody tr {
+  transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.app-shell .app-list-table tbody td {
+  padding: 0.85rem 1rem !important;
+}
+
+.app-shell .app-list-table tbody tr:hover {
+  background: #f8fafc !important;
+}
+
+.app-shell .app-list-table tbody tr:hover td {
+  filter: none !important;
+}
+
+.app-shell .app-list-table .w-1.self-stretch,
+.app-shell .app-list-table .w-px.self-stretch {
+  background: rgba(51, 65, 85, 0.26) !important;
+  width: 0.16rem !important;
+}
+
+.app-shell .app-list-table td [class*="rounded-xl"] {
+  border-radius: 0.85rem !important;
+  box-shadow: none !important;
+}
+
+.app-shell .app-list-table td:last-child button {
+  box-shadow: none !important;
+}
+
+.app-shell .app-list-table-separated {
+  border-spacing: 0 0.55rem !important;
+}
+
+.app-list-stats {
+  gap: 0.85rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.app-list-stats > div {
+  padding: 0.95rem !important;
+}
+
+.app-list-stats p[class*="text-3xl"] {
+  font-size: 1.65rem !important;
+  line-height: 1.1 !important;
+}
+
 .app-shell h2,
 .app-shell h3,
 .app-shell h4 {
