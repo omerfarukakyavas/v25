@@ -13,6 +13,9 @@ export interface ArabuluculukTaraf {
   tcVergiNo?: string;
   vergiDairesi?: string;
   adres?: string;
+  il?: string;
+  ilce?: string;
+  acikAdres?: string;
   telefon?: string;
   eposta?: string;
   vekil?: string;
@@ -37,6 +40,9 @@ export interface DavaTarafKaydi {
   telefon?: string;
   eposta?: string;
   adres?: string;
+  il?: string;
+  ilce?: string;
+  acikAdres?: string;
 }
 
 export interface DavaDosyasi { 
@@ -57,7 +63,7 @@ export interface ArabuluculukDosyasi {
   dosyaNo?: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil?: string; karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string; icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
 }
 
-export interface Muvekkil { id: number; tip?: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer'; _isNewDiger?: boolean; adSoyad: string; tcKimlik: string; telefon: string; eposta: string; adres: string; bankaBilgileri: string; vergiDairesi?: string; vekaletnameUrl?: string; yetkililer?: { id: number; adSoyad: string; telefon: string; eposta?: string; pozisyon: string; }[]; }
+export interface Muvekkil { id: number; tip?: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer'; _isNewDiger?: boolean; adSoyad: string; tcKimlik: string; telefon: string; eposta: string; adres: string; il?: string; ilce?: string; acikAdres?: string; bankaBilgileri: string; vergiDairesi?: string; vekaletnameUrl?: string; yetkililer?: { id: number; adSoyad: string; telefon: string; eposta?: string; pozisyon: string; }[]; }
 
 export interface MuvekkilGorusmeNotu {
   id: number;
