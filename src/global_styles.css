@@ -278,6 +278,92 @@ textarea {
   color: #dc2626 !important;
 }
 
+.app-shell .app-file-form-modal {
+  max-width: min(64rem, calc(100vw - 1.5rem)) !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 24px 54px -36px rgba(15, 23, 42, 0.34), 0 10px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+.app-shell .app-file-form-modal > .flex:first-child {
+  background: #ffffff !important;
+  padding: 0.85rem 1rem !important;
+}
+
+.app-shell .app-file-form-modal > .flex:first-child h3 {
+  font-size: 1.06rem !important;
+  font-weight: 750 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.25 !important;
+}
+
+.app-shell .app-file-form-modal > .flex:first-child button {
+  border-radius: 0.75rem !important;
+  padding: 0.5rem 0.8rem !important;
+}
+
+.app-shell .app-file-form-modal > div:nth-child(2) {
+  background: #f6f8fb !important;
+  gap: 0.85rem !important;
+  max-height: min(74vh, 760px) !important;
+  padding: 1rem !important;
+}
+
+.app-shell .app-file-form-modal > div:last-child {
+  padding: 0.85rem 1rem !important;
+}
+
+.app-shell .app-file-form-modal > div:nth-child(2) > .flex.flex-col {
+  gap: 0.85rem !important;
+}
+
+.app-shell .app-file-form-modal > div:nth-child(2) > .flex.flex-col > [class*="rounded-2xl"] {
+  border-radius: 1rem !important;
+  padding: 0.95rem !important;
+  box-shadow: 0 12px 28px -24px rgba(15, 23, 42, 0.22), 0 4px 12px rgba(148, 163, 184, 0.06) !important;
+}
+
+.app-shell .app-file-form-modal [class*="rounded-2xl"] {
+  border-radius: 1rem !important;
+}
+
+.app-shell .app-file-form-modal [class*="rounded-xl"] {
+  border-radius: 0.75rem !important;
+}
+
+.app-shell .app-file-form-modal > div:nth-child(2) p[class*="font-black"][class*="uppercase"] {
+  color: #111827 !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.045em !important;
+}
+
+.app-shell .app-file-form-modal > div:nth-child(2) p[class*="leading-6"][class*="text-slate-500"] {
+  color: #475569 !important;
+  font-size: 0.84rem !important;
+  line-height: 1.45 !important;
+  margin-top: 0.35rem !important;
+}
+
+.app-shell .app-file-form-modal input,
+.app-shell .app-file-form-modal select,
+.app-shell .app-file-form-modal textarea {
+  border-radius: 0.65rem !important;
+  font-size: 0.88rem !important;
+  padding: 0.55rem 0.75rem !important;
+}
+
+.app-shell .app-file-form-modal textarea {
+  line-height: 1.45 !important;
+}
+
+.app-shell .app-file-form-modal label[class*="min-h-"] {
+  align-items: flex-start !important;
+  min-height: 0 !important;
+}
+
+.app-shell .app-file-form-modal .app-arb-party-card {
+  padding: 0.9rem !important;
+}
+
 .app-shell .app-arb-party-card {
   position: relative;
   overflow: hidden;
