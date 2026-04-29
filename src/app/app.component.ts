@@ -69,6 +69,12 @@ type BildirimGosterSecenekleri = {
   geriAl?: GeriAlmaSecenegi;
 };
 
+type HazirExcelMakbuz = {
+  url: string;
+  dosyaAdi: string;
+  olusturmaTarihi: string;
+};
+
 type GeriAlmaKaydi = {
   islem: () => Promise<boolean | void> | boolean | void;
   basariBaslik: string;
@@ -213,6 +219,9 @@ export class AppComponent implements OnInit {
   yeniIslem: Partial<FinansalIslem> = { tur: 'Vekalet Ücreti' }; 
   duzenlenenFinansalIslemId: number | null = null;
   duzenlenenFinansalIslem: Partial<FinansalIslem> = {};
+  makbuzExcelSablonYolu = 'assets/templates/makbuz-sablonu.xlsx';
+  makbuzExcelOlusturuluyorId: number | null = null;
+  hazirExcelMakbuzlar: Record<number, HazirExcelMakbuz> = {};
   seciliBaglantiliIcraId: number | undefined = undefined;
   seciliBaglantiliArabuluculukId: number | undefined = undefined;
   baglantiliIcraArama = '';
@@ -3520,6 +3529,177 @@ export class AppComponent implements OnInit {
     pencere.document.write(html);
     pencere.document.close();
     pencere.focus();
+  }
+  getMakbuzIsinTuruEtiketi() {
+    if (this.aktifSayfa === 'icraDetay') return 'İcra';
+    if (this.aktifSayfa === 'arabuluculukDetay') return 'Arabuluculuk';
+    return 'Dava';
+  }
+  getMakbuzDosyaNo(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null | undefined) {
+    if (!dosya) return '-';
+    if (this.aktifSayfa === 'arabuluculukDetay') {
+      const arabuluculuk = dosya as ArabuluculukDosyasi;
+      return [arabuluculuk.buroNo, arabuluculuk.arabuluculukNo].filter(Boolean).join(' / ') || '-';
+    }
+    return (dosya.dosyaNo || (dosya.dosyaNumaralari || []).map(no => `${no.tur}: ${no.no}`).join(' / ') || '-');
+  }
+  getMakbuzDosyaTaraflari(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null | undefined) {
+    if (!dosya) return '-';
+    if (this.aktifSayfa === 'icraDetay') {
+      const icra = dosya as IcraDosyasi;
+      return `${icra.alacakli || 'Alacaklı yok'} / ${icra.borclu || 'Borçlu yok'}`;
+    }
+    if (this.aktifSayfa === 'arabuluculukDetay') return this.getArabuluculukTarafIsimMetni(dosya as ArabuluculukDosyasi);
+    return this.getDavaTarafOzet(dosya as DavaDosyasi) || '-';
+  }
+  getMakbuzDosyaKonuMetni(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null | undefined) {
+    if (!dosya) return '-';
+    if (this.aktifSayfa === 'icraDetay') {
+      const icra = dosya as IcraDosyasi;
+      return [icra.takipTipi, icra.icraDairesi].filter(Boolean).join(' - ') || 'İcra takibi';
+    }
+    if (this.aktifSayfa === 'arabuluculukDetay') {
+      const arabuluculuk = dosya as ArabuluculukDosyasi;
+      return [arabuluculuk.basvuruTuru, arabuluculuk.uyusmazlikTuru, arabuluculuk.basvuruKonusu].filter(Boolean).join(' - ') || 'Arabuluculuk işi';
+    }
+    const dava = dosya as DavaDosyasi;
+    return [dava.konu, dava.mahkeme].filter(Boolean).join(' - ') || 'Dava dosyası';
+  }
+  getMakbuzHesapMuhatabi(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null | undefined) {
+    const davaMuvekkilId = (dosya as DavaDosyasi | undefined)?.muvekkilId || (dosya as DavaDosyasi | undefined)?.muvekkiller?.find(kayit => kayit.muvekkilId)?.muvekkilId;
+    const muvekkilId = (dosya as any)?.muvekkilId || davaMuvekkilId;
+    const kayitli = muvekkilId ? this.muvekkiller.find(muvekkil => muvekkil.id === muvekkilId) : undefined;
+    const arabuluculukBasvurucu = this.aktifSayfa === 'arabuluculukDetay'
+      ? (dosya as ArabuluculukDosyasi | undefined)?.taraflar?.find(taraf => taraf.tip === 'Başvurucu')
+      : undefined;
+    const davaIlkMuvekkil = this.aktifSayfa === 'detay'
+      ? (dosya as DavaDosyasi | undefined)?.muvekkiller?.find(kayit => kayit.isim || kayit.muvekkilId)
+      : undefined;
+    const adSoyad = this.formatMetin(kayitli?.adSoyad || davaIlkMuvekkil?.isim || (dosya as any)?.muvekkil || arabuluculukBasvurucu?.isim || '') || '-';
+    const adres = this.formatMetin(kayitli?.adres || davaIlkMuvekkil?.adres || arabuluculukBasvurucu?.adres || '') || '-';
+    const adresParcalari = this.adrestenIlIlceCikar(adres);
+    const sirketMi = this.makbuzMuhatabiSirketMi(kayitli, adSoyad);
+    const kisiAdiSoyadi = this.kisiAdiSoyadiAyir(adSoyad);
+    return {
+      adSoyad,
+      unvan: sirketMi ? adSoyad : '',
+      ad: sirketMi ? '' : kisiAdiSoyadi.ad,
+      soyad: sirketMi ? '' : kisiAdiSoyadi.soyad,
+      tcVkn: kayitli?.tcKimlik || davaIlkMuvekkil?.tcKimlikVergiNo || arabuluculukBasvurucu?.tcVergiNo || '-',
+      vergiDairesi: kayitli?.vergiDairesi || davaIlkMuvekkil?.vergiDairesi || arabuluculukBasvurucu?.vergiDairesi || '-',
+      il: adresParcalari.il || '-',
+      ilce: adresParcalari.ilce || '-',
+      adres
+    };
+  }
+  makbuzMuhatabiSirketMi(kayitli?: Muvekkil, adSoyad = '') {
+    if (kayitli?.tip === 'Şirketler') return true;
+    return /\b(a\.?ş\.?|anonim|limited|ltd|şti|şirket|ticaret|sanayi|holding|bankası|bakanlığı|müdürlüğü|belediyesi)\b/i.test(adSoyad.toLocaleLowerCase('tr-TR'));
+  }
+  kisiAdiSoyadiAyir(adSoyad: string) {
+    const parcalar = (adSoyad || '').trim().split(/\s+/).filter(Boolean);
+    if (parcalar.length <= 1) return { ad: adSoyad || '-', soyad: '' };
+    return { ad: parcalar.slice(0, -1).join(' '), soyad: parcalar[parcalar.length - 1] };
+  }
+  adrestenIlIlceCikar(adres: string) {
+    const temiz = (adres || '').replace(/\s+/g, ' ').trim();
+    const slashParcalari = temiz.split('/').map(parca => parca.trim()).filter(Boolean);
+    if (slashParcalari.length >= 2) {
+      return {
+        ilce: slashParcalari[slashParcalari.length - 2].replace(/[,.]$/g, ''),
+        il: slashParcalari[slashParcalari.length - 1].replace(/[,.]$/g, '')
+      };
+    }
+    return { il: '', ilce: '' };
+  }
+  getMakbuzExcelYerTutuculari(islem: FinansalIslem) {
+    const dosya = this.aktifDosya as DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null;
+    const isinTuru = this.getMakbuzIsinTuruEtiketi();
+    const dosyaNo = this.getMakbuzDosyaNo(dosya);
+    const taraflar = this.getMakbuzDosyaTaraflari(dosya);
+    const konu = this.getMakbuzDosyaKonuMetni(dosya);
+    const muhatap = this.getMakbuzHesapMuhatabi(dosya);
+    const brutTutar = Number(islem.tutar || 0);
+    return {
+      MAKBUZ_DUZENLEME_TARIHI: this.formatTarih(new Date().toISOString()),
+      ISIN_TURU: isinTuru,
+      MAKBUZ_ACIKLAMASI: `${dosyaNo} numaralı ${isinTuru.toLocaleLowerCase('tr-TR')} işi - ${taraflar} - ${konu}`,
+      HESAP_MUHATABI_UNVANI: muhatap.unvan || '-',
+      HESAP_MUHATABI_ADI: muhatap.ad || '-',
+      HESAP_MUHATABI_SOYADI: muhatap.soyad || '-',
+      HESAP_MUHATABI_TC_VKN: muhatap.tcVkn || '-',
+      VERGI_DAIRESI: muhatap.vergiDairesi || '-',
+      HESAP_MUHATABI_IL: muhatap.il || '-',
+      HESAP_MUHATABI_ILCE: muhatap.ilce || '-',
+      HESAP_MUHATABI_ADRES: muhatap.adres || '-',
+      BRUT_TUTAR: this.formatTutarMetni(brutTutar),
+      BRUT_TUTAR_YAZIYLA: this.turkceTutarYazisinaCevir(brutTutar),
+      DOSYA_NO: dosyaNo,
+      DOSYA_TARAFLARI: taraflar,
+      FINANS_ISLEM_TURU: islem.tur || '-',
+      FINANS_ISLEM_ACIKLAMASI: this.formatMetin(islem.aciklama) || '-'
+    };
+  }
+  excelYerTutuculariniDegistir(metin: string, yerTutucular: Record<string, string>) {
+    return Object.entries(yerTutucular).reduce((sonuc, [anahtar, deger]) => {
+      const desen = new RegExp(`{{\\s*${anahtar.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*}}`, 'g');
+      return sonuc.replace(desen, deger || '-');
+    }, metin);
+  }
+  excelMakbuzDosyaAdiOlustur(islem: FinansalIslem) {
+    const dosyaNo = this.getMakbuzDosyaNo(this.aktifDosya as any).replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '-');
+    const tarih = new Date().toISOString().slice(0, 10);
+    return `makbuz-${this.getMakbuzIsinTuruEtiketi().toLocaleLowerCase('tr-TR')}-${dosyaNo || 'dosya'}-${islem.id || tarih}.xlsx`;
+  }
+  async excelMakbuzOlustur(islem: FinansalIslem) {
+    if (!this.aktifDosya) return;
+    if (!Number(islem.tutar || 0)) {
+      this.bildirimGoster('info', 'Excel makbuz oluşturulamadı', 'Bu finans kaydında tutar bulunmuyor.');
+      return;
+    }
+    this.makbuzExcelOlusturuluyorId = islem.id;
+    try {
+      const response = await fetch(this.makbuzExcelSablonYolu);
+      if (!response.ok) throw new Error('Makbuz şablonu bulunamadı.');
+      const ExcelJSModule: any = await import('exceljs/dist/exceljs.min.js');
+      const ExcelJS = ExcelJSModule.default || ExcelJSModule;
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(await response.arrayBuffer());
+      const yerTutucular = this.getMakbuzExcelYerTutuculari(islem);
+      workbook.eachSheet((worksheet: any) => {
+        worksheet.eachRow((row: any) => {
+          row.eachCell((cell: any) => {
+            const deger: any = cell.value;
+            if (typeof deger === 'string') {
+              cell.value = this.excelYerTutuculariniDegistir(deger, yerTutucular);
+            } else if (deger?.richText) {
+              const metin = deger.richText.map((parca: any) => parca.text || '').join('');
+              cell.value = this.excelYerTutuculariniDegistir(metin, yerTutucular);
+            } else if (deger?.text) {
+              cell.value = { ...deger, text: this.excelYerTutuculariniDegistir(deger.text, yerTutucular) };
+            }
+          });
+        });
+      });
+      const buffer = await workbook.xlsx.writeBuffer();
+      const onceki = this.hazirExcelMakbuzlar[islem.id];
+      if (onceki?.url) URL.revokeObjectURL(onceki.url);
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const dosyaAdi = this.excelMakbuzDosyaAdiOlustur(islem);
+      this.hazirExcelMakbuzlar = {
+        ...this.hazirExcelMakbuzlar,
+        [islem.id]: {
+          url: URL.createObjectURL(blob),
+          dosyaAdi,
+          olusturmaTarihi: new Date().toISOString()
+        }
+      };
+      this.bildirimGoster('success', 'Excel makbuz hazırlandı', 'İndirme bağlantısı finans işlem satırında görünüyor.');
+    } catch (error: any) {
+      this.bildirimGoster('error', 'Excel makbuz oluşturulamadı', error?.message || 'Şablon işlenirken beklenmeyen bir hata oluştu.');
+    } finally {
+      this.makbuzExcelOlusturuluyorId = null;
+    }
   }
   finansalIslemGuncelle() {
     if (!this.aktifDosya || !this.duzenlenenFinansalIslemId) return;

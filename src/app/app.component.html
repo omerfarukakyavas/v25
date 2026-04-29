@@ -3257,6 +3257,22 @@
                                                 </button>
                                               </div>
                                             }
+                                            <div class="flex flex-wrap items-center gap-2">
+                                              <button
+                                                type="button"
+                                                (click)="excelMakbuzOlustur(islem)"
+                                                [disabled]="makbuzExcelOlusturuluyorId === islem.id"
+                                                class="inline-flex w-fit items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-black text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-wait disabled:opacity-60">
+                                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v12m0 0l-4-4m4 4l4-4"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 19h14"></path></svg>
+                                                {{ makbuzExcelOlusturuluyorId === islem.id ? 'Hazırlanıyor' : 'Excel Makbuz Oluştur' }}
+                                              </button>
+                                              @if (hazirExcelMakbuzlar[islem.id]; as excelMakbuz) {
+                                                <a [href]="guvenliUrl(excelMakbuz.url)" [download]="excelMakbuz.dosyaAdi" class="inline-flex w-fit items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-[11px] font-black text-blue-700 transition-colors hover:bg-blue-100">
+                                                  Exceli İndir
+                                                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14 3h7m0 0v7m0-7L10 14"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 5v14h14v-5"></path></svg>
+                                                </a>
+                                              }
+                                            </div>
                                           </div>
                                           <div class="flex items-center gap-2">
                                             <span class="text-[10px] text-slate-400 font-medium">{{ formatTarihKisa(islem.tarih) }}</span>
