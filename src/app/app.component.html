@@ -1874,7 +1874,7 @@
             <!-- ORTAK DOSYA DETAY SAYFASI (DAVA, İCRA, ARABULUCULUK) -->
             @if (aktifSayfa === 'detay' || aktifSayfa === 'icraDetay' || aktifSayfa === 'arabuluculukDetay') {
               @if (aktifDosya) {
-                <div class="app-page space-y-4 sm:space-y-6 max-w-7xl mx-auto pb-8 sm:pb-10">
+                <div class="app-page app-detail-page space-y-4 sm:space-y-6 max-w-7xl mx-auto pb-8 sm:pb-10">
                   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                     <div class="flex items-center gap-3">
                       <button (click)="geriGit()" class="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200 transition-colors hover:bg-slate-50">Geri Dön</button>
@@ -1894,7 +1894,7 @@
                     </div>
                   </div>
 
-                  <div [class]="getAktifDosyaKapakKartiClass()" class="relative overflow-hidden rounded-[1.5rem] border p-4 shadow-sm sm:rounded-[1.75rem] sm:p-6">
+                  <div [class]="getAktifDosyaKapakKartiClass()" class="app-detail-hero relative overflow-hidden rounded-[1.5rem] border p-4 shadow-sm sm:rounded-[1.75rem] sm:p-6">
                     <div class="absolute -right-10 -top-12 hidden h-40 w-40 rounded-full bg-white/35 blur-2xl sm:block"></div>
                     <div class="absolute -bottom-10 left-0 hidden h-28 w-28 rounded-full bg-white/25 blur-2xl sm:block"></div>
                     <div class="relative grid grid-cols-1 gap-4 xl:grid-cols-12 xl:gap-6">
@@ -2405,8 +2405,8 @@
                     </div>
 
                     <div class="space-y-4 sm:space-y-6 lg:col-span-12">
-                      <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden min-h-[320px]">
-                        <div class="flex overflow-x-auto border-b border-slate-200 bg-slate-50 custom-scrollbar">
+                      <div class="app-detail-tabs-card bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden min-h-[320px]">
+                        <div class="app-detail-tabs-nav flex overflow-x-auto border-b border-slate-200 bg-slate-50 custom-scrollbar">
                            @if (aktifSayfa === 'arabuluculukDetay') {
                              <button (click)="aktifDetaySekmesi = 'notlar'" [class]="getDetayTabClass('notlar')" class="flex min-w-[110px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Notlar</button>
                              <button (click)="aktifDetaySekmesi = 'evraklar'" [class]="getDetayTabClass('evraklar')" class="flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Evrak Bağlantıları</button>
@@ -2434,7 +2434,7 @@
                           </button>
                         </div>
 
-                        <div class="flex h-full flex-1 flex-col bg-slate-50/50 p-3 sm:p-5">
+                        <div class="app-detail-tabs-content flex h-full flex-1 flex-col bg-slate-50/50 p-3 sm:p-5">
                           @if (aktifDetaySekmesi === 'notlar') {
                             <div class="flex h-full flex-1 flex-col gap-3">
                               <div class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
