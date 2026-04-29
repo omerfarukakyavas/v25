@@ -3705,7 +3705,7 @@ export class AppComponent implements OnInit {
     const taraflar = this.getMakbuzDosyaTaraflari(dosya);
     const konu = this.getMakbuzDosyaKonuMetni(dosya);
     const muhatap = this.getMakbuzHesapMuhatabi(dosya);
-    const brutTutar = Number(islem.tutar || 0);
+    const hizmetTutari = this.getMakbuzExcelHizmetTutari(islem, dosya);
     return {
       MAKBUZ_DUZENLEME_TARIHI: this.formatTarih(new Date().toISOString()),
       ISIN_TURU: isinTuru,
@@ -3718,13 +3718,20 @@ export class AppComponent implements OnInit {
       HESAP_MUHATABI_IL: muhatap.il || '',
       HESAP_MUHATABI_ILCE: muhatap.ilce || '',
       HESAP_MUHATABI_ADRES: muhatap.adres || '',
-      BRUT_TUTAR: this.formatTutarMetni(brutTutar),
-      BRUT_TUTAR_YAZIYLA: this.turkceTutarYazisinaCevir(brutTutar),
+      BRUT_TUTAR: this.formatTutarSayisiMetni(hizmetTutari),
+      BRUT_TUTAR_YAZIYLA: this.turkceTutarYazisinaCevir(hizmetTutari),
       DOSYA_NO: dosyaNo,
       DOSYA_TARAFLARI: taraflar,
       FINANS_ISLEM_TURU: islem.tur || '-',
       FINANS_ISLEM_ACIKLAMASI: this.formatMetin(islem.aciklama) || '-'
     };
+  }
+  getMakbuzExcelHizmetTutari(islem: FinansalIslem, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null) {
+    if (this.aktifSayfa === 'arabuluculukDetay') {
+      const hesap = this.getArabuluculukMakbuzHesabi(islem, dosya as ArabuluculukDosyasi | null);
+      return hesap?.brutTutar ?? Number(islem.tutar || 0);
+    }
+    return Number(islem.tutar || 0);
   }
   excelYerTutuculariniDegistir(metin: string, yerTutucular: Record<string, string>) {
     return Object.entries(yerTutucular).reduce((sonuc, [anahtar, deger]) => {
@@ -4088,6 +4095,10 @@ export class AppComponent implements OnInit {
     if (miktar === null || miktar === undefined || !Number.isFinite(miktar)) return '';
     const sayi = Number(miktar);
     return `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(sayi)} TL`;
+  }
+  formatTutarSayisiMetni(miktar?: number | null) {
+    if (miktar === null || miktar === undefined || !Number.isFinite(miktar)) return '';
+    return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(miktar));
   }
   turkceUcBasamakYaziyaCevir(sayi: number) {
     const birler = ['', 'bir', 'iki', 'üç', 'dört', 'beş', 'altı', 'yedi', 'sekiz', 'dokuz'];
