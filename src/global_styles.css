@@ -739,6 +739,154 @@ textarea {
   border-color: rgba(251, 113, 133, 0.3) !important;
 }
 
+.app-dashboard-page,
+.app-agenda-page {
+  max-width: min(80rem, calc(100vw - 2rem)) !important;
+}
+
+.app-dashboard-metrics,
+.app-agenda-metrics {
+  gap: 0.85rem !important;
+}
+
+.app-dashboard-metrics > div,
+.app-agenda-metrics > div,
+.app-dashboard-panel,
+.app-dashboard-panel-lite,
+.app-agenda-filter,
+.app-agenda-flow-card,
+.app-agenda-side-card {
+  border-color: var(--app-border-strong) !important;
+  border-width: 1.25px !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 16px 34px -30px rgba(15, 23, 42, 0.24), 0 5px 14px rgba(148, 163, 184, 0.08) !important;
+}
+
+.app-dashboard-metrics > div,
+.app-agenda-metrics > div {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+  padding: 0.95rem !important;
+}
+
+.app-dashboard-metrics > div:hover,
+.app-agenda-metrics > div:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 38px -30px rgba(15, 23, 42, 0.3), 0 7px 16px rgba(148, 163, 184, 0.1) !important;
+}
+
+.app-dashboard-metrics p[class*="text-2xl"],
+.app-agenda-metrics .app-agenda-count {
+  font-size: 1.65rem !important;
+  line-height: 1.1 !important;
+}
+
+.app-dashboard-metrics p[class*="uppercase"],
+.app-agenda-metrics p[class*="uppercase"] {
+  color: #334155 !important;
+}
+
+.app-dashboard-panel {
+  background: #ffffff !important;
+  overflow: hidden;
+}
+
+.app-dashboard-panel > div:first-child {
+  background: #f8fafc !important;
+  border-color: var(--app-border) !important;
+  padding: 1rem !important;
+}
+
+.app-dashboard-panel > div:first-child h3,
+.app-dashboard-panel-lite h4 {
+  letter-spacing: 0.055em !important;
+}
+
+.app-dashboard-panel > .p-6 {
+  padding: 1rem !important;
+}
+
+.app-dashboard-alert-grid {
+  gap: 0.85rem !important;
+}
+
+.app-dashboard-alert-grid button {
+  border-width: 1.25px !important;
+  border-radius: 1rem !important;
+  padding: 0.95rem !important;
+  box-shadow: none !important;
+}
+
+.app-dashboard-alert-grid button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 16px 28px -24px rgba(15, 23, 42, 0.28) !important;
+}
+
+.app-dashboard-alert-grid p[class*="text-3xl"],
+.app-dashboard-mediation-timers p[class*="text-3xl"] {
+  font-size: 1.75rem !important;
+  line-height: 1.1 !important;
+}
+
+.app-dashboard-panel-lite {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.92) 100%) !important;
+  padding: 1rem !important;
+}
+
+.app-dashboard-panel-lite [class*="rounded-2xl"] {
+  border-radius: 0.95rem !important;
+}
+
+.app-dashboard-mediation-timers {
+  background: #ffffff !important;
+}
+
+.app-dashboard-mediation-timers > div:first-child {
+  background: #f8fafc !important;
+  padding: 1rem !important;
+}
+
+.app-dashboard-mediation-timers > .p-6 {
+  padding: 1rem !important;
+}
+
+.app-agenda-filter {
+  background: #ffffff !important;
+  gap: 0.75rem !important;
+  padding: 0.85rem !important;
+}
+
+.app-agenda-filter input,
+.app-agenda-filter select {
+  min-height: 2.65rem;
+  border-radius: 0.8rem !important;
+  font-size: 0.9rem !important;
+  padding-top: 0.55rem !important;
+  padding-bottom: 0.55rem !important;
+}
+
+.app-agenda-flow-card > div:first-child {
+  background: #f8fafc !important;
+  border-color: var(--app-border) !important;
+  padding: 0.95rem 1rem !important;
+}
+
+.app-agenda-flow-card > .divide-y > div {
+  padding: 0.9rem 1rem !important;
+}
+
+.app-agenda-flow-card > .divide-y > div:hover {
+  background: #f8fafc !important;
+}
+
+.app-agenda-side-card {
+  padding: 1rem !important;
+}
+
+.app-agenda-side-card button {
+  border-radius: 0.9rem !important;
+  box-shadow: none !important;
+}
+
 .app-agenda-page {
   font-variant-ligatures: common-ligatures;
   font-feature-settings: "kern" 1, "liga" 1;
@@ -1042,6 +1190,30 @@ textarea {
   .app-detail-page .app-file-detail-info-card {
     border-radius: 1rem !important;
     padding: 0.9rem !important;
+  }
+
+  .app-dashboard-page,
+  .app-agenda-page {
+    max-width: calc(100vw - 0.75rem) !important;
+  }
+
+  .app-dashboard-panel > div:first-child,
+  .app-dashboard-panel > .p-6,
+  .app-dashboard-panel-lite,
+  .app-dashboard-mediation-timers > div:first-child,
+  .app-dashboard-mediation-timers > .p-6,
+  .app-agenda-filter,
+  .app-agenda-side-card {
+    padding: 0.85rem !important;
+  }
+
+  .app-dashboard-alert-grid button {
+    padding: 0.85rem !important;
+  }
+
+  .app-agenda-flow-card > div:first-child,
+  .app-agenda-flow-card > .divide-y > div {
+    padding: 0.85rem !important;
   }
 
   .app-detail-tabs-nav {
