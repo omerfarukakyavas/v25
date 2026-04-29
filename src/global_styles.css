@@ -2,17 +2,17 @@
 
 :root {
   --app-font-sans: "Segoe UI Variable Text", "Segoe UI", Arial, "Helvetica Neue", Helvetica, sans-serif;
-  --app-bg: #dde7f1;
-  --app-bg-soft: #edf3f9;
+  --app-bg: #e8eef6;
+  --app-bg-soft: #f3f6fa;
   --app-surface: #ffffff;
-  --app-surface-soft: #f6f9fd;
-  --app-border: #c3d0df;
-  --app-border-strong: #9eb1c7;
+  --app-surface-soft: #f8fafc;
+  --app-border: #cbd6e2;
+  --app-border-strong: #aebdcd;
   --app-title: #091223;
   --app-body: #334155;
-  --app-body-soft: #526277;
-  --app-shadow: 0 28px 54px -34px rgba(15, 23, 42, 0.32), 0 10px 24px rgba(59, 130, 246, 0.08);
-  --app-shadow-soft: 0 20px 40px -34px rgba(15, 23, 42, 0.24), 0 8px 18px rgba(148, 163, 184, 0.08);
+  --app-body-soft: #475569;
+  --app-shadow: 0 18px 38px -30px rgba(15, 23, 42, 0.22), 0 6px 16px rgba(59, 130, 246, 0.05);
+  --app-shadow-soft: 0 14px 28px -28px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(148, 163, 184, 0.06);
 }
 
 html {
@@ -28,9 +28,9 @@ body {
   line-height: 1.55;
   color: var(--app-title);
   background:
-    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.1), transparent 22%),
-    linear-gradient(180deg, #f5f8fc 0%, var(--app-bg) 100%);
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.07), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.06), transparent 22%),
+    linear-gradient(180deg, #f7f9fc 0%, var(--app-bg) 100%);
   min-height: 100vh;
 }
 
@@ -57,9 +57,9 @@ textarea {
 
 .app-shell {
   background:
-    radial-gradient(circle at top right, rgba(37, 99, 235, 0.1), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.08), transparent 22%),
-    linear-gradient(180deg, #eef3f9 0%, #e2ebf4 100%);
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.06), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.045), transparent 22%),
+    linear-gradient(180deg, #f2f6fb 0%, #e8eef6 100%);
 }
 
 .app-sidebar {
@@ -70,8 +70,8 @@ textarea {
 .app-topbar {
   background: rgba(255, 255, 255, 0.96);
   border-bottom-color: var(--app-border-strong) !important;
-  box-shadow: 0 18px 34px -28px rgba(15, 23, 42, 0.32);
-  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.2);
+  backdrop-filter: blur(12px);
 }
 
 .app-topbar-title {
@@ -83,9 +83,9 @@ textarea {
 
 .app-canvas {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(240, 245, 251, 0.92)),
-    linear-gradient(135deg, rgba(191, 219, 254, 0.12), transparent 24%),
-    linear-gradient(225deg, rgba(148, 163, 184, 0.18), transparent 24%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(243, 247, 252, 0.92)),
+    linear-gradient(135deg, rgba(191, 219, 254, 0.07), transparent 24%),
+    linear-gradient(225deg, rgba(148, 163, 184, 0.09), transparent 24%);
 }
 
 .app-page {
@@ -160,8 +160,8 @@ textarea {
 .app-shell [class*="bg-white"][class*="rounded-2xl"],
 .app-shell [class*="bg-white"][class*="rounded-[1.5rem]"],
 .app-shell [class*="bg-white"][class*="rounded-[1.75rem]"] {
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-  border-color: var(--app-border-strong) !important;
+  background: #ffffff;
+  border-color: var(--app-border) !important;
   box-shadow: var(--app-shadow);
 }
 
@@ -232,12 +232,12 @@ textarea {
 
 .app-shell [class*="rounded-xl"][class*="border"],
 .app-shell [class*="rounded-2xl"][class*="border"] {
-  border-width: 1.5px;
+  border-width: 1px;
 }
 
 .app-shell .app-page [class*="shadow-sm"][class*="border"][class*="rounded"],
 .app-shell .app-page [class*="shadow-md"][class*="border"][class*="rounded"] {
-  border-width: 2px;
+  border-width: 1.25px;
 }
 
 .app-shell .app-file-detail-info-card [class*="text-slate-400"],
@@ -258,7 +258,7 @@ textarea {
 .app-shell [class*="text-xs"][class*="uppercase"],
 .app-shell [class*="text-[10px]"][class*="uppercase"],
 .app-shell [class*="text-[11px]"][class*="uppercase"] {
-  letter-spacing: 0.09em !important;
+  letter-spacing: 0.055em !important;
 }
 
 .app-shell .app-file-form-modal label,
@@ -266,11 +266,11 @@ textarea {
 .app-shell .app-file-form-modal p[class*="font-black"][class*="uppercase"],
 .app-shell .app-file-form-modal h4[class*="font-black"][class*="uppercase"] {
   color: #050b16 !important;
-  font-weight: 700 !important;
+  font-weight: 650 !important;
 }
 
 .app-shell .app-file-form-modal label {
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.035em !important;
 }
 
 .app-shell .app-file-form-modal label .text-red-500,
@@ -281,42 +281,42 @@ textarea {
 .app-shell .app-arb-party-card {
   position: relative;
   overflow: hidden;
-  border-width: 2px !important;
-  border-radius: 1.35rem;
+  border-width: 1.5px !important;
+  border-radius: 1.15rem;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
-  box-shadow: 0 22px 42px -34px rgba(15, 23, 42, 0.26), 0 10px 22px rgba(148, 163, 184, 0.1);
+  box-shadow: 0 16px 32px -30px rgba(15, 23, 42, 0.2), 0 6px 16px rgba(148, 163, 184, 0.07);
 }
 
 .app-shell .app-arb-party-card::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 0.36rem;
+  height: 0.22rem;
 }
 
 .app-shell .app-arb-party-card__header {
-  margin: -0.15rem -0.15rem 1rem;
-  padding: 0.9rem 1rem 0.95rem;
-  border-radius: 1rem;
+  margin: -0.05rem -0.05rem 0.85rem;
+  padding: 0.75rem 0.85rem 0.8rem;
+  border-radius: 0.9rem;
 }
 
 .app-shell .app-arb-party-card__header-main {
   display: flex;
   align-items: flex-start;
-  gap: 0.8rem;
+  gap: 0.65rem;
 }
 
 .app-shell .app-arb-party-card__badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 6.75rem;
+  min-width: 5.8rem;
   border-radius: 999px;
-  padding: 0.45rem 0.8rem;
-  font-size: 0.72rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.025em;
   line-height: 1;
 }
 
@@ -339,11 +339,11 @@ textarea {
 }
 
 .app-shell .app-arb-party-card__guide {
-  border-width: 1.5px !important;
+  border-width: 1px !important;
 }
 
 .app-shell .app-arb-party-card__proxy {
-  border-width: 1.5px !important;
+  border-width: 1px !important;
 }
 
 .app-shell .app-arb-party-card--basvurucu {
@@ -358,7 +358,7 @@ textarea {
 
 .app-shell .app-arb-party-card--basvurucu .app-arb-party-card__header {
   background: linear-gradient(135deg, rgba(220, 252, 231, 0.96) 0%, rgba(236, 253, 245, 0.88) 100%);
-  border: 1.5px solid rgba(52, 211, 153, 0.34);
+  border: 1px solid rgba(52, 211, 153, 0.34);
 }
 
 .app-shell .app-arb-party-card--basvurucu .app-arb-party-card__badge {
@@ -394,7 +394,7 @@ textarea {
 
 .app-shell .app-arb-party-card--diger .app-arb-party-card__header {
   background: linear-gradient(135deg, rgba(255, 228, 230, 0.96) 0%, rgba(255, 241, 242, 0.88) 100%);
-  border: 1.5px solid rgba(251, 113, 133, 0.34);
+  border: 1px solid rgba(251, 113, 133, 0.34);
 }
 
 .app-shell .app-arb-party-card--diger .app-arb-party-card__badge {
@@ -428,7 +428,7 @@ textarea {
 }
 
 .app-agenda-page [class*="uppercase"] {
-  letter-spacing: 0.065em !important;
+  letter-spacing: 0.045em !important;
 }
 
 .app-agenda-title {
@@ -488,7 +488,7 @@ textarea {
   background: rgba(255, 255, 255, 0.99);
   color: var(--app-title);
   border-color: var(--app-border-strong);
-  box-shadow: inset 0 1px 2px rgba(148, 163, 184, 0.08), 0 1px 0 rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1px 2px rgba(148, 163, 184, 0.06), 0 1px 0 rgba(255, 255, 255, 0.78);
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
@@ -539,10 +539,10 @@ textarea {
 }
 
 .mobile-record-card {
-  border: 1.5px solid #bfdbfe;
-  border-radius: 1.5rem;
+  border: 1.25px solid #bfdbfe;
+  border-radius: 1.15rem;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(239, 246, 255, 0.86) 100%);
-  box-shadow: 0 18px 36px -32px rgba(15, 23, 42, 0.35), 0 10px 18px rgba(59, 130, 246, 0.12);
+  box-shadow: 0 14px 28px -26px rgba(15, 23, 42, 0.24), 0 5px 14px rgba(59, 130, 246, 0.08);
   overflow: hidden;
 }
 
@@ -625,25 +625,25 @@ textarea {
   width: 100%;
   display: flex;
   align-items: flex-start;
-  gap: 0.9rem;
-  padding: 1rem;
+  gap: 0.75rem;
+  padding: 0.85rem;
   text-align: left;
   background: transparent;
 }
 
 .mobile-record-panel {
   display: grid;
-  gap: 0.85rem;
-  padding: 0 1rem 1rem;
+  gap: 0.72rem;
+  padding: 0 0.85rem 0.85rem;
   border-top: 1px solid rgba(148, 163, 184, 0.2);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.72));
 }
 
 .mobile-record-section {
-  border: 1.5px solid rgba(148, 163, 184, 0.2);
-  border-radius: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.76);
-  padding: 0.9rem;
+  padding: 0.75rem;
 }
 
 .mobile-record-section-head {
@@ -656,9 +656,9 @@ textarea {
 
 .mobile-record-section-title {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.055em;
   text-transform: uppercase;
   color: #475569;
 }
@@ -707,13 +707,13 @@ textarea {
 
   .app-canvas {
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(236, 243, 250, 0.94)),
-      linear-gradient(135deg, rgba(191, 219, 254, 0.08), transparent 22%);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(239, 245, 251, 0.94)),
+      linear-gradient(135deg, rgba(191, 219, 254, 0.05), transparent 22%);
   }
 
   .app-shell [class*="bg-white"][class*="rounded-xl"],
   .app-shell [class*="bg-white"][class*="rounded-2xl"] {
-    box-shadow: 0 18px 36px -30px rgba(15, 23, 42, 0.22), 0 6px 16px rgba(148, 163, 184, 0.08);
+    box-shadow: 0 14px 28px -26px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(148, 163, 184, 0.06);
   }
 
   .app-shell h2 {
@@ -729,7 +729,7 @@ textarea {
   }
 
   .app-shell .app-arb-party-card__header {
-    padding: 0.8rem 0.85rem 0.85rem;
+    padding: 0.72rem 0.78rem 0.76rem;
   }
 
   .app-shell .app-arb-party-card__header-main {
