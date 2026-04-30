@@ -1349,21 +1349,37 @@
               }
 
               @case ('sablonlar') {
-                <div class="app-page space-y-6 max-w-5xl mx-auto pb-10">
-                  <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden min-h-[500px]">
-                    <div class="flex border-b border-slate-200 bg-slate-50">
+                <div class="app-page app-template-page space-y-6 max-w-5xl mx-auto pb-10">
+                  <div class="app-template-shell bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden min-h-[500px]">
+                    <div class="app-template-tabs flex border-b border-slate-200 bg-slate-50">
                        <button (click)="aktifSablonSekmesi = 'avukatlik'" [class.border-blue-500]="aktifSablonSekmesi === 'avukatlik'" [class.text-blue-600]="aktifSablonSekmesi === 'avukatlik'" [class.border-transparent]="aktifSablonSekmesi !== 'avukatlik'" [class.text-slate-500]="aktifSablonSekmesi !== 'avukatlik'" class="flex-1 py-4 font-bold text-sm border-b-2 transition-colors flex items-center justify-center gap-2">Avukatlık Şablonları</button>
                        <button (click)="aktifSablonSekmesi = 'arabuluculuk'" [class.border-blue-500]="aktifSablonSekmesi === 'arabuluculuk'" [class.text-blue-600]="aktifSablonSekmesi === 'arabuluculuk'" [class.border-transparent]="aktifSablonSekmesi !== 'arabuluculuk'" [class.text-slate-500]="aktifSablonSekmesi !== 'arabuluculuk'" class="flex-1 py-4 font-bold text-sm border-b-2 transition-colors flex items-center justify-center gap-2">Arabuluculuk Şablonları</button>
                     </div>
-                    <div class="p-6 flex-1 flex flex-col h-full bg-slate-50/50">
+                    <div class="app-template-body p-6 flex-1 flex flex-col h-full bg-slate-50/50">
                       <div class="flex flex-col h-full">
-                         <div class="flex flex-col gap-3 mb-6 bg-white p-4 rounded-xl border border-blue-100 shadow-sm relative overflow-hidden">
+                         <div class="app-template-add-card flex flex-col gap-3 mb-6 bg-white p-4 rounded-xl border border-blue-100 shadow-sm relative overflow-hidden">
                             <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
-                            <p class="text-[10px] font-black uppercase text-blue-600 tracking-wider">Yeni Şablon Ekle</p>
-                            <div class="flex gap-2 w-full">
-                              <input [(ngModel)]="yeniEvrak.isim" type="text" placeholder="Şablon Adı (Örn: İhtarname Şablonu, Dava Şartı Başvuru Formu)" class="w-1/3 px-3 py-2.5 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                              <input [(ngModel)]="yeniEvrak.url" (keyup.enter)="evrakEkle()" type="text" placeholder="Bağlantı URL (Google Drive, vs)" class="flex-1 px-3 py-2.5 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                              <button (click)="evrakEkle()" class="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-sm shrink-0 h-[42px]">Listeye Ekle</button>
+                            <div class="flex flex-col gap-3 xl:flex-row xl:items-end">
+                              <div class="flex-1">
+                                <p class="text-[10px] font-black uppercase text-blue-600 tracking-wider">Yeni Şablon Ekle</p>
+                                <div class="mt-2 flex flex-col gap-2 sm:flex-row">
+                                  <input [(ngModel)]="yeniEvrak.isim" type="text" placeholder="Şablon Adı (Örn: İhtarname Şablonu, Dava Şartı Başvuru Formu)" class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 sm:w-1/3">
+                                  <input [(ngModel)]="yeniEvrak.url" (keyup.enter)="evrakEkle()" type="text" placeholder="Bağlantı URL (Google Drive, vs)" class="flex-1 px-3 py-2.5 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                                  <button (click)="evrakEkle()" class="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-sm shrink-0 h-[42px]">Listeye Ekle</button>
+                                </div>
+                              </div>
+                              <div class="app-template-search-card rounded-xl border border-slate-200 bg-slate-50 p-3 xl:w-[310px]">
+                                <div class="flex items-center justify-between gap-3">
+                                  <p class="text-[10px] font-black uppercase tracking-wider text-slate-700">Şablonlarda Ara</p>
+                                  <span class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-200">{{ aktifSablonAramaSonucSayisi }} sonuç</span>
+                                </div>
+                                <div class="mt-2 flex gap-2">
+                                  <input [(ngModel)]="sablonArama" type="text" placeholder="Belge adı veya bağlantı ara..." class="min-h-[38px] flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                  @if (sablonArama) {
+                                    <button type="button" (click)="sablonArama = ''" class="rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 hover:bg-slate-100">Temizle</button>
+                                  }
+                                </div>
+                              </div>
                             </div>
                             @if (aktifSablonSekmesi === 'arabuluculuk') {
                               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1386,9 +1402,9 @@
                               </div>
                             }
                          </div>
-                         <div class="flex-1 overflow-y-auto space-y-4 pr-1 pb-4 custom-scrollbar">
+                         <div class="app-template-list flex-1 overflow-y-auto space-y-4 pr-1 pb-4 custom-scrollbar">
                             <ng-template #sablonKart let-evrak="evrak" let-i="index" let-ortakMi="ortakMi">
-                              <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col transition-all hover:border-blue-300">
+                              <div class="app-template-card bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col transition-all hover:border-blue-300">
                                 <div class="flex items-center justify-between p-3" [class.bg-blue-50]="duzenlenenEvrakId === evrak.id">
                                   @if (duzenlenenEvrakId === evrak.id && !duzenlenenEvrakParentId) {
                                      <div class="flex flex-col w-full gap-2">
@@ -1504,14 +1520,16 @@
                             @if (aktifSablonSekmesi === 'arabuluculuk') {
                               @if (sablonlar.arabuluculuk.length === 0) {
                                 <div class="text-center py-10 bg-white rounded-xl border border-slate-200 border-dashed text-slate-400 text-sm font-medium">Buraya henüz bir şablon eklemediniz.</div>
+                              } @else if (aktifSablonAramaSonucSayisi === 0) {
+                                <div class="app-template-empty text-center py-10 bg-white rounded-xl border border-slate-200 border-dashed text-slate-500 text-sm font-medium">Bu aramaya uygun arabuluculuk şablonu bulunamadı.</div>
                               } @else {
-                                <div class="rounded-2xl border border-purple-100 bg-gradient-to-r from-purple-50 via-white to-blue-50 px-4 py-3 shadow-sm">
+                                <div class="app-template-intro rounded-2xl border border-purple-100 bg-gradient-to-r from-purple-50 via-white to-blue-50 px-4 py-3 shadow-sm">
                                   <p class="text-sm font-black text-slate-900">Arabuluculuk Şablonları</p>
                                   <p class="text-xs text-slate-600 mt-1">Başlıklara tıklayarak ilgili bölümü açabilirsiniz. Aynı anda yalnızca seçtiğiniz bölüm görünür.</p>
                                 </div>
 
                                 @for (bolum of arabuluculukSablonBolumGorunumu; track bolum.key) {
-                                  <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                                  <div class="app-template-section bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                                     <button type="button" (click)="toggleArabuluculukSablonBolumu(bolum.key)" class="w-full px-4 py-4 bg-slate-50 hover:bg-slate-100 transition-colors flex items-center justify-between gap-4 text-left">
                                       <div>
                                         <p class="text-lg font-black text-slate-900">{{ bolum.baslik }}</p>
@@ -1525,7 +1543,7 @@
                                     @if (acikArabuluculukSablonBolumu === bolum.key) {
                                       <div class="p-4 border-t border-slate-200 space-y-4">
                                         @for (altBaslik of bolum.altBasliklar; track altBaslik.key) {
-                                          <div class="rounded-2xl border border-slate-200 bg-slate-50/70 overflow-hidden">
+                                          <div class="app-template-subsection rounded-2xl border border-slate-200 bg-slate-50/70 overflow-hidden">
                                             <button type="button" (click)="toggleArabuluculukSablonAltBolumu(bolum.key, altBaslik.key)" class="w-full px-4 py-3 bg-white hover:bg-slate-100 transition-colors flex items-start justify-between gap-3 text-left">
                                               <div>
                                                 <p class="text-sm font-black text-slate-900">{{ altBaslik.baslik }}</p>
@@ -1575,10 +1593,10 @@
                                 }
                               }
                             } @else {
-                              @for (evrak of sablonlar[aktifSablonSekmesi]; track evrak.id; let i = $index) {
-                                <ng-container [ngTemplateOutlet]="sablonKart" [ngTemplateOutletContext]="{ evrak: evrak, index: i, ortakMi: false }"></ng-container>
+                              @for (kayit of filtrelenmisAvukatlikSablonKayitlari; track kayit.evrak.id) {
+                                <ng-container [ngTemplateOutlet]="sablonKart" [ngTemplateOutletContext]="{ evrak: kayit.evrak, index: kayit.index, ortakMi: false }"></ng-container>
                               } @empty {
-                                <div class="text-center py-10 bg-white rounded-xl border border-slate-200 border-dashed text-slate-400 text-sm font-medium">Buraya henüz bir şablon eklemediniz.</div>
+                                <div class="app-template-empty text-center py-10 bg-white rounded-xl border border-slate-200 border-dashed text-slate-400 text-sm font-medium">Bu aramaya uygun şablon bulunamadı.</div>
                               }
                             }
                          </div>
@@ -2694,7 +2712,7 @@
                                    }
                                  </div>
                                }
-                                <div class="relative mb-4 flex flex-col gap-3 overflow-hidden rounded-xl border border-blue-100 bg-white p-3 shadow-sm sm:mb-6 sm:p-4">
+                                <div class="app-document-add-card relative mb-4 flex flex-col gap-3 overflow-hidden rounded-xl border border-blue-100 bg-white p-3 shadow-sm sm:mb-6 sm:p-4">
                                   <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
                                   <p class="text-[10px] font-black uppercase text-blue-600 tracking-wider">Yeni Ana Evrak Ekle</p>
                                   <div class="flex w-full flex-col gap-2 sm:flex-row">
@@ -2724,7 +2742,7 @@
                                
                                <div class="flex-1 overflow-y-auto space-y-3 pb-4 pr-1">
                                   @for (evrak of aktifDosya.evraklar; track evrak.id; let i = $index) {
-                                    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col transition-all hover:border-blue-300">
+                                    <div class="app-document-link-card bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col transition-all hover:border-blue-300">
                                       <div class="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between" [class.bg-blue-50]="duzenlenenEvrakId === evrak.id">
                                         @if (duzenlenenEvrakId === evrak.id && !duzenlenenEvrakParentId) {
                                            <div class="flex flex-col w-full gap-2">
@@ -2778,7 +2796,7 @@
                                                </div>
                                              </div>
                                             </div>
-                                            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                            <div class="app-document-link-actions flex flex-wrap items-center gap-2 shrink-0">
                                               <button (click)="ekEvrakFormAc(evrak.id)" class="px-2 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold rounded transition-colors flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Alt Ek</button>
                                               <button (click)="evrakGorevFormunuAc(evrak.id)" class="px-2 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 text-[11px] font-bold rounded transition-colors flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Görev Ekle</button>
                                               <button (click)="evrakDuzenleBaslat(evrak)" class="px-2 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-[11px] font-bold rounded transition-colors">Düzenle</button>
@@ -2793,9 +2811,9 @@
                                       </div>
 
                                       @if (duzenlenenEvrakId !== evrak.id && ((evrak.gorevler && evrak.gorevler.length > 0) || acikEvrakGorevFormlari[evrak.id])) {
-                                        <div class="border-t border-slate-100 bg-slate-50/70 px-3 py-2 sm:pl-[3.25rem]">
+                                        <div class="app-document-task-panel border-t border-slate-100 bg-slate-50/70 px-3 py-2 sm:pl-[3.25rem]">
                                           @if (acikEvrakGorevFormlari[evrak.id] && (!duzenlenenEvrakGorevi || duzenlenenEvrakGorevi.evrakId !== evrak.id)) {
-                                            <div class="flex flex-col gap-2 rounded-lg border border-sky-100 bg-sky-50/60 p-2 sm:flex-row sm:items-center">
+                                            <div class="app-document-task-form flex flex-col gap-2 rounded-lg border border-sky-100 bg-sky-50/60 p-2 sm:flex-row sm:items-center">
                                               <input [(ngModel)]="yeniEvrakGorevMetinleri[evrak.id]" (keyup.enter)="evrakGoreviEkle(evrak.id)" type="text" placeholder="Görev açıklaması yazın..." class="min-h-[34px] flex-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
                                               <div class="flex gap-2">
                                                 <button (click)="evrakGoreviEkle(evrak.id)" class="rounded-md bg-slate-900 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-slate-700">Kaydet</button>
@@ -2804,7 +2822,7 @@
                                             </div>
                                           }
                                           @if (duzenlenenEvrakGorevi && duzenlenenEvrakGorevi.evrakId === evrak.id) {
-                                            <div class="flex flex-col gap-2 rounded-lg border border-amber-100 bg-amber-50/70 p-2 sm:flex-row sm:items-center">
+                                            <div class="app-document-task-form flex flex-col gap-2 rounded-lg border border-amber-100 bg-amber-50/70 p-2 sm:flex-row sm:items-center">
                                               <input [(ngModel)]="duzenlenenEvrakGorevi.metin" (keyup.enter)="evrakGoreviDuzenlemeKaydet()" type="text" class="min-h-[34px] flex-1 rounded-md border border-amber-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-amber-500">
                                               <div class="flex gap-2">
                                                 <button (click)="evrakGoreviDuzenlemeKaydet()" class="rounded-md bg-amber-500 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-amber-600">Kaydet</button>
@@ -2815,7 +2833,7 @@
                                           @if (evrak.gorevler && evrak.gorevler.length > 0) {
                                             <div class="mt-2 space-y-1.5">
                                               @for (gorev of evrak.gorevler; track gorev.id) {
-                                                <div class="flex items-start justify-between gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700 transition-opacity" [class.opacity-45]="gorev.tamamlandiMi">
+                                                <div class="app-document-task-row flex items-start justify-between gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700 transition-opacity" [class.opacity-45]="gorev.tamamlandiMi">
                                                   <label class="flex min-w-0 flex-1 items-start gap-2">
                                                     <input type="checkbox" class="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" [ngModel]="!!gorev.tamamlandiMi" (ngModelChange)="evrakGoreviDurumDegistir(evrak.id, gorev.id, $event)">
                                                     <span class="leading-relaxed" [class.line-through]="gorev.tamamlandiMi">{{ gorev.metin }}</span>
@@ -2884,9 +2902,9 @@
                                                  </div>
                                               }
                                               @if (duzenlenenEvrakId !== ek.id && ((ek.gorevler && ek.gorevler.length > 0) || acikEvrakGorevFormlari[ek.id])) {
-                                                <div class="border-t border-slate-100 pt-2 sm:w-full sm:basis-full">
+                                                <div class="app-document-task-panel border-t border-slate-100 pt-2 sm:w-full sm:basis-full">
                                                   @if (acikEvrakGorevFormlari[ek.id] && (!duzenlenenEvrakGorevi || duzenlenenEvrakGorevi.evrakId !== ek.id)) {
-                                                    <div class="flex flex-col gap-2 rounded-lg border border-sky-100 bg-sky-50/60 p-2 sm:flex-row sm:items-center">
+                                                    <div class="app-document-task-form flex flex-col gap-2 rounded-lg border border-sky-100 bg-sky-50/60 p-2 sm:flex-row sm:items-center">
                                                       <input [(ngModel)]="yeniEvrakGorevMetinleri[ek.id]" (keyup.enter)="evrakGoreviEkle(ek.id)" type="text" placeholder="Görev açıklaması yazın..." class="min-h-[32px] flex-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
                                                       <div class="flex gap-2">
                                                         <button (click)="evrakGoreviEkle(ek.id)" class="rounded-md bg-slate-800 px-3 py-1.5 text-[10px] font-bold text-white transition-colors hover:bg-slate-700">Kaydet</button>
@@ -2895,7 +2913,7 @@
                                                     </div>
                                                   }
                                                   @if (duzenlenenEvrakGorevi && duzenlenenEvrakGorevi.evrakId === ek.id) {
-                                                    <div class="flex flex-col gap-2 rounded-lg border border-amber-100 bg-amber-50/70 p-2 sm:flex-row sm:items-center">
+                                                    <div class="app-document-task-form flex flex-col gap-2 rounded-lg border border-amber-100 bg-amber-50/70 p-2 sm:flex-row sm:items-center">
                                                       <input [(ngModel)]="duzenlenenEvrakGorevi.metin" (keyup.enter)="evrakGoreviDuzenlemeKaydet()" type="text" class="min-h-[32px] flex-1 rounded-md border border-amber-300 bg-white px-2.5 py-1.5 text-[11px] text-slate-700 outline-none focus:ring-2 focus:ring-amber-500">
                                                       <div class="flex gap-2">
                                                         <button (click)="evrakGoreviDuzenlemeKaydet()" class="rounded-md bg-amber-500 px-3 py-1.5 text-[10px] font-bold text-white transition-colors hover:bg-amber-600">Kaydet</button>
@@ -2906,7 +2924,7 @@
                                                   @if (ek.gorevler && ek.gorevler.length > 0) {
                                                     <div class="mt-2 space-y-1.5">
                                                       @for (gorev of ek.gorevler; track gorev.id) {
-                                                        <div class="flex items-start justify-between gap-2 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-[11px] text-slate-700 transition-opacity" [class.opacity-45]="gorev.tamamlandiMi">
+                                                        <div class="app-document-task-row flex items-start justify-between gap-2 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-[11px] text-slate-700 transition-opacity" [class.opacity-45]="gorev.tamamlandiMi">
                                                           <label class="flex min-w-0 flex-1 items-start gap-2">
                                                             <input type="checkbox" class="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" [ngModel]="!!gorev.tamamlandiMi" (ngModelChange)="evrakGoreviDurumDegistir(ek.id, gorev.id, $event)">
                                                             <span class="leading-relaxed" [class.line-through]="gorev.tamamlandiMi">{{ gorev.metin }}</span>

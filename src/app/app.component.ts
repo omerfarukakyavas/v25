@@ -192,6 +192,7 @@ export class AppComponent implements OnInit {
   
   sablonlar: { avukatlik: EvrakBaglantisi[], arabuluculuk: EvrakBaglantisi[] } = { avukatlik: [], arabuluculuk: [] };
   aktifSablonSekmesi: 'avukatlik' | 'arabuluculuk' = 'avukatlik';
+  sablonArama = '';
 
   aramaMetni = ''; durumFiltresi = 'Tümü';
   muhasebeArama = ''; muhasebeFiltre = 'Tümü';
@@ -3858,6 +3859,23 @@ export class AppComponent implements OnInit {
   klasorGecis(id: number) { this.acikKlasorler[id] = !this.acikKlasorler[id]; }
   googleDocsEntegrasyonuHazirMi() { return GOOGLE_DOCS_CONFIG.clientId.trim() !== ''; }
   sablonAramaMetniHazirla(metin?: string) { return (metin || '').toLocaleLowerCase('tr-TR').replace(/\s+/g, ' ').trim(); }
+  private evrakSablonAramayaUygun(evrak: EvrakBaglantisi) {
+    const arama = this.sablonAramaMetniHazirla(this.sablonArama);
+    if (!arama) return true;
+    const ekMetni = (evrak.ekler || []).map(ek => [ek.isim, ek.url].filter(Boolean).join(' ')).join(' ');
+    const kaynak = this.sablonAramaMetniHazirla([evrak.isim, evrak.url, ekMetni].filter(Boolean).join(' '));
+    return kaynak.includes(arama);
+  }
+  get filtrelenmisAvukatlikSablonKayitlari(): ArabuluculukSablonListeKaydi[] {
+    return this.sablonlar.avukatlik
+      .map((evrak, index) => ({ evrak, index, ortakMi: false }))
+      .filter(kayit => this.evrakSablonAramayaUygun(kayit.evrak));
+  }
+  get aktifSablonAramaSonucSayisi() {
+    return this.aktifSablonSekmesi === 'arabuluculuk'
+      ? this.getFiltrelenmisArabuluculukSablonKayitlari().length
+      : this.filtrelenmisAvukatlikSablonKayitlari.length;
+  }
   private isArabuluculukSablonBolumuDegeri(deger?: string | null): deger is ArabuluculukSablonBolumAnahtari {
     return deger === 'ihtiyari' || deger === 'dava_sarti';
   }
@@ -3913,8 +3931,11 @@ export class AppComponent implements OnInit {
       return { evrak, index, kategori, bolum };
     });
   }
+  private getFiltrelenmisArabuluculukSablonKayitlari() {
+    return this.getArabuluculukSablonKayitlari().filter(kayit => this.evrakSablonAramayaUygun(kayit.evrak));
+  }
   get arabuluculukSablonBolumGorunumu(): ArabuluculukSablonBolumGorunumu[] {
-    const kayitlar = this.getArabuluculukSablonKayitlari();
+    const kayitlar = this.getFiltrelenmisArabuluculukSablonKayitlari();
     return this.arabuluculukSablonBolumTanimlari.map((bolum) => ({
       ...bolum,
       altBasliklar: this.arabuluculukSablonAltBolumTanimlari.map((altBaslik) => ({
@@ -3930,7 +3951,7 @@ export class AppComponent implements OnInit {
     }));
   }
   get siniflandirilmamisArabuluculukSablonlari(): ArabuluculukSablonListeKaydi[] {
-    return this.getArabuluculukSablonKayitlari()
+    return this.getFiltrelenmisArabuluculukSablonKayitlari()
       .filter((kayit) => !kayit.kategori || !kayit.bolum)
       .map((kayit) => ({
         evrak: kayit.evrak,
