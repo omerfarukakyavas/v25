@@ -31,6 +31,8 @@ export interface ArabuluculukTaksit {
   odemeTarihi?: string;
 }
 
+export type ArabuluculukSonucu = 'Anlaşma' | 'Anlaşamama' | 'Vazgeçme';
+
 export interface DavaTarafKaydi {
   id: number;
   isim: string;
@@ -140,6 +142,7 @@ export type SayfaTipi = 'dashboard' | 'davalar' | 'icralar' | 'arabuluculuk' | '
 export type DetaySekmesi = 'notlar' | 'muvekkilGorusmeleri' | 'evraklar' | 'finans' | 'sureliIsler' | 'gecmis';
 
 export interface ArabuluculukDosyasi {
+  sonuc?: ArabuluculukSonucu | '';
   buroyaBasvuruTarihi?: string;
   arabulucuGorevlendirmeTarihi?: string;
   tutanakDuzenlemeTarihi?: string;

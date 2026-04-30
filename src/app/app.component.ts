@@ -13,6 +13,7 @@ import {
   AjandaKaynak,
   AjandaTur,
   ArabuluculukDosyasi,
+  ArabuluculukSonucu,
   ArabuluculukTaksit,
   ArabuluculukTaraf,
   BildirimTur,
@@ -150,6 +151,7 @@ type UygulamaGezinmeDurumu = {
   aktifDavaTarafDetayi: { tur: 'davaci' | 'davali'; tarafId: number } | null;
   aramaMetni: string;
   durumFiltresi: string;
+  arabuluculukSonucFiltresi: 'Tümü' | 'Girilmedi' | ArabuluculukSonucu;
   muhasebeArama: string;
   muhasebeFiltre: string;
   aktifIliskiSekmesi: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer';
@@ -195,6 +197,8 @@ export class AppComponent implements OnInit {
   sablonArama = '';
 
   aramaMetni = ''; durumFiltresi = 'Tümü';
+  arabuluculukSonucFiltresi: 'Tümü' | 'Girilmedi' | ArabuluculukSonucu = 'Tümü';
+  readonly arabuluculukSonucSecenekleri: ArabuluculukSonucu[] = ['Anlaşma', 'Anlaşamama', 'Vazgeçme'];
   muhasebeArama = ''; muhasebeFiltre = 'Tümü';
   
   aktifIliskiSekmesi: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer' = 'Müvekkil';
@@ -771,6 +775,7 @@ export class AppComponent implements OnInit {
       aktifDavaTarafDetayi: this.aktifDavaTarafDetayi ? { ...this.aktifDavaTarafDetayi } : null,
       aramaMetni: this.aramaMetni,
       durumFiltresi: this.durumFiltresi,
+      arabuluculukSonucFiltresi: this.arabuluculukSonucFiltresi,
       muhasebeArama: this.muhasebeArama,
       muhasebeFiltre: this.muhasebeFiltre,
       aktifIliskiSekmesi: this.aktifIliskiSekmesi,
@@ -827,6 +832,7 @@ export class AppComponent implements OnInit {
     this.aktifDavaTarafDetayi = hedefSayfa === 'detay' ? (durum.aktifDavaTarafDetayi ? { ...durum.aktifDavaTarafDetayi } : null) : null;
     this.aramaMetni = durum.aramaMetni;
     this.durumFiltresi = durum.durumFiltresi;
+    this.arabuluculukSonucFiltresi = durum.arabuluculukSonucFiltresi || 'Tümü';
     this.muhasebeArama = durum.muhasebeArama;
     this.muhasebeFiltre = durum.muhasebeFiltre;
     this.aktifIliskiSekmesi = durum.aktifIliskiSekmesi;
@@ -881,6 +887,7 @@ export class AppComponent implements OnInit {
     if (s === 'davalar' || s === 'icralar' || s === 'arabuluculuk') {
       this.durumFiltresi = this.varsayilanDurumFiltresi(s);
     }
+    if (s === 'arabuluculuk') this.arabuluculukSonucFiltresi = 'Tümü';
   }
 
   detayaGit(d: DavaDosyasi) { this.gezinmeGecmisineEkle(); this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.aktifDavaTarafDetayi = null; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
@@ -1095,6 +1102,7 @@ export class AppComponent implements OnInit {
       { etiket: 'Tutanak tarihi', onceki: onceki?.tutanakDuzenlemeTarihi, sonraki: sonraki.tutanakDuzenlemeTarihi },
       { etiket: 'Uyuşmazlık türü', onceki: onceki?.uyusmazlikTuru, sonraki: sonraki.uyusmazlikTuru },
       { etiket: 'Başvuru konusu', onceki: onceki?.basvuruKonusu, sonraki: sonraki.basvuruKonusu },
+      { etiket: 'Sonuç', onceki: this.getArabuluculukSonucu(onceki) || 'Girilmedi', sonraki: this.getArabuluculukSonucu(sonraki) || 'Girilmedi' },
       { etiket: 'Anlaşma şartları', onceki: onceki?.anlasmaSartlari, sonraki: sonraki.anlasmaSartlari },
       { etiket: 'İşe giriş tarihi', onceki: onceki?.iseGirisTarihi, sonraki: sonraki.iseGirisTarihi },
       { etiket: 'İşten çıkış tarihi', onceki: onceki?.istenCikisTarihi, sonraki: sonraki.istenCikisTarihi },
@@ -1396,15 +1404,59 @@ export class AppComponent implements OnInit {
 
   get filtrelenmisDavalar() { return this.davalar.filter(d => { const s = this.aramaMetni.toLowerCase(); const mS = d.dosyaNo.toLowerCase().includes(s) || d.muvekkil.toLowerCase().includes(s) || this.getDavaKarsiTarafOzet(d).toLowerCase().includes(s) || d.mahkeme.toLowerCase().includes(s) || (d.eskiMahkeme || '').toLowerCase().includes(s) || (d.eskiEsasNo || '').toLowerCase().includes(s); const mD = this.durumFiltresi === 'Tümü' || d.durum === this.durumFiltresi; return mS && mD; }); }
   get filtrelenmisIcralar() { return this.icralar.filter(i => { const s = this.aramaMetni.toLowerCase(); const mS = i.dosyaNo.toLowerCase().includes(s) || i.icraDairesi.toLowerCase().includes(s) || i.alacakli.toLowerCase().includes(s) || i.borclu.toLowerCase().includes(s) || (i.eskiMahkeme || '').toLowerCase().includes(s) || (i.eskiEsasNo || '').toLowerCase().includes(s); const mD = this.durumFiltresi === 'Tümü' || i.durum === this.durumFiltresi; return mS && mD; }); }
-  get filtrelenmisArabuluculuk() {
+  get arabuluculukAramaDurumFiltreliListe() {
     return this.arabuluculukDosyalar.filter(a => {
-      const s = this.aramaMetni.toLowerCase();
-      const mS = a.buroNo.toLowerCase().includes(s)
-        || a.arabuluculukNo.toLowerCase().includes(s)
+      const s = this.aramaMetni.toLocaleLowerCase('tr-TR');
+      const mS = (a.buroNo || '').toLocaleLowerCase('tr-TR').includes(s)
+        || (a.arabuluculukNo || '').toLocaleLowerCase('tr-TR').includes(s)
         || this.getArabuluculukTarafAramaMetni(a.taraflar).includes(s);
       const mD = this.durumFiltresi === 'Tümü' || a.durum === this.durumFiltresi;
       return mS && mD;
     });
+  }
+
+  get filtrelenmisArabuluculuk() {
+    return this.arabuluculukAramaDurumFiltreliListe.filter(a => this.arabuluculukSonucFiltresi === 'Tümü'
+      || (this.arabuluculukSonucFiltresi === 'Girilmedi' ? !this.getArabuluculukSonucu(a) : this.getArabuluculukSonucu(a) === this.arabuluculukSonucFiltresi));
+  }
+
+  getArabuluculukSonucu(dosya?: Partial<ArabuluculukDosyasi> | null): ArabuluculukSonucu | '' {
+    const sonuc = (dosya?.sonuc || '') as string;
+    return this.arabuluculukSonucSecenekleri.includes(sonuc as ArabuluculukSonucu) ? sonuc as ArabuluculukSonucu : '';
+  }
+  getArabuluculukSonucEtiketi(dosya?: Partial<ArabuluculukDosyasi> | null) {
+    return this.getArabuluculukSonucu(dosya) || 'Sonuç girilmedi';
+  }
+  getArabuluculukSonucClass(sonuc?: string | null) {
+    if (sonuc === 'Anlaşma') return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    if (sonuc === 'Anlaşamama') return 'border-rose-200 bg-rose-50 text-rose-700';
+    if (sonuc === 'Vazgeçme') return 'border-amber-200 bg-amber-50 text-amber-700';
+    return 'border-slate-200 bg-slate-50 text-slate-500';
+  }
+  get arabuluculukSonucOzet() {
+    const liste = this.arabuluculukAramaDurumFiltreliListe;
+    const anlasma = liste.filter(a => this.getArabuluculukSonucu(a) === 'Anlaşma').length;
+    const anlasamama = liste.filter(a => this.getArabuluculukSonucu(a) === 'Anlaşamama').length;
+    const vazgecme = liste.filter(a => this.getArabuluculukSonucu(a) === 'Vazgeçme').length;
+    const sonuclanan = anlasma + anlasamama + vazgecme;
+    return {
+      anlasma,
+      anlasamama,
+      vazgecme,
+      sonuclanan,
+      girilmedi: Math.max(0, liste.length - sonuclanan),
+      toplam: liste.length
+    };
+  }
+  getArabuluculukSonucGrafikStili() {
+    const ozet = this.arabuluculukSonucOzet;
+    const toplam = Math.max(ozet.sonuclanan, 0);
+    if (!toplam) return { background: 'conic-gradient(#e2e8f0 0deg 360deg)' };
+    const anlasmaAci = (ozet.anlasma / toplam) * 360;
+    const anlasamamaAci = anlasmaAci + (ozet.anlasamama / toplam) * 360;
+    return {
+      background: `conic-gradient(#059669 0deg ${anlasmaAci}deg, #e11d48 ${anlasmaAci}deg ${anlasamamaAci}deg, #d97706 ${anlasamamaAci}deg 360deg)`
+    };
   }
 
   get filtrelenmisArabuluculukSureKayitlari() {
@@ -2796,7 +2848,7 @@ export class AppComponent implements OnInit {
     }
     else {
       this.formModu = 'ekle';
-      this.islemGorenArabuluculuk = { durum: 'Hazırlık', basvuruTuru: 'Dava Şartı', uyusmazlikTuru: 'İşçi İşveren', basvuruKonusu: '', anlasmaSartlari: '', iseGirisTarihi: '', istenCikisTarihi: '', odemeTarihi: '', odenecekToplamTutarRakamla: '', odenecekToplamTutarYaziyla: '', arabulucuUcretiTutari: '', arabulucuUcretiOdemeTarihi: '', kidemTazminatiTutari: '', kidemTazminatiOdemeTarihi: '', ihbarTazminatiTutari: '', ihbarTazminatiOdemeTarihi: '', yillikUcretliIzinTutari: '', yillikUcretliIzinOdemeTarihi: '', bakiyeUcretAlacagi: '', bakiyeUcretAlacagiOdemeTarihi: '', primAlacagi: '', primAlacagiOdemeTarihi: '', iseBaslatmamaVeBostaGecenSureAlacagi: '', iseBaslatmamaVeBostaGecenSureOdemeTarihi: '', ekOdeme: '', ekOdemeOdemeTarihi: '', taksitleOdeme: false, taksitSayisi: 0, taksitler: [], buro: 'İstanbul Anadolu', buroyaBasvuruTarihi: '', arabulucuGorevlendirmeTarihi: '', tutanakDuzenlemeTarihi: '', toplantiSaati: '', toplantiTamamlandiMi: false, hizmetUcretiStopajli: true, taraflar: [this.arabuluculukTarafBosOlustur('Başvurucu', Date.now()), this.arabuluculukTarafBosOlustur('Diğer Taraf', Date.now() + 1)] };
+      this.islemGorenArabuluculuk = { durum: 'Hazırlık', sonuc: '', basvuruTuru: 'Dava Şartı', uyusmazlikTuru: 'İşçi İşveren', basvuruKonusu: '', anlasmaSartlari: '', iseGirisTarihi: '', istenCikisTarihi: '', odemeTarihi: '', odenecekToplamTutarRakamla: '', odenecekToplamTutarYaziyla: '', arabulucuUcretiTutari: '', arabulucuUcretiOdemeTarihi: '', kidemTazminatiTutari: '', kidemTazminatiOdemeTarihi: '', ihbarTazminatiTutari: '', ihbarTazminatiOdemeTarihi: '', yillikUcretliIzinTutari: '', yillikUcretliIzinOdemeTarihi: '', bakiyeUcretAlacagi: '', bakiyeUcretAlacagiOdemeTarihi: '', primAlacagi: '', primAlacagiOdemeTarihi: '', iseBaslatmamaVeBostaGecenSureAlacagi: '', iseBaslatmamaVeBostaGecenSureOdemeTarihi: '', ekOdeme: '', ekOdemeOdemeTarihi: '', taksitleOdeme: false, taksitSayisi: 0, taksitler: [], buro: 'İstanbul Anadolu', buroyaBasvuruTarihi: '', arabulucuGorevlendirmeTarihi: '', tutanakDuzenlemeTarihi: '', toplantiSaati: '', toplantiTamamlandiMi: false, hizmetUcretiStopajli: true, taraflar: [this.arabuluculukTarafBosOlustur('Başvurucu', Date.now()), this.arabuluculukTarafBosOlustur('Diğer Taraf', Date.now() + 1)] };
       this.arabuluculukUyusmazlikTuruDegisti(this.islemGorenArabuluculuk.uyusmazlikTuru as ArabuluculukDosyasi['uyusmazlikTuru']);
     }
     this.arabuluculukTarafAramalariniHazirla(this.islemGorenArabuluculuk.taraflar);
@@ -2894,7 +2946,7 @@ export class AppComponent implements OnInit {
     };
 
     if (this.formModu === 'ekle') {
-      let y: ArabuluculukDosyasi = { id: Date.now(), buroNo: this.islemGorenArabuluculuk.buroNo || '', arabuluculukNo: this.islemGorenArabuluculuk.arabuluculukNo || '', buro: this.islemGorenArabuluculuk.buro || '', basvuruTuru: this.islemGorenArabuluculuk.basvuruTuru as any, uyusmazlikTuru: this.islemGorenArabuluculuk.uyusmazlikTuru as any, basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', ...ortakOdemeAlanlari, taraflar: t, muvekkilId: this.islemGorenArabuluculuk.muvekkilId, buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', toplantiTarihi: this.islemGorenArabuluculuk.toplantiTarihi, toplantiSaati: this.islemGorenArabuluculuk.toplantiSaati || '', toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '', toplantiYontemi: this.islemGorenArabuluculuk.toplantiYontemi, durum: this.islemGorenArabuluculuk.durum as any, arsivYeri: this.islemGorenArabuluculuk.arsivYeri || '', vekaletUcreti: this.islemGorenArabuluculuk.vekaletUcreti || 0, hizmetUcretiStopajli: !!this.islemGorenArabuluculuk.hizmetUcretiStopajli, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      let y: ArabuluculukDosyasi = { id: Date.now(), buroNo: this.islemGorenArabuluculuk.buroNo || '', arabuluculukNo: this.islemGorenArabuluculuk.arabuluculukNo || '', buro: this.islemGorenArabuluculuk.buro || '', basvuruTuru: this.islemGorenArabuluculuk.basvuruTuru as any, uyusmazlikTuru: this.islemGorenArabuluculuk.uyusmazlikTuru as any, basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', sonuc: this.getArabuluculukSonucu(this.islemGorenArabuluculuk), ...ortakOdemeAlanlari, taraflar: t, muvekkilId: this.islemGorenArabuluculuk.muvekkilId, buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', toplantiTarihi: this.islemGorenArabuluculuk.toplantiTarihi, toplantiSaati: this.islemGorenArabuluculuk.toplantiSaati || '', toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '', toplantiYontemi: this.islemGorenArabuluculuk.toplantiYontemi, durum: this.islemGorenArabuluculuk.durum as any, arsivYeri: this.islemGorenArabuluculuk.arsivYeri || '', vekaletUcreti: this.islemGorenArabuluculuk.vekaletUcreti || 0, hizmetUcretiStopajli: !!this.islemGorenArabuluculuk.hizmetUcretiStopajli, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
       y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'Arabuluculuk dosyası açıldı', `${y.arabuluculukNo} referansıyla yeni arabuluculuk kaydı oluşturuldu.`);
       if (y.toplantiTarihi) {
         y = this.dosyayaTakvimKaydiEkle(y, 'Toplantı', 'Planlandı', y.toplantiTarihi, y.toplantiSaati, 'İlk toplantı planı kaydedildi.');
@@ -2904,7 +2956,7 @@ export class AppComponent implements OnInit {
     } else {
       const mevcut = this.arabuluculukDosyalar.find(x => x.id === this.islemGorenArabuluculuk.id);
       const toplantiDegisti = (mevcut?.toplantiTarihi || '') !== (this.islemGorenArabuluculuk.toplantiTarihi || '') || (mevcut?.toplantiSaati || '') !== (this.islemGorenArabuluculuk.toplantiSaati || '');
-      let g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', ...ortakOdemeAlanlari, buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', hizmetUcretiStopajli: !!this.islemGorenArabuluculuk.hizmetUcretiStopajli, taraflar: t } as ArabuluculukDosyasi;
+      let g = { ...this.islemGorenArabuluculuk, buroNo: this.islemGorenArabuluculuk.buroNo || '', basvuruKonusu: this.islemGorenArabuluculuk.basvuruKonusu || '', sonuc: this.getArabuluculukSonucu(this.islemGorenArabuluculuk), ...ortakOdemeAlanlari, buroyaBasvuruTarihi: this.islemGorenArabuluculuk.buroyaBasvuruTarihi || '', arabulucuGorevlendirmeTarihi: this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || '', tutanakDuzenlemeTarihi: this.islemGorenArabuluculuk.tutanakDuzenlemeTarihi || '', hizmetUcretiStopajli: !!this.islemGorenArabuluculuk.hizmetUcretiStopajli, taraflar: t } as ArabuluculukDosyasi;
       if (toplantiDegisti) { g.toplantiTamamlandiMi = false; g.toplantiTamamlanmaTarihi = ''; }
       g = this.dosyayaIslemKaydiEkle(g, 'dosya', 'Arabuluculuk dosyası güncellendi', this.arabuluculukGuncellemeOzeti(mevcut, g));
       if (toplantiDegisti) {
