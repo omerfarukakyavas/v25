@@ -99,8 +99,22 @@ export interface TakvimGecmisKaydi {
   aciklama?: string;
 }
 
-export type AjandaKaynak = 'dava' | 'icra' | 'arabuluculuk';
-export type AjandaTur = 'durusma' | 'toplanti' | 'sureliIs';
+export type OfisGoreviOncelik = 'Normal' | 'Önemli' | 'Acil';
+
+export interface OfisGorevi {
+  id: number;
+  baslik: string;
+  aciklama?: string;
+  tarih: string;
+  saat?: string;
+  oncelik: OfisGoreviOncelik;
+  tamamlandiMi?: boolean;
+  kayitTarihi: string;
+  tamamlanmaTarihi?: string;
+}
+
+export type AjandaKaynak = 'dava' | 'icra' | 'arabuluculuk' | 'ofis';
+export type AjandaTur = 'durusma' | 'toplanti' | 'sureliIs' | 'ofisGorevi';
 
 export interface AjandaKaydi {
   id: string;
@@ -108,7 +122,8 @@ export interface AjandaKaydi {
   saat?: string;
   tur: AjandaTur;
   kaynak: AjandaKaynak;
-  dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi;
+  dosya?: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi;
+  ofisGorevi?: OfisGorevi;
   baslik: string;
   altBaslik: string;
   taraflar: string;

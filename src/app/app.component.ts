@@ -30,6 +30,7 @@ import {
   IliskiDosyaKaydi,
   Muvekkil,
   MuvekkilGorusmeNotu,
+  OfisGorevi,
   SayfaTipi,
   TakvimGecmisKaydi,
   TakvimGecmisiDurumu,
@@ -189,7 +190,7 @@ export class AppComponent implements OnInit {
   bildirimSayaci = 0;
   gecmisKaydiSayaci = 0;
 
-  davalar: DavaDosyasi[] = []; icralar: IcraDosyasi[] = []; arabuluculukDosyalar: ArabuluculukDosyasi[] = []; muvekkiller: Muvekkil[] = [];
+  davalar: DavaDosyasi[] = []; icralar: IcraDosyasi[] = []; arabuluculukDosyalar: ArabuluculukDosyasi[] = []; muvekkiller: Muvekkil[] = []; ofisGorevleri: OfisGorevi[] = [];
   aktifSayfa: SayfaTipi = 'dashboard'; seciliDava: DavaDosyasi | null = null; seciliIcra: IcraDosyasi | null = null; seciliArabuluculuk: ArabuluculukDosyasi | null = null;
   
   sablonlar: { avukatlik: EvrakBaglantisi[], arabuluculuk: EvrakBaglantisi[] } = { avukatlik: [], arabuluculuk: [] };
@@ -210,6 +211,9 @@ export class AppComponent implements OnInit {
   ajandaArama = '';
   ajandaZamanFiltresi: 'all' | 'today' | '7days' | '30days' | 'overdue' = 'all';
   ajandaTurFiltresi: 'all' | AjandaTur = 'all';
+  yeniOfisGorevi: Partial<OfisGorevi> = { tarih: new Date().toISOString().split('T')[0], saat: '', oncelik: 'Normal' };
+  duzenlenenOfisGoreviId: number | null = null;
+  duzenlenenOfisGorevi: Partial<OfisGorevi> = {};
   
   arabuluculukMuvekkilDropdownAcik = false;
   arabuluculukMuvekkilArama = '';
@@ -347,6 +351,7 @@ export class AppComponent implements OnInit {
           this.icralar = [];
           this.arabuluculukDosyalar = [];
           this.muvekkiller = [];
+          this.ofisGorevleri = [];
           this.gunlukOzetMetni = '';
           this.gunlukOzetOlusturulmaTarihi = '';
           this.gunlukOzetKartlari = [];
@@ -399,6 +404,10 @@ export class AppComponent implements OnInit {
         return { id: Number(d.id), ...data };
       }).sort((a: any, b: any) => b.id - a.id);
       if (this.seciliIliskiId && !this.muvekkiller.some((m: any) => m.id === this.seciliIliskiId)) this.seciliIliskiId = null;
+      this.cdr.detectChanges();
+    });
+    onSnapshot(collection(this.db, 'artifacts', appId, 'users', this.user.uid, 'ofisGorevleri'), (sn: any) => {
+      this.ofisGorevleri = sn.docs.map((d: any) => ({ id: Number(d.id), ...d.data() })).sort((a: any, b: any) => this.ofisGoreviZamanDamgasi(a) - this.ofisGoreviZamanDamgasi(b));
       this.cdr.detectChanges();
     });
     onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'sablonlar'), (ds: any) => {
@@ -497,6 +506,29 @@ export class AppComponent implements OnInit {
       return true;
     } catch (e: any) {
       this.bildirimGoster('error', 'Kişi kaydı silinemedi', e?.message || 'Silme işlemi tamamlanamadı.');
+      return false;
+    }
+  }
+  async ofisGoreviKaydetCloud(gorev: OfisGorevi, basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
+    this.islemYapiyor = true;
+    try {
+      await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ofisGorevleri', gorev.id.toString()), JSON.parse(JSON.stringify(gorev)));
+      if (basariMesaji) this.bildirimGoster('success', 'Ofis görevi kaydedildi', basariMesaji);
+      return true;
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Ofis görevi kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+      return false;
+    } finally { this.islemYapiyor = false; }
+  }
+  async ofisGoreviSilCloud(id: number, basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
+    try {
+      await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ofisGorevleri', id.toString()));
+      if (basariMesaji) this.bildirimGoster('success', 'Ofis görevi silindi', basariMesaji);
+      return true;
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Ofis görevi silinemedi', e?.message || 'Silme işlemi tamamlanamadı.');
       return false;
     }
   }
@@ -1977,31 +2009,147 @@ export class AppComponent implements OnInit {
     return `Normal yasal süre ${this.formatTarih(sayac.normalSonTarih)} tarihinde doluyor. Gerekirse uzatma ile azami son tarih ${this.formatTarih(sayac.azamiSonTarih)} olarak hesaplandı.`;
   }
 
+  ofisGoreviFormunuSifirla() {
+    this.yeniOfisGorevi = { tarih: new Date().toISOString().split('T')[0], saat: '', oncelik: 'Normal', baslik: '', aciklama: '' };
+  }
+
+  ofisGoreviZamanDamgasi(gorev?: Partial<OfisGorevi>) {
+    if (!gorev?.tarih) return Number.MAX_SAFE_INTEGER;
+    return new Date(`${gorev.tarih}T${(gorev.saat || '00:00').slice(0, 5) || '00:00'}`).getTime();
+  }
+
+  get aktifOfisGorevleri() {
+    return [...this.ofisGorevleri]
+      .filter(gorev => !gorev.tamamlandiMi)
+      .sort((a, b) => this.ofisGoreviZamanDamgasi(a) - this.ofisGoreviZamanDamgasi(b));
+  }
+
+  async ofisGoreviKaydet() {
+    const baslik = this.formatMetin(this.yeniOfisGorevi.baslik)?.trim();
+    const tarih = (this.yeniOfisGorevi.tarih || '').trim();
+    if (!baslik || !tarih) {
+      this.bildirimGoster('info', 'Ofis görevi eksik', 'Başlık ve tarih alanını doldurun.');
+      return;
+    }
+
+    const gorev: OfisGorevi = {
+      id: Date.now(),
+      baslik,
+      aciklama: (this.yeniOfisGorevi.aciklama || '').trim(),
+      tarih,
+      saat: (this.yeniOfisGorevi.saat || '').trim().slice(0, 5),
+      oncelik: this.yeniOfisGorevi.oncelik || 'Normal',
+      tamamlandiMi: false,
+      kayitTarihi: new Date().toISOString()
+    };
+    const kaydedildi = await this.ofisGoreviKaydetCloud(gorev, 'Görev ajandaya eklendi.');
+    if (!kaydedildi) return;
+    this.ofisGoreviFormunuSifirla();
+  }
+
+  ofisGoreviDuzenleBaslat(gorev: OfisGorevi, event?: Event) {
+    event?.stopPropagation();
+    this.duzenlenenOfisGoreviId = gorev.id;
+    this.duzenlenenOfisGorevi = { ...gorev };
+  }
+
+  ofisGoreviDuzenlemeIptal(event?: Event) {
+    event?.stopPropagation();
+    this.duzenlenenOfisGoreviId = null;
+    this.duzenlenenOfisGorevi = {};
+  }
+
+  async ofisGoreviGuncelleKaydet(event?: Event) {
+    event?.stopPropagation();
+    const id = this.duzenlenenOfisGoreviId;
+    const mevcut = id ? this.ofisGorevleri.find(gorev => gorev.id === id) : null;
+    if (!id || !mevcut) return;
+    const baslik = this.formatMetin(this.duzenlenenOfisGorevi.baslik)?.trim();
+    const tarih = (this.duzenlenenOfisGorevi.tarih || '').trim();
+    if (!baslik || !tarih) {
+      this.bildirimGoster('info', 'Ofis görevi eksik', 'Başlık ve tarih alanını doldurun.');
+      return;
+    }
+
+    const guncel: OfisGorevi = {
+      ...mevcut,
+      baslik,
+      aciklama: (this.duzenlenenOfisGorevi.aciklama || '').trim(),
+      tarih,
+      saat: (this.duzenlenenOfisGorevi.saat || '').trim().slice(0, 5),
+      oncelik: this.duzenlenenOfisGorevi.oncelik || 'Normal'
+    };
+    const kaydedildi = await this.ofisGoreviKaydetCloud(guncel, 'Ofis görevi güncellendi.');
+    if (!kaydedildi) return;
+    this.ofisGoreviDuzenlemeIptal();
+  }
+
+  async ofisGoreviTamamla(gorev: OfisGorevi, event?: Event) {
+    event?.stopPropagation();
+    const onceki = this.veriKopyala(gorev);
+    const guncel: OfisGorevi = { ...gorev, tamamlandiMi: true, tamamlanmaTarihi: new Date().toISOString() };
+    const kaydedildi = await this.ofisGoreviKaydetCloud(guncel);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Ofis görevi tamamlandı',
+      'Görev ajandadan kapatıldı.',
+      () => this.ofisGoreviKaydetCloud(onceki),
+      'Ofis görevi geri açıldı',
+      'Görev tekrar aktif hale getirildi.'
+    );
+  }
+
+  async ofisGoreviSil(gorev: OfisGorevi, event?: Event) {
+    event?.stopPropagation();
+    const onceki = this.veriKopyala(gorev);
+    const silindi = await this.ofisGoreviSilCloud(gorev.id);
+    if (!silindi) return;
+    if (this.duzenlenenOfisGoreviId === gorev.id) this.ofisGoreviDuzenlemeIptal();
+    this.geriAlinabilirBasariBildirimiGoster(
+      'Ofis görevi silindi',
+      'Görev listesinden kaldırıldı.',
+      () => this.ofisGoreviKaydetCloud(onceki),
+      'Ofis görevi geri yüklendi',
+      'Silinen görev tekrar ajandaya eklendi.'
+    );
+  }
+
+  getOfisGoreviOncelikClass(oncelik?: string) {
+    if (oncelik === 'Acil') return 'bg-rose-100 text-rose-700 border-rose-200';
+    if (oncelik === 'Önemli') return 'bg-amber-100 text-amber-700 border-amber-200';
+    return 'bg-slate-100 text-slate-700 border-slate-200';
+  }
+
   getAjandaTurEtiketi(tur: AjandaTur) {
     if (tur === 'durusma') return 'Duruşma';
     if (tur === 'toplanti') return 'Toplantı';
+    if (tur === 'ofisGorevi') return 'Ofis Görevi';
     return 'Süreli İş';
   }
 
   getAjandaTurClass(tur: AjandaTur) {
     if (tur === 'durusma') return 'bg-blue-100 text-blue-700';
     if (tur === 'toplanti') return 'bg-purple-100 text-purple-700';
+    if (tur === 'ofisGorevi') return 'bg-emerald-100 text-emerald-700';
     return 'bg-rose-100 text-rose-700';
   }
 
   getAjandaKaynakEtiketi(kaynak: AjandaKaynak) {
     if (kaynak === 'dava') return 'Dava';
     if (kaynak === 'icra') return 'İcra';
+    if (kaynak === 'ofis') return 'Ofis';
     return 'Arabuluculuk';
   }
 
   getAjandaKaynakClass(kaynak: AjandaKaynak) {
     if (kaynak === 'dava') return 'bg-slate-100 text-slate-700';
     if (kaynak === 'icra') return 'bg-emerald-100 text-emerald-700';
+    if (kaynak === 'ofis') return 'bg-amber-100 text-amber-700';
     return 'bg-violet-100 text-violet-700';
   }
 
-  getAjandaDosyaOzeti(kaynak: AjandaKaynak, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi) {
+  getAjandaDosyaOzeti(kaynak: AjandaKaynak, dosya?: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi) {
+    if (kaynak === 'ofis' || !dosya) return 'Ofis içi görev';
     if (kaynak === 'dava') {
       const dava = dosya as DavaDosyasi;
       return dava.dosyaNo || 'Dava dosyası';
@@ -2015,6 +2163,10 @@ export class AppComponent implements OnInit {
   }
 
   ajandaKaydinaGit(kayit: AjandaKaydi) {
+    if (kayit.kaynak === 'ofis') {
+      this.sayfaDegistir('ajanda');
+      return;
+    }
     if (kayit.kaynak === 'dava') this.detayaGit(kayit.dosya as DavaDosyasi);
     else if (kayit.kaynak === 'icra') this.icraDetayinaGit(kayit.dosya as IcraDosyasi);
     else this.arabuluculukDetayinaGit(kayit.dosya as ArabuluculukDosyasi);
@@ -2068,6 +2220,20 @@ export class AppComponent implements OnInit {
         evrakId: is.evrak.id,
         evrakIsmi: is.evrak.isim,
         anaEvrakIsmi: is.anaEvrakIsim
+      });
+    });
+
+    this.aktifOfisGorevleri.forEach(gorev => {
+      kayitlar.push({
+        id: `ofis-gorevi-${gorev.id}`,
+        tarih: this.birlestirTarihVeSaat(gorev.tarih, gorev.saat),
+        saat: gorev.saat,
+        tur: 'ofisGorevi',
+        kaynak: 'ofis',
+        ofisGorevi: gorev,
+        baslik: gorev.baslik || 'Ofis görevi',
+        altBaslik: gorev.aciklama || `${gorev.oncelik || 'Normal'} öncelikli ofis içi iş`,
+        taraflar: 'Ofis içi görev'
       });
     });
 
@@ -2136,6 +2302,8 @@ export class AppComponent implements OnInit {
         kayit.taraflar,
         kayit.evrakIsmi || '',
         kayit.anaEvrakIsmi || '',
+        kayit.ofisGorevi?.aciklama || '',
+        kayit.ofisGorevi?.oncelik || '',
         this.getAjandaKaynakEtiketi(kayit.kaynak),
         this.getAjandaTurEtiketi(kayit.tur),
         this.getAjandaDosyaOzeti(kayit.kaynak, kayit.dosya)
@@ -2165,7 +2333,8 @@ export class AppComponent implements OnInit {
       gecmis: kayitlar.filter(kayit => this.ajandaGunFarki(kayit.tarih) < 0).length,
       durusma: kayitlar.filter(kayit => kayit.tur === 'durusma').length,
       toplanti: kayitlar.filter(kayit => kayit.tur === 'toplanti').length,
-      sureliIs: kayitlar.filter(kayit => kayit.tur === 'sureliIs').length
+      sureliIs: kayitlar.filter(kayit => kayit.tur === 'sureliIs').length,
+      ofisGorevi: kayitlar.filter(kayit => kayit.tur === 'ofisGorevi').length
     };
   }
 
@@ -3396,13 +3565,15 @@ export class AppComponent implements OnInit {
     );
   }
   ajandaKaydiTamamla(kayit: AjandaKaydi, event?: Event) {
-    if (kayit.tur === 'durusma') this.durusmaTamamlandiIsaretle(kayit.dosya as DavaDosyasi, event);
+    if (kayit.tur === 'ofisGorevi' && kayit.ofisGorevi) this.ofisGoreviTamamla(kayit.ofisGorevi, event);
+    else if (kayit.tur === 'durusma') this.durusmaTamamlandiIsaretle(kayit.dosya as DavaDosyasi, event);
     else if (kayit.tur === 'toplanti') this.toplantiTamamlandiIsaretle(kayit.dosya as ArabuluculukDosyasi, event);
     else if (kayit.evrakId) this.sureliIsiTamamlandiIsaretle(kayit.dosya, kayit.kaynak, kayit.evrakId, event);
   }
   getAjandaTamamlaMetni(kayit: AjandaKaydi) {
     if (kayit.tur === 'durusma') return 'Duruşma Yapıldı';
     if (kayit.tur === 'toplanti') return 'Toplantı Yapıldı';
+    if (kayit.tur === 'ofisGorevi') return 'Görev Bitti';
     return 'Tamamlandı';
   }
 
