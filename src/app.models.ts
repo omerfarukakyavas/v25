@@ -153,7 +153,7 @@ export interface IliskiDosyaKaydi {
   dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi;
 }
 
-export type SayfaTipi = 'dashboard' | 'davalar' | 'icralar' | 'arabuluculuk' | 'sablonlar' | 'muhasebe' | 'iliskiler' | 'ajanda' | 'detay' | 'icraDetay' | 'arabuluculukDetay';
+export type SayfaTipi = 'dashboard' | 'davalar' | 'icralar' | 'arabuluculuk' | 'sablonlar' | 'belgeCikti' | 'muhasebe' | 'iliskiler' | 'ajanda' | 'detay' | 'icraDetay' | 'arabuluculukDetay';
 export type DetaySekmesi = 'notlar' | 'muvekkilGorusmeleri' | 'evraklar' | 'finans' | 'sureliIsler' | 'gecmis';
 
 export interface ArabuluculukDosyasi {

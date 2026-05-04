@@ -54,6 +54,7 @@
             <a (click)="sayfaDegistir('icralar')" [class]="getMenuClass('icralar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg><span>İcra Takipleri</span></a>
             <a (click)="sayfaDegistir('arabuluculuk')" [class]="getMenuClass('arabuluculuk')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Arabuluculuk</span></a>
             <a (click)="sayfaDegistir('sablonlar')" [class]="getMenuClass('sablonlar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg><span>Şablonlar</span></a>
+            <a (click)="sayfaDegistir('belgeCikti')" [class]="getMenuClass('belgeCikti')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg><span>Belge Çıktı</span></a>
             <a (click)="sayfaDegistir('muhasebe')" [class]="getMenuClass('muhasebe')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Muhasebe</span></a>
             <a (click)="sayfaDegistir('iliskiler')" [class]="getMenuClass('iliskiler')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span>İlişkiler</span></a>
             <a (click)="sayfaDegistir('ajanda')" [class]="getMenuClass('ajanda')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span>Ajanda</span></a>
@@ -73,7 +74,7 @@
               @switch (aktifSayfa) {
                 @case ('dashboard') { Genel Özet ve İstatistikler }
                 @case ('davalar') { Dava Dosyaları } @case ('icralar') { İcra Takipleri } @case ('arabuluculuk') { Arabuluculuk Dosyaları }
-                @case ('sablonlar') { Belge Şablonları } @case ('muhasebe') { Muhasebe ve Finans } @case ('iliskiler') { İlişkiler Yönetimi }
+                @case ('sablonlar') { Belge Şablonları } @case ('belgeCikti') { Belge Çıktı Merkezi } @case ('muhasebe') { Muhasebe ve Finans } @case ('iliskiler') { İlişkiler Yönetimi }
                 @case ('ajanda') { Duruşma Takvimi } @case ('detay') { Dava Yönetimi ve Finans } @case ('icraDetay') { İcra Yönetimi ve Finans }
                 @case ('arabuluculukDetay') { Arabuluculuk Yönetimi ve Finans }
               }
@@ -103,6 +104,7 @@
               <button (click)="sayfaDegistir('muhasebe')" [class]="getMobilMenuClass('muhasebe')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Muhasebe</button>
               <button (click)="sayfaDegistir('iliskiler')" [class]="getMobilMenuClass('iliskiler')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">İlişkiler</button>
               <button (click)="sayfaDegistir('sablonlar')" [class]="getMobilMenuClass('sablonlar')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Şablonlar</button>
+              <button (click)="sayfaDegistir('belgeCikti')" [class]="getMobilMenuClass('belgeCikti')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Çıktı</button>
             </div>
           </div>
 
@@ -1754,6 +1756,116 @@
                          </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              }
+
+              @case ('belgeCikti') {
+                <div class="app-page max-w-7xl mx-auto pb-10 space-y-6">
+                  <div class="rounded-2xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 via-white to-emerald-50 p-5 shadow-sm">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                      <div>
+                        <p class="text-xs font-black uppercase tracking-[0.25em] text-blue-700">Belge Çıktı Merkezi</p>
+                        <h3 class="mt-2 text-2xl font-black text-slate-950">Google Docs uyumlu DOCX ve UYAP’a hazır RTF üretimi</h3>
+                        <p class="mt-2 max-w-4xl text-sm leading-6 text-slate-700">
+                          Bu bölümde oluşturulan belgeleri DOCX olarak indirip Google Dokümanlar’da düzenleyebilir veya UYAP’a hazır RTF formatında indirerek UYAP Editör’de açabilirsiniz. Sistem şimdilik doğrudan UDF üretmez; en güvenli yöntem RTF dosyasını UYAP Editör’de açıp UDF olarak kaydetmektir.
+                        </p>
+                      </div>
+                      <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+                        <button type="button" (click)="belgeCiktiOrnekDavaDilekcesiYukle()" class="rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-xs font-black text-blue-700 shadow-sm hover:bg-blue-50">Örnek Dava</button>
+                        <button type="button" (click)="belgeCiktiOrnekBeyanDilekcesiYukle()" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-black text-slate-700 shadow-sm hover:bg-slate-50">Örnek Beyan</button>
+                        <button type="button" (click)="belgeCiktiFormu = belgeCiktiVarsayilanFormu()" class="rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-xs font-black text-rose-700 shadow-sm hover:bg-rose-50">Temizle</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+                    <section class="rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-sm">
+                      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-sm font-black text-slate-950">Belge Türü</span>
+                          <select [(ngModel)]="belgeCiktiFormu.belgeTuru" class="min-h-[44px] rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500">
+                            @for (tur of belgeCiktiTurleri; track tur) {
+                              <option [ngValue]="tur">{{ tur }}</option>
+                            }
+                          </select>
+                        </label>
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-sm font-black text-slate-950">Belge Başlığı</span>
+                          <input [(ngModel)]="belgeCiktiFormu.belgeBasligi" type="text" placeholder="Örn: BEYAN DİLEKÇESİ" class="min-h-[44px] rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500">
+                        </label>
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-sm font-black text-slate-950">Mahkeme / Kurum</span>
+                          <input [(ngModel)]="belgeCiktiFormu.mahkemeKurum" type="text" placeholder="Örn: İstanbul Anadolu ... Mahkemesi" class="min-h-[44px] rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500">
+                        </label>
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-sm font-black text-slate-950">Dosya Numarası</span>
+                          <input [(ngModel)]="belgeCiktiFormu.dosyaNo" type="text" placeholder="Örn: 2026/..." class="min-h-[44px] rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500">
+                        </label>
+                      </div>
+
+                      <div class="mt-4 grid grid-cols-1 gap-4">
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-sm font-black text-slate-950">Taraf Bilgileri</span>
+                          <textarea [(ngModel)]="belgeCiktiFormu.tarafBilgileri" rows="4" placeholder="Davacı: ...&#10;Davalı: ..." class="rounded-xl border border-slate-300 px-3 py-2 text-sm leading-6 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </label>
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-sm font-black text-slate-950">Konu</span>
+                          <textarea [(ngModel)]="belgeCiktiFormu.konu" rows="3" placeholder="Belgenin konusu..." class="rounded-xl border border-slate-300 px-3 py-2 text-sm leading-6 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </label>
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-sm font-black text-slate-950">Açıklamalar</span>
+                          <textarea [(ngModel)]="belgeCiktiFormu.aciklamalar" rows="7" placeholder="Maddeler halinde açıklamaları yazabilirsiniz." class="rounded-xl border border-slate-300 px-3 py-2 text-sm leading-6 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </label>
+                      </div>
+
+                      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-sm font-black text-slate-950">Hukuki Sebepler</span>
+                          <textarea [(ngModel)]="belgeCiktiFormu.hukukiSebepler" rows="4" placeholder="HMK, TBK ve ilgili mevzuat..." class="rounded-xl border border-slate-300 px-3 py-2 text-sm leading-6 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </label>
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-sm font-black text-slate-950">Deliller</span>
+                          <textarea [(ngModel)]="belgeCiktiFormu.deliller" rows="4" placeholder="Sözleşme, yazışma, tanık, bilirkişi..." class="rounded-xl border border-slate-300 px-3 py-2 text-sm leading-6 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </label>
+                      </div>
+
+                      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_260px]">
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-sm font-black text-slate-950">Sonuç ve İstem</span>
+                          <textarea [(ngModel)]="belgeCiktiFormu.sonucIstem" rows="4" placeholder="Talep sonucunu yazın..." class="rounded-xl border border-slate-300 px-3 py-2 text-sm leading-6 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </label>
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-sm font-black text-slate-950">İmza Bloğu</span>
+                          <textarea [(ngModel)]="belgeCiktiFormu.imzaBlogu" rows="4" class="rounded-xl border border-slate-300 px-3 py-2 text-sm leading-6 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </label>
+                      </div>
+                    </section>
+
+                    <aside class="space-y-4">
+                      <div class="rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-sm">
+                        <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-600">Çıktı Seçenekleri</p>
+                        <div class="mt-4 grid grid-cols-1 gap-3">
+                          <button type="button" (click)="belgeCiktiDocxIndir(false)" class="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800">DOCX İndir</button>
+                          <button type="button" (click)="belgeCiktiDocxIndir(true)" class="rounded-xl bg-blue-600 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-blue-700">Google Docs İçin DOCX İndir</button>
+                          <button type="button" (click)="belgeCiktiRtfIndir()" class="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-emerald-700">UYAP’a Hazır RTF İndir</button>
+                          <button type="button" (click)="belgeCiktiDuzMetniKopyala()" class="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm hover:bg-slate-50">Düz Metni Kopyala</button>
+                        </div>
+                        <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold leading-5 text-amber-900">
+                          Bu RTF dosyasını UYAP Editör’de açıp UDF olarak kaydedebilirsiniz. Burada doğrudan UDF üretimi yapılmaz.
+                        </div>
+                      </div>
+
+                      <div class="rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-sm">
+                        <div class="flex items-center justify-between gap-3">
+                          <div>
+                            <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-600">Canlı Önizleme</p>
+                            <p class="mt-1 text-xs text-slate-500">Boş alanlarda sistem makul varsayılan metin kullanır.</p>
+                          </div>
+                        </div>
+                        <pre class="mt-4 max-h-[620px] overflow-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-950 custom-scrollbar" style="font-family: 'Times New Roman', serif;">{{ belgeCiktiDuzMetinOlustur() }}</pre>
+                      </div>
+                    </aside>
                   </div>
                 </div>
               }

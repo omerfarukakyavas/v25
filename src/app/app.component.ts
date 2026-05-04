@@ -77,6 +77,28 @@ type HazirExcelMakbuz = {
   olusturmaTarihi: string;
 };
 
+type BelgeCiktiFormu = {
+  belgeTuru: string;
+  belgeBasligi: string;
+  mahkemeKurum: string;
+  dosyaNo: string;
+  tarafBilgileri: string;
+  konu: string;
+  aciklamalar: string;
+  hukukiSebepler: string;
+  deliller: string;
+  sonucIstem: string;
+  imzaBlogu: string;
+};
+
+type BelgeParagrafi = {
+  metin: string;
+  hizalama?: 'left' | 'center' | 'right' | 'both';
+  kalin?: boolean;
+  buyukHarf?: boolean;
+  boslukSonrasi?: number;
+};
+
 type AdresliKayit = {
   adres?: string;
   il?: string;
@@ -196,6 +218,16 @@ export class AppComponent implements OnInit {
   sablonlar: { avukatlik: EvrakBaglantisi[], arabuluculuk: EvrakBaglantisi[] } = { avukatlik: [], arabuluculuk: [] };
   aktifSablonSekmesi: 'avukatlik' | 'arabuluculuk' = 'avukatlik';
   sablonArama = '';
+  belgeCiktiFormu: BelgeCiktiFormu = this.belgeCiktiVarsayilanFormu();
+  readonly belgeCiktiTurleri = [
+    'Dava Dilekçesi',
+    'Cevap Dilekçesi',
+    'Beyan Dilekçesi',
+    'İhtarname',
+    'Arabuluculuk Tutanağı',
+    'Müvekkil Bilgilendirme Raporu',
+    'Sözleşme Taslağı'
+  ];
 
   aramaMetni = ''; durumFiltresi = 'Tümü';
   arabuluculukSonucFiltresi: 'Tümü' | 'Girilmedi' | ArabuluculukSonucu = 'Tümü';
@@ -751,6 +783,312 @@ export class AppComponent implements OnInit {
       this.gunlukOzetKopyalaniyor = false;
     }
   }
+
+  belgeCiktiVarsayilanFormu(): BelgeCiktiFormu {
+    return {
+      belgeTuru: 'Dava Dilekçesi',
+      belgeBasligi: 'DİLEKÇE',
+      mahkemeKurum: '',
+      dosyaNo: '',
+      tarafBilgileri: '',
+      konu: '',
+      aciklamalar: '',
+      hukukiSebepler: '',
+      deliller: '',
+      sonucIstem: '',
+      imzaBlogu: 'Arb. Av. Ömer Faruk AKYAVAŞ'
+    };
+  }
+
+  belgeCiktiOrnekDavaDilekcesiYukle() {
+    this.belgeCiktiFormu = {
+      belgeTuru: 'Dava Dilekçesi',
+      belgeBasligi: 'DAVA DİLEKÇESİ',
+      mahkemeKurum: 'İstanbul Nöbetçi Asliye Hukuk Mahkemesi',
+      dosyaNo: '2026/...',
+      tarafBilgileri: 'Davacı: ...\nDavalı: ...',
+      konu: 'Fazlaya ilişkin haklarımız saklı kalmak kaydıyla alacak talebimizden ibarettir.',
+      aciklamalar: '1. Müvekkil ile davalı arasındaki hukuki ilişki kapsamında uyuşmazlık doğmuştur.\n2. Davalı tarafın yükümlülüklerini yerine getirmemesi nedeniyle işbu davanın açılması zorunlu olmuştur.',
+      hukukiSebepler: 'Türk Borçlar Kanunu, Hukuk Muhakemeleri Kanunu ve ilgili sair mevzuat.',
+      deliller: 'Sözleşme, yazışmalar, banka kayıtları, tanık beyanları, bilirkişi incelemesi ve sair yasal deliller.',
+      sonucIstem: 'Yukarıda arz ve izah edilen nedenlerle davamızın kabulüne, yargılama giderleri ve vekalet ücretinin karşı tarafa yükletilmesine karar verilmesini saygıyla arz ve talep ederiz.',
+      imzaBlogu: 'Arb. Av. Ömer Faruk AKYAVAŞ'
+    };
+  }
+
+  belgeCiktiOrnekBeyanDilekcesiYukle() {
+    this.belgeCiktiFormu = {
+      belgeTuru: 'Beyan Dilekçesi',
+      belgeBasligi: 'BEYAN DİLEKÇESİ',
+      mahkemeKurum: 'İstanbul Anadolu ... Mahkemesi',
+      dosyaNo: '2026/...',
+      tarafBilgileri: 'Davacı: ...\nDavalı: ...',
+      konu: 'Sayın Mahkemeniz dosyasına beyanlarımızın sunulmasından ibarettir.',
+      aciklamalar: 'Dosya kapsamındaki beyan ve delillerimiz çerçevesinde aşağıdaki hususların dikkate alınmasını talep ederiz.',
+      hukukiSebepler: 'HMK ve ilgili sair mevzuat.',
+      deliller: 'Dosya kapsamı, taraf beyanları ve sair yasal deliller.',
+      sonucIstem: 'Açıklanan nedenlerle beyanlarımızın dosya kapsamında değerlendirilmesini saygıyla arz ve talep ederiz.',
+      imzaBlogu: 'Arb. Av. Ömer Faruk AKYAVAŞ'
+    };
+  }
+
+  belgeCiktiMetin(deger: any, varsayilan = '') {
+    const metin = typeof deger === 'string' ? deger.trim() : '';
+    return metin || varsayilan;
+  }
+
+  belgeCiktiDosyaAdi(uzanti: 'docx' | 'rtf' | 'txt') {
+    const tur = this.belgeCiktiMetin(this.belgeCiktiFormu.belgeTuru, 'belge')
+      .toLocaleLowerCase('tr-TR')
+      .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'belge';
+    return `${tur}-${new Date().toISOString().slice(0, 10)}.${uzanti}`;
+  }
+
+  belgeCiktiGovdeParagraflari(metin: string, varsayilan: string) {
+    return this.belgeCiktiMetin(metin, varsayilan)
+      .split(/\n+/)
+      .map(satir => satir.trim())
+      .filter(Boolean);
+  }
+
+  belgeCiktiParagraflariOlustur(): BelgeParagrafi[] {
+    const f = this.belgeCiktiFormu;
+    const mahkeme = this.belgeCiktiMetin(f.mahkemeKurum, 'İLGİLİ MAKAMA').toLocaleUpperCase('tr-TR');
+    const belgeBasligi = this.belgeCiktiMetin(f.belgeBasligi, f.belgeTuru || 'DİLEKÇE').toLocaleUpperCase('tr-TR');
+    const paragraflar: BelgeParagrafi[] = [
+      { metin: mahkeme, hizalama: 'center', kalin: true, boslukSonrasi: 220 },
+      { metin: belgeBasligi, hizalama: 'center', kalin: true, boslukSonrasi: 260 },
+      { metin: `DOSYA NO: ${this.belgeCiktiMetin(f.dosyaNo, 'Belirtilmedi')}`, kalin: true, boslukSonrasi: 120 },
+      { metin: 'TARAFLAR', kalin: true, boslukSonrasi: 80 }
+    ];
+
+    this.belgeCiktiGovdeParagraflari(f.tarafBilgileri, 'Taraf bilgileri daha sonra tamamlanacaktır.').forEach(metin => paragraflar.push({ metin, hizalama: 'both', boslukSonrasi: 90 }));
+    paragraflar.push({ metin: 'KONU', kalin: true, boslukSonrasi: 80 });
+    this.belgeCiktiGovdeParagraflari(f.konu, 'Konu bilgisi daha sonra tamamlanacaktır.').forEach(metin => paragraflar.push({ metin, hizalama: 'both', boslukSonrasi: 120 }));
+
+    const bolumler = [
+      { baslik: 'AÇIKLAMALAR', metin: f.aciklamalar, varsayilan: 'Açıklamalar bölümü daha sonra tamamlanacaktır.' },
+      { baslik: 'HUKUKİ SEBEPLER', metin: f.hukukiSebepler, varsayilan: 'İlgili mevzuat ve sair hukuki sebepler.' },
+      { baslik: 'DELİLLER', metin: f.deliller, varsayilan: 'Yasal deliller.' },
+      { baslik: 'SONUÇ VE İSTEM', metin: f.sonucIstem, varsayilan: 'Yukarıda açıklanan nedenlerle gereğinin yapılmasını saygıyla arz ve talep ederiz.' }
+    ];
+
+    bolumler.forEach(bolum => {
+      paragraflar.push({ metin: bolum.baslik, kalin: true, boslukSonrasi: 80 });
+      this.belgeCiktiGovdeParagraflari(bolum.metin, bolum.varsayilan).forEach(metin => paragraflar.push({ metin, hizalama: 'both', boslukSonrasi: 130 }));
+    });
+
+    paragraflar.push({ metin: '', boslukSonrasi: 180 });
+    this.belgeCiktiGovdeParagraflari(f.imzaBlogu, 'Arb. Av. Ömer Faruk AKYAVAŞ').forEach(metin => paragraflar.push({ metin, hizalama: 'right', kalin: true, boslukSonrasi: 80 }));
+    return paragraflar;
+  }
+
+  belgeCiktiDuzMetinOlustur() {
+    return this.belgeCiktiParagraflariOlustur()
+      .map(paragraf => paragraf.metin)
+      .join('\n\n')
+      .replace(/\n{4,}/g, '\n\n\n')
+      .trim();
+  }
+
+  async belgeCiktiDuzMetniKopyala() {
+    const metin = this.belgeCiktiDuzMetinOlustur();
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(metin);
+      } else if (typeof document !== 'undefined') {
+        const alan = document.createElement('textarea');
+        alan.value = metin;
+        alan.setAttribute('readonly', 'true');
+        alan.style.position = 'fixed';
+        alan.style.opacity = '0';
+        document.body.appendChild(alan);
+        alan.focus();
+        alan.select();
+        document.execCommand('copy');
+        document.body.removeChild(alan);
+      }
+      this.bildirimGoster('success', 'Belge metni kopyalandı', 'Metni Google Dokümanlar veya UYAP Editör alanına yapıştırabilirsiniz.');
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Metin kopyalanamadı', e?.message || 'Panoya kopyalama tamamlanamadı.');
+    }
+  }
+
+  belgeCiktiRtfKacis(metin: string) {
+    return (metin || '').replace(/[\\{}]/g, karakter => `\\${karakter}`).replace(/\r?\n/g, '\\line ').replace(/[^\x00-\x7F]/g, karakter => {
+      const kod = karakter.charCodeAt(0);
+      const signed = kod > 32767 ? kod - 65536 : kod;
+      return `\\u${signed}?`;
+    });
+  }
+
+  belgeCiktiRtfOlustur() {
+    const satirlar = [
+      '{\\rtf1\\ansi\\ansicpg1254\\uc1\\deff0',
+      '{\\fonttbl{\\f0 Times New Roman;}}',
+      '\\paperw11906\\paperh16838\\margl1417\\margr1417\\margt1417\\margb1417',
+      '\\f0\\fs24'
+    ];
+    this.belgeCiktiParagraflariOlustur().forEach(paragraf => {
+      const hizalama = paragraf.hizalama === 'center' ? '\\qc' : paragraf.hizalama === 'right' ? '\\qr' : paragraf.hizalama === 'both' ? '\\qj' : '\\ql';
+      const kalinBasla = paragraf.kalin ? '\\b ' : '';
+      const kalinBitir = paragraf.kalin ? '\\b0 ' : '';
+      const metin = this.belgeCiktiRtfKacis(paragraf.metin || '');
+      satirlar.push(`\\pard${hizalama}\\sl276\\slmult1\\sa${paragraf.boslukSonrasi ?? 140} ${kalinBasla}${metin}${kalinBitir}\\par`);
+    });
+    satirlar.push('}');
+    return satirlar.join('\n');
+  }
+
+  belgeCiktiRtfIndir() {
+    const blob = new Blob([this.belgeCiktiRtfOlustur()], { type: 'application/rtf;charset=utf-8' });
+    this.belgeCiktiBlobIndir(blob, this.belgeCiktiDosyaAdi('rtf'));
+    this.bildirimGoster('success', 'RTF dosyası hazır', 'Bu RTF dosyasını UYAP Editör’de açıp UDF olarak kaydedebilirsiniz.');
+  }
+
+  belgeCiktiXmlKacis(metin: string) {
+    return (metin || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  belgeCiktiDocxParagrafXml(paragraf: BelgeParagrafi) {
+    const hizalama = paragraf.hizalama === 'center' ? 'center' : paragraf.hizalama === 'right' ? 'right' : paragraf.hizalama === 'both' ? 'both' : 'left';
+    const metin = this.belgeCiktiXmlKacis(paragraf.metin || '');
+    const kalin = paragraf.kalin ? '<w:b/>' : '';
+    return `<w:p><w:pPr><w:jc w:val="${hizalama}"/><w:spacing w:line="276" w:lineRule="auto" w:after="${paragraf.boslukSonrasi ?? 140}"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>${kalin}<w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t xml:space="preserve">${metin}</w:t></w:r></w:p>`;
+  }
+
+  belgeCiktiDocxDocumentXml() {
+    const paragraflar = this.belgeCiktiParagraflariOlustur().map(paragraf => this.belgeCiktiDocxParagrafXml(paragraf)).join('');
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${paragraflar}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1417" w:bottom="1417" w:left="1417" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+  }
+
+  belgeCiktiDocxBlobOlustur() {
+    const dosyalar = [
+      {
+        ad: '[Content_Types].xml',
+        icerik: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/></Types>'
+      },
+      {
+        ad: '_rels/.rels',
+        icerik: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'
+      },
+      {
+        ad: 'word/styles.xml',
+        icerik: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="24"/></w:rPr></w:style></w:styles>'
+      },
+      {
+        ad: 'word/settings.xml',
+        icerik: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:zoom w:percent="100"/></w:settings>'
+      },
+      { ad: 'word/document.xml', icerik: this.belgeCiktiDocxDocumentXml() }
+    ];
+    return new Blob([this.belgeCiktiZipOlustur(dosyalar)], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  }
+
+  belgeCiktiDocxIndir(googleDocsIcin = false) {
+    const blob = this.belgeCiktiDocxBlobOlustur();
+    this.belgeCiktiBlobIndir(blob, this.belgeCiktiDosyaAdi('docx'));
+    this.bildirimGoster(
+      'success',
+      googleDocsIcin ? 'Google Docs uyumlu DOCX hazır' : 'DOCX dosyası hazır',
+      googleDocsIcin ? 'Dosyayı Google Drive’a yükleyip Google Dokümanlar ile açabilirsiniz.' : 'Belge DOCX formatında indirildi.'
+    );
+  }
+
+  belgeCiktiBlobIndir(blob: Blob, dosyaAdi: string) {
+    if (typeof document === 'undefined') return;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = dosyaAdi;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  belgeCiktiZipOlustur(dosyalar: { ad: string; icerik: string | Uint8Array }[]) {
+    const encoder = new TextEncoder();
+    const parcalar: Uint8Array[] = [];
+    const merkezParcalar: Uint8Array[] = [];
+    let offset = 0;
+    const simdi = new Date();
+    const dosTime = ((simdi.getHours() & 0x1f) << 11) | ((simdi.getMinutes() & 0x3f) << 5) | ((Math.floor(simdi.getSeconds() / 2)) & 0x1f);
+    const dosDate = (((simdi.getFullYear() - 1980) & 0x7f) << 9) | (((simdi.getMonth() + 1) & 0x0f) << 5) | (simdi.getDate() & 0x1f);
+
+    dosyalar.forEach(dosya => {
+      const adBytes = encoder.encode(dosya.ad);
+      const icerikBytes = typeof dosya.icerik === 'string' ? encoder.encode(dosya.icerik) : dosya.icerik;
+      const crc = this.belgeCiktiCrc32(icerikBytes);
+      const localHeader = this.belgeCiktiZipHeader([
+        [0x04034b50, 4], [20, 2], [0x0800, 2], [0, 2], [dosTime, 2], [dosDate, 2],
+        [crc, 4], [icerikBytes.length, 4], [icerikBytes.length, 4], [adBytes.length, 2], [0, 2]
+      ]);
+      parcalar.push(localHeader, adBytes, icerikBytes);
+
+      const centralHeader = this.belgeCiktiZipHeader([
+        [0x02014b50, 4], [20, 2], [20, 2], [0x0800, 2], [0, 2], [dosTime, 2], [dosDate, 2],
+        [crc, 4], [icerikBytes.length, 4], [icerikBytes.length, 4], [adBytes.length, 2], [0, 2],
+        [0, 2], [0, 2], [0, 2], [0, 4], [offset, 4]
+      ]);
+      merkezParcalar.push(centralHeader, adBytes);
+      offset += localHeader.length + adBytes.length + icerikBytes.length;
+    });
+
+    const merkezOffset = offset;
+    const merkezBoyut = merkezParcalar.reduce((toplam, parca) => toplam + parca.length, 0);
+    const bitis = this.belgeCiktiZipHeader([
+      [0x06054b50, 4], [0, 2], [0, 2], [dosyalar.length, 2], [dosyalar.length, 2],
+      [merkezBoyut, 4], [merkezOffset, 4], [0, 2]
+    ]);
+    return this.belgeCiktiUint8Birlestir([...parcalar, ...merkezParcalar, bitis]);
+  }
+
+  belgeCiktiZipHeader(alanlar: [number, number][]) {
+    const uzunluk = alanlar.reduce((toplam, [, byte]) => toplam + byte, 0);
+    const sonuc = new Uint8Array(uzunluk);
+    let offset = 0;
+    alanlar.forEach(([deger, byte]) => {
+      for (let i = 0; i < byte; i++) sonuc[offset++] = (deger >>> (8 * i)) & 0xff;
+    });
+    return sonuc;
+  }
+
+  belgeCiktiUint8Birlestir(parcalar: Uint8Array[]) {
+    const toplam = parcalar.reduce((boyut, parca) => boyut + parca.length, 0);
+    const sonuc = new Uint8Array(toplam);
+    let offset = 0;
+    parcalar.forEach(parca => {
+      sonuc.set(parca, offset);
+      offset += parca.length;
+    });
+    return sonuc;
+  }
+
+  belgeCiktiCrc32(bytes: Uint8Array) {
+    let crc = -1;
+    for (let i = 0; i < bytes.length; i++) {
+      crc = (crc >>> 8) ^ this.belgeCiktiCrcTablosu[(crc ^ bytes[i]) & 0xff];
+    }
+    return (crc ^ -1) >>> 0;
+  }
+
+  private belgeCiktiCrcTablosu = (() => {
+    const tablo: number[] = [];
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      tablo[n] = c >>> 0;
+    }
+    return tablo;
+  })();
 
 
 
