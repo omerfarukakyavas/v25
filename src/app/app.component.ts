@@ -111,6 +111,30 @@ type BelgeCiktiKaynakSecenegi = {
   dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi;
 };
 
+type BelgeCiktiSablonAlani = {
+  anahtar: string;
+  etiket: string;
+  tip?: 'input' | 'textarea';
+  varsayilan?: string;
+};
+
+type BelgeCiktiHazirSablon = {
+  id: string;
+  baslik: string;
+  aciklama: string;
+  kaynakTuru?: BelgeCiktiKaynakTuru;
+  belgeTuru: string;
+  belgeBasligi: string;
+  mahkemeKurum: string;
+  konu: string;
+  aciklamalar: string;
+  hukukiSebepler: string;
+  deliller: string;
+  sonucIstem: string;
+  imzaBlogu?: string;
+  alanlar: BelgeCiktiSablonAlani[];
+};
+
 type AdresliKayit = {
   adres?: string;
   il?: string;
@@ -234,14 +258,46 @@ export class AppComponent implements OnInit {
   belgeCiktiKaynakTuru: BelgeCiktiKaynakTuru = 'dava';
   belgeCiktiSeciliDosyaAnahtari = '';
   belgeCiktiDosyaArama = '';
+  belgeCiktiSeciliSablonId = '';
+  belgeCiktiSablonDegerleri: Record<string, string> = {};
   readonly belgeCiktiTurleri = [
     'Dava Dilekçesi',
     'Cevap Dilekçesi',
     'Beyan Dilekçesi',
     'İhtarname',
     'Arabuluculuk Tutanağı',
+    'Arabuluculuk Ücret Dilekçesi',
     'Müvekkil Bilgilendirme Raporu',
     'Sözleşme Taslağı'
+  ];
+  readonly belgeCiktiHazirSablonlari: BelgeCiktiHazirSablon[] = [
+    {
+      id: 'arabuluculuk-mali-isler-ucret-dilekcesi',
+      baslik: 'Dava Şartı Arabuluculuk - Mali İşler Ücret Dilekçesi',
+      aciklama: 'Dava şartı arabuluculuk faaliyeti tamamlandıktan sonra Mali İşler Müdürlüğüne sunulabilecek sade RTF/DOCX dilekçe taslağı.',
+      kaynakTuru: 'arabuluculuk',
+      belgeTuru: 'Arabuluculuk Ücret Dilekçesi',
+      belgeBasligi: 'DİLEKÇE',
+      mahkemeKurum: 'İSTANBUL ANADOLU CUMHURİYET BAŞSAVCILIĞI\nMALİ İŞLER MÜDÜRLÜĞÜNE',
+      konu: '{{ARABULUCULUK_NO}} numaralı dava şartı arabuluculuk dosyasına ilişkin arabuluculuk ücretinin ödenmesi talebidir.',
+      aciklamalar: '1. {{BURO}} Arabuluculuk Bürosunun {{BURO_NO}} büro numaralı, {{ARABULUCULUK_NO}} arabuluculuk numaralı dosyasında {{TARAFLAR_KISA}} arasında yürütülen dava şartı arabuluculuk süreci tamamlanmıştır.\n\n2. Dosyanın başvuru türü {{BASVURU_TURU}}, uyuşmazlık türü {{UYUSMAZLIK_TURU}} olup başvuru konusu {{BASVURU_KONUSU}} şeklindedir.\n\n3. {{ACIKLAMA_EK}}\n\n4. Arabuluculuk ücretinin ödenebilmesi için gerekli işlemlerin yapılmasını talep ederim.\n\n5. Ödeme bilgileri: Hesap sahibi {{HESAP_SAHIBI}}, IBAN {{IBAN}}, talep edilen tutar {{ODENECEK_TUTAR}}.',
+      hukukiSebepler: '6325 sayılı Hukuk Uyuşmazlıklarında Arabuluculuk Kanunu, Arabuluculuk Asgari Ücret Tarifesi ve ilgili sair mevzuat.',
+      deliller: 'Arabuluculuk son tutanağı, arabuluculuk dosyası, sistem kayıtları ve sair yasal deliller.',
+      sonucIstem: 'Yukarıda açıklanan nedenlerle {{ARABULUCULUK_NO}} numaralı dava şartı arabuluculuk dosyasına ilişkin arabuluculuk ücretinin tarafıma ödenmesi hususunda gereğini arz ederim.\n\nEkler: {{EKLER}}',
+      imzaBlogu: 'Arb. Av. Ömer Faruk AKYAVAŞ',
+      alanlar: [
+        {
+          anahtar: 'ACIKLAMA_EK',
+          etiket: 'Açıklama Ek Metni',
+          tip: 'textarea',
+          varsayilan: 'Arabuluculuk faaliyeti mevzuata uygun şekilde yürütülmüş ve süreç son tutanakla tamamlanmıştır.'
+        },
+        { anahtar: 'ODENECEK_TUTAR', etiket: 'Talep Edilen Tutar', varsayilan: '' },
+        { anahtar: 'HESAP_SAHIBI', etiket: 'Hesap Sahibi', varsayilan: 'Arb. Av. Ömer Faruk AKYAVAŞ' },
+        { anahtar: 'IBAN', etiket: 'IBAN', varsayilan: '' },
+        { anahtar: 'EKLER', etiket: 'Ekler', tip: 'textarea', varsayilan: 'Son tutanak ve ilgili arabuluculuk evrakları' }
+      ]
+    }
   ];
 
   aramaMetni = ''; durumFiltresi = 'Tümü';
@@ -820,6 +876,117 @@ export class AppComponent implements OnInit {
     this.belgeCiktiDosyaArama = '';
   }
 
+  belgeCiktiSeciliHazirSablon() {
+    return this.belgeCiktiHazirSablonlari.find(sablon => sablon.id === this.belgeCiktiSeciliSablonId) || null;
+  }
+
+  belgeCiktiSablonSecildi() {
+    const sablon = this.belgeCiktiSeciliHazirSablon();
+    this.belgeCiktiSablonDegerleri = {};
+    if (!sablon) return;
+
+    if (sablon.kaynakTuru && this.belgeCiktiKaynakTuru !== sablon.kaynakTuru) {
+      this.belgeCiktiKaynakTuru = sablon.kaynakTuru;
+      this.belgeCiktiKaynakTuruDegisti();
+    }
+
+    sablon.alanlar.forEach(alan => {
+      this.belgeCiktiSablonDegerleri[alan.anahtar] = alan.varsayilan || '';
+    });
+  }
+
+  belgeCiktiSablonYerTutuculari() {
+    const secenek = this.belgeCiktiSeciliKaynakSecenegi();
+    const yerTutucular: Record<string, string> = {
+      BELGE_TARIHI: this.formatTarih(new Date().toISOString()),
+      DOSYA_NO: '',
+      MAHKEME_KURUM: '',
+      KONU: '',
+      TARAFLAR_KISA: '',
+      TARAFLAR_DETAYLI: ''
+    };
+
+    if (secenek?.tur === 'dava') {
+      const dava = secenek.dosya as DavaDosyasi;
+      const taraflar = this.getDavaTarafKayitlari(dava);
+      yerTutucular['DOSYA_NO'] = this.belgeCiktiDavaDosyaNoMetni(dava);
+      yerTutucular['MAHKEME_KURUM'] = this.formatMetin(dava.mahkeme) || '';
+      yerTutucular['KONU'] = this.formatMetin(dava.konu) || '';
+      yerTutucular['DAVACI'] = taraflar.davacilar.map(taraf => this.formatMetin(taraf.isim)).filter(Boolean).join(', ') || dava.muvekkil || '';
+      yerTutucular['DAVALI'] = taraflar.davalilar.map(taraf => this.formatMetin(taraf.isim)).filter(Boolean).join(', ') || dava.karsiTaraf || '';
+      yerTutucular['TARAFLAR_KISA'] = this.getDavaTarafOzet(dava);
+      yerTutucular['TARAFLAR_DETAYLI'] = this.belgeCiktiDavaTarafMetni(dava);
+    } else if (secenek?.tur === 'icra') {
+      const icra = secenek.dosya as IcraDosyasi;
+      yerTutucular['DOSYA_NO'] = icra.dosyaNo || '';
+      yerTutucular['MAHKEME_KURUM'] = icra.icraDairesi || '';
+      yerTutucular['KONU'] = icra.takipTipi || '';
+      yerTutucular['ALACAKLI'] = icra.alacakli || '';
+      yerTutucular['BORCLU'] = icra.borclu || '';
+      yerTutucular['TARAFLAR_KISA'] = `${icra.alacakli || '-'} - ${icra.borclu || '-'}`;
+      yerTutucular['TARAFLAR_DETAYLI'] = this.belgeCiktiIcraTarafMetni(icra);
+    } else if (secenek?.tur === 'arabuluculuk') {
+      const arabuluculuk = secenek.dosya as ArabuluculukDosyasi;
+      yerTutucular['DOSYA_NO'] = this.belgeCiktiDosyaBasligi(arabuluculuk, 'arabuluculuk');
+      yerTutucular['MAHKEME_KURUM'] = arabuluculuk.buro || '';
+      yerTutucular['KONU'] = arabuluculuk.basvuruKonusu || '';
+      yerTutucular['ARABULUCULUK_NO'] = arabuluculuk.arabuluculukNo || '';
+      yerTutucular['BURO_NO'] = arabuluculuk.buroNo || '';
+      yerTutucular['BURO'] = arabuluculuk.buro || '';
+      yerTutucular['BASVURU_TURU'] = arabuluculuk.basvuruTuru || '';
+      yerTutucular['UYUSMAZLIK_TURU'] = arabuluculuk.uyusmazlikTuru || '';
+      yerTutucular['BASVURU_KONUSU'] = arabuluculuk.basvuruKonusu || '';
+      yerTutucular['BASVURUCU'] = this.getArabuluculukTaraflari(arabuluculuk, 'Başvurucu');
+      yerTutucular['DIGER_TARAFLAR'] = this.getArabuluculukTaraflari(arabuluculuk, 'Diğer Taraf');
+      yerTutucular['TARAFLAR_KISA'] = this.getArabuluculukTaraflari(arabuluculuk);
+      yerTutucular['TARAFLAR_DETAYLI'] = this.belgeCiktiArabuluculukTarafMetni(arabuluculuk);
+      yerTutucular['ODENECEK_TUTAR'] = arabuluculuk.arabulucuUcretiTutari || '';
+    }
+
+    this.belgeCiktiSeciliHazirSablon()?.alanlar.forEach(alan => {
+      yerTutucular[alan.anahtar] = this.belgeCiktiMetin(
+        this.belgeCiktiSablonDegerleri[alan.anahtar],
+        yerTutucular[alan.anahtar] || alan.varsayilan || ''
+      );
+    });
+
+    return yerTutucular;
+  }
+
+  belgeCiktiSablonMetniDoldur(metin: string, yerTutucular = this.belgeCiktiSablonYerTutuculari()) {
+    return (metin || '').replace(/\{\{\s*([A-Z0-9_]+)\s*\}\}/g, (_eslesme, anahtar: string) => yerTutucular[anahtar] ?? '');
+  }
+
+  belgeCiktiHazirSablonUygula() {
+    const sablon = this.belgeCiktiSeciliHazirSablon();
+    if (!sablon) {
+      this.bildirimGoster('error', 'Şablon seçilmedi', 'Belgeye yerleştirmek için önce hazır metin şablonu seçin.');
+      return;
+    }
+
+    const yerTutucular = this.belgeCiktiSablonYerTutuculari();
+    this.belgeCiktiFormu = {
+      ...this.belgeCiktiFormu,
+      belgeTuru: sablon.belgeTuru,
+      belgeBasligi: sablon.belgeBasligi,
+      mahkemeKurum: this.belgeCiktiSablonMetniDoldur(sablon.mahkemeKurum, yerTutucular),
+      dosyaNo: this.belgeCiktiMetin(yerTutucular['DOSYA_NO'], this.belgeCiktiFormu.dosyaNo),
+      tarafBilgileri: this.belgeCiktiMetin(yerTutucular['TARAFLAR_DETAYLI'], this.belgeCiktiFormu.tarafBilgileri),
+      konu: this.belgeCiktiSablonMetniDoldur(sablon.konu, yerTutucular),
+      aciklamalar: this.belgeCiktiSablonMetniDoldur(sablon.aciklamalar, yerTutucular),
+      hukukiSebepler: this.belgeCiktiSablonMetniDoldur(sablon.hukukiSebepler, yerTutucular),
+      deliller: this.belgeCiktiSablonMetniDoldur(sablon.deliller, yerTutucular),
+      sonucIstem: this.belgeCiktiSablonMetniDoldur(sablon.sonucIstem, yerTutucular),
+      imzaBlogu: this.belgeCiktiSablonMetniDoldur(sablon.imzaBlogu || 'Arb. Av. Ömer Faruk AKYAVAŞ', yerTutucular)
+    };
+
+    if (sablon.kaynakTuru && !this.belgeCiktiSeciliKaynakSecenegi()) {
+      this.bildirimGoster('info', 'Şablon yerleştirildi', 'Dosya seçerseniz numara ve taraf alanları da otomatik dolar.');
+      return;
+    }
+    this.bildirimGoster('success', 'Şablon belgeye yerleştirildi', 'Metni kontrol edip DOCX veya UYAP’a hazır RTF olarak indirebilirsiniz.');
+  }
+
   belgeCiktiDosyaBasligi(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi, tur: BelgeCiktiKaynakTuru) {
     if (tur === 'dava') {
       const dava = dosya as DavaDosyasi;
@@ -1026,10 +1193,11 @@ export class AppComponent implements OnInit {
 
   belgeCiktiParagraflariOlustur(): BelgeParagrafi[] {
     const f = this.belgeCiktiFormu;
-    const mahkeme = this.belgeCiktiMetin(f.mahkemeKurum, 'İLGİLİ MAKAMA').toLocaleUpperCase('tr-TR');
+    const mahkemeSatirlari = this.belgeCiktiGovdeParagraflari(f.mahkemeKurum, 'İLGİLİ MAKAMA')
+      .map(metin => metin.toLocaleUpperCase('tr-TR'));
     const belgeBasligi = this.belgeCiktiMetin(f.belgeBasligi, f.belgeTuru || 'DİLEKÇE').toLocaleUpperCase('tr-TR');
     const paragraflar: BelgeParagrafi[] = [
-      { metin: mahkeme, hizalama: 'center', kalin: true, boslukSonrasi: 220 },
+      ...mahkemeSatirlari.map((metin, index) => ({ metin, hizalama: 'center' as const, kalin: true, boslukSonrasi: index === mahkemeSatirlari.length - 1 ? 220 : 40 })),
       { metin: belgeBasligi, hizalama: 'center', kalin: true, boslukSonrasi: 260 },
       { metin: `DOSYA NO: ${this.belgeCiktiMetin(f.dosyaNo, 'Belirtilmedi')}`, kalin: true, boslukSonrasi: 120 },
       { metin: 'TARAFLAR', kalin: true, boslukSonrasi: 80 }
