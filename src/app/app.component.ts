@@ -279,11 +279,11 @@ export class AppComponent implements OnInit {
       belgeTuru: 'Arabuluculuk Ücret Dilekçesi',
       belgeBasligi: 'DİLEKÇE',
       mahkemeKurum: 'İSTANBUL ANADOLU CUMHURİYET BAŞSAVCILIĞI\nMALİ İŞLER MÜDÜRLÜĞÜNE',
-      konu: '{{ARABULUCULUK_NO}} numaralı dava şartı arabuluculuk dosyasına ilişkin arabuluculuk ücretinin ödenmesi talebidir.',
-      aciklamalar: '1. {{BURO}} Arabuluculuk Bürosunun {{BURO_NO}} büro numaralı, {{ARABULUCULUK_NO}} arabuluculuk numaralı dosyasında {{TARAFLAR_KISA}} arasında yürütülen dava şartı arabuluculuk süreci tamamlanmıştır.\n\n2. Dosyanın başvuru türü {{BASVURU_TURU}}, uyuşmazlık türü {{UYUSMAZLIK_TURU}} olup başvuru konusu {{BASVURU_KONUSU}} şeklindedir.\n\n3. {{ACIKLAMA_EK}}\n\n4. Arabuluculuk ücretinin ödenebilmesi için gerekli işlemlerin yapılmasını talep ederim.\n\n5. Ödeme bilgileri: Hesap sahibi {{HESAP_SAHIBI}}, IBAN {{IBAN}}, talep edilen tutar {{ODENECEK_TUTAR}}.',
+      konu: '{{ARABULUCULUK_DOSYA_NUMARALARI}} sayılı dava şartı arabuluculuk dosyasına ilişkin arabuluculuk ücretinin ödenmesi talebidir.',
+      aciklamalar: '1. {{BURO}} Arabuluculuk Bürosunun {{BURO_NO}} büro numaralı ve {{ARABULUCULUK_NO}} arabuluculuk numaralı dosyasında {{TARAFLAR_KISA}} arasında yürütülen dava şartı arabuluculuk süreci tamamlanmıştır.\n\n2. Dosyanın başvuru türü {{BASVURU_TURU}}, uyuşmazlık türü {{UYUSMAZLIK_TURU}} olup başvuru konusu {{BASVURU_KONUSU}} şeklindedir.\n\n3. Dosyada toplam {{TARAF_SAYISI}} taraf bulunmaktadır. Arabuluculuk ücretinin belirlenmesinde taraf sayısının dikkate alınmasını talep ederim.\n\n4. {{ACIKLAMA_EK}}\n\n5. Arabuluculuk ücretinin ödenebilmesi için gerekli işlemlerin yapılmasını talep ederim.\n\n6. Ödeme bilgileri:\nHesap Sahibi: {{HESAP_SAHIBI}}\nBanka Adı: {{BANKA_ADI}}\nŞube Adı: {{SUBE_ADI}}\nIBAN No: {{IBAN_NO}}\nTalep Edilen Tutar: {{ODENECEK_TUTAR}}',
       hukukiSebepler: '6325 sayılı Hukuk Uyuşmazlıklarında Arabuluculuk Kanunu, Arabuluculuk Asgari Ücret Tarifesi ve ilgili sair mevzuat.',
       deliller: 'Arabuluculuk son tutanağı, arabuluculuk dosyası, sistem kayıtları ve sair yasal deliller.',
-      sonucIstem: 'Yukarıda açıklanan nedenlerle {{ARABULUCULUK_NO}} numaralı dava şartı arabuluculuk dosyasına ilişkin arabuluculuk ücretinin tarafıma ödenmesi hususunda gereğini arz ederim.\n\nEkler: {{EKLER}}',
+      sonucIstem: 'Yukarıda açıklanan nedenlerle {{ARABULUCULUK_DOSYA_NUMARALARI}} sayılı dava şartı arabuluculuk dosyasına ilişkin, toplam {{TARAF_SAYISI}} taraf üzerinden değerlendirme yapılarak arabuluculuk ücretinin tarafıma ödenmesi hususunda gereğini arz ederim.\n\nEkler: {{EKLER}}',
       imzaBlogu: 'Arb. Av. Ömer Faruk AKYAVAŞ',
       alanlar: [
         {
@@ -294,7 +294,9 @@ export class AppComponent implements OnInit {
         },
         { anahtar: 'ODENECEK_TUTAR', etiket: 'Talep Edilen Tutar', varsayilan: '' },
         { anahtar: 'HESAP_SAHIBI', etiket: 'Hesap Sahibi', varsayilan: 'Arb. Av. Ömer Faruk AKYAVAŞ' },
-        { anahtar: 'IBAN', etiket: 'IBAN', varsayilan: '' },
+        { anahtar: 'BANKA_ADI', etiket: 'Banka Adı', varsayilan: '' },
+        { anahtar: 'SUBE_ADI', etiket: 'Şube Adı', varsayilan: '' },
+        { anahtar: 'IBAN_NO', etiket: 'IBAN No', varsayilan: '' },
         { anahtar: 'EKLER', etiket: 'Ekler', tip: 'textarea', varsayilan: 'Son tutanak ve ilgili arabuluculuk evrakları' }
       ]
     }
@@ -900,34 +902,43 @@ export class AppComponent implements OnInit {
     const yerTutucular: Record<string, string> = {
       BELGE_TARIHI: this.formatTarih(new Date().toISOString()),
       DOSYA_NO: '',
+      DOSYA_NUMARALARI: '',
       MAHKEME_KURUM: '',
       KONU: '',
       TARAFLAR_KISA: '',
-      TARAFLAR_DETAYLI: ''
+      TARAFLAR_DETAYLI: '',
+      TARAF_SAYISI: '0'
     };
 
     if (secenek?.tur === 'dava') {
       const dava = secenek.dosya as DavaDosyasi;
       const taraflar = this.getDavaTarafKayitlari(dava);
       yerTutucular['DOSYA_NO'] = this.belgeCiktiDavaDosyaNoMetni(dava);
+      yerTutucular['DOSYA_NUMARALARI'] = this.belgeCiktiDavaDosyaNoMetni(dava);
       yerTutucular['MAHKEME_KURUM'] = this.formatMetin(dava.mahkeme) || '';
       yerTutucular['KONU'] = this.formatMetin(dava.konu) || '';
       yerTutucular['DAVACI'] = taraflar.davacilar.map(taraf => this.formatMetin(taraf.isim)).filter(Boolean).join(', ') || dava.muvekkil || '';
       yerTutucular['DAVALI'] = taraflar.davalilar.map(taraf => this.formatMetin(taraf.isim)).filter(Boolean).join(', ') || dava.karsiTaraf || '';
       yerTutucular['TARAFLAR_KISA'] = this.getDavaTarafOzet(dava);
       yerTutucular['TARAFLAR_DETAYLI'] = this.belgeCiktiDavaTarafMetni(dava);
+      yerTutucular['TARAF_SAYISI'] = String([...(taraflar.davacilar || []), ...(taraflar.davalilar || [])].length || 2);
     } else if (secenek?.tur === 'icra') {
       const icra = secenek.dosya as IcraDosyasi;
       yerTutucular['DOSYA_NO'] = icra.dosyaNo || '';
+      yerTutucular['DOSYA_NUMARALARI'] = icra.dosyaNo || '';
       yerTutucular['MAHKEME_KURUM'] = icra.icraDairesi || '';
       yerTutucular['KONU'] = icra.takipTipi || '';
       yerTutucular['ALACAKLI'] = icra.alacakli || '';
       yerTutucular['BORCLU'] = icra.borclu || '';
       yerTutucular['TARAFLAR_KISA'] = `${icra.alacakli || '-'} - ${icra.borclu || '-'}`;
       yerTutucular['TARAFLAR_DETAYLI'] = this.belgeCiktiIcraTarafMetni(icra);
+      yerTutucular['TARAF_SAYISI'] = String([icra.alacakli, icra.borclu].filter(deger => (deger || '').trim() && deger !== '-').length || 2);
     } else if (secenek?.tur === 'arabuluculuk') {
       const arabuluculuk = secenek.dosya as ArabuluculukDosyasi;
-      yerTutucular['DOSYA_NO'] = this.belgeCiktiDosyaBasligi(arabuluculuk, 'arabuluculuk');
+      const arabuluculukDosyaNumaralari = this.belgeCiktiArabuluculukDosyaNumaralariMetni(arabuluculuk);
+      yerTutucular['DOSYA_NO'] = arabuluculukDosyaNumaralari;
+      yerTutucular['DOSYA_NUMARALARI'] = arabuluculukDosyaNumaralari;
+      yerTutucular['ARABULUCULUK_DOSYA_NUMARALARI'] = arabuluculukDosyaNumaralari;
       yerTutucular['MAHKEME_KURUM'] = arabuluculuk.buro || '';
       yerTutucular['KONU'] = arabuluculuk.basvuruKonusu || '';
       yerTutucular['ARABULUCULUK_NO'] = arabuluculuk.arabuluculukNo || '';
@@ -940,6 +951,7 @@ export class AppComponent implements OnInit {
       yerTutucular['DIGER_TARAFLAR'] = this.getArabuluculukTaraflari(arabuluculuk, 'Diğer Taraf');
       yerTutucular['TARAFLAR_KISA'] = this.getArabuluculukTaraflari(arabuluculuk);
       yerTutucular['TARAFLAR_DETAYLI'] = this.belgeCiktiArabuluculukTarafMetni(arabuluculuk);
+      yerTutucular['TARAF_SAYISI'] = String((arabuluculuk.taraflar || []).filter(taraf => (taraf.isim || '').trim()).length || arabuluculuk.taraflar?.length || 0);
       yerTutucular['ODENECEK_TUTAR'] = arabuluculuk.arabulucuUcretiTutari || '';
     }
 
@@ -997,7 +1009,15 @@ export class AppComponent implements OnInit {
       return `${this.belgeCiktiMetin(icra.icraDairesi, 'İcra Dairesi')} / ${this.belgeCiktiMetin(icra.dosyaNo, 'Dosya No')}`;
     }
     const arabuluculuk = dosya as ArabuluculukDosyasi;
-    return `${arabuluculuk.buroNo ? `${arabuluculuk.buroNo} / ` : ''}${this.belgeCiktiMetin(arabuluculuk.arabuluculukNo, 'Arabuluculuk Dosyası')}`;
+    return this.belgeCiktiArabuluculukDosyaNumaralariMetni(arabuluculuk) || 'Arabuluculuk Dosyası';
+  }
+
+  belgeCiktiArabuluculukDosyaNumaralariMetni(dosya: ArabuluculukDosyasi) {
+    const numaralar = [
+      dosya.buroNo ? `Büro No: ${dosya.buroNo}` : '',
+      dosya.arabuluculukNo ? `Arabuluculuk No: ${dosya.arabuluculukNo}` : ''
+    ].filter(Boolean);
+    return numaralar.join(' / ');
   }
 
   belgeCiktiDavaDosyaNoMetni(dava: DavaDosyasi) {
