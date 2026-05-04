@@ -99,6 +99,18 @@ type BelgeParagrafi = {
   boslukSonrasi?: number;
 };
 
+type BelgeCiktiKaynakTuru = 'dava' | 'icra' | 'arabuluculuk';
+
+type BelgeCiktiKaynakSecenegi = {
+  anahtar: string;
+  tur: BelgeCiktiKaynakTuru;
+  baslik: string;
+  altBaslik: string;
+  aramaMetni: string;
+  sira: number;
+  dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi;
+};
+
 type AdresliKayit = {
   adres?: string;
   il?: string;
@@ -219,6 +231,9 @@ export class AppComponent implements OnInit {
   aktifSablonSekmesi: 'avukatlik' | 'arabuluculuk' = 'avukatlik';
   sablonArama = '';
   belgeCiktiFormu: BelgeCiktiFormu = this.belgeCiktiVarsayilanFormu();
+  belgeCiktiKaynakTuru: BelgeCiktiKaynakTuru = 'dava';
+  belgeCiktiSeciliDosyaAnahtari = '';
+  belgeCiktiDosyaArama = '';
   readonly belgeCiktiTurleri = [
     'Dava Dilekçesi',
     'Cevap Dilekçesi',
@@ -798,6 +813,162 @@ export class AppComponent implements OnInit {
       sonucIstem: '',
       imzaBlogu: 'Arb. Av. Ömer Faruk AKYAVAŞ'
     };
+  }
+
+  belgeCiktiKaynakTuruDegisti() {
+    this.belgeCiktiSeciliDosyaAnahtari = '';
+    this.belgeCiktiDosyaArama = '';
+  }
+
+  belgeCiktiDosyaBasligi(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi, tur: BelgeCiktiKaynakTuru) {
+    if (tur === 'dava') {
+      const dava = dosya as DavaDosyasi;
+      return this.belgeCiktiMetin(this.belgeCiktiDavaDosyaNoMetni(dava), 'Dava dosyası');
+    }
+    if (tur === 'icra') {
+      const icra = dosya as IcraDosyasi;
+      return `${this.belgeCiktiMetin(icra.icraDairesi, 'İcra Dairesi')} / ${this.belgeCiktiMetin(icra.dosyaNo, 'Dosya No')}`;
+    }
+    const arabuluculuk = dosya as ArabuluculukDosyasi;
+    return `${arabuluculuk.buroNo ? `${arabuluculuk.buroNo} / ` : ''}${this.belgeCiktiMetin(arabuluculuk.arabuluculukNo, 'Arabuluculuk Dosyası')}`;
+  }
+
+  belgeCiktiDavaDosyaNoMetni(dava: DavaDosyasi) {
+    const numaralar = (dava.dosyaNumaralari || [])
+      .map(numara => [this.formatMetin(numara.tur), this.formatMetin(numara.no)].filter(Boolean).join(': '))
+      .filter(Boolean)
+      .join(' / ');
+    return numaralar || this.belgeCiktiMetin(dava.dosyaNo);
+  }
+
+  belgeCiktiKaynakAltBasligi(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi, tur: BelgeCiktiKaynakTuru) {
+    if (tur === 'dava') {
+      const dava = dosya as DavaDosyasi;
+      return [this.formatMetin(dava.mahkeme), this.getDavaTarafOzet(dava)].filter(Boolean).join(' • ');
+    }
+    if (tur === 'icra') {
+      const icra = dosya as IcraDosyasi;
+      return [`Alacaklı: ${icra.alacakli || '-'}`, `Borçlu: ${icra.borclu || '-'}`].join(' • ');
+    }
+    const arabuluculuk = dosya as ArabuluculukDosyasi;
+    return [this.formatMetin(arabuluculuk.buro), this.getArabuluculukTarafOzet(arabuluculuk)].filter(Boolean).join(' • ');
+  }
+
+  belgeCiktiTumKaynakSecenekleri(): BelgeCiktiKaynakSecenegi[] {
+    const tur = this.belgeCiktiKaynakTuru;
+    const liste = tur === 'dava'
+      ? this.davalar
+      : tur === 'icra'
+      ? this.icralar
+      : this.arabuluculukDosyalar;
+
+    return liste
+      .map(dosya => {
+        const baslik = this.belgeCiktiDosyaBasligi(dosya as any, tur);
+        const altBaslik = this.belgeCiktiKaynakAltBasligi(dosya as any, tur);
+        return {
+          anahtar: `${tur}:${dosya.id}`,
+          tur,
+          baslik,
+          altBaslik,
+          aramaMetni: this.sablonAramaMetniHazirla([baslik, altBaslik].filter(Boolean).join(' ')),
+          sira: dosya.id || 0,
+          dosya: dosya as DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi
+        };
+      })
+      .sort((a, b) => b.sira - a.sira);
+  }
+
+  belgeCiktiKaynakSecenekleri() {
+    const arama = this.sablonAramaMetniHazirla(this.belgeCiktiDosyaArama);
+    return this.belgeCiktiTumKaynakSecenekleri().filter(secenek => !arama || secenek.aramaMetni.includes(arama));
+  }
+
+  belgeCiktiSeciliKaynakSecenegi() {
+    if (!this.belgeCiktiSeciliDosyaAnahtari) return null;
+    return this.belgeCiktiTumKaynakSecenekleri().find(secenek => secenek.anahtar === this.belgeCiktiSeciliDosyaAnahtari) || null;
+  }
+
+  belgeCiktiDavaTarafMetni(dava: DavaDosyasi) {
+    const taraflar = this.getDavaTarafKayitlari(dava);
+    const davacilar = taraflar.davacilar.map(taraf => this.formatMetin(taraf.isim)).filter(Boolean).join(', ') || this.belgeCiktiMetin(dava.muvekkil, '-');
+    const davalilar = taraflar.davalilar.map(taraf => this.formatMetin(taraf.isim)).filter(Boolean).join(', ') || this.belgeCiktiMetin(dava.karsiTaraf, '-');
+    const muvekkil = this.belgeCiktiMetin(dava.muvekkil);
+    return [
+      `Davacı: ${davacilar}`,
+      `Davalı: ${davalilar}`,
+      muvekkil ? `Müvekkil: ${muvekkil}` : ''
+    ].filter(Boolean).join('\n');
+  }
+
+  belgeCiktiIcraTarafMetni(icra: IcraDosyasi) {
+    return [
+      `Alacaklı: ${this.belgeCiktiMetin(icra.alacakli, '-')}`,
+      `Borçlu: ${this.belgeCiktiMetin(icra.borclu, '-')}`,
+      `Müvekkil: ${this.belgeCiktiMetin(icra.muvekkil, '-')}${icra.muvekkilRolu ? ` (${icra.muvekkilRolu})` : ''}`
+    ].join('\n');
+  }
+
+  belgeCiktiArabuluculukTarafMetni(dosya: ArabuluculukDosyasi) {
+    const taraflar = (dosya.taraflar || [])
+      .map(taraf => `${this.formatMetin(taraf.tip) || 'Taraf'}: ${this.formatMetin(taraf.isim) || '-'}`)
+      .filter(Boolean);
+    const muvekkil = this.getArabuluculukMuvekkilAdi(dosya);
+    if (muvekkil) taraflar.push(`Müvekkil / Hesap Muhatabı: ${muvekkil}`);
+    return taraflar.join('\n') || 'Taraf bilgisi girilmemiş.';
+  }
+
+  belgeCiktiDosyadanAktar() {
+    const secenek = this.belgeCiktiSeciliKaynakSecenegi();
+    if (!secenek) {
+      this.bildirimGoster('error', 'Dosya seçilmedi', 'Bilgileri aktarmak için önce listeden bir dosya seçin.');
+      return;
+    }
+
+    let mahkemeKurum = '';
+    let dosyaNo = '';
+    let tarafBilgileri = '';
+    let konu = '';
+
+    if (secenek.tur === 'dava') {
+      const dava = secenek.dosya as DavaDosyasi;
+      mahkemeKurum = this.belgeCiktiMetin(dava.mahkeme, 'İLGİLİ MAHKEME');
+      dosyaNo = this.belgeCiktiMetin(this.belgeCiktiDavaDosyaNoMetni(dava), '-');
+      tarafBilgileri = this.belgeCiktiDavaTarafMetni(dava);
+      konu = this.belgeCiktiMetin(dava.konu, 'Dava dosyasına ilişkin beyan ve taleplerimizden ibarettir.');
+    } else if (secenek.tur === 'icra') {
+      const icra = secenek.dosya as IcraDosyasi;
+      mahkemeKurum = this.belgeCiktiMetin(icra.icraDairesi, 'İLGİLİ İCRA DAİRESİ');
+      dosyaNo = this.belgeCiktiMetin(icra.dosyaNo, '-');
+      tarafBilgileri = this.belgeCiktiIcraTarafMetni(icra);
+      konu = this.belgeCiktiMetin(icra.takipTipi ? `${icra.takipTipi} icra takibi` : '', 'İcra dosyasına ilişkin talep ve beyanlarımızdan ibarettir.');
+    } else {
+      const arabuluculuk = secenek.dosya as ArabuluculukDosyasi;
+      mahkemeKurum = this.belgeCiktiMetin(arabuluculuk.buro, 'İLGİLİ ARABULUCULUK BÜROSU');
+      dosyaNo = this.belgeCiktiDosyaBasligi(arabuluculuk, 'arabuluculuk');
+      tarafBilgileri = this.belgeCiktiArabuluculukTarafMetni(arabuluculuk);
+      konu = [
+        this.formatMetin(arabuluculuk.basvuruTuru),
+        this.formatMetin(arabuluculuk.uyusmazlikTuru),
+        this.formatMetin(arabuluculuk.basvuruKonusu)
+      ].filter(Boolean).join(' - ') || 'Arabuluculuk dosyasına ilişkin belge düzenlenmesinden ibarettir.';
+    }
+
+    const mevcutBaslik = this.belgeCiktiMetin(this.belgeCiktiFormu.belgeBasligi);
+    const otomatikBaslik = !mevcutBaslik || mevcutBaslik === 'DİLEKÇE'
+      ? this.belgeCiktiMetin(this.belgeCiktiFormu.belgeTuru, 'DİLEKÇE').toLocaleUpperCase('tr-TR')
+      : mevcutBaslik;
+
+    this.belgeCiktiFormu = {
+      ...this.belgeCiktiFormu,
+      belgeBasligi: otomatikBaslik,
+      mahkemeKurum,
+      dosyaNo,
+      tarafBilgileri,
+      konu
+    };
+
+    this.bildirimGoster('success', 'Dosya bilgileri aktarıldı', 'Kurum, dosya numarası, taraflar ve konu alanları belge formuna yerleştirildi.');
   }
 
   belgeCiktiOrnekDavaDilekcesiYukle() {
