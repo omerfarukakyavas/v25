@@ -1087,20 +1087,54 @@ export class AppComponent implements OnInit {
     }
   }
 
+  belgeCiktiRtfCp1254Byte(karakter: string) {
+    const kod = karakter.codePointAt(0) || 0;
+    if (kod >= 32 && kod <= 126) return kod;
+    if (kod >= 160 && kod <= 255) return kod;
+
+    const harita: Record<string, number> = {
+      '€': 0x80, '‚': 0x82, 'ƒ': 0x83, '„': 0x84, '…': 0x85, '†': 0x86, '‡': 0x87,
+      'ˆ': 0x88, '‰': 0x89, 'Š': 0x8a, '‹': 0x8b, 'Œ': 0x8c, 'Ž': 0x8e,
+      '‘': 0x91, '’': 0x92, '“': 0x93, '”': 0x94, '•': 0x95, '–': 0x96, '—': 0x97,
+      '˜': 0x98, '™': 0x99, 'š': 0x9a, '›': 0x9b, 'œ': 0x9c, 'ž': 0x9e, 'Ÿ': 0x9f,
+      'Ğ': 0xd0, 'İ': 0xdd, 'Ş': 0xde, 'ğ': 0xf0, 'ı': 0xfd, 'ş': 0xfe
+    };
+    return harita[karakter] ?? null;
+  }
+
   belgeCiktiRtfKacis(metin: string) {
-    return (metin || '').replace(/[\\{}]/g, karakter => `\\${karakter}`).replace(/\r?\n/g, '\\line ').replace(/[^\x00-\x7F]/g, karakter => {
-      const kod = karakter.charCodeAt(0);
-      const signed = kod > 32767 ? kod - 65536 : kod;
-      return `\\u${signed}?`;
-    });
+    let sonuc = '';
+    for (const karakter of Array.from(metin || '')) {
+      if (karakter === '\r') continue;
+      if (karakter === '\n') {
+        sonuc += '\\line ';
+        continue;
+      }
+      if (karakter === '\t') {
+        sonuc += '\\tab ';
+        continue;
+      }
+      if (karakter === '\\' || karakter === '{' || karakter === '}') {
+        sonuc += `\\${karakter}`;
+        continue;
+      }
+
+      const byte = this.belgeCiktiRtfCp1254Byte(karakter);
+      if (byte !== null) {
+        sonuc += byte <= 126 ? karakter : `\\'${byte.toString(16).padStart(2, '0')}`;
+      } else {
+        sonuc += '?';
+      }
+    }
+    return sonuc;
   }
 
   belgeCiktiRtfOlustur() {
     const satirlar = [
-      '{\\rtf1\\ansi\\ansicpg1254\\uc1\\deff0',
-      '{\\fonttbl{\\f0 Times New Roman;}}',
+      '{\\rtf1\\ansi\\ansicpg1254\\deff0\\deflang1055\\uc0',
+      '{\\fonttbl{\\f0\\froman\\fcharset162 Times New Roman;}}',
       '\\paperw11906\\paperh16838\\margl1417\\margr1417\\margt1417\\margb1417',
-      '\\f0\\fs24'
+      '\\viewkind4\\f0\\fs24\\lang1055'
     ];
     this.belgeCiktiParagraflariOlustur().forEach(paragraf => {
       const hizalama = paragraf.hizalama === 'center' ? '\\qc' : paragraf.hizalama === 'right' ? '\\qr' : paragraf.hizalama === 'both' ? '\\qj' : '\\ql';
@@ -1114,7 +1148,7 @@ export class AppComponent implements OnInit {
   }
 
   belgeCiktiRtfIndir() {
-    const blob = new Blob([this.belgeCiktiRtfOlustur()], { type: 'application/rtf;charset=utf-8' });
+    const blob = new Blob([this.belgeCiktiRtfOlustur()], { type: 'application/rtf' });
     this.belgeCiktiBlobIndir(blob, this.belgeCiktiDosyaAdi('rtf'));
     this.bildirimGoster('success', 'RTF dosyası hazır', 'Bu RTF dosyasını UYAP Editör’de açıp UDF olarak kaydedebilirsiniz.');
   }
