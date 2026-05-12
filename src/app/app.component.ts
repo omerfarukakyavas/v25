@@ -4790,6 +4790,41 @@ export class AppComponent implements OnInit {
     this.aktifDosyaKaydet(kayitli, 'Finans hareketi dosyaya eklendi.');
     this.finansalIslemFormunuSifirla(this.yeniIslem.tur as string);
   }
+
+  aktifDosyaOdemesiniTamamla() {
+    if (!this.aktifDosya) return;
+    const finans = this.getDosyaFinans(this.aktifDosya);
+    const kalanNetAlacak = Math.round(Number(finans.kalanVekalet || 0) * 100) / 100;
+    if (kalanNetAlacak <= 0.01) {
+      this.bildirimGoster('info', 'Kalan alacak yok', 'Bu dosyada kapatılacak bir alacak görünmüyor.');
+      return;
+    }
+
+    const arabuluculukDosyasi = this.aktifSayfa === 'arabuluculukDetay' ? this.getAktifArabuluculukDosyasi() : null;
+    const arabuluculukMu = !!arabuluculukDosyasi;
+    const makbuzStopajli = arabuluculukMu ? this.isArabuluculukMakbuzStopajli({}, arabuluculukDosyasi) : false;
+    const tahsilatTutari = arabuluculukMu && makbuzStopajli
+      ? Math.round(kalanNetAlacak * 1.2 * 100) / 100
+      : kalanNetAlacak;
+    const islem: FinansalIslem = {
+      id: Date.now(),
+      tarih: new Date().toISOString().split('T')[0],
+      tur: arabuluculukMu ? 'Ödeme' : 'Vekalet Ücreti',
+      tutar: tahsilatTutari,
+      aciklama: 'Ödeme yapıldı - kalan alacak kapatıldı',
+      makbuzStopajli
+    };
+    const k: any = { ...this.aktifDosya, finansalIslemler: [...(this.aktifDosya.finansalIslemler || [])] };
+    k.finansalIslemler.unshift(islem);
+    const ozet = arabuluculukMu && makbuzStopajli
+      ? `${islem.tur}: ${this.formatPara(tahsilatTutari)} * Net kapanan alacak: ${this.formatPara(kalanNetAlacak)} * Stopajlı ödeme`
+      : `${islem.tur}: ${this.formatPara(tahsilatTutari)} * Kalan alacak sıfırlandı`;
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Ödeme yapıldı olarak işaretlendi', ozet);
+    this.finansalIslemDuzenlemeIptal();
+    this.aktifDosyaKaydet(kayitli, 'Ödeme yapıldı. Kalan alacak sıfırlandı.');
+    this.finansalIslemFormunuSifirla(this.yeniIslem.tur as string);
+  }
+
   async finansalIslemSil(id: number) {
     if(!this.aktifDosya) return;
     const oncekiKayit = this.veriKopyala(this.aktifDosya);

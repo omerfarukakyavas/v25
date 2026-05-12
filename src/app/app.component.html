@@ -3424,6 +3424,22 @@
                                 </div>
                               }
                             </div>
+                            @if (getDosyaFinans(aktifDosya); as finansOzeti) {
+                              <div class="flex flex-col gap-3 rounded-xl border border-emerald-200 bg-emerald-50/80 p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                  <p class="text-xs font-black uppercase tracking-[0.14em] text-emerald-900">Hızlı ödeme kapatma</p>
+                                  <p class="mt-1 text-[11px] font-semibold text-emerald-800">Kalan alacak kadar otomatik tahsilat kaydı açar ve dosyanın alacağını sıfırlar.</p>
+                                </div>
+                                <button
+                                  type="button"
+                                  (click)="aktifDosyaOdemesiniTamamla()"
+                                  [disabled]="finansOzeti.kalanVekalet <= 0.01"
+                                  class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-black text-white shadow-sm transition-colors hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:w-auto">
+                                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                  Ödeme Yapıldı
+                                </button>
+                              </div>
+                            }
                             @if (aktifSayfa === 'arabuluculukDetay' && getArabuluculukHizmetUcretiHesabi(getAktifArabuluculukDosyasi()); as hizmetHesabi) {
                               <div class="overflow-hidden rounded-xl border border-violet-200 bg-white shadow-sm">
                                 <div class="border-b border-violet-100 bg-violet-50/80 px-3 py-2.5">
