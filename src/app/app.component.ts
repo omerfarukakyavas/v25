@@ -1615,6 +1615,9 @@ export class AppComponent implements OnInit {
   geriGidilebilirMi() {
     return this.navigasyonGecmisi.length > 0;
   }
+  geriButonuGoster() {
+    return this.geriGidilebilirMi() || this.aktifSayfa !== 'dashboard';
+  }
   geriGit() {
     const onceki = this.navigasyonGecmisi.pop();
     if (onceki) {
