@@ -1130,6 +1130,17 @@ textarea {
   transform: translateY(-1px);
 }
 
+.app-shell .app-payment-complete-button:not(:disabled) {
+  background: #047857 !important;
+  color: #ffffff !important;
+}
+
+.app-shell .app-payment-complete-button:not(:disabled) *,
+.app-shell .app-payment-complete-button:not(:disabled) svg {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}
+
 .app-shell table thead th {
   color: #1e293b;
   font-weight: 700;
