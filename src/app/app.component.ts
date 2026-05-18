@@ -77,6 +77,12 @@ type HazirExcelMakbuz = {
   olusturmaTarihi: string;
 };
 
+type GoogleCalendarAktarimKaydi = {
+  eventId: string;
+  htmlLink?: string;
+  aktarimTarihi: string;
+};
+
 type BelgeCiktiFormu = {
   belgeTuru: string;
   belgeBasligi: string;
@@ -380,6 +386,9 @@ export class AppComponent implements OnInit {
   topluDosyaSecenekleriAcik = false;
   arabuluculukBelgeSecenekMenusu: 'belirleme' | 'sonTutanak' | 'anlasmaBelgesi' | null = null;
   googleDocsYetkiIstendi = false;
+  googleCalendarYetkiIstendi = false;
+  googleCalendarAktariliyorId: string | null = null;
+  googleCalendarAktarimlari: Record<string, GoogleCalendarAktarimKaydi> = {};
   gunlukOzetYakinGunSayisi = 30;
   gunlukOzetMetni = '';
   gunlukOzetOlusturulmaTarihi = '';
@@ -450,7 +459,10 @@ export class AppComponent implements OnInit {
       this.app = initializeApp(config); this.auth = getAuth(this.app); this.db = getFirestore(this.app);
       onAuthStateChanged(this.auth, (user: User | null) => {
         this.user = user; this.authInitialized = true;
-        if (user) { this.verileriDinle(); }
+        if (user) {
+          this.googleCalendarAktarimlariniYukle();
+          this.verileriDinle();
+        }
         else {
           this.davalar = [];
           this.icralar = [];
@@ -462,6 +474,9 @@ export class AppComponent implements OnInit {
           this.gunlukOzetKartlari = [];
           this.gunlukOzetBolumleri = [];
           this.mobilAcikKartlar = {};
+          this.googleCalendarAktarimlari = {};
+          this.googleCalendarAktariliyorId = null;
+          this.googleCalendarYetkiIstendi = false;
         }
         this.cdr.detectChanges();
       });
@@ -3023,6 +3038,20 @@ export class AppComponent implements OnInit {
       });
     });
 
+    this.aktifOfisGorevleri.forEach(gorev => {
+      kayitlar.push({
+        id: `ofis-gorevi-${gorev.id}`,
+        tarih: this.birlestirTarihVeSaat(gorev.tarih, gorev.saat),
+        saat: gorev.saat,
+        tur: 'ofisGorevi',
+        kaynak: 'ofis',
+        ofisGorevi: gorev,
+        baslik: gorev.baslik || 'Ofis görevi',
+        altBaslik: gorev.aciklama || `${gorev.oncelik || 'Normal'} öncelikli ofis içi iş`,
+        taraflar: 'Ofis içi görev'
+      });
+    });
+
     return kayitlar.sort((a, b) => this.ajandaTarihDamgasi(a.tarih) - this.ajandaTarihDamgasi(b.tarih));
   }
 
@@ -5441,7 +5470,7 @@ export class AppComponent implements OnInit {
       }, 100);
     });
   }
-  async googleErisimBelirteciAl() {
+  async googleErisimBelirteciAl(scopes: string[] = GOOGLE_DOCS_CONFIG.scopes, yetkiTuru: 'docs' | 'calendar' = 'docs') {
     if (!this.googleDocsEntegrasyonuHazirMi()) {
       throw new Error('Google Docs ayarı henüz tamamlanmadı. Önce Google istemci kimliğini eklememiz gerekiyor.');
     }
@@ -5451,20 +5480,22 @@ export class AppComponent implements OnInit {
     return await new Promise<string>((resolve, reject) => {
       const tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_DOCS_CONFIG.clientId,
-        scope: GOOGLE_DOCS_CONFIG.scopes.join(' '),
+        scope: scopes.join(' '),
         callback: (yanit: any) => {
           if (!yanit?.access_token) {
             reject(new Error(yanit?.error || 'Google yetkisi alınamadı.'));
             return;
           }
 
-          this.googleDocsYetkiIstendi = true;
+          if (yetkiTuru === 'calendar') this.googleCalendarYetkiIstendi = true;
+          else this.googleDocsYetkiIstendi = true;
           resolve(yanit.access_token);
         },
         error_callback: () => reject(new Error('Google izin penceresi kapatıldı veya erişim reddedildi.'))
       });
 
-      tokenClient.requestAccessToken({ prompt: this.googleDocsYetkiIstendi ? '' : 'consent' });
+      const yetkiIstendi = yetkiTuru === 'calendar' ? this.googleCalendarYetkiIstendi : this.googleDocsYetkiIstendi;
+      tokenClient.requestAccessToken({ prompt: yetkiIstendi ? '' : 'consent' });
     });
   }
   async googleJsonIstek(url: string, token: string, init: RequestInit = {}) {
@@ -5480,6 +5511,186 @@ export class AppComponent implements OnInit {
 
     return await yanit.json();
   }
+
+  googleCalendarEntegrasyonuHazirMi() {
+    return GOOGLE_DOCS_CONFIG.clientId.trim() !== '' && (GOOGLE_DOCS_CONFIG.calendarScopes || []).length > 0;
+  }
+
+  googleCalendarDepolamaAnahtari() {
+    return `v25-google-calendar-aktarimlari-${this.user?.uid || 'yerel'}`;
+  }
+
+  googleCalendarAktarimlariniYukle() {
+    if (typeof localStorage === 'undefined') return;
+
+    try {
+      const kayitli = localStorage.getItem(this.googleCalendarDepolamaAnahtari());
+      this.googleCalendarAktarimlari = kayitli ? JSON.parse(kayitli) : {};
+    } catch {
+      this.googleCalendarAktarimlari = {};
+    }
+  }
+
+  googleCalendarAktarimlariniKaydet() {
+    if (typeof localStorage === 'undefined') return;
+
+    try {
+      localStorage.setItem(this.googleCalendarDepolamaAnahtari(), JSON.stringify(this.googleCalendarAktarimlari));
+    } catch {
+      // Takvim aktarımı başarılıysa, yerel işaret kaydı tutulamasa bile uygulamayı durdurmayalım.
+    }
+  }
+
+  getGoogleCalendarAktarimAnahtari(kayit: AjandaKaydi) {
+    return `${kayit.id}|${kayit.tarih || ''}|${kayit.saat || ''}`;
+  }
+
+  getGoogleCalendarAktarim(kayit: AjandaKaydi) {
+    return this.googleCalendarAktarimlari[this.getGoogleCalendarAktarimAnahtari(kayit)];
+  }
+
+  googleCalendarAktarildiMi(kayit: AjandaKaydi) {
+    return Boolean(this.getGoogleCalendarAktarim(kayit));
+  }
+
+  googleCalendarSaatMetni(kayit: AjandaKaydi) {
+    const saat = (kayit.saat || (kayit.tarih?.includes('T') ? kayit.tarih.slice(11, 16) : '') || '').trim();
+    return /^\d{2}:\d{2}$/.test(saat) ? saat : '';
+  }
+
+  googleCalendarSaattenDakika(saat: string) {
+    const [saatParcasi, dakikaParcasi] = saat.split(':').map(Number);
+    if (!Number.isFinite(saatParcasi) || !Number.isFinite(dakikaParcasi)) return 0;
+    return saatParcasi * 60 + dakikaParcasi;
+  }
+
+  googleCalendarDakikadanSaat(toplamDakika: number) {
+    const saat = Math.floor((toplamDakika % (24 * 60)) / 60).toString().padStart(2, '0');
+    const dakika = (toplamDakika % 60).toString().padStart(2, '0');
+    return `${saat}:${dakika}`;
+  }
+
+  googleCalendarEtkinlikSuresiDakika(kayit: AjandaKaydi) {
+    if (kayit.tur === 'durusma' || kayit.tur === 'toplanti') return 60;
+    return 30;
+  }
+
+  googleCalendarEtkinlikZamani(kayit: AjandaKaydi) {
+    const tarih = (kayit.tarih || '').slice(0, 10) || this.gunBazliIsoTarih(new Date());
+    const saat = this.googleCalendarSaatMetni(kayit);
+
+    if (!saat) {
+      return {
+        start: { date: tarih },
+        end: { date: this.gunBazliTarihEkle(tarih, 1) || tarih }
+      };
+    }
+
+    const baslangicDakika = this.googleCalendarSaattenDakika(saat);
+    const bitisDakika = baslangicDakika + this.googleCalendarEtkinlikSuresiDakika(kayit);
+    const bitisTarihi = bitisDakika >= 24 * 60 ? (this.gunBazliTarihEkle(tarih, 1) || tarih) : tarih;
+    const bitisSaat = this.googleCalendarDakikadanSaat(bitisDakika);
+
+    return {
+      start: { dateTime: `${tarih}T${saat}:00`, timeZone: 'Europe/Istanbul' },
+      end: { dateTime: `${bitisTarihi}T${bitisSaat}:00`, timeZone: 'Europe/Istanbul' }
+    };
+  }
+
+  googleCalendarEtkinlikBasligi(kayit: AjandaKaydi) {
+    const dosyaOzeti = this.getAjandaDosyaOzeti(kayit.kaynak, kayit.dosya);
+    if (kayit.tur === 'durusma') return `Duruşma - ${kayit.baslik} - ${dosyaOzeti}`;
+    if (kayit.tur === 'toplanti') return `Arabuluculuk Toplantısı - ${dosyaOzeti}`;
+    if (kayit.tur === 'sureliIs') return `Süreli İş - ${kayit.baslik} - ${dosyaOzeti}`;
+    return `Ofis Görevi - ${kayit.baslik}`;
+  }
+
+  googleCalendarEtkinlikKonumu(kayit: AjandaKaydi) {
+    const dosya = kayit.dosya as any;
+    if (!dosya) return '';
+    if (kayit.tur === 'durusma') return dosya.mahkeme || '';
+    if (kayit.tur === 'toplanti') return [dosya.buro, dosya.toplantiYontemi].filter(Boolean).join(' - ');
+    if (kayit.kaynak === 'icra') return dosya.icraDairesi || '';
+    return dosya.mahkeme || dosya.icraDairesi || dosya.buro || '';
+  }
+
+  googleCalendarEtkinlikAciklamasi(kayit: AjandaKaydi) {
+    const satirlar = [
+      `Tür: ${this.getAjandaTurEtiketi(kayit.tur)}`,
+      `Kaynak: ${this.getAjandaKaynakEtiketi(kayit.kaynak)}`,
+      `Dosya: ${this.getAjandaDosyaOzeti(kayit.kaynak, kayit.dosya)}`,
+      `Tarih: ${this.formatTarihSaatKisa(kayit.tarih, kayit.saat)}`,
+      `Taraflar: ${kayit.taraflar || '-'}`,
+      kayit.altBaslik ? `Açıklama: ${kayit.altBaslik}` : '',
+      kayit.anaEvrakIsmi ? `Bağlı ana evrak: ${kayit.anaEvrakIsmi}` : '',
+      kayit.evrakIsmi ? `Süreli iş evrakı: ${kayit.evrakIsmi}` : '',
+      '',
+      'Akyavaş Hukuk Takip Sistemi üzerinden Google Takvim’e aktarılmıştır.'
+    ];
+
+    return satirlar.filter(satir => satir !== '').join('\n');
+  }
+
+  googleCalendarHataMesaji(hata: any) {
+    const mesaj = hata?.message || 'Google Calendar bağlantısını ve izin ekranını kontrol edip tekrar deneyin.';
+    try {
+      const parsed = JSON.parse(mesaj);
+      return parsed?.error?.message || mesaj;
+    } catch {
+      return mesaj;
+    }
+  }
+
+  async googleTakvimeAktar(kayit: AjandaKaydi, event?: Event) {
+    event?.stopPropagation();
+    if (this.googleCalendarAktariliyorId) return;
+
+    if (!this.googleCalendarEntegrasyonuHazirMi()) {
+      this.bildirimGoster('error', 'Google Takvim ayarı eksik', 'Google Calendar API ve istemci kimliği ayarı tamamlandıktan sonra aktarım yapılabilir.');
+      return;
+    }
+
+    const aktarimAnahtari = this.getGoogleCalendarAktarimAnahtari(kayit);
+    if (this.googleCalendarAktarimlari[aktarimAnahtari]) {
+      this.bildirimGoster('info', 'Zaten aktarıldı', 'Bu ajanda kaydı aynı tarih ve saatle daha önce Google Takvim’e aktarılmış.');
+      return;
+    }
+
+    this.googleCalendarAktariliyorId = kayit.id;
+    this.cdr.detectChanges();
+
+    try {
+      const token = await this.googleErisimBelirteciAl(GOOGLE_DOCS_CONFIG.calendarScopes, 'calendar');
+      const zaman = this.googleCalendarEtkinlikZamani(kayit);
+      const etkinlik = await this.googleJsonIstek('https://www.googleapis.com/calendar/v3/calendars/primary/events', token, {
+        method: 'POST',
+        body: JSON.stringify({
+          summary: this.googleCalendarEtkinlikBasligi(kayit),
+          description: this.googleCalendarEtkinlikAciklamasi(kayit),
+          location: this.googleCalendarEtkinlikKonumu(kayit),
+          ...zaman,
+          reminders: { useDefault: true }
+        })
+      });
+
+      this.googleCalendarAktarimlari = {
+        ...this.googleCalendarAktarimlari,
+        [aktarimAnahtari]: {
+          eventId: etkinlik.id,
+          htmlLink: etkinlik.htmlLink,
+          aktarimTarihi: new Date().toISOString()
+        }
+      };
+      this.googleCalendarAktarimlariniKaydet();
+      this.bildirimGoster('success', 'Google Takvim’e aktarıldı', `${kayit.baslik} takvimine eklendi.`);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Google Takvim’e aktarılamadı', this.googleCalendarHataMesaji(e));
+    } finally {
+      this.googleCalendarAktariliyorId = null;
+      this.cdr.detectChanges();
+    }
+  }
+
   async arabuluculukGoogleBelgesiOlustur(dosya: ArabuluculukDosyasi, sablon: EvrakBaglantisi, varsayilanSablonIsmi: string, belgeBasligi: string) {
     const sablonDosyaId = this.googleDosyaIdAyikla(sablon.url);
     if (!sablonDosyaId) {

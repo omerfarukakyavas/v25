@@ -4,6 +4,9 @@ export const GOOGLE_DOCS_CONFIG = {
     'https://www.googleapis.com/auth/documents',
     'https://www.googleapis.com/auth/drive'
   ],
+  calendarScopes: [
+    'https://www.googleapis.com/auth/calendar.events'
+  ],
   davetMektubuTemplateName: 'Davet Mektubu',
   bilgilendirmeTutanagiTemplateName: 'Bilgilendirme Tutanağı',
   arabuluculukBelirlemeTutanagiTemplateName: 'Arabuluculuk Belirleme Tutanağı',
