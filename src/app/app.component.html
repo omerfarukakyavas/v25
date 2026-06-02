@@ -126,8 +126,16 @@
                 <div class="app-page app-dashboard-page space-y-6 max-w-7xl mx-auto pb-10">
                   <div class="app-dashboard-metrics grid grid-cols-1 md:grid-cols-4 gap-4">
                      <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                        <div class="flex items-center gap-3 mb-2"><div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Toplam Bekleyen Alacak</p></div>
-                        <p class="text-2xl font-black text-slate-800">{{ formatPara(muhasebeOzet.toplam) }}</p>
+                        <div class="mb-2 flex items-center justify-between gap-3">
+                          <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Toplam Bekleyen Alacak</p>
+                          </div>
+                          <button type="button" (click)="toplamBekleyenAlacakGizliliginiDegistir($event)" class="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-600 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">
+                            {{ toplamBekleyenAlacakGizli ? 'Göster' : 'Gizle' }}
+                          </button>
+                        </div>
+                        <p [class.blur-md]="toplamBekleyenAlacakGizli" [class.select-none]="toplamBekleyenAlacakGizli" class="text-2xl font-black text-slate-800 transition duration-200">{{ formatPara(muhasebeOzet.toplam) }}</p>
                      </div>
                      <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer" (click)="sayfaDegistir('davalar')">
                         <div class="flex items-center gap-3 mb-2"><div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg></div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Dava Dosyaları</p></div>
@@ -1979,10 +1987,15 @@
                 <div class="app-page space-y-6 max-w-7xl mx-auto pb-10">
                   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="bg-gradient-to-br from-slate-50 via-white to-slate-100 p-5 rounded-xl shadow-sm border border-slate-200">
-                      <p class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Toplam Bekleyen Alacak</p>
-                      <p class="text-2xl font-black text-slate-900">{{ formatPara(muhasebeOzet.toplam) }}</p>
+                      <div class="mb-1 flex items-center justify-between gap-3">
+                        <p class="text-xs font-bold text-slate-600 uppercase tracking-wider">Toplam Bekleyen Alacak</p>
+                        <button type="button" (click)="toplamBekleyenAlacakGizliliginiDegistir($event)" class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-600 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">
+                          {{ toplamBekleyenAlacakGizli ? 'Göster' : 'Gizle' }}
+                        </button>
+                      </div>
+                      <p [class.blur-md]="toplamBekleyenAlacakGizli" [class.select-none]="toplamBekleyenAlacakGizli" class="text-2xl font-black text-slate-900 transition duration-200">{{ formatPara(muhasebeOzet.toplam) }}</p>
                       <p class="mt-2 text-xs font-bold text-emerald-700">
-                        Net Kar: <span class="text-sm font-black">{{ formatPara(muhasebeOzet.toplam * 0.8) }}</span>
+                        Net Kar: <span [class.blur-sm]="toplamBekleyenAlacakGizli" [class.select-none]="toplamBekleyenAlacakGizli" class="inline-block text-sm font-black transition duration-200">{{ formatPara(muhasebeOzet.toplam * 0.8) }}</span>
                       </p>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">

@@ -312,6 +312,7 @@ export class AppComponent implements OnInit {
   arabuluculukSonucFiltresi: 'Tümü' | 'Girilmedi' | ArabuluculukSonucu = 'Tümü';
   readonly arabuluculukSonucSecenekleri: ArabuluculukSonucu[] = ['Anlaşma', 'Anlaşamama', 'Vazgeçme'];
   muhasebeArama = ''; muhasebeFiltre = 'Tümü';
+  toplamBekleyenAlacakGizli = false;
   
   aktifIliskiSekmesi: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer' = 'Müvekkil';
   iliskiGorunumModu: 'kart' | 'liste' = 'liste';
@@ -450,7 +451,10 @@ export class AppComponent implements OnInit {
   private readonly isciIsverenVarsayilanBasvuruKonusu = 'KIDEM TAZMİNATI- İHBAR TAZMİNATI –ÜCRET ALACAĞI – FAZLA MESAİ ÜCRETİ –YILLIK İZİN ÜCRETİ- HAFTA TATİLİ ÜCRETİ – ÜCRET FARKI - İKRAMİYE - PRİM – SENDİKAL TAZMİNAT - İŞ ARAMA İZİN ÜCRETİ - ULUSAL BAYRAM VE GENEL TATİL GÜNLERİ ÜCRETİ – MADDİ VE MANEVİ TAZMİNAT - AYRIMCILIK VE KÖTÜNİYET TAZMİNATI- CEZAİ ŞART ALACAĞI - TOPLU İŞ SÖZLEŞMESİNDEN KAYNAKLI ALACAKLAR - GECE VARDİYASI ZAMMI - TRANSFER ÜCRETİ - YARIM ÜCRET ALACAĞI - EĞİTİM ÖDENEĞİ - KIRTASİYE ÖDENEĞİ - ZAM FARKI ALACAĞI - ŞUA İZNİ ALACAĞI - ELEKTRİK, SU, KİRA, İNTERNET GİDER YARDIMI -  HAKSIZ REKABET-YOL ve YEMEK ÜCRETİ – AGİ (Asgari Geçim İndirimi) - AYNİ YARDIMLAR - ÖLÜM, DOĞUM VE EVLENME YARDIMLARI - GÖREV YOLLUĞU - SEYYAR GÖREV TAZMİNATI - İŞ SONU TAZMİNATI - KEŞİF ÜCRETİ - KASA TAZMİNATI - ÇOCUK VE AİLE YARDIMLARI -  İŞE İADE, BOŞTA GEÇEN SÜRE VE İŞE BAŞLATMAMA TAZMİNATI - MADDİ VE MANEVİ TAZMİNAT - İŞ KAZASI VE BUNDAN DOĞACAK ALACAK KALEMLERİ - MESLEK HASTALIĞI VE BUNDAN DOĞACAK ALACAK KALEMLERİ';
   arabuluculukBasvuruKonusuOtomatikMi = false;
 
-  ngOnInit() { this.initFirebase(); }
+  ngOnInit() {
+    this.toplamBekleyenAlacakGizli = this.toplamBekleyenAlacakGizliYukle();
+    this.initFirebase();
+  }
 
   async initFirebase() {
     try {
@@ -2515,6 +2519,29 @@ export class AppComponent implements OnInit {
       if (item.tip === 'Arabuluculuk') o.arabuluculuk += item.kalan;
     });
     return o;
+  }
+
+  toplamBekleyenAlacakGizliYukle() {
+    if (typeof localStorage === 'undefined') return false;
+
+    try {
+      return localStorage.getItem('v25-toplam-bekleyen-alacak-gizli') === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  toplamBekleyenAlacakGizliliginiDegistir(event?: Event) {
+    event?.stopPropagation();
+    this.toplamBekleyenAlacakGizli = !this.toplamBekleyenAlacakGizli;
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('v25-toplam-bekleyen-alacak-gizli', this.toplamBekleyenAlacakGizli ? '1' : '0');
+      } catch {
+        // Gizleme tercihi kaydedilemese de ekrandaki pratik sansürleme çalışmaya devam eder.
+      }
+    }
   }
 
   ajandaGunDamgasi(str?: string) {
