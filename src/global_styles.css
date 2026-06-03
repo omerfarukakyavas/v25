@@ -2,17 +2,17 @@
 
 :root {
   --app-font-sans: "Segoe UI Variable Text", "Segoe UI", Arial, "Helvetica Neue", Helvetica, sans-serif;
-  --app-bg: #e8eef6;
-  --app-bg-soft: #f3f6fa;
+  --app-bg: #e6ebf2;
+  --app-bg-soft: #f1f4f8;
   --app-surface: #ffffff;
-  --app-surface-soft: #f8fafc;
-  --app-border: #cbd6e2;
-  --app-border-strong: #aebdcd;
-  --app-title: #091223;
-  --app-body: #334155;
-  --app-body-soft: #475569;
-  --app-shadow: 0 18px 38px -30px rgba(15, 23, 42, 0.22), 0 6px 16px rgba(59, 130, 246, 0.05);
-  --app-shadow-soft: 0 14px 28px -28px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(148, 163, 184, 0.06);
+  --app-surface-soft: #eef2f7;
+  --app-border: #8d9aab;
+  --app-border-strong: #617083;
+  --app-title: #05070b;
+  --app-body: #111827;
+  --app-body-soft: #2f3b4c;
+  --app-shadow: none;
+  --app-shadow-soft: none;
 }
 
 html {
@@ -27,10 +27,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.55;
   color: var(--app-title);
-  background:
-    radial-gradient(circle at top right, rgba(37, 99, 235, 0.07), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.06), transparent 22%),
-    linear-gradient(180deg, #f7f9fc 0%, var(--app-bg) 100%);
+  background: var(--app-bg);
   min-height: 100vh;
 }
 
@@ -56,22 +53,19 @@ textarea {
 }
 
 .app-shell {
-  background:
-    radial-gradient(circle at top right, rgba(37, 99, 235, 0.06), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.045), transparent 22%),
-    linear-gradient(180deg, #f2f6fb 0%, #e8eef6 100%);
+  background: var(--app-bg);
 }
 
 .app-sidebar {
-  background: linear-gradient(180deg, #0f172a 0%, #101a2d 55%, #0b1221 100%);
-  border-right: 1px solid rgba(148, 163, 184, 0.18);
+  background: #111827;
+  border-right: 2px solid #030712;
 }
 
 .app-topbar {
-  background: rgba(255, 255, 255, 0.96);
+  background: #ffffff;
   border-bottom-color: var(--app-border-strong) !important;
-  box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.2);
-  backdrop-filter: blur(12px);
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .app-topbar-title {
@@ -82,10 +76,7 @@ textarea {
 }
 
 .app-canvas {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(243, 247, 252, 0.92)),
-    linear-gradient(135deg, rgba(191, 219, 254, 0.07), transparent 24%),
-    linear-gradient(225deg, rgba(148, 163, 184, 0.09), transparent 24%);
+  background: var(--app-bg);
 }
 
 .app-page {
@@ -1447,4 +1438,341 @@ textarea {
   .app-shell .app-arb-party-card__subtitle {
     font-size: 0.72rem;
   }
+}
+
+/* Klasik kontrast katmanı: daha düz zemin, daha net çizgi, daha köşeli kontrol. */
+.app-shell {
+  color: var(--app-body);
+}
+
+.app-shell .app-canvas,
+.app-shell .app-page {
+  background: transparent !important;
+}
+
+.app-shell [class*="shadow"] {
+  box-shadow: none !important;
+}
+
+.app-shell [class*="rounded-full"] {
+  border-radius: 999px !important;
+}
+
+.app-shell [class*="rounded-xl"],
+.app-shell [class*="rounded-2xl"],
+.app-shell [class*="rounded-[1.5rem]"],
+.app-shell [class*="rounded-[1.75rem]"] {
+  border-radius: 0.35rem !important;
+}
+
+.app-shell button[class*="rounded"],
+.app-shell a[class*="rounded"],
+.app-shell input,
+.app-shell select,
+.app-shell textarea {
+  border-radius: 0.28rem !important;
+}
+
+.app-shell [class*="bg-gradient-to-r"],
+.app-shell [class*="bg-gradient-to-br"],
+.app-shell [class*="bg-gradient-to-b"],
+.app-shell [class*="bg-gradient-to-t"] {
+  background-image: none !important;
+}
+
+.app-shell [class*="from-slate"],
+.app-shell [class*="via-white"],
+.app-shell [class*="to-slate"],
+.app-shell [class*="from-white"],
+.app-shell [class*="to-white"] {
+  background-color: #ffffff !important;
+}
+
+.app-shell [class*="bg-white"][class*="rounded"],
+.app-shell [class*="bg-slate-50"][class*="rounded"],
+.app-shell [class*="bg-gradient"][class*="rounded"],
+.app-shell .app-detail-hero,
+.app-shell .app-file-detail-info-card,
+.app-shell .app-detail-tabs-card,
+.app-shell .app-list-alert,
+.app-shell .app-list-filter,
+.app-shell .app-list-card,
+.app-shell .app-dashboard-panel,
+.app-shell .app-dashboard-panel-lite,
+.app-shell .app-agenda-filter,
+.app-shell .app-agenda-flow-card,
+.app-shell .app-agenda-side-card,
+.app-shell .app-template-shell,
+.app-shell .app-template-add-card,
+.app-shell .app-template-card,
+.app-shell .app-template-section,
+.app-shell .app-template-subsection,
+.app-shell .app-document-add-card,
+.app-shell .app-document-link-card,
+.app-shell .mobile-record-card,
+.app-shell .mobile-record-section,
+.app-shell .app-arb-party-card {
+  background: #ffffff !important;
+  border-color: var(--app-border-strong) !important;
+  border-width: 1.5px !important;
+}
+
+.app-shell .app-dashboard-metrics > div,
+.app-shell .app-agenda-metrics > div,
+.app-shell .app-list-stats > div {
+  background: #ffffff !important;
+  border: 1.5px solid var(--app-border-strong) !important;
+  border-radius: 0.35rem !important;
+  box-shadow: none !important;
+}
+
+.app-shell .app-detail-tabs-nav,
+.app-shell .app-detail-tabs-content,
+.app-shell .app-dashboard-panel > div:first-child,
+.app-shell .app-agenda-flow-card > div:first-child,
+.app-shell .app-template-tabs,
+.app-shell .app-template-body,
+.app-shell .app-document-task-panel,
+.app-shell .mobile-record-panel,
+.app-shell .app-file-form-modal > div:nth-child(2) {
+  background: #eef2f7 !important;
+  border-color: var(--app-border) !important;
+}
+
+.app-shell input,
+.app-shell select,
+.app-shell textarea {
+  background: #ffffff !important;
+  border: 1.5px solid #6b7280 !important;
+  color: #05070b !important;
+  box-shadow: none !important;
+}
+
+.app-shell input:focus,
+.app-shell select:focus,
+.app-shell textarea:focus {
+  border-color: #1d4ed8 !important;
+  box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.22) !important;
+  outline: none !important;
+}
+
+.app-shell button,
+.app-shell a {
+  box-shadow: none !important;
+}
+
+.app-shell button[class*="rounded"]:hover,
+.app-shell a[class*="rounded"]:hover,
+.app-shell .app-dashboard-metrics > div:hover,
+.app-shell .app-agenda-metrics > div:hover,
+.app-shell .app-template-card:hover,
+.app-shell .app-document-link-card:hover {
+  transform: none !important;
+}
+
+.app-shell button[class*="bg-blue-"],
+.app-shell a[class*="bg-blue-"] {
+  background-color: #1d4ed8 !important;
+  border-color: #1e3a8a !important;
+  color: #ffffff !important;
+}
+
+.app-shell button[class*="bg-emerald-"],
+.app-shell a[class*="bg-emerald-"] {
+  background-color: #047857 !important;
+  border-color: #065f46 !important;
+  color: #ffffff !important;
+}
+
+.app-shell button[class*="bg-purple-"],
+.app-shell button[class*="bg-violet-"],
+.app-shell a[class*="bg-purple-"],
+.app-shell a[class*="bg-violet-"] {
+  background-color: #5b21b6 !important;
+  border-color: #4c1d95 !important;
+  color: #ffffff !important;
+}
+
+.app-shell button[class*="bg-orange-"],
+.app-shell button[class*="bg-amber-"],
+.app-shell a[class*="bg-orange-"],
+.app-shell a[class*="bg-amber-"] {
+  background-color: #b45309 !important;
+  border-color: #92400e !important;
+  color: #ffffff !important;
+}
+
+.app-shell button[class*="bg-red-"],
+.app-shell button[class*="bg-rose-"],
+.app-shell a[class*="bg-red-"],
+.app-shell a[class*="bg-rose-"] {
+  background-color: #b91c1c !important;
+  border-color: #7f1d1d !important;
+  color: #ffffff !important;
+}
+
+.app-shell [class*="bg-blue-50"],
+.app-shell [class*="bg-sky-50"],
+.app-shell [class*="bg-blue-100"],
+.app-shell [class*="bg-sky-100"] {
+  background-color: #dbeafe !important;
+  border-color: #60a5fa !important;
+  color: #0f172a !important;
+}
+
+.app-shell [class*="bg-emerald-50"],
+.app-shell [class*="bg-teal-50"],
+.app-shell [class*="bg-green-50"],
+.app-shell [class*="bg-emerald-100"],
+.app-shell [class*="bg-teal-100"],
+.app-shell [class*="bg-green-100"] {
+  background-color: #dcfce7 !important;
+  border-color: #34d399 !important;
+  color: #052e16 !important;
+}
+
+.app-shell [class*="bg-purple-50"],
+.app-shell [class*="bg-violet-50"],
+.app-shell [class*="bg-fuchsia-50"],
+.app-shell [class*="bg-purple-100"],
+.app-shell [class*="bg-violet-100"],
+.app-shell [class*="bg-fuchsia-100"] {
+  background-color: #ede9fe !important;
+  border-color: #a78bfa !important;
+  color: #1e1b4b !important;
+}
+
+.app-shell [class*="bg-rose-50"],
+.app-shell [class*="bg-red-50"],
+.app-shell [class*="bg-rose-100"],
+.app-shell [class*="bg-red-100"] {
+  background-color: #fee2e2 !important;
+  border-color: #f87171 !important;
+  color: #450a0a !important;
+}
+
+.app-shell [class*="bg-amber-50"],
+.app-shell [class*="bg-yellow-50"],
+.app-shell [class*="bg-amber-100"],
+.app-shell [class*="bg-yellow-100"] {
+  background-color: #fef3c7 !important;
+  border-color: #f59e0b !important;
+  color: #451a03 !important;
+}
+
+.app-shell [class*="text-slate-400"],
+.app-shell [class*="text-slate-500"],
+.app-shell [class*="text-slate-600"],
+.app-shell [class*="text-slate-700"],
+.app-shell [class*="text-slate-800"],
+.app-shell [class*="text-slate-900"] {
+  color: var(--app-body) !important;
+}
+
+.app-shell h1,
+.app-shell h2,
+.app-shell h3,
+.app-shell h4,
+.app-shell [class*="font-black"] {
+  color: var(--app-title) !important;
+}
+
+.app-shell table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.app-shell table thead tr,
+.app-shell .app-list-table thead tr {
+  background: #d8e0ea !important;
+  border-bottom: 1.5px solid var(--app-border-strong) !important;
+}
+
+.app-shell table thead th,
+.app-shell .app-list-table thead th {
+  color: #05070b !important;
+  font-weight: 750 !important;
+}
+
+.app-shell table tbody tr,
+.app-shell .app-list-table tbody tr {
+  background: #ffffff !important;
+}
+
+.app-shell table tbody tr:nth-child(even),
+.app-shell .app-list-table tbody tr:nth-child(even) {
+  background: #f3f6fa !important;
+}
+
+.app-shell table tbody tr:hover,
+.app-shell .app-list-table tbody tr:hover {
+  background: #e7eef7 !important;
+}
+
+.app-shell table td,
+.app-shell table th,
+.app-shell .app-list-table tbody td {
+  border-color: #b2bdca !important;
+}
+
+.app-shell .app-detail-tabs-nav button {
+  border-radius: 0.28rem 0.28rem 0 0 !important;
+}
+
+.app-shell .app-arb-party-card::before {
+  height: 0.35rem;
+}
+
+.app-shell .app-arb-party-card--basvurucu {
+  border-color: #059669 !important;
+}
+
+.app-shell .app-arb-party-card--diger {
+  border-color: #dc2626 !important;
+}
+
+.app-shell .arabuluculuk-liste-satir > td:first-child {
+  border-top-left-radius: 0.35rem;
+  border-bottom-left-radius: 0.35rem;
+}
+
+.app-shell .arabuluculuk-liste-satir > td:last-child {
+  border-top-right-radius: 0.35rem;
+  border-bottom-right-radius: 0.35rem;
+}
+
+.app-shell button[class*="bg-blue-600"],
+.app-shell button[class*="bg-blue-700"],
+.app-shell button[class*="bg-indigo-600"],
+.app-shell button[class*="bg-indigo-700"],
+.app-shell button[class*="bg-purple-600"],
+.app-shell button[class*="bg-purple-700"],
+.app-shell button[class*="bg-violet-600"],
+.app-shell button[class*="bg-violet-700"],
+.app-shell button[class*="bg-emerald-600"],
+.app-shell button[class*="bg-emerald-700"],
+.app-shell button[class*="bg-slate-800"],
+.app-shell button[class*="bg-slate-900"],
+.app-shell a[class*="bg-blue-600"],
+.app-shell a[class*="bg-indigo-600"],
+.app-shell a[class*="bg-purple-600"],
+.app-shell a[class*="bg-violet-600"],
+.app-shell a[class*="bg-emerald-600"],
+.app-shell a[class*="bg-slate-900"] {
+  color: #ffffff !important;
+}
+
+.app-shell button[class*="bg-blue-600"] *,
+.app-shell button[class*="bg-blue-700"] *,
+.app-shell button[class*="bg-indigo-600"] *,
+.app-shell button[class*="bg-indigo-700"] *,
+.app-shell button[class*="bg-purple-600"] *,
+.app-shell button[class*="bg-purple-700"] *,
+.app-shell button[class*="bg-violet-600"] *,
+.app-shell button[class*="bg-violet-700"] *,
+.app-shell button[class*="bg-emerald-600"] *,
+.app-shell button[class*="bg-emerald-700"] *,
+.app-shell button[class*="bg-slate-800"] *,
+.app-shell button[class*="bg-slate-900"] * {
+  color: inherit !important;
 }
