@@ -397,6 +397,8 @@ export class AppComponent implements OnInit {
   gunlukOzetKartlari: GunlukOzetKart[] = [];
   gunlukOzetBolumleri: GunlukOzetBolum[] = [];
   yeniMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
+  readonly arabuluculukSureSayaciAktifDurumlari = ['Hazırlık', 'Müzakere', 'İmza'];
+  readonly arabuluculukSureSayaciDuranDurumlari = ['Tahsilat', 'Evrak Yükleme', 'Kapalı'];
   readonly arabuluculukSablonBolumTanimlari: Array<{ key: ArabuluculukSablonBolumAnahtari; baslik: string; aciklama: string; }> = [
     {
       key: 'ihtiyari',
@@ -2263,9 +2265,12 @@ export class AppComponent implements OnInit {
   getArabuluculukSureListeDetayi(dosya?: Partial<ArabuluculukDosyasi> | null) {
     if (!dosya) return 'Dosya bulunamadı.';
     if (dosya.basvuruTuru !== 'Dava Şartı') return 'İhtiyari dosyada kanuni sayaç uygulanmaz.';
+    if (!this.arabuluculukSureSayaciAktifDurumMu(dosya.durum)) {
+      return `${dosya.durum || 'Bu'} aşamasında sayaç durduruldu.`;
+    }
 
     const sayac = this.getArabuluculukSureSayaci(dosya);
-    if (!sayac) return 'Görevlendirme tarihi girildiğinde sayaç başlayacak.';
+    if (!sayac) return this.getArabuluculukSureSayaciBeklemeMetni(dosya);
     if (sayac.asama === 'tamamlandi') return `Tutanak ${sayac.tamamlanmaGun || 0} günde düzenlendi.`;
 
     return `Normal son: ${this.formatTarih(sayac.normalSonTarih)} * Azami son: ${this.formatTarih(sayac.azamiSonTarih)}`;
@@ -2661,8 +2666,28 @@ export class AppComponent implements OnInit {
     };
   }
 
+  arabuluculukSureSayaciAktifDurumMu(durum?: string | null) {
+    const temizDurum = (durum || '').trim();
+    if (!temizDurum) return true;
+    return this.arabuluculukSureSayaciAktifDurumlari.includes(temizDurum);
+  }
+
+  arabuluculukSureSayaciDuranDurumMu(durum?: string | null) {
+    return this.arabuluculukSureSayaciDuranDurumlari.includes((durum || '').trim());
+  }
+
+  getArabuluculukSureSayaciBeklemeMetni(dosya?: Partial<ArabuluculukDosyasi> | null) {
+    if (!dosya) return 'Dosya bulunamadı.';
+    if (dosya.basvuruTuru !== 'Dava Şartı') return 'İhtiyari dosyalarda kanuni süre sayacı işletilmez.';
+    if (!this.arabuluculukSureSayaciAktifDurumMu(dosya.durum)) {
+      return `${dosya.durum || 'Bu'} aşamasında sayaç durduruldu. Dosya Hazırlık, Müzakere veya İmza aşamasına alınırsa görevlendirme tarihinden itibaren yeniden hesaplanır.`;
+    }
+    return 'Görevlendirme tarihi girildiğinde arabuluculuk süre sayacı otomatik başlayacak.';
+  }
+
   getArabuluculukSureSayaci(dosya?: Partial<ArabuluculukDosyasi> | null): ArabuluculukSureSayaci | null {
     if (!dosya || dosya.basvuruTuru !== 'Dava Şartı') return null;
+    if (!this.arabuluculukSureSayaciAktifDurumMu(dosya.durum)) return null;
 
     const gorevlendirmeTarihi = (dosya.arabulucuGorevlendirmeTarihi || '').trim();
     const gorevTarihi = this.gunBazliTarihOlustur(gorevlendirmeTarihi);
@@ -2688,15 +2713,6 @@ export class AppComponent implements OnInit {
       normalKalanGun,
       azamiKalanGun
     };
-
-    const tutanakTarihi = this.gunBazliTarihOlustur(dosya.tutanakDuzenlemeTarihi);
-    if (tutanakTarihi) {
-      return {
-        ...temelBilgi,
-        asama: 'tamamlandi',
-        tamamlanmaGun: Math.max(0, Math.round((tutanakTarihi.getTime() - gorevTarihi.getTime()) / (1000 * 60 * 60 * 24)))
-      };
-    }
 
     const asama: ArabuluculukSureAsamasi = normalKalanGun < 0
       ? (azamiKalanGun < 0 ? 'asildi' : 'uzatma')
