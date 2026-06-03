@@ -4125,7 +4125,20 @@
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Eski Mahkeme (Opsiyonel)</label><input [(ngModel)]="islemGorenDava.eskiMahkeme" type="text" placeholder="Örn: İstanbul 5. Asliye Ticaret Mahkemesi" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Eski Esas / Dosya No (Opsiyonel)</label><input [(ngModel)]="islemGorenDava.eskiEsasNo" type="text" placeholder="Örn: 2023/415" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
                 </div>
-                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label><input [(ngModel)]="islemGorenDava.arsivYeri" type="text" placeholder="Örn: Mavi Klasör, Dolap 2, Raf 1" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
+                <div class="mt-4">
+                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label>
+                  <select [(ngModel)]="islemGorenDava.arsivYeri" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    <option value="">Seçim yok</option>
+                    @for (klasor of getArsivKlasorSecenekleri(islemGorenDava.arsivYeri); track klasor) {
+                      <option [value]="klasor">{{ klasor }}</option>
+                    }
+                  </select>
+                  <div class="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
+                    <input [(ngModel)]="yeniArsivKlasoru" type="text" placeholder="Yeni klasör / başlık adı" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white">
+                    <button type="button" (click)="arsivKlasoruEkle('dava')" class="rounded-lg bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800">Yeni Klasör Ekle</button>
+                  </div>
+                  <p class="mt-1 text-[11px] font-medium text-slate-500">Fiziksel yeni klasör açtığınızda başlığı buradan listeye ekleyebilirsiniz.</p>
+                </div>
               </div>
 
               <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -4256,7 +4269,20 @@
                   </select>
                 </div>
               
-                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label><input [(ngModel)]="islemGorenIcra.arsivYeri" type="text" placeholder="Örn: Kırmızı Klasör, İcra Dolabı" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
+                <div class="mt-4">
+                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label>
+                  <select [(ngModel)]="islemGorenIcra.arsivYeri" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    <option value="">Seçim yok</option>
+                    @for (klasor of getArsivKlasorSecenekleri(islemGorenIcra.arsivYeri); track klasor) {
+                      <option [value]="klasor">{{ klasor }}</option>
+                    }
+                  </select>
+                  <div class="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
+                    <input [(ngModel)]="yeniArsivKlasoru" type="text" placeholder="Yeni klasör / başlık adı" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white">
+                    <button type="button" (click)="arsivKlasoruEkle('icra')" class="rounded-lg bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800">Yeni Klasör Ekle</button>
+                  </div>
+                  <p class="mt-1 text-[11px] font-medium text-slate-500">Fiziksel yeni klasör açtığınızda başlığı buradan listeye ekleyebilirsiniz.</p>
+                </div>
               </div>
 
               <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
@@ -4657,7 +4683,20 @@
                 </div>
                 </div>
 
-                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label><input [(ngModel)]="islemGorenArabuluculuk.arsivYeri" type="text" placeholder="Örn: Mor Klasör, Çekmece 3" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
+                <div class="mt-4">
+                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label>
+                  <select [(ngModel)]="islemGorenArabuluculuk.arsivYeri" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                    <option value="">Seçim yok</option>
+                    @for (klasor of getArsivKlasorSecenekleri(islemGorenArabuluculuk.arsivYeri); track klasor) {
+                      <option [value]="klasor">{{ klasor }}</option>
+                    }
+                  </select>
+                  <div class="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
+                    <input [(ngModel)]="yeniArsivKlasoru" type="text" placeholder="Yeni klasör / başlık adı" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white">
+                    <button type="button" (click)="arsivKlasoruEkle('arabuluculuk')" class="rounded-lg bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800">Yeni Klasör Ekle</button>
+                  </div>
+                  <p class="mt-1 text-[11px] font-medium text-slate-500">Fiziksel yeni klasör açtığınızda başlığı buradan listeye ekleyebilirsiniz.</p>
+                </div>
 
                 <div class="mt-4 grid gap-4 md:grid-cols-2">
                 <div>

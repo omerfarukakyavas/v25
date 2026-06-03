@@ -258,6 +258,9 @@ export class AppComponent implements OnInit {
   aktifSayfa: SayfaTipi = 'dashboard'; seciliDava: DavaDosyasi | null = null; seciliIcra: IcraDosyasi | null = null; seciliArabuluculuk: ArabuluculukDosyasi | null = null;
   
   sablonlar: { avukatlik: EvrakBaglantisi[], arabuluculuk: EvrakBaglantisi[] } = { avukatlik: [], arabuluculuk: [] };
+  readonly varsayilanArsivKlasorleri = ['Hukuk Davaları 2', 'Arabuluculuk 4', 'Masada', 'Çantada'];
+  arsivKlasorleri: string[] = [...this.varsayilanArsivKlasorleri];
+  yeniArsivKlasoru = '';
   aktifSablonSekmesi: 'avukatlik' | 'arabuluculuk' = 'avukatlik';
   sablonArama = '';
   belgeCiktiFormu: BelgeCiktiFormu = this.belgeCiktiVarsayilanFormu();
@@ -483,6 +486,8 @@ export class AppComponent implements OnInit {
           this.googleCalendarAktarimlari = {};
           this.googleCalendarAktariliyorId = null;
           this.googleCalendarYetkiIstendi = false;
+          this.arsivKlasorleri = [...this.varsayilanArsivKlasorleri];
+          this.yeniArsivKlasoru = '';
         }
         this.cdr.detectChanges();
       });
@@ -538,6 +543,11 @@ export class AppComponent implements OnInit {
     });
     onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'sablonlar'), (ds: any) => {
       if (ds.exists()) { this.sablonlar = ds.data(); } else { this.sablonlar = { avukatlik: [], arabuluculuk: [] }; }
+      this.cdr.detectChanges();
+    });
+    onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'arsivKlasorleri'), (ds: any) => {
+      const liste = ds.exists() ? ds.data()?.liste : [];
+      this.arsivKlasorleri = this.arsivKlasorListesiniHazirla(liste);
       this.cdr.detectChanges();
     });
   }
@@ -2536,6 +2546,71 @@ export class AppComponent implements OnInit {
     }
   }
 
+  async arsivKlasorleriKaydetCloud(basariMesaji?: string): Promise<boolean> {
+    if (!this.user) return false;
+    try {
+      await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'arsivKlasorleri'), { liste: this.arsivKlasorleri });
+      if (basariMesaji) this.bildirimGoster('success', 'Arşiv klasörleri kaydedildi', basariMesaji);
+      return true;
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Arşiv klasörleri kaydedilemedi', e?.message || 'Bağlantıyı kontrol edip tekrar deneyin.');
+      return false;
+    }
+  }
+
+  arsivKlasorListesiniHazirla(liste?: any[]) {
+    return this.tekilArsivKlasorListesi([
+      ...this.varsayilanArsivKlasorleri,
+      ...(Array.isArray(liste) ? liste : [])
+    ]);
+  }
+
+  tekilArsivKlasorListesi(liste: any[]) {
+    const gorulen = new Set<string>();
+    const sonuc: string[] = [];
+    liste.forEach(item => {
+      const deger = this.formatMetin(String(item || ''));
+      if (!deger) return;
+      const anahtar = deger.toLocaleLowerCase('tr-TR');
+      if (gorulen.has(anahtar)) return;
+      gorulen.add(anahtar);
+      sonuc.push(deger);
+    });
+    return sonuc;
+  }
+
+  get mevcutDosyaArsivKlasorleri() {
+    return this.tekilArsivKlasorListesi([
+      ...this.davalar.map(d => d.arsivYeri || ''),
+      ...this.icralar.map(i => i.arsivYeri || ''),
+      ...this.arabuluculukDosyalar.map(a => a.arsivYeri || '')
+    ]);
+  }
+
+  getArsivKlasorSecenekleri(secili?: string | null) {
+    return this.tekilArsivKlasorListesi([
+      ...this.arsivKlasorleri,
+      ...this.mevcutDosyaArsivKlasorleri,
+      secili || ''
+    ]);
+  }
+
+  async arsivKlasoruEkle(tur: 'dava' | 'icra' | 'arabuluculuk') {
+    const ad = this.formatMetin(this.yeniArsivKlasoru)?.trim();
+    if (!ad) {
+      this.bildirimGoster('error', 'Klasör adı boş', 'Yeni klasör veya başlık adı yazın.');
+      return;
+    }
+
+    this.arsivKlasorleri = this.tekilArsivKlasorListesi([...this.arsivKlasorleri, ad]);
+    if (tur === 'dava') this.islemGorenDava.arsivYeri = ad;
+    if (tur === 'icra') this.islemGorenIcra.arsivYeri = ad;
+    if (tur === 'arabuluculuk') this.islemGorenArabuluculuk.arsivYeri = ad;
+    this.yeniArsivKlasoru = '';
+    await this.arsivKlasorleriKaydetCloud('Yeni klasör / başlık listeye eklendi.');
+    this.cdr.detectChanges();
+  }
+
   toplamBekleyenAlacakGizliliginiDegistir(event?: Event) {
     event?.stopPropagation();
     this.toplamBekleyenAlacakGizli = !this.toplamBekleyenAlacakGizli;
@@ -3608,6 +3683,7 @@ export class AppComponent implements OnInit {
 
   dosyaFormunuAc(d?: DavaDosyasi) {
     this.formHata = '';
+    this.yeniArsivKlasoru = '';
     this.seciliBaglantiliIcraId = undefined;
     this.seciliBaglantiliArabuluculukId = undefined;
     this.baglantiliIcraArama = '';
@@ -3631,7 +3707,7 @@ export class AppComponent implements OnInit {
   }
   dosyaNumarasiEkle() { if (!this.islemGorenDava.dosyaNumaralari) this.islemGorenDava.dosyaNumaralari = []; this.islemGorenDava.dosyaNumaralari.push({ tur: 'ESAS', no: '' }); }
   dosyaNumarasiSil(i: number) { if (this.islemGorenDava.dosyaNumaralari) this.islemGorenDava.dosyaNumaralari.splice(i, 1); }
-  davaFormKapat() { this.davaFormAcik = false; this.hizliMuvekkilFormAcik = false; this.hizliMuvekkilKaydi = { tip: 'Müvekkil' }; this.seciliBaglantiliIcraId = undefined; this.seciliBaglantiliArabuluculukId = undefined; this.baglantiliIcraArama = ''; this.baglantiliArabuluculukArama = ''; this.yeniBaglantiliTedbirDosyasi = ''; this.yeniBaglantiliDelilTespitiDosyasi = ''; this.yeniBaglantiliNoterlikDosyasi = ''; }
+  davaFormKapat() { this.davaFormAcik = false; this.hizliMuvekkilFormAcik = false; this.hizliMuvekkilKaydi = { tip: 'Müvekkil' }; this.seciliBaglantiliIcraId = undefined; this.seciliBaglantiliArabuluculukId = undefined; this.baglantiliIcraArama = ''; this.baglantiliArabuluculukArama = ''; this.yeniBaglantiliTedbirDosyasi = ''; this.yeniBaglantiliDelilTespitiDosyasi = ''; this.yeniBaglantiliNoterlikDosyasi = ''; this.yeniArsivKlasoru = ''; }
   davaKaydet() {
     const num = (this.islemGorenDava.dosyaNumaralari || []).filter(n => n.no && n.no.trim() !== '');
     const muvekkiller = this.davaMuvekkilleriniHazirla(this.islemGorenDava.muvekkiller);
@@ -3722,6 +3798,7 @@ export class AppComponent implements OnInit {
 
   icraFormunuAc(i?: IcraDosyasi) {
     this.formHata = '';
+    this.yeniArsivKlasoru = '';
     this.icraMuvekkilDropdownAcik = false;
     this.icraMuvekkilArama = '';
     if (i) {
@@ -3744,6 +3821,7 @@ export class AppComponent implements OnInit {
     this.icraMuvekkilDropdownAcik = false;
     this.icraMuvekkilArama = '';
     this.icraMuvekkilRolu = null;
+    this.yeniArsivKlasoru = '';
   }
   
   icraKaydet() {
@@ -3804,6 +3882,7 @@ export class AppComponent implements OnInit {
 
   arabuluculukFormAc(a?: ArabuluculukDosyasi) {
     this.formHata = '';
+    this.yeniArsivKlasoru = '';
     this.arabuluculukBasvuruKonusuOtomatikMi = false;
     this.hizliMuvekkilFormAcik = false;
     this.hizliMuvekkilKayitBaglami = 'arabuluculuk';
@@ -3838,6 +3917,7 @@ export class AppComponent implements OnInit {
     this.hizliMuvekkilFormAcik = false;
     this.hizliMuvekkilKayitBaglami = 'dava';
     this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
+    this.yeniArsivKlasoru = '';
   }
   arabuluculukUyusmazlikTuruDegisti(tur: ArabuluculukDosyasi['uyusmazlikTuru']) {
     this.islemGorenArabuluculuk.uyusmazlikTuru = tur;
