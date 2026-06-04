@@ -514,10 +514,17 @@ textarea {
 }
 
 .app-shell .app-file-form-modal {
-  width: min(58rem, calc(100vw - 2rem)) !important;
-  max-width: min(58rem, calc(100vw - 2rem)) !important;
+  width: min(58rem, 82vw) !important;
+  max-width: min(58rem, 82vw) !important;
   border-radius: 1.25rem !important;
   box-shadow: 0 24px 54px -36px rgba(15, 23, 42, 0.34), 0 10px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+@media (max-width: 640px) {
+  .app-shell .app-file-form-modal {
+    width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+  }
 }
 
 .app-shell .app-file-form-modal > .flex:first-child {
