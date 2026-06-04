@@ -514,10 +514,20 @@ textarea {
 }
 
 .app-shell .app-file-form-modal {
-  width: min(58rem, 70vw) !important;
-  max-width: min(58rem, 70vw) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: min(60rem, calc(100vw - 24rem)) !important;
+  max-width: 60rem !important;
+  max-height: min(84vh, 780px) !important;
   border-radius: 1.25rem !important;
   box-shadow: 0 24px 54px -36px rgba(15, 23, 42, 0.34), 0 10px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+@media (max-width: 1280px) {
+  .app-shell .app-file-form-modal {
+    width: min(56rem, 80vw) !important;
+    max-width: min(56rem, 80vw) !important;
+  }
 }
 
 @media (max-width: 640px) {
@@ -546,8 +556,11 @@ textarea {
 
 .app-shell .app-file-form-modal > div:nth-child(2) {
   background: #f6f8fb !important;
+  flex: 1 1 auto !important;
   gap: 0.85rem !important;
-  max-height: min(74vh, 760px) !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
   padding: 1rem !important;
 }
 
@@ -605,6 +618,38 @@ textarea {
 
 .app-shell .app-file-form-modal .app-arb-party-card {
   padding: 0.9rem !important;
+}
+
+/* File edit/create modals are rendered outside .app-shell, so keep these rules unscoped too. */
+.app-file-form-modal {
+  display: flex !important;
+  flex-direction: column !important;
+  width: min(60rem, calc(100vw - 24rem)) !important;
+  max-width: 60rem !important;
+  max-height: min(84vh, 780px) !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 24px 54px -36px rgba(15, 23, 42, 0.34), 0 10px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+.app-file-form-modal > div:nth-child(2) {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+}
+
+@media (max-width: 1280px) {
+  .app-file-form-modal {
+    width: min(56rem, 80vw) !important;
+    max-width: min(56rem, 80vw) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-file-form-modal {
+    width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+  }
 }
 
 .app-shell .app-arb-party-card {
