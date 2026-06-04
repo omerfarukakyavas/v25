@@ -2990,6 +2990,7 @@ export class AppComponent implements OnInit {
   getAjandaTurEtiketi(tur: AjandaTur) {
     if (tur === 'durusma') return 'Duruşma';
     if (tur === 'toplanti') return 'Toplantı';
+    if (tur === 'takip') return 'Takip Tarihi';
     if (tur === 'ofisGorevi') return 'Ofis Görevi';
     return 'Süreli İş';
   }
@@ -2997,6 +2998,7 @@ export class AppComponent implements OnInit {
   getAjandaTurClass(tur: AjandaTur) {
     if (tur === 'durusma') return 'bg-blue-100 text-blue-700';
     if (tur === 'toplanti') return 'bg-purple-100 text-purple-700';
+    if (tur === 'takip') return 'bg-emerald-100 text-emerald-700';
     if (tur === 'ofisGorevi') return 'bg-emerald-100 text-emerald-700';
     return 'bg-rose-100 text-rose-700';
   }
@@ -5676,6 +5678,11 @@ export class AppComponent implements OnInit {
     return Boolean(this.getGoogleCalendarAktarim(kayit));
   }
 
+  getGoogleCalendarButonMetni(kayit: AjandaKaydi) {
+    if (this.googleCalendarAktariliyorId === kayit.id) return 'Aktarılıyor';
+    return this.googleCalendarAktarildiMi(kayit) ? 'Takvime Aktarıldı' : 'Google Takvim’e Aktar';
+  }
+
   googleCalendarSaatMetni(kayit: AjandaKaydi) {
     const saat = (kayit.saat || (kayit.tarih?.includes('T') ? kayit.tarih.slice(11, 16) : '') || '').trim();
     return /^\d{2}:\d{2}$/.test(saat) ? saat : '';
@@ -5724,6 +5731,7 @@ export class AppComponent implements OnInit {
     const dosyaOzeti = this.getAjandaDosyaOzeti(kayit.kaynak, kayit.dosya);
     if (kayit.tur === 'durusma') return `Duruşma - ${kayit.baslik} - ${dosyaOzeti}`;
     if (kayit.tur === 'toplanti') return `Arabuluculuk Toplantısı - ${dosyaOzeti}`;
+    if (kayit.tur === 'takip') return `İcra Takip Tarihi - ${dosyaOzeti}`;
     if (kayit.tur === 'sureliIs') return `Süreli İş - ${kayit.baslik} - ${dosyaOzeti}`;
     return `Ofis Görevi - ${kayit.baslik}`;
   }
@@ -6577,7 +6585,76 @@ export class AppComponent implements OnInit {
     return false;
   }
   getAktifDavaDosyasi() { return this.aktifSayfa === 'detay' ? this.aktifDosya as DavaDosyasi : null; }
+  getAktifIcraDosyasi() { return this.aktifSayfa === 'icraDetay' ? this.aktifDosya as IcraDosyasi : null; }
   getAktifArabuluculukDosyasi() { return this.aktifSayfa === 'arabuluculukDetay' ? this.aktifDosya as ArabuluculukDosyasi : null; }
+  getAktifDavaDurusmaAjandaKaydi(): AjandaKaydi | null {
+    const dava = this.getAktifDavaDosyasi();
+    if (!dava?.durusmaTarihi) return null;
+    return {
+      id: `dava-durusma-${dava.id}`,
+      tarih: this.birlestirTarihVeSaat(dava.durusmaTarihi, dava.durusmaSaati),
+      saat: dava.durusmaSaati,
+      tur: 'durusma',
+      kaynak: 'dava',
+      dosya: dava,
+      baslik: dava.mahkeme || 'Dava Duruşması',
+      altBaslik: dava.konu || this.getAjandaDosyaOzeti('dava', dava),
+      taraflar: this.getDavaTarafOzet(dava)
+    };
+  }
+  getAktifIcraTakipAjandaKaydi(): AjandaKaydi | null {
+    const icra = this.getAktifIcraDosyasi();
+    if (!icra?.takipTarihi) return null;
+    return {
+      id: `icra-takip-${icra.id}`,
+      tarih: icra.takipTarihi,
+      tur: 'takip',
+      kaynak: 'icra',
+      dosya: icra,
+      baslik: `${icra.icraDairesi || 'İcra Takibi'} ${icra.dosyaNo || ''}`.trim(),
+      altBaslik: icra.takipTipi || 'Takip tarihi',
+      taraflar: this.getTaraflarMetni({ tur: 'icra', dosya: icra })
+    };
+  }
+  getAktifArabuluculukToplantiAjandaKaydi(): AjandaKaydi | null {
+    const dosya = this.getAktifArabuluculukDosyasi();
+    if (!dosya?.toplantiTarihi) return null;
+    return {
+      id: `arabuluculuk-toplanti-${dosya.id}`,
+      tarih: this.birlestirTarihVeSaat(dosya.toplantiTarihi, dosya.toplantiSaati),
+      saat: dosya.toplantiSaati,
+      tur: 'toplanti',
+      kaynak: 'arabuluculuk',
+      dosya,
+      baslik: this.getAjandaDosyaOzeti('arabuluculuk', dosya),
+      altBaslik: dosya.toplantiYontemi ? `${dosya.buro || 'Arabuluculuk'} - ${dosya.toplantiYontemi}` : (dosya.buro || 'Arabuluculuk toplantısı'),
+      taraflar: dosya.taraflar?.map(taraf => taraf.isim).join(' - ') || 'Taraf bilgisi yok'
+    };
+  }
+  getAktifDosyaAjandaKaynak(): AjandaKaynak | null {
+    if (this.aktifSayfa === 'detay') return 'dava';
+    if (this.aktifSayfa === 'icraDetay') return 'icra';
+    if (this.aktifSayfa === 'arabuluculukDetay') return 'arabuluculuk';
+    return null;
+  }
+  getAktifDosyaSureliIsAjandaKaydi(is: any): AjandaKaydi | null {
+    const kaynak = this.getAktifDosyaAjandaKaynak();
+    const dosya = this.aktifDosya as DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null;
+    if (!kaynak || !dosya || !is?.sonEylemTarihi) return null;
+    return {
+      id: `${kaynak}-sureli-${dosya.id}-${is.id}`,
+      tarih: is.sonEylemTarihi,
+      tur: 'sureliIs',
+      kaynak,
+      dosya,
+      baslik: is.isim || 'Süreli iş',
+      altBaslik: this.getAjandaDosyaOzeti(kaynak, dosya),
+      taraflar: this.getTaraflarMetni({ tur: kaynak, dosya, evrak: is, anaEvrakIsim: is.anaEvrakIsim }),
+      evrakId: is.id,
+      evrakIsmi: is.isim,
+      anaEvrakIsmi: is.anaEvrakIsim
+    };
+  }
   getAktifDavaDurusmaMetni() {
     const dava = this.getAktifDavaDosyasi();
     return this.formatTarihSaat(dava?.durusmaTarihi, dava?.durusmaSaati);

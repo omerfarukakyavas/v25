@@ -114,7 +114,7 @@ export interface OfisGorevi {
 }
 
 export type AjandaKaynak = 'dava' | 'icra' | 'arabuluculuk' | 'ofis';
-export type AjandaTur = 'durusma' | 'toplanti' | 'sureliIs' | 'ofisGorevi';
+export type AjandaTur = 'durusma' | 'toplanti' | 'takip' | 'sureliIs' | 'ofisGorevi';
 
 export interface AjandaKaydi {
   id: string;
