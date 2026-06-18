@@ -2701,6 +2701,7 @@
                                     <div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Telefon</p><p class="mt-1 text-sm text-slate-700">{{ t.telefon || '-' }}</p></div>
                                     <div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">E-posta</p><p class="mt-1 text-sm text-slate-700 break-all">{{ t.eposta || '-' }}</p></div>
                                     <div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Vekil</p><p class="mt-1 text-sm text-slate-700">{{ t.vekil || '-' }}</p></div>
+                                    <div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Vekil TCKN</p><p class="mt-1 text-sm text-slate-700">{{ t.vekilTckn || '-' }}</p></div>
                                     <div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Vekil Telefon</p><p class="mt-1 text-sm text-slate-700">{{ t.vekilTelefon || '-' }}</p></div>
                                     <div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Vekil E-posta</p><p class="mt-1 text-sm text-slate-700 break-all">{{ t.vekilEposta || '-' }}</p></div>
                                     <div class="sm:col-span-2"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Vekil Baro Bilgisi</p><p class="mt-1 text-sm text-slate-700">{{ t.vekilBaroBilgisi || '-' }}</p></div>
@@ -4715,7 +4716,11 @@
                             <input [ngModel]="taraf.vekil" (ngModelChange)="arabuluculukTarafVekilMetniElleDegisti(taraf, $event)" type="text" placeholder="Varsa vekil adı soyadı" class="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm outline-none">
                           </div>
                         </div>
-                        <div class="mt-3 grid gap-3 md:grid-cols-2">
+                        <div class="mt-3 grid gap-3 md:grid-cols-3">
+                          <div>
+                            <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil TCKN</label>
+                            <input [(ngModel)]="taraf.vekilTckn" type="text" placeholder="Vekilin TCKN bilgisi" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                          </div>
                           <div>
                             <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil Telefon</label>
                             <input [(ngModel)]="taraf.vekilTelefon" type="text" placeholder="05xx xxx xx xx" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
@@ -4724,7 +4729,7 @@
                             <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil E-posta</label>
                             <input [(ngModel)]="taraf.vekilEposta" type="email" placeholder="vekil@alanadi.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                           </div>
-                          <div class="md:col-span-2">
+                          <div class="md:col-span-3">
                             <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil Baro Bilgisi</label>
                             <input [(ngModel)]="taraf.vekilBaroBilgisi" type="text" placeholder="Örn: İstanbul Barosu Sicil No: 12345" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                           </div>

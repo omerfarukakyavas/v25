@@ -3569,7 +3569,7 @@ export class AppComponent implements OnInit {
     return this.adresGosterimMetniOlustur(kayit, bosDeger);
   }
   arabuluculukTarafBosOlustur(tip: ArabuluculukTaraf['tip'] = 'Diğer Taraf', id = Date.now()): ArabuluculukTaraf {
-    return { id, tip, isim: '', muvekkilId: undefined, vekilMuvekkilId: undefined, tcVergiNo: '', vergiDairesi: '', adres: '', il: '', ilce: '', acikAdres: '', telefon: '', eposta: '', vekil: '', vekilTelefon: '', vekilEposta: '', vekilBaroBilgisi: '' };
+    return { id, tip, isim: '', muvekkilId: undefined, vekilMuvekkilId: undefined, tcVergiNo: '', vergiDairesi: '', adres: '', il: '', ilce: '', acikAdres: '', telefon: '', eposta: '', vekil: '', vekilTckn: '', vekilTelefon: '', vekilEposta: '', vekilBaroBilgisi: '' };
   }
   arabuluculukTarafMuvekkilKaydiBul(taraf?: Partial<ArabuluculukTaraf> | null) {
     if (!taraf) return null;
@@ -3612,6 +3612,7 @@ export class AppComponent implements OnInit {
   arabuluculukTarafVekilBilgileriniMuvekkildenDoldur(taraf: ArabuluculukTaraf, secilen: Muvekkil, isimKorunsun = false) {
     taraf.vekilMuvekkilId = secilen.id;
     if (!isimKorunsun || !(taraf.vekil || '').trim()) taraf.vekil = secilen.adSoyad || '';
+    taraf.vekilTckn = this.duzMetinTrimle(taraf.vekilTckn || secilen.tcKimlik) || '';
     taraf.vekilTelefon = this.duzMetinTrimle(taraf.vekilTelefon || secilen.telefon) || '';
     taraf.vekilEposta = this.epostaDegeriniTemizle(taraf.vekilEposta || secilen.eposta) || '';
   }
@@ -3660,6 +3661,7 @@ export class AppComponent implements OnInit {
           telefon: this.duzMetinTrimle(taraf.telefon || secilen?.telefon) || '',
           eposta: this.epostaDegeriniTemizle(taraf.eposta || secilen?.eposta) || '',
           vekil: this.formatMetin(secilenVekil?.adSoyad || taraf.vekil) || '',
+          vekilTckn: this.duzMetinTrimle(taraf.vekilTckn || secilenVekil?.tcKimlik) || '',
           vekilTelefon: this.duzMetinTrimle(taraf.vekilTelefon || secilenVekil?.telefon) || '',
           vekilEposta: this.epostaDegeriniTemizle(taraf.vekilEposta || secilenVekil?.eposta) || '',
           vekilBaroBilgisi: this.formatMetin(taraf.vekilBaroBilgisi) || ''
@@ -3669,12 +3671,12 @@ export class AppComponent implements OnInit {
   }
   getArabuluculukTarafKayitOzeti(liste?: ArabuluculukTaraf[]) {
     return (liste || [])
-      .map(taraf => [taraf.tip, taraf.isim, taraf.tcVergiNo, taraf.vergiDairesi, taraf.adres, taraf.il, taraf.ilce, taraf.acikAdres, taraf.vekil].filter(Boolean).join(':'))
+      .map(taraf => [taraf.tip, taraf.isim, taraf.tcVergiNo, taraf.vergiDairesi, taraf.adres, taraf.il, taraf.ilce, taraf.acikAdres, taraf.vekil, taraf.vekilTckn].filter(Boolean).join(':'))
       .join('|');
   }
   getArabuluculukTarafAramaMetni(liste?: ArabuluculukTaraf[]) {
     return (liste || [])
-      .flatMap(taraf => [taraf.tip, taraf.isim, taraf.tcVergiNo, taraf.vergiDairesi, taraf.adres, taraf.il, taraf.ilce, taraf.acikAdres, taraf.telefon, taraf.eposta, taraf.vekil, taraf.vekilTelefon, taraf.vekilEposta, taraf.vekilBaroBilgisi])
+      .flatMap(taraf => [taraf.tip, taraf.isim, taraf.tcVergiNo, taraf.vergiDairesi, taraf.adres, taraf.il, taraf.ilce, taraf.acikAdres, taraf.telefon, taraf.eposta, taraf.vekil, taraf.vekilTckn, taraf.vekilTelefon, taraf.vekilEposta, taraf.vekilBaroBilgisi])
       .filter(Boolean)
       .join(' ')
       .toLocaleLowerCase('tr-TR');
@@ -5508,6 +5510,7 @@ export class AppComponent implements OnInit {
       yerTutucular[`${onEk}_${sira}_TELEFON`] = taraf?.telefon || '-';
       yerTutucular[`${onEk}_${sira}_EPOSTA`] = taraf?.eposta || '-';
       yerTutucular[`${onEk}_${sira}_VEKIL`] = taraf?.vekil || '-';
+      yerTutucular[`${onEk}_${sira}_VEKIL_TCKN`] = taraf?.vekilTckn || '-';
       yerTutucular[`${onEk}_${sira}_VEKIL_TELEFON`] = taraf?.vekilTelefon || '-';
       yerTutucular[`${onEk}_${sira}_VEKIL_EPOSTA`] = taraf?.vekilEposta || '-';
       yerTutucular[`${onEk}_${sira}_VEKIL_BARO`] = taraf?.vekilBaroBilgisi || '-';
@@ -5546,6 +5549,7 @@ export class AppComponent implements OnInit {
         `Telefon: ${taraf.telefon || '-'}`,
         `E-posta: ${taraf.eposta || '-'}`,
         `Vekil: ${taraf.vekil || '-'}`,
+        `Vekil TCKN: ${taraf.vekilTckn || '-'}`,
         `Vekil Telefon: ${taraf.vekilTelefon || '-'}`,
         `Vekil E-posta: ${taraf.vekilEposta || '-'}`,
         `Vekil Baro Bilgisi: ${taraf.vekilBaroBilgisi || '-'}`

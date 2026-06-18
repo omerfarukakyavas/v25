@@ -19,6 +19,7 @@ export interface ArabuluculukTaraf {
   telefon?: string;
   eposta?: string;
   vekil?: string;
+  vekilTckn?: string;
   vekilTelefon?: string;
   vekilEposta?: string;
   vekilBaroBilgisi?: string;
