@@ -105,8 +105,7 @@
                 </button>
 
                 @if (bildirimPanelAcik) {
-                  <div class="fixed inset-0 z-40" (click)="bildirimPaneliniKapat($event)"></div>
-                  <div class="absolute right-0 top-full z-50 mt-3 w-[calc(100vw-2rem)] max-w-[28rem] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20" (click)="$event.stopPropagation()">
+                  <div class="fixed right-4 top-20 z-[90] w-[calc(100vw-2rem)] max-w-[28rem] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 sm:right-8" (click)="$event.stopPropagation()">
                     <div class="border-b border-slate-100 bg-gradient-to-r from-slate-900 to-slate-700 px-5 py-4 text-white">
                       <div class="flex items-start justify-between gap-3">
                         <div>
