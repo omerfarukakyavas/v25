@@ -4065,8 +4065,12 @@ export class AppComponent implements OnInit {
   muvekkilFormunuAc(m?: Muvekkil) { 
     this.formHata = ''; this.formModu = m ? 'duzenle' : 'ekle'; 
     this.islemGorenMuvekkil = m
-      ? this.adresKaydiNormalizeEt({ ...m, yetkililer: Array.isArray(m.yetkililer) ? m.yetkililer.map(y => ({...y})) : [] })
-      : { tip: this.aktifIliskiSekmesi, adres: '', il: '', ilce: '', acikAdres: '', yetkililer: [] }; 
+      ? this.adresKaydiNormalizeEt({
+        ...m,
+        yetkililer: Array.isArray(m.yetkililer) ? m.yetkililer.map(y => ({...y})) : [],
+        ekKayitlar: Array.isArray(m.ekKayitlar) ? m.ekKayitlar.map(kayit => ({...kayit})) : []
+      })
+      : { tip: this.aktifIliskiSekmesi, adres: '', il: '', ilce: '', acikAdres: '', yetkililer: [], ekKayitlar: [] }; 
     this.muvekkilFormAcik = true; 
   }
   muvekkilFormKapat() { this.muvekkilFormAcik = false; this.yetkiliSecimDropdownAcik = false; this.yetkiliSecimArama = ''; }
@@ -4100,7 +4104,8 @@ export class AppComponent implements OnInit {
       bankaBilgileri: '',
       vergiDairesi: '',
       vekaletnameUrl: '',
-      yetkililer: []
+      yetkililer: [],
+      ekKayitlar: []
     };
     const basariMesaji = this.hizliMuvekkilKayitBaglami === 'arabuluculuk'
       ? 'Yeni kişi veya kurum arabuluculuk ekranından oluşturuldu.'
@@ -4126,6 +4131,27 @@ export class AppComponent implements OnInit {
     this.formHata = '';
     this.hizliMuvekkilKaydiIptal();
   }
+  muvekkilEkKayitEkle() {
+    if (!Array.isArray(this.islemGorenMuvekkil.ekKayitlar)) this.islemGorenMuvekkil.ekKayitlar = [];
+    this.islemGorenMuvekkil.ekKayitlar.push({ id: Date.now(), baslik: '', deger: '' });
+  }
+  muvekkilEkKayitSil(index: number) {
+    if (!Array.isArray(this.islemGorenMuvekkil.ekKayitlar)) return;
+    this.islemGorenMuvekkil.ekKayitlar.splice(index, 1);
+  }
+  muvekkilEkKayitlariniHazirla(kayitlar?: any[]) {
+    return (Array.isArray(kayitlar) ? kayitlar : [])
+      .map((kayit, index) => {
+        const deger = this.duzMetinTrimle(kayit?.deger) || '';
+        const baslik = this.formatMetin(kayit?.baslik) || (deger ? 'Ek Bilgi' : '');
+        return {
+          id: Number(kayit?.id) || Date.now() + index,
+          baslik,
+          deger
+        };
+      })
+      .filter(kayit => kayit.baslik || kayit.deger);
+  }
   yetkiliEkle() { if (!this.islemGorenMuvekkil.yetkililer) this.islemGorenMuvekkil.yetkililer = []; this.islemGorenMuvekkil.yetkililer.push({ id: Date.now(), adSoyad: '', telefon: '', eposta: '', pozisyon: '' }); }
   kayitliYetkiliEkle(m: Muvekkil) {
     if (!this.islemGorenMuvekkil.yetkililer) this.islemGorenMuvekkil.yetkililer = [];
@@ -4138,6 +4164,7 @@ export class AppComponent implements OnInit {
     const oncekiMuvekkil = this.formModu === 'duzenle' ? this.muvekkiller.find(m => m.id === this.islemGorenMuvekkil.id) : undefined;
     if (!this.islemGorenMuvekkil.adSoyad || !this.islemGorenMuvekkil.tip) { this.formHata = "İsim ve Kayıt Tipi zorunludur."; return; }
     const yList = (this.islemGorenMuvekkil.yetkililer || []).filter(y => y.adSoyad && y.adSoyad.trim() !== '');
+    const ekKayitlar = this.muvekkilEkKayitlariniHazirla(this.islemGorenMuvekkil.ekKayitlar);
     
     this.islemGorenMuvekkil.adSoyad = this.formatMetin(this.islemGorenMuvekkil.adSoyad);
     const adres = this.adresBilesenleriniHazirla(this.islemGorenMuvekkil);
@@ -4155,10 +4182,10 @@ export class AppComponent implements OnInit {
     if (vUrl && !/^https?:\/\//i.test(vUrl)) vUrl = 'https://' + vUrl;
 
     if (this.formModu === 'ekle') {
-      const y: Muvekkil = { id: Date.now(), tip: this.islemGorenMuvekkil.tip as any, _isNewDiger: this.islemGorenMuvekkil.tip === 'Diğer', adSoyad: this.islemGorenMuvekkil.adSoyad || '', tcKimlik: this.islemGorenMuvekkil.tcKimlik || '', telefon: this.islemGorenMuvekkil.telefon || '', eposta: this.islemGorenMuvekkil.eposta || '', adres: this.islemGorenMuvekkil.adres || '', il: this.islemGorenMuvekkil.il || '', ilce: this.islemGorenMuvekkil.ilce || '', acikAdres: this.islemGorenMuvekkil.acikAdres || '', bankaBilgileri: this.islemGorenMuvekkil.bankaBilgileri || '', vergiDairesi: this.islemGorenMuvekkil.vergiDairesi || '', vekaletnameUrl: vUrl, yetkililer: yList };
+      const y: Muvekkil = { id: Date.now(), tip: this.islemGorenMuvekkil.tip as any, _isNewDiger: this.islemGorenMuvekkil.tip === 'Diğer', adSoyad: this.islemGorenMuvekkil.adSoyad || '', tcKimlik: this.islemGorenMuvekkil.tcKimlik || '', telefon: this.islemGorenMuvekkil.telefon || '', eposta: this.islemGorenMuvekkil.eposta || '', adres: this.islemGorenMuvekkil.adres || '', il: this.islemGorenMuvekkil.il || '', ilce: this.islemGorenMuvekkil.ilce || '', acikAdres: this.islemGorenMuvekkil.acikAdres || '', bankaBilgileri: this.islemGorenMuvekkil.bankaBilgileri || '', vergiDairesi: this.islemGorenMuvekkil.vergiDairesi || '', vekaletnameUrl: vUrl, yetkililer: yList, ekKayitlar };
       this.muvekkilKaydetCloud(y, 'Yeni kişi veya kurum kaydı oluşturuldu.');
     } else {
-      const g = { ...this.islemGorenMuvekkil, yetkililer: yList, adSoyad: this.islemGorenMuvekkil.adSoyad || '', _isNewDiger: this.islemGorenMuvekkil.tip === 'Diğer', vekaletnameUrl: vUrl } as Muvekkil;
+      const g = { ...this.islemGorenMuvekkil, yetkililer: yList, ekKayitlar, adSoyad: this.islemGorenMuvekkil.adSoyad || '', _isNewDiger: this.islemGorenMuvekkil.tip === 'Diğer', vekaletnameUrl: vUrl } as Muvekkil;
       this.muvekkilKaydetCloud(g, 'Kişi veya kurum bilgileri güncellendi.');
       this.davalar.forEach(d => {
         let degisti = false;
