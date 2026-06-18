@@ -183,6 +183,19 @@ type GunlukOzetBolum = {
   kayitlar: GunlukOzetKayitOnizleme[];
 };
 
+type BildirimMerkeziOnemi = 'kritik' | 'uyari' | 'bilgi';
+
+type BildirimMerkeziKaydi = {
+  id: string;
+  baslik: string;
+  altBaslik: string;
+  meta: string;
+  durum: string;
+  onem: BildirimMerkeziOnemi;
+  ajandaKaydi?: AjandaKaydi;
+  sureKaydi?: ArabuluculukSureSayaci;
+};
+
 type ArabuluculukSablonBolumAnahtari = 'ihtiyari' | 'dava_sarti';
 
 type ArabuluculukSablonKategoriAnahtari = 'toplu' | 'anlasma' | 'son_tutanak' | 'belirleme' | 'bilgilendirme' | 'davet';
@@ -251,6 +264,7 @@ export class AppComponent implements OnInit {
   
   emailGiris = ''; sifreGiris = ''; authModu: 'giris' | 'kayit' = 'giris'; authHata = ''; authYukleniyor = false;
   bildirimler: UygulamaBildirimi[] = [];
+  bildirimPanelAcik = false;
   bildirimSayaci = 0;
   gecmisKaydiSayaci = 0;
 
@@ -3249,6 +3263,104 @@ export class AppComponent implements OnInit {
     return this.getGunlukOzetAjandaKayitlari().slice(0, 8);
   }
 
+  bildirimPaneliniAcKapat(event?: Event) {
+    event?.stopPropagation();
+    this.bildirimPanelAcik = !this.bildirimPanelAcik;
+  }
+
+  bildirimPaneliniKapat(event?: Event) {
+    event?.stopPropagation();
+    this.bildirimPanelAcik = false;
+  }
+
+  bildirimMerkeziAjandaOnemi(kayit: AjandaKaydi): BildirimMerkeziOnemi {
+    const fark = this.ajandaGunFarki(kayit.tarih);
+    if (fark < 0 || (kayit.tur === 'sureliIs' && fark <= 2)) return 'kritik';
+    if (fark === 0 || fark <= 7) return 'uyari';
+    return 'bilgi';
+  }
+
+  bildirimMerkeziOnemSirasi(onem: BildirimMerkeziOnemi) {
+    if (onem === 'kritik') return 0;
+    if (onem === 'uyari') return 1;
+    return 2;
+  }
+
+  get bildirimMerkeziKayitlari(): BildirimMerkeziKaydi[] {
+    const ajandaBildirimleri = this.ajandaKayitlari
+      .filter(kayit => {
+        const fark = this.ajandaGunFarki(kayit.tarih);
+        return fark < 0 || fark <= 30;
+      })
+      .map(kayit => ({
+        id: `ajanda-${kayit.id}`,
+        baslik: kayit.baslik,
+        altBaslik: kayit.taraflar || kayit.altBaslik || this.getAjandaDosyaOzeti(kayit.kaynak, kayit.dosya),
+        meta: `${this.getAjandaKaynakEtiketi(kayit.kaynak)} • ${this.getAjandaTurEtiketi(kayit.tur)} • ${this.formatTarihSaatKisa(kayit.tarih, kayit.saat)}`,
+        durum: this.getAjandaDurumMetni(kayit),
+        onem: this.bildirimMerkeziAjandaOnemi(kayit),
+        ajandaKaydi: kayit
+      } as BildirimMerkeziKaydi));
+
+    const sureBildirimleri = this.kritikArabuluculukSureKayitlari.map(sure => ({
+      id: `sure-${sure.dosya.id}`,
+      baslik: `${sure.dosya.buroNo ? sure.dosya.buroNo + ' / ' : ''}${sure.dosya.arabuluculukNo || 'Arabuluculuk dosyası'}`,
+      altBaslik: this.getArabuluculukTarafIsimMetni(sure.dosya),
+      meta: `${sure.dosya.uyusmazlikTuru} • Azami son: ${this.formatTarih(sure.azamiSonTarih)}`,
+      durum: this.getArabuluculukSureKalanMetni(sure),
+      onem: sure.asama === 'asildi' ? 'kritik' : 'uyari',
+      sureKaydi: sure
+    } as BildirimMerkeziKaydi));
+
+    return [...ajandaBildirimleri, ...sureBildirimleri]
+      .sort((a, b) => {
+        const onemFarki = this.bildirimMerkeziOnemSirasi(a.onem) - this.bildirimMerkeziOnemSirasi(b.onem);
+        if (onemFarki !== 0) return onemFarki;
+        const aTarih = a.ajandaKaydi?.tarih || a.sureKaydi?.azamiSonTarih;
+        const bTarih = b.ajandaKaydi?.tarih || b.sureKaydi?.azamiSonTarih;
+        return this.ajandaTarihDamgasi(aTarih) - this.ajandaTarihDamgasi(bTarih);
+      })
+      .slice(0, 12);
+  }
+
+  get bildirimMerkeziKritikSayisi() {
+    return this.bildirimMerkeziKayitlari.filter(kayit => kayit.onem !== 'bilgi').length;
+  }
+
+  get bildirimMerkeziBaslikMetni() {
+    const kritik = this.bildirimMerkeziKayitlari.filter(kayit => kayit.onem === 'kritik').length;
+    if (kritik > 0) return `${kritik} kritik bildirim var`;
+    if (this.bildirimMerkeziKritikSayisi > 0) return `${this.bildirimMerkeziKritikSayisi} yaklaşan bildirim var`;
+    return 'Kritik bildirim yok';
+  }
+
+  bildirimMerkeziKaydinaGit(kayit: BildirimMerkeziKaydi) {
+    this.bildirimPanelAcik = false;
+    if (kayit.ajandaKaydi) {
+      this.ajandaKaydinaGit(kayit.ajandaKaydi);
+      return;
+    }
+    if (kayit.sureKaydi) this.arabuluculukDetayinaGit(kayit.sureKaydi.dosya);
+  }
+
+  bildirimMerkeziAjandayiAc(event?: Event) {
+    event?.stopPropagation();
+    this.bildirimPanelAcik = false;
+    this.sayfaDegistir('ajanda');
+  }
+
+  getBildirimMerkeziKayitClass(onem: BildirimMerkeziOnemi) {
+    if (onem === 'kritik') return 'border-rose-200 bg-rose-50 hover:border-rose-300';
+    if (onem === 'uyari') return 'border-amber-200 bg-amber-50 hover:border-amber-300';
+    return 'border-slate-200 bg-white hover:border-blue-200';
+  }
+
+  getBildirimMerkeziRozetClass(onem: BildirimMerkeziOnemi) {
+    if (onem === 'kritik') return 'bg-rose-600 text-white';
+    if (onem === 'uyari') return 'bg-amber-100 text-amber-800';
+    return 'bg-blue-100 text-blue-700';
+  }
+
   get oncelikliAjandaKayitlari() {
     return this.getGunlukOzetAjandaKayitlari(7).slice(0, 6);
   }
@@ -5793,6 +5905,33 @@ export class AppComponent implements OnInit {
     return satirlar.filter(satir => satir !== '').join('\n');
   }
 
+  googleCalendarHatirlaticilari(kayit: AjandaKaydi) {
+    if (kayit.tur === 'durusma') {
+      return [
+        { method: 'popup', minutes: 7 * 24 * 60 },
+        { method: 'popup', minutes: 3 * 24 * 60 },
+        { method: 'popup', minutes: 24 * 60 },
+        { method: 'popup', minutes: 2 * 60 }
+      ];
+    }
+    if (kayit.tur === 'toplanti') {
+      return [
+        { method: 'popup', minutes: 24 * 60 },
+        { method: 'popup', minutes: 2 * 60 }
+      ];
+    }
+    if (kayit.tur === 'sureliIs') {
+      return [
+        { method: 'popup', minutes: 24 * 60 },
+        { method: 'popup', minutes: 3 * 60 }
+      ];
+    }
+    return [
+      { method: 'popup', minutes: 60 },
+      { method: 'popup', minutes: 15 }
+    ];
+  }
+
   googleCalendarHataMesaji(hata: any) {
     const mesaj = hata?.message || 'Google Calendar bağlantısını ve izin ekranını kontrol edip tekrar deneyin.';
     try {
@@ -5831,7 +5970,7 @@ export class AppComponent implements OnInit {
           description: this.googleCalendarEtkinlikAciklamasi(kayit),
           location: this.googleCalendarEtkinlikKonumu(kayit),
           ...zaman,
-          reminders: { useDefault: true }
+          reminders: { useDefault: false, overrides: this.googleCalendarHatirlaticilari(kayit) }
         })
       });
 
