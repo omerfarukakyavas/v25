@@ -103,55 +103,6 @@
                     <span class="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-black text-white shadow-lg shadow-rose-600/20">{{ bildirimMerkeziKritikSayisi }}</span>
                   }
                 </button>
-
-                @if (bildirimPanelAcik) {
-                  <div class="fixed right-4 top-20 z-[90] w-[calc(100vw-2rem)] max-w-[28rem] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 sm:right-8" (click)="$event.stopPropagation()">
-                    <div class="border-b border-slate-100 bg-gradient-to-r from-slate-900 to-slate-700 px-5 py-4 text-white">
-                      <div class="flex items-start justify-between gap-3">
-                        <div>
-                          <p class="text-[10px] font-black uppercase tracking-[0.22em] text-amber-200">Bildirim Merkezi</p>
-                          <h3 class="mt-1 text-base font-black">{{ bildirimMerkeziBaslikMetni }}</h3>
-                        </div>
-                        <button type="button" (click)="bildirimPaneliniKapat($event)" class="rounded-lg bg-white/10 px-2 py-1 text-xs font-black text-white transition-colors hover:bg-white/20">Kapat</button>
-                      </div>
-                      <div class="mt-4 grid grid-cols-3 gap-2 text-center">
-                        <div class="rounded-xl bg-white/10 px-3 py-2">
-                          <p class="text-lg font-black">{{ dashboardUyariOzet.gecmis }}</p>
-                          <p class="text-[9px] font-bold uppercase tracking-wider text-white/70">Geciken</p>
-                        </div>
-                        <div class="rounded-xl bg-white/10 px-3 py-2">
-                          <p class="text-lg font-black">{{ dashboardUyariOzet.bugun }}</p>
-                          <p class="text-[9px] font-bold uppercase tracking-wider text-white/70">Bugün</p>
-                        </div>
-                        <div class="rounded-xl bg-white/10 px-3 py-2">
-                          <p class="text-lg font-black">{{ dashboardUyariOzet.yediGun + dashboardUyariOzet.sureAlarm }}</p>
-                          <p class="text-[9px] font-bold uppercase tracking-wider text-white/70">Yakın</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="max-h-[28rem] overflow-y-auto p-3 custom-scrollbar">
-                      @for (bildirim of bildirimMerkeziKayitlari; track bildirim.id) {
-                        <button type="button" (click)="bildirimMerkeziKaydinaGit(bildirim)" [class]="getBildirimMerkeziKayitClass(bildirim.onem)" class="mb-2 w-full rounded-xl border p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-md">
-                          <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0">
-                              <p class="truncate text-sm font-black text-slate-900">{{ bildirim.baslik }}</p>
-                              <p class="mt-1 line-clamp-2 text-xs font-semibold text-slate-600">{{ bildirim.altBaslik }}</p>
-                            </div>
-                            <span [class]="getBildirimMerkeziRozetClass(bildirim.onem)" class="shrink-0 rounded-full px-2 py-1 text-[10px] font-black">{{ bildirim.durum }}</span>
-                          </div>
-                          <p class="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">{{ bildirim.meta }}</p>
-                        </button>
-                      } @empty {
-                        <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-5 text-center text-sm font-bold text-emerald-700">Şu an yaklaşan kritik kayıt görünmüyor.</div>
-                      }
-                    </div>
-
-                    <div class="border-t border-slate-100 bg-slate-50 px-4 py-3">
-                      <button type="button" (click)="bildirimMerkeziAjandayiAc($event)" class="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-black text-white transition-colors hover:bg-slate-800">Ajandada Tümünü Gör</button>
-                    </div>
-                  </div>
-                }
               </div>
               <button (click)="cikisYap()" class="md:hidden px-3 py-2 text-slate-600 font-semibold border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
@@ -166,6 +117,57 @@
               @else if (aktifSayfa === 'arabuluculukDetay' && seciliArabuluculuk) { <button (click)="arabuluculukFormAc(seciliArabuluculuk)" class="detail-edit-button"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg> Dosyayı Düzenle</button> }
             </div>
           </header>
+
+          @if (bildirimPanelAcik) {
+            <div class="pointer-events-none fixed inset-0 z-[90]">
+            <div class="pointer-events-auto absolute right-4 top-20 w-[calc(100vw-2rem)] max-w-[28rem] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 sm:right-8" (click)="$event.stopPropagation()">
+              <div class="border-b border-slate-100 bg-gradient-to-r from-slate-900 to-slate-700 px-5 py-4 text-white">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.22em] text-amber-200">Bildirim Merkezi</p>
+                    <h3 class="mt-1 text-base font-black">{{ bildirimMerkeziBaslikMetni }}</h3>
+                  </div>
+                  <button type="button" (click)="bildirimPaneliniKapat($event)" class="rounded-lg bg-white/10 px-2 py-1 text-xs font-black text-white transition-colors hover:bg-white/20">Kapat</button>
+                </div>
+                <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+                  <div class="rounded-xl bg-white/10 px-3 py-2">
+                    <p class="text-lg font-black">{{ dashboardUyariOzet.gecmis }}</p>
+                    <p class="text-[9px] font-bold uppercase tracking-wider text-white/70">Geciken</p>
+                  </div>
+                  <div class="rounded-xl bg-white/10 px-3 py-2">
+                    <p class="text-lg font-black">{{ dashboardUyariOzet.bugun }}</p>
+                    <p class="text-[9px] font-bold uppercase tracking-wider text-white/70">Bugün</p>
+                  </div>
+                  <div class="rounded-xl bg-white/10 px-3 py-2">
+                    <p class="text-lg font-black">{{ dashboardUyariOzet.yediGun + dashboardUyariOzet.sureAlarm }}</p>
+                    <p class="text-[9px] font-bold uppercase tracking-wider text-white/70">Yakın</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="max-h-[28rem] overflow-y-auto p-3 custom-scrollbar">
+                @for (bildirim of bildirimMerkeziKayitlari; track bildirim.id) {
+                  <button type="button" (click)="bildirimMerkeziKaydinaGit(bildirim)" [class]="getBildirimMerkeziKayitClass(bildirim.onem)" class="mb-2 w-full rounded-xl border p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-md">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="truncate text-sm font-black text-slate-900">{{ bildirim.baslik }}</p>
+                        <p class="mt-1 line-clamp-2 text-xs font-semibold text-slate-600">{{ bildirim.altBaslik }}</p>
+                      </div>
+                      <span [class]="getBildirimMerkeziRozetClass(bildirim.onem)" class="shrink-0 rounded-full px-2 py-1 text-[10px] font-black">{{ bildirim.durum }}</span>
+                    </div>
+                    <p class="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">{{ bildirim.meta }}</p>
+                  </button>
+                } @empty {
+                  <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-5 text-center text-sm font-bold text-emerald-700">Şu an yaklaşan kritik kayıt görünmüyor.</div>
+                }
+              </div>
+
+              <div class="border-t border-slate-100 bg-slate-50 px-4 py-3">
+                <button type="button" (click)="bildirimMerkeziAjandayiAc($event)" class="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-black text-white transition-colors hover:bg-slate-800">Ajandada Tümünü Gör</button>
+              </div>
+            </div>
+            </div>
+          }
 
           <div class="md:hidden border-b border-slate-200 bg-white/95 backdrop-blur-sm px-4 py-3 overflow-x-auto custom-scrollbar">
             <div class="flex gap-2 min-w-max">
