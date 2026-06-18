@@ -391,6 +391,19 @@ textarea {
   color: #050b16 !important;
 }
 
+.app-shell .app-notification-popover__header .app-notification-popover__eyebrow {
+  color: #fef3c7 !important;
+}
+
+.app-shell .app-notification-popover__header .app-notification-popover__title {
+  color: #ffffff !important;
+}
+
+.app-shell .app-notification-popover__header .app-notification-popover__close {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
 .app-shell [class*="bg-white"][class*="rounded-xl"],
 .app-shell [class*="bg-white"][class*="rounded-2xl"],
 .app-shell [class*="bg-white"][class*="rounded-[1.5rem]"],
