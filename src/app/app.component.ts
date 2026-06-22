@@ -3382,6 +3382,44 @@ export class AppComponent implements OnInit {
     });
   }
 
+  temizMetinYapistir(event: ClipboardEvent, cokSatirli = false) {
+    const metin = event.clipboardData?.getData('text/plain');
+    const hedef = event.target as HTMLInputElement | HTMLTextAreaElement | null;
+    if (metin === undefined || !hedef || !('value' in hedef)) return;
+
+    event.preventDefault();
+    const temizMetin = this.yapistirilanMetniTemizle(metin, cokSatirli);
+    const secimBaslangici = hedef.selectionStart ?? hedef.value.length;
+    const secimBitisi = hedef.selectionEnd ?? hedef.value.length;
+    hedef.value = `${hedef.value.slice(0, secimBaslangici)}${temizMetin}${hedef.value.slice(secimBitisi)}`;
+
+    const yeniImlecKonumu = secimBaslangici + temizMetin.length;
+    try {
+      hedef.setSelectionRange(yeniImlecKonumu, yeniImlecKonumu);
+    } catch {
+      // Bazı input tipleri imleç aralığı desteklemez; değer yine de temiz yapıştırılır.
+    }
+
+    hedef.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  private yapistirilanMetniTemizle(metin: string, cokSatirli: boolean) {
+    const normalize = metin
+      .replace(/\r\n?/g, '\n')
+      .replace(/\u00a0/g, ' ')
+      .replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+    if (!cokSatirli) {
+      return normalize.replace(/\s+/g, ' ').trim();
+    }
+
+    return normalize
+      .split('\n')
+      .map(satir => satir.replace(/[ \t]+/g, ' ').trim())
+      .filter(Boolean)
+      .join('\n');
+  }
+
   get aktifDosya() { return this.aktifSayfa === 'icraDetay' ? this.seciliIcra : (this.aktifSayfa === 'arabuluculukDetay' ? this.seciliArabuluculuk : this.seciliDava); }
   aktifDosyaNotKomutuUygula(komut: 'bold' | 'italic' | 'underline' | 'insertUnorderedList' | 'insertOrderedList' | 'formatBlock' | 'removeFormat', deger?: string) {
     if (typeof document === 'undefined' || !this.dosyaNotEditorRef?.nativeElement) return;

@@ -4153,7 +4153,7 @@
                       @for(taraf of (islemGorenDava.davacilar || []); track $index) {
                         <div class="rounded-xl border border-blue-100 bg-white p-3">
                           <div class="grid gap-2 md:grid-cols-[minmax(0,1fr)_220px_auto] md:items-center">
-                            <input [(ngModel)]="taraf.isim" (ngModelChange)="davaTarafMetniElleDegisti(taraf, $event)" type="text" placeholder="Davacı adı / unvanı" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
+                            <input [(ngModel)]="taraf.isim" (ngModelChange)="davaTarafMetniElleDegisti(taraf, $event)" (paste)="temizMetinYapistir($event)" type="text" placeholder="Davacı adı / unvanı" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
                             <select [ngModel]="taraf.muvekkilId" (ngModelChange)="davaTarafSecimDegisti(taraf, $event)" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
                               <option [ngValue]="undefined">Listeden kişi / şirket seç</option>
                     @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option> }
@@ -4163,31 +4163,31 @@
                           <div class="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">TC / VKN</label>
-                              <input [(ngModel)]="taraf.tcKimlikVergiNo" type="text" placeholder="Kimlik veya vergi no" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.tcKimlikVergiNo" (paste)="temizMetinYapistir($event)" type="text" placeholder="Kimlik veya vergi no" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Telefon</label>
-                              <input [(ngModel)]="taraf.telefon" type="text" placeholder="Telefon" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.telefon" (paste)="temizMetinYapistir($event)" type="text" placeholder="Telefon" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">E-Posta</label>
-                              <input [(ngModel)]="taraf.eposta" type="email" placeholder="ornek@alan.com" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.eposta" (paste)="temizMetinYapistir($event)" type="email" placeholder="ornek@alan.com" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Vergi Dairesi</label>
-                              <input [(ngModel)]="taraf.vergiDairesi" type="text" placeholder="Varsa vergi dairesi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.vergiDairesi" (paste)="temizMetinYapistir($event)" type="text" placeholder="Varsa vergi dairesi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">İl</label>
-                              <input [(ngModel)]="taraf.il" type="text" placeholder="Örn: İstanbul" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.il" (paste)="temizMetinYapistir($event)" type="text" placeholder="Örn: İstanbul" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">İlçe</label>
-                              <input [(ngModel)]="taraf.ilce" type="text" placeholder="Örn: Kadıköy" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.ilce" (paste)="temizMetinYapistir($event)" type="text" placeholder="Örn: Kadıköy" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div class="md:col-span-2 xl:col-span-2">
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Açık Adres</label>
-                              <textarea [(ngModel)]="taraf.acikAdres" rows="2" placeholder="Mahalle, cadde, sokak, bina ve kapı bilgisi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white"></textarea>
+                              <textarea [(ngModel)]="taraf.acikAdres" (paste)="temizMetinYapistir($event, true)" rows="2" placeholder="Mahalle, cadde, sokak, bina ve kapı bilgisi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white"></textarea>
                             </div>
                           </div>
                           @if (taraf.muvekkilId) {
@@ -4206,7 +4206,7 @@
                       @for(taraf of (islemGorenDava.davalilar || []); track $index) {
                         <div class="rounded-xl border border-rose-100 bg-white p-3">
                           <div class="grid gap-2 md:grid-cols-[minmax(0,1fr)_220px_auto] md:items-center">
-                            <input [(ngModel)]="taraf.isim" (ngModelChange)="davaTarafMetniElleDegisti(taraf, $event)" type="text" placeholder="Davalı adı / unvanı" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
+                            <input [(ngModel)]="taraf.isim" (ngModelChange)="davaTarafMetniElleDegisti(taraf, $event)" (paste)="temizMetinYapistir($event)" type="text" placeholder="Davalı adı / unvanı" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
                             <select [ngModel]="taraf.muvekkilId" (ngModelChange)="davaTarafSecimDegisti(taraf, $event)" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none">
                               <option [ngValue]="undefined">Listeden kişi / şirket seç</option>
                     @for(m of muvekkiller; track m.id) { <option [ngValue]="m.id">{{ m.adSoyad }} {{ m.tip === 'Şirketler' ? '(Şirket/Kurum)' : '' }}</option> }
@@ -4216,31 +4216,31 @@
                           <div class="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">TC / VKN</label>
-                              <input [(ngModel)]="taraf.tcKimlikVergiNo" type="text" placeholder="Kimlik veya vergi no" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.tcKimlikVergiNo" (paste)="temizMetinYapistir($event)" type="text" placeholder="Kimlik veya vergi no" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Telefon</label>
-                              <input [(ngModel)]="taraf.telefon" type="text" placeholder="Telefon" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.telefon" (paste)="temizMetinYapistir($event)" type="text" placeholder="Telefon" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">E-Posta</label>
-                              <input [(ngModel)]="taraf.eposta" type="email" placeholder="ornek@alan.com" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.eposta" (paste)="temizMetinYapistir($event)" type="email" placeholder="ornek@alan.com" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Vergi Dairesi</label>
-                              <input [(ngModel)]="taraf.vergiDairesi" type="text" placeholder="Varsa vergi dairesi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.vergiDairesi" (paste)="temizMetinYapistir($event)" type="text" placeholder="Varsa vergi dairesi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">İl</label>
-                              <input [(ngModel)]="taraf.il" type="text" placeholder="Örn: İstanbul" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.il" (paste)="temizMetinYapistir($event)" type="text" placeholder="Örn: İstanbul" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div>
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">İlçe</label>
-                              <input [(ngModel)]="taraf.ilce" type="text" placeholder="Örn: Kadıköy" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
+                              <input [(ngModel)]="taraf.ilce" (paste)="temizMetinYapistir($event)" type="text" placeholder="Örn: Kadıköy" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white">
                             </div>
                             <div class="md:col-span-2 xl:col-span-2">
                               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Açık Adres</label>
-                              <textarea [(ngModel)]="taraf.acikAdres" rows="2" placeholder="Mahalle, cadde, sokak, bina ve kapı bilgisi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white"></textarea>
+                              <textarea [(ngModel)]="taraf.acikAdres" (paste)="temizMetinYapistir($event, true)" rows="2" placeholder="Mahalle, cadde, sokak, bina ve kapı bilgisi" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:bg-white"></textarea>
                             </div>
                           </div>
                           @if (taraf.muvekkilId) {
@@ -4385,8 +4385,8 @@
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-700">Taraf ve İlişki Bilgisi</p>
                 <p class="mt-2 text-sm leading-6 text-slate-500">Alacaklı, borçlu ve bağlı dava bilgisi aynı blokta durarak takibi daha kolay okunur hale getirir.</p>
                 <div class="mt-4 flex gap-4">
-                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Alacaklı</label><input [(ngModel)]="islemGorenIcra.alacakli" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Borçlu</label><input [(ngModel)]="islemGorenIcra.borclu" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Alacaklı</label><input [(ngModel)]="islemGorenIcra.alacakli" (paste)="temizMetinYapistir($event)" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div class="flex-1"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Borçlu</label><input [(ngModel)]="islemGorenIcra.borclu" (paste)="temizMetinYapistir($event)" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 </div>
 
                 <div class="mt-4">
@@ -4515,19 +4515,19 @@
                       </div>
                       <div>
                         <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Ad Soyad / Unvan</label>
-                        <input [(ngModel)]="hizliMuvekkilKaydi.adSoyad" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                        <input [(ngModel)]="hizliMuvekkilKaydi.adSoyad" (paste)="temizMetinYapistir($event)" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                       </div>
                       <div>
                         <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">TC / VKN</label>
-                        <input [(ngModel)]="hizliMuvekkilKaydi.tcKimlik" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                        <input [(ngModel)]="hizliMuvekkilKaydi.tcKimlik" (paste)="temizMetinYapistir($event)" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                       </div>
                       <div>
                         <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Telefon</label>
-                        <input [(ngModel)]="hizliMuvekkilKaydi.telefon" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                        <input [(ngModel)]="hizliMuvekkilKaydi.telefon" (paste)="temizMetinYapistir($event)" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                       </div>
                       <div class="sm:col-span-2">
                         <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">E-Posta</label>
-                        <input [(ngModel)]="hizliMuvekkilKaydi.eposta" type="email" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                        <input [(ngModel)]="hizliMuvekkilKaydi.eposta" (paste)="temizMetinYapistir($event)" type="email" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                       </div>
                       <div class="sm:col-span-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
                         <button (click)="hizliMuvekkilKaydiIptal()" type="button" class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-200">İptal</button>
@@ -4723,37 +4723,37 @@
                         </div>
                         <div class="md:col-span-2 xl:col-span-1">
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Manuel Kişi / Unvan</label>
-                          <input [ngModel]="taraf.isim" (ngModelChange)="arabuluculukTarafMetniElleDegisti(taraf, $event)" type="text" placeholder="Taraf ismi veya unvanını yazın" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none shadow-sm">
+                          <input [ngModel]="taraf.isim" (ngModelChange)="arabuluculukTarafMetniElleDegisti(taraf, $event)" (paste)="temizMetinYapistir($event)" type="text" placeholder="Taraf ismi veya unvanını yazın" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none shadow-sm">
                         </div>
                       </div>
                       <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                         <div>
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">TC No / Vergi No</label>
-                          <input [(ngModel)]="taraf.tcVergiNo" type="text" placeholder="TCKN veya VKN" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                          <input [(ngModel)]="taraf.tcVergiNo" (paste)="temizMetinYapistir($event)" type="text" placeholder="TCKN veya VKN" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                         </div>
                         <div>
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vergi Dairesi</label>
-                          <input [(ngModel)]="taraf.vergiDairesi" type="text" placeholder="Örn: Kadıköy" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                          <input [(ngModel)]="taraf.vergiDairesi" (paste)="temizMetinYapistir($event)" type="text" placeholder="Örn: Kadıköy" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                         </div>
                         <div>
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-700">İl</label>
-                          <input [(ngModel)]="taraf.il" type="text" placeholder="Örn: İstanbul" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                          <input [(ngModel)]="taraf.il" (paste)="temizMetinYapistir($event)" type="text" placeholder="Örn: İstanbul" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                         </div>
                         <div>
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-700">İlçe</label>
-                          <input [(ngModel)]="taraf.ilce" type="text" placeholder="Örn: Kadıköy" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                          <input [(ngModel)]="taraf.ilce" (paste)="temizMetinYapistir($event)" type="text" placeholder="Örn: Kadıköy" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                         </div>
                         <div class="md:col-span-2 xl:col-span-4">
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-700">Açık Adres</label>
-                          <textarea [(ngModel)]="taraf.acikAdres" rows="2" placeholder="Mahalle, cadde, sokak, bina ve kapı bilgisi" class="w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none"></textarea>
+                          <textarea [(ngModel)]="taraf.acikAdres" (paste)="temizMetinYapistir($event, true)" rows="2" placeholder="Mahalle, cadde, sokak, bina ve kapı bilgisi" class="w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none"></textarea>
                         </div>
                         <div>
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Telefon</label>
-                          <input [(ngModel)]="taraf.telefon" type="text" placeholder="05xx xxx xx xx" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                          <input [(ngModel)]="taraf.telefon" (paste)="temizMetinYapistir($event)" type="text" placeholder="05xx xxx xx xx" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                         </div>
                         <div>
                           <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">E-posta</label>
-                          <input [(ngModel)]="taraf.eposta" type="email" placeholder="ornek@alanadi.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                          <input [(ngModel)]="taraf.eposta" (paste)="temizMetinYapistir($event)" type="email" placeholder="ornek@alanadi.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                         </div>
                       </div>
                       <div class="app-arb-party-card__proxy mt-4 rounded-xl border border-violet-100 bg-violet-50/60 p-3">
@@ -4777,25 +4777,25 @@
                           </div>
                           <div class="md:col-span-2 xl:col-span-1">
                             <label class="mb-1 block text-[10px] font-bold uppercase text-violet-700">Manuel Vekil</label>
-                            <input [ngModel]="taraf.vekil" (ngModelChange)="arabuluculukTarafVekilMetniElleDegisti(taraf, $event)" type="text" placeholder="Varsa vekil adı soyadı" class="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm outline-none">
+                            <input [ngModel]="taraf.vekil" (ngModelChange)="arabuluculukTarafVekilMetniElleDegisti(taraf, $event)" (paste)="temizMetinYapistir($event)" type="text" placeholder="Varsa vekil adı soyadı" class="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm outline-none">
                           </div>
                         </div>
                         <div class="mt-3 grid gap-3 md:grid-cols-3">
                           <div>
                             <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil TCKN</label>
-                            <input [(ngModel)]="taraf.vekilTckn" type="text" placeholder="Vekilin TCKN bilgisi" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                            <input [(ngModel)]="taraf.vekilTckn" (paste)="temizMetinYapistir($event)" type="text" placeholder="Vekilin TCKN bilgisi" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                           </div>
                           <div>
                             <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil Telefon</label>
-                            <input [(ngModel)]="taraf.vekilTelefon" type="text" placeholder="05xx xxx xx xx" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                            <input [(ngModel)]="taraf.vekilTelefon" (paste)="temizMetinYapistir($event)" type="text" placeholder="05xx xxx xx xx" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                           </div>
                           <div>
                             <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil E-posta</label>
-                            <input [(ngModel)]="taraf.vekilEposta" type="email" placeholder="vekil@alanadi.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                            <input [(ngModel)]="taraf.vekilEposta" (paste)="temizMetinYapistir($event)" type="email" placeholder="vekil@alanadi.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                           </div>
                           <div class="md:col-span-3">
                             <label class="mb-1 block text-[10px] font-bold uppercase text-slate-500">Vekil Baro Bilgisi</label>
-                            <input [(ngModel)]="taraf.vekilBaroBilgisi" type="text" placeholder="Örn: İstanbul Barosu Sicil No: 12345" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
+                            <input [(ngModel)]="taraf.vekilBaroBilgisi" (paste)="temizMetinYapistir($event)" type="text" placeholder="Örn: İstanbul Barosu Sicil No: 12345" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none">
                           </div>
                         </div>
                       </div>
@@ -4920,24 +4920,24 @@
               <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-indigo-700">Kimlik ve İletişim</p>
                 <p class="mt-2 text-sm leading-6 text-slate-500">Temel kişi veya kurum bilgileri tek blokta durarak müvekkil kartını daha düzenli hale getirir.</p>
-                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 mb-1">Ad Soyad / Unvan <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenMuvekkil.adSoyad" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div class="mt-4"><label class="block text-xs font-bold text-slate-500 mb-1">Ad Soyad / Unvan <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenMuvekkil.adSoyad" (paste)="temizMetinYapistir($event)" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div class="mt-4 grid grid-cols-2 gap-4">
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">TC Kimlik / VKN</label><input [(ngModel)]="islemGorenMuvekkil.tcKimlik" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">Telefon</label><input [(ngModel)]="islemGorenMuvekkil.telefon" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">TC Kimlik / VKN</label><input [(ngModel)]="islemGorenMuvekkil.tcKimlik" (paste)="temizMetinYapistir($event)" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Telefon</label><input [(ngModel)]="islemGorenMuvekkil.telefon" (paste)="temizMetinYapistir($event)" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
               </div>
                 <div class="mt-4 grid grid-cols-2 gap-4">
-                  <div><label class="block text-xs font-bold text-slate-700 mb-1">İl</label><input [(ngModel)]="islemGorenMuvekkil.il" type="text" placeholder="Örn: İstanbul" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-                  <div><label class="block text-xs font-bold text-slate-700 mb-1">İlçe</label><input [(ngModel)]="islemGorenMuvekkil.ilce" type="text" placeholder="Örn: Kadıköy" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                  <div><label class="block text-xs font-bold text-slate-700 mb-1">İl</label><input [(ngModel)]="islemGorenMuvekkil.il" (paste)="temizMetinYapistir($event)" type="text" placeholder="Örn: İstanbul" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                  <div><label class="block text-xs font-bold text-slate-700 mb-1">İlçe</label><input [(ngModel)]="islemGorenMuvekkil.ilce" (paste)="temizMetinYapistir($event)" type="text" placeholder="Örn: Kadıköy" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 </div>
-                <div class="mt-4"><label class="block text-xs font-bold text-slate-700 mb-1">Açık Adres</label><textarea [(ngModel)]="islemGorenMuvekkil.acikAdres" rows="3" placeholder="Mahalle, cadde, sokak, bina ve kapı bilgisi" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></textarea></div>
+                <div class="mt-4"><label class="block text-xs font-bold text-slate-700 mb-1">Açık Adres</label><textarea [(ngModel)]="islemGorenMuvekkil.acikAdres" (paste)="temizMetinYapistir($event, true)" rows="3" placeholder="Mahalle, cadde, sokak, bina ve kapı bilgisi" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></textarea></div>
               </div>
 
               <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-700">Finans ve Belgeler</p>
                 <p class="mt-2 text-sm leading-6 text-slate-500">Banka, e-posta ve vekalet bağlantısını bir arada tutarak dosya hazırlığını hızlandırın.</p>
                 <div class="mt-4 grid grid-cols-2 gap-4">
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">E-Posta</label><input [(ngModel)]="islemGorenMuvekkil.eposta" type="email" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">Banka ve IBAN Bilgisi</label><input [(ngModel)]="islemGorenMuvekkil.bankaBilgileri" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">E-Posta</label><input [(ngModel)]="islemGorenMuvekkil.eposta" (paste)="temizMetinYapistir($event)" type="email" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Banka ve IBAN Bilgisi</label><input [(ngModel)]="islemGorenMuvekkil.bankaBilgileri" (paste)="temizMetinYapistir($event)" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
               </div>
                 <div class="mt-4"><label class="block text-xs font-bold text-slate-500 mb-1">Vekaletname Bağlantısı (URL)</label><input [(ngModel)]="islemGorenMuvekkil.vekaletnameUrl" type="text" placeholder="Örn: Google Drive linki, UYAP bağlantısı..." class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none text-blue-600 bg-slate-50 focus:bg-white transition-colors"></div>
                 <div class="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50/80 p-3">
