@@ -31,6 +31,7 @@ import {
   Muvekkil,
   MuvekkilGorusmeNotu,
   OfisGorevi,
+  OfisGoreviBagliDosyaTuru,
   SayfaTipi,
   TakvimGecmisKaydi,
   TakvimGecmisiDurumu,
@@ -81,6 +82,16 @@ type GoogleCalendarAktarimKaydi = {
   eventId: string;
   htmlLink?: string;
   aktarimTarihi: string;
+};
+
+type GorevBagliDosyaSecenegi = {
+  anahtar: string;
+  tur: OfisGoreviBagliDosyaTuru;
+  id: number;
+  baslik: string;
+  altBaslik: string;
+  taraflar: string;
+  dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi;
 };
 
 type BelgeCiktiFormu = {
@@ -341,8 +352,11 @@ export class AppComponent implements OnInit {
   ajandaZamanFiltresi: 'all' | 'today' | '7days' | '30days' | 'overdue' = 'all';
   ajandaTurFiltresi: 'all' | AjandaTur = 'all';
   yeniOfisGorevi: Partial<OfisGorevi> = { tarih: new Date().toISOString().split('T')[0], saat: '', oncelik: 'Normal' };
+  yeniOfisGoreviBagliDosyaAnahtari = '';
   duzenlenenOfisGoreviId: number | null = null;
   duzenlenenOfisGorevi: Partial<OfisGorevi> = {};
+  duzenlenenOfisGoreviBagliDosyaAnahtari = '';
+  aktifDosyaGorevFormu: Partial<OfisGorevi> = { tarih: new Date().toISOString().split('T')[0], saat: '', oncelik: 'Normal', baslik: '', aciklama: '' };
   
   arabuluculukMuvekkilDropdownAcik = false;
   arabuluculukMuvekkilArama = '';
@@ -2892,6 +2906,160 @@ export class AppComponent implements OnInit {
 
   ofisGoreviFormunuSifirla() {
     this.yeniOfisGorevi = { tarih: new Date().toISOString().split('T')[0], saat: '', oncelik: 'Normal', baslik: '', aciklama: '' };
+    this.yeniOfisGoreviBagliDosyaAnahtari = '';
+  }
+
+  aktifDosyaGoreviFormunuSifirla() {
+    this.aktifDosyaGorevFormu = { tarih: new Date().toISOString().split('T')[0], saat: '', oncelik: 'Normal', baslik: '', aciklama: '' };
+  }
+
+  get ofisGoreviDosyaSecenekleri(): GorevBagliDosyaSecenegi[] {
+    const secenekler: GorevBagliDosyaSecenegi[] = [
+      ...this.davalar.map(dosya => this.ofisGoreviDosyaSecenegiOlustur('dava', dosya)),
+      ...this.icralar.map(dosya => this.ofisGoreviDosyaSecenegiOlustur('icra', dosya)),
+      ...this.arabuluculukDosyalar.map(dosya => this.ofisGoreviDosyaSecenegiOlustur('arabuluculuk', dosya))
+    ];
+    return secenekler.sort((a, b) => a.baslik.localeCompare(b.baslik, 'tr'));
+  }
+
+  ofisGoreviDosyaSecenegiOlustur(tur: OfisGoreviBagliDosyaTuru, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi): GorevBagliDosyaSecenegi {
+    const baslik = this.getAjandaDosyaOzeti(tur, dosya);
+    const taraflar = tur === 'dava'
+      ? this.getDavaTarafOzet(dosya as DavaDosyasi)
+      : this.getTaraflarMetni({ tur, dosya });
+    const altBaslik = tur === 'dava'
+      ? [this.formatMetin((dosya as DavaDosyasi).mahkeme), this.formatMetin((dosya as DavaDosyasi).konu)].filter(Boolean).join(' • ')
+      : tur === 'icra'
+        ? [this.formatMetin((dosya as IcraDosyasi).icraDairesi), this.formatMetin((dosya as IcraDosyasi).takipTipi)].filter(Boolean).join(' • ')
+        : [this.formatMetin((dosya as ArabuluculukDosyasi).buro), this.formatMetin((dosya as ArabuluculukDosyasi).uyusmazlikTuru)].filter(Boolean).join(' • ');
+    return {
+      anahtar: `${tur}:${dosya.id}`,
+      tur,
+      id: dosya.id,
+      baslik,
+      altBaslik,
+      taraflar,
+      dosya
+    };
+  }
+
+  getOfisGoreviBagliDosyaSecenegi(anahtar?: string) {
+    return this.ofisGoreviDosyaSecenekleri.find(secenek => secenek.anahtar === anahtar);
+  }
+
+  ofisGoreviBagliDosyaAnahtari(gorev?: Partial<OfisGorevi> | null) {
+    return gorev?.bagliDosyaTuru && gorev.bagliDosyaId ? `${gorev.bagliDosyaTuru}:${gorev.bagliDosyaId}` : '';
+  }
+
+  ofisGoreviBaglantiAlanlariOlustur(secenek?: GorevBagliDosyaSecenegi | null): Partial<OfisGorevi> {
+    return {
+      bagliDosyaTuru: secenek?.tur,
+      bagliDosyaId: secenek?.id,
+      bagliDosyaBaslik: secenek?.baslik,
+      bagliDosyaTaraflar: secenek?.taraflar
+    };
+  }
+
+  getOfisGoreviBagliDosyasi(gorev?: Partial<OfisGorevi> | null) {
+    if (!gorev?.bagliDosyaTuru || !gorev.bagliDosyaId) return undefined;
+    if (gorev.bagliDosyaTuru === 'dava') return this.davalar.find(dosya => dosya.id === gorev.bagliDosyaId);
+    if (gorev.bagliDosyaTuru === 'icra') return this.icralar.find(dosya => dosya.id === gorev.bagliDosyaId);
+    return this.arabuluculukDosyalar.find(dosya => dosya.id === gorev.bagliDosyaId);
+  }
+
+  getOfisGoreviBagliDosyaBaslik(gorev?: Partial<OfisGorevi> | null) {
+    const dosya = this.getOfisGoreviBagliDosyasi(gorev);
+    if (dosya && gorev?.bagliDosyaTuru) return this.getAjandaDosyaOzeti(gorev.bagliDosyaTuru, dosya);
+    return gorev?.bagliDosyaBaslik || '';
+  }
+
+  getOfisGoreviBagliDosyaTaraflar(gorev?: Partial<OfisGorevi> | null) {
+    const dosya = this.getOfisGoreviBagliDosyasi(gorev);
+    if (dosya && gorev?.bagliDosyaTuru) {
+      return gorev.bagliDosyaTuru === 'dava'
+        ? this.getDavaTarafOzet(dosya as DavaDosyasi)
+        : this.getTaraflarMetni({ tur: gorev.bagliDosyaTuru, dosya });
+    }
+    return gorev?.bagliDosyaTaraflar || '';
+  }
+
+  getOfisGoreviBagliDosyaEtiketi(gorev?: Partial<OfisGorevi> | null) {
+    if (gorev?.bagliDosyaTuru === 'dava') return 'Dava';
+    if (gorev?.bagliDosyaTuru === 'icra') return 'İcra';
+    if (gorev?.bagliDosyaTuru === 'arabuluculuk') return 'Arabuluculuk';
+    return 'Dosyaya bağlı değil';
+  }
+
+  getOfisGoreviBagliDosyaClass(gorev?: Partial<OfisGorevi> | null) {
+    if (gorev?.bagliDosyaTuru === 'dava') return 'border-blue-200 bg-blue-50 text-blue-700';
+    if (gorev?.bagliDosyaTuru === 'icra') return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    if (gorev?.bagliDosyaTuru === 'arabuluculuk') return 'border-violet-200 bg-violet-50 text-violet-700';
+    return 'border-slate-200 bg-slate-50 text-slate-600';
+  }
+
+  get aktifDosyaOfisGorevleri() {
+    const kaynak = this.getAktifDosyaAjandaKaynak();
+    const dosya = this.aktifDosya as DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null;
+    if (!kaynak || !dosya) return [];
+    return this.aktifOfisGorevleri.filter(gorev => gorev.bagliDosyaTuru === kaynak && gorev.bagliDosyaId === dosya.id);
+  }
+
+  async aktifDosyaGoreviKaydet() {
+    const kaynak = this.getAktifDosyaAjandaKaynak() as OfisGoreviBagliDosyaTuru | null;
+    const dosya = this.aktifDosya as DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null;
+    if (!kaynak || !dosya) return;
+
+    const baslik = this.formatMetin(this.aktifDosyaGorevFormu.baslik)?.trim();
+    const tarih = (this.aktifDosyaGorevFormu.tarih || '').trim();
+    if (!baslik || !tarih) {
+      this.bildirimGoster('info', 'Dosya görevi eksik', 'Görev başlığı ve tarih alanını doldurun.');
+      return;
+    }
+
+    const secenek = this.ofisGoreviDosyaSecenegiOlustur(kaynak, dosya);
+    const gorev: OfisGorevi = {
+      id: Date.now(),
+      baslik,
+      aciklama: (this.aktifDosyaGorevFormu.aciklama || '').trim(),
+      tarih,
+      saat: (this.aktifDosyaGorevFormu.saat || '').trim().slice(0, 5),
+      oncelik: this.aktifDosyaGorevFormu.oncelik || 'Normal',
+      ...this.ofisGoreviBaglantiAlanlariOlustur(secenek),
+      tamamlandiMi: false,
+      kayitTarihi: new Date().toISOString()
+    };
+    const kaydedildi = await this.ofisGoreviKaydetCloud(gorev, 'Görev bu dosyaya bağlandı ve ajandaya eklendi.');
+    if (!kaydedildi) return;
+    this.aktifDosyaGoreviFormunuSifirla();
+  }
+
+  ofisGoreviBagliDosyayaGit(gorev: OfisGorevi, event?: Event) {
+    event?.stopPropagation();
+    const dosya = this.getOfisGoreviBagliDosyasi(gorev);
+    if (!dosya || !gorev.bagliDosyaTuru) {
+      this.sayfaDegistir('ajanda');
+      return;
+    }
+    if (gorev.bagliDosyaTuru === 'dava') this.detayaGit(dosya as DavaDosyasi);
+    else if (gorev.bagliDosyaTuru === 'icra') this.icraDetayinaGit(dosya as IcraDosyasi);
+    else this.arabuluculukDetayinaGit(dosya as ArabuluculukDosyasi);
+  }
+
+  ofisGoreviAjandaKaydiOlustur(gorev: OfisGorevi): AjandaKaydi {
+    const dosya = this.getOfisGoreviBagliDosyasi(gorev);
+    const kaynak: AjandaKaynak = dosya && gorev.bagliDosyaTuru ? gorev.bagliDosyaTuru : 'ofis';
+    return {
+      id: `ofis-gorevi-${gorev.id}`,
+      tarih: this.birlestirTarihVeSaat(gorev.tarih, gorev.saat),
+      saat: gorev.saat,
+      tur: 'ofisGorevi',
+      kaynak,
+      dosya,
+      ofisGorevi: gorev,
+      baslik: gorev.baslik || 'Ofis görevi',
+      altBaslik: gorev.aciklama || (dosya ? this.getAjandaDosyaOzeti(kaynak, dosya) : `${gorev.oncelik || 'Normal'} öncelikli ofis içi iş`),
+      taraflar: dosya ? (this.getOfisGoreviBagliDosyaTaraflar(gorev) || 'Dosyaya bağlı görev') : 'Ofis içi görev'
+    };
   }
 
   ofisGoreviZamanDamgasi(gorev?: Partial<OfisGorevi>) {
@@ -2913,6 +3081,7 @@ export class AppComponent implements OnInit {
       return;
     }
 
+    const secilenDosya = this.getOfisGoreviBagliDosyaSecenegi(this.yeniOfisGoreviBagliDosyaAnahtari);
     const gorev: OfisGorevi = {
       id: Date.now(),
       baslik,
@@ -2920,6 +3089,7 @@ export class AppComponent implements OnInit {
       tarih,
       saat: (this.yeniOfisGorevi.saat || '').trim().slice(0, 5),
       oncelik: this.yeniOfisGorevi.oncelik || 'Normal',
+      ...this.ofisGoreviBaglantiAlanlariOlustur(secilenDosya),
       tamamlandiMi: false,
       kayitTarihi: new Date().toISOString()
     };
@@ -2932,12 +3102,14 @@ export class AppComponent implements OnInit {
     event?.stopPropagation();
     this.duzenlenenOfisGoreviId = gorev.id;
     this.duzenlenenOfisGorevi = { ...gorev };
+    this.duzenlenenOfisGoreviBagliDosyaAnahtari = this.ofisGoreviBagliDosyaAnahtari(gorev);
   }
 
   ofisGoreviDuzenlemeIptal(event?: Event) {
     event?.stopPropagation();
     this.duzenlenenOfisGoreviId = null;
     this.duzenlenenOfisGorevi = {};
+    this.duzenlenenOfisGoreviBagliDosyaAnahtari = '';
   }
 
   async ofisGoreviGuncelleKaydet(event?: Event) {
@@ -2952,13 +3124,15 @@ export class AppComponent implements OnInit {
       return;
     }
 
+    const secilenDosya = this.getOfisGoreviBagliDosyaSecenegi(this.duzenlenenOfisGoreviBagliDosyaAnahtari);
     const guncel: OfisGorevi = {
       ...mevcut,
       baslik,
       aciklama: (this.duzenlenenOfisGorevi.aciklama || '').trim(),
       tarih,
       saat: (this.duzenlenenOfisGorevi.saat || '').trim().slice(0, 5),
-      oncelik: this.duzenlenenOfisGorevi.oncelik || 'Normal'
+      oncelik: this.duzenlenenOfisGorevi.oncelik || 'Normal',
+      ...this.ofisGoreviBaglantiAlanlariOlustur(secilenDosya)
     };
     const kaydedildi = await this.ofisGoreviKaydetCloud(guncel, 'Ofis görevi güncellendi.');
     if (!kaydedildi) return;
@@ -3106,19 +3280,7 @@ export class AppComponent implements OnInit {
       });
     });
 
-    this.aktifOfisGorevleri.forEach(gorev => {
-      kayitlar.push({
-        id: `ofis-gorevi-${gorev.id}`,
-        tarih: this.birlestirTarihVeSaat(gorev.tarih, gorev.saat),
-        saat: gorev.saat,
-        tur: 'ofisGorevi',
-        kaynak: 'ofis',
-        ofisGorevi: gorev,
-        baslik: gorev.baslik || 'Ofis görevi',
-        altBaslik: gorev.aciklama || `${gorev.oncelik || 'Normal'} öncelikli ofis içi iş`,
-        taraflar: 'Ofis içi görev'
-      });
-    });
+    this.aktifOfisGorevleri.forEach(gorev => kayitlar.push(this.ofisGoreviAjandaKaydiOlustur(gorev)));
 
     return kayitlar.sort((a, b) => this.ajandaTarihDamgasi(a.tarih) - this.ajandaTarihDamgasi(b.tarih));
   }
@@ -3172,19 +3334,7 @@ export class AppComponent implements OnInit {
       });
     });
 
-    this.aktifOfisGorevleri.forEach(gorev => {
-      kayitlar.push({
-        id: `ofis-gorevi-${gorev.id}`,
-        tarih: this.birlestirTarihVeSaat(gorev.tarih, gorev.saat),
-        saat: gorev.saat,
-        tur: 'ofisGorevi',
-        kaynak: 'ofis',
-        ofisGorevi: gorev,
-        baslik: gorev.baslik || 'Ofis görevi',
-        altBaslik: gorev.aciklama || `${gorev.oncelik || 'Normal'} öncelikli ofis içi iş`,
-        taraflar: 'Ofis içi görev'
-      });
-    });
+    this.aktifOfisGorevleri.forEach(gorev => kayitlar.push(this.ofisGoreviAjandaKaydiOlustur(gorev)));
 
     return kayitlar.sort((a, b) => this.ajandaTarihDamgasi(a.tarih) - this.ajandaTarihDamgasi(b.tarih));
   }
@@ -3201,6 +3351,8 @@ export class AppComponent implements OnInit {
         kayit.anaEvrakIsmi || '',
         kayit.ofisGorevi?.aciklama || '',
         kayit.ofisGorevi?.oncelik || '',
+        kayit.ofisGorevi?.bagliDosyaBaslik || '',
+        kayit.ofisGorevi?.bagliDosyaTaraflar || '',
         this.getAjandaKaynakEtiketi(kayit.kaynak),
         this.getAjandaTurEtiketi(kayit.tur),
         this.getAjandaDosyaOzeti(kayit.kaynak, kayit.dosya)

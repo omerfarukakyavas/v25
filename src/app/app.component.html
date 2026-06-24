@@ -1333,8 +1333,8 @@
                   <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="border-b border-slate-200 bg-gradient-to-r from-emerald-50 via-white to-slate-50 px-5 py-4">
                       <p class="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-700">Ofis İçi Görevler</p>
-                      <h3 class="mt-1 text-lg font-black text-slate-900">Dosyaya bağlı olmayan işleri ajandaya ekle</h3>
-                      <p class="mt-1 text-sm text-slate-600">Kendi yapacağın ofis görevleri burada tutulur ve ajanda akışında ayrıca görünür.</p>
+                      <h3 class="mt-1 text-lg font-black text-slate-900">Ofis ve dosya görevlerini ajandaya ekle</h3>
+                      <p class="mt-1 text-sm text-slate-600">Görevi ister bağımsız bırakabilir, ister dava, icra veya arabuluculuk dosyasına bağlayabilirsin.</p>
                     </div>
                     <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 p-5">
                       <div class="xl:col-span-7 rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -1360,6 +1360,15 @@
                             </select>
                           </div>
                           <div class="md:col-span-7">
+                            <label class="block text-xs font-black text-slate-900 mb-1">Dosyaya Bağla (Opsiyonel)</label>
+                            <select [(ngModel)]="yeniOfisGoreviBagliDosyaAnahtari" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                              <option value="">Dosyaya bağlı değil</option>
+                              @for (secenek of ofisGoreviDosyaSecenekleri; track secenek.anahtar) {
+                                <option [value]="secenek.anahtar">{{ getAjandaKaynakEtiketi(secenek.tur) }} · {{ secenek.baslik }} · {{ secenek.taraflar }}</option>
+                              }
+                            </select>
+                          </div>
+                          <div class="md:col-span-10">
                             <label class="block text-xs font-black text-slate-900 mb-1">Not</label>
                             <input [(ngModel)]="yeniOfisGorevi.aciklama" type="text" placeholder="Kısa açıklama veya hatırlatma..." class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                           </div>
@@ -1390,6 +1399,12 @@
                                     <option value="Önemli">Önemli</option>
                                     <option value="Acil">Acil</option>
                                   </select>
+                                  <select [(ngModel)]="duzenlenenOfisGoreviBagliDosyaAnahtari" class="sm:col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                                    <option value="">Dosyaya bağlı değil</option>
+                                    @for (secenek of ofisGoreviDosyaSecenekleri; track secenek.anahtar) {
+                                      <option [value]="secenek.anahtar">{{ getAjandaKaynakEtiketi(secenek.tur) }} · {{ secenek.baslik }} · {{ secenek.taraflar }}</option>
+                                    }
+                                  </select>
                                   <input [(ngModel)]="duzenlenenOfisGorevi.aciklama" type="text" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Not">
                                   <div class="sm:col-span-2 flex justify-end gap-2">
                                     <button type="button" (click)="ofisGoreviDuzenlemeIptal($event)" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600">Vazgeç</button>
@@ -1402,9 +1417,16 @@
                                     <div class="flex flex-wrap items-center gap-2">
                                       <span [class]="getOfisGoreviOncelikClass(gorev.oncelik)" class="rounded-full border px-2 py-0.5 text-[10px] font-black">{{ gorev.oncelik }}</span>
                                       <span class="text-[11px] font-bold text-slate-500">{{ formatTarihSaatKisa(gorev.tarih, gorev.saat) }}</span>
+                                      @if (gorev.bagliDosyaTuru) {
+                                        <button type="button" (click)="ofisGoreviBagliDosyayaGit(gorev, $event)" [class]="getOfisGoreviBagliDosyaClass(gorev)" class="rounded-full border px-2 py-0.5 text-[10px] font-black">{{ getOfisGoreviBagliDosyaEtiketi(gorev) }}</button>
+                                      }
                                     </div>
                                     <p class="mt-2 text-sm font-black text-slate-900">{{ gorev.baslik }}</p>
                                     @if (gorev.aciklama) { <p class="mt-1 text-xs text-slate-600">{{ gorev.aciklama }}</p> }
+                                    @if (gorev.bagliDosyaTuru) {
+                                      <p class="mt-2 text-[11px] font-bold text-slate-700">{{ getOfisGoreviBagliDosyaBaslik(gorev) }}</p>
+                                      <p class="mt-0.5 line-clamp-2 text-[11px] text-slate-500">{{ getOfisGoreviBagliDosyaTaraflar(gorev) }}</p>
+                                    }
                                   </div>
                                   <div class="flex shrink-0 gap-1">
                                     <button type="button" (click)="ofisGoreviTamamla(gorev, $event)" class="rounded-lg bg-slate-900 px-2 py-1 text-[10px] font-black text-white">Bitti</button>
@@ -2467,6 +2489,68 @@
                         </div>
                       </div>
                     </div>
+                  </div>
+
+                  <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm sm:p-5">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Dosyaya Bağlı Görevler</p>
+                        <h4 class="mt-1 text-base font-black text-slate-900">Bu dosyaya özel görev ekle</h4>
+                        <p class="mt-1 text-xs font-medium leading-5 text-slate-600">Örn: İstinafa başvur, ara kararı yerine getir, ödeme kontrolü yap. Görev ajandada da görünür.</p>
+                      </div>
+                      <span class="inline-flex w-fit rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-black text-emerald-700">{{ aktifDosyaOfisGorevleri.length }} aktif görev</span>
+                    </div>
+
+                    <div class="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_150px_120px_140px_minmax(0,0.9fr)_auto] lg:items-end">
+                      <div>
+                        <label class="mb-1 block text-xs font-black text-slate-900">Görev Başlığı</label>
+                        <input [(ngModel)]="aktifDosyaGorevFormu.baslik" type="text" placeholder="Örn: İstinafa başvur" class="w-full rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-xs font-black text-slate-900">Tarih</label>
+                        <input [(ngModel)]="aktifDosyaGorevFormu.tarih" type="date" class="w-full rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-xs font-black text-slate-900">Saat</label>
+                        <input [(ngModel)]="aktifDosyaGorevFormu.saat" type="time" class="w-full rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-xs font-black text-slate-900">Öncelik</label>
+                        <select [(ngModel)]="aktifDosyaGorevFormu.oncelik" class="w-full rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500">
+                          <option value="Normal">Normal</option>
+                          <option value="Önemli">Önemli</option>
+                          <option value="Acil">Acil</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-xs font-black text-slate-900">Not</label>
+                        <input [(ngModel)]="aktifDosyaGorevFormu.aciklama" type="text" placeholder="Kısa açıklama..." class="w-full rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                      </div>
+                      <button type="button" (click)="aktifDosyaGoreviKaydet()" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-black text-white shadow-sm transition-colors hover:bg-emerald-700">Görev Ekle</button>
+                    </div>
+
+                    @if (aktifDosyaOfisGorevleri.length > 0) {
+                      <div class="mt-4 grid gap-2 lg:grid-cols-2">
+                        @for (gorev of aktifDosyaOfisGorevleri; track gorev.id) {
+                          <div class="rounded-xl border border-emerald-100 bg-white p-3 shadow-sm">
+                            <div class="flex items-start justify-between gap-3">
+                              <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-2">
+                                  <span [class]="getOfisGoreviOncelikClass(gorev.oncelik)" class="rounded-full border px-2 py-0.5 text-[10px] font-black">{{ gorev.oncelik }}</span>
+                                  <span class="text-[11px] font-bold text-slate-500">{{ formatTarihSaatKisa(gorev.tarih, gorev.saat) }}</span>
+                                </div>
+                                <p class="mt-2 text-sm font-black text-slate-900">{{ gorev.baslik }}</p>
+                                @if (gorev.aciklama) { <p class="mt-1 text-xs text-slate-600">{{ gorev.aciklama }}</p> }
+                              </div>
+                              <div class="flex shrink-0 gap-1">
+                                <button type="button" (click)="ofisGoreviTamamla(gorev, $event)" class="rounded-lg bg-slate-900 px-2 py-1 text-[10px] font-black text-white">Bitti</button>
+                                <button type="button" (click)="ofisGoreviDuzenleBaslat(gorev, $event); sayfaDegistir('ajanda')" class="rounded-lg bg-amber-50 px-2 py-1 text-[10px] font-black text-amber-700">Ajandada Düzenle</button>
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
                   </div>
 
                   <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">

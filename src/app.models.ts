@@ -102,6 +102,7 @@ export interface TakvimGecmisKaydi {
 }
 
 export type OfisGoreviOncelik = 'Normal' | 'Önemli' | 'Acil';
+export type OfisGoreviBagliDosyaTuru = 'dava' | 'icra' | 'arabuluculuk';
 
 export interface OfisGorevi {
   id: number;
@@ -110,6 +111,10 @@ export interface OfisGorevi {
   tarih: string;
   saat?: string;
   oncelik: OfisGoreviOncelik;
+  bagliDosyaTuru?: OfisGoreviBagliDosyaTuru;
+  bagliDosyaId?: number;
+  bagliDosyaBaslik?: string;
+  bagliDosyaTaraflar?: string;
   tamamlandiMi?: boolean;
   kayitTarihi: string;
   tamamlanmaTarihi?: string;
