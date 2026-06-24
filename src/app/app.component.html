@@ -1359,14 +1359,30 @@
                               <option value="Acil">Acil</option>
                             </select>
                           </div>
-                          <div class="md:col-span-7">
-                            <label class="block text-xs font-black text-slate-900 mb-1">Dosyaya Bağla (Opsiyonel)</label>
-                            <select [(ngModel)]="yeniOfisGoreviBagliDosyaAnahtari" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                              <option value="">Dosyaya bağlı değil</option>
-                              @for (secenek of ofisGoreviDosyaSecenekleri; track secenek.anahtar) {
-                                <option [value]="secenek.anahtar">{{ getAjandaKaynakEtiketi(secenek.tur) }} · {{ secenek.baslik }} · {{ secenek.taraflar }}</option>
+                          <div class="md:col-span-3">
+                            <label class="block text-xs font-black text-slate-900 mb-1">Dosya Türü</label>
+                            <select [(ngModel)]="yeniOfisGoreviBagliDosyaTuru" (ngModelChange)="ofisGoreviBagliDosyaTuruDegisti('yeni')" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                              <option value="">Bağlantı yok</option>
+                              <option value="dava">Dava</option>
+                              <option value="icra">İcra</option>
+                              <option value="arabuluculuk">Arabuluculuk</option>
+                            </select>
+                          </div>
+                          <div class="md:col-span-4">
+                            <label class="block text-xs font-black text-slate-900 mb-1">Dosya Ara</label>
+                            <input [(ngModel)]="yeniOfisGoreviBagliDosyaArama" [disabled]="!yeniOfisGoreviBagliDosyaTuru" type="text" placeholder="Dosya no, taraf, mahkeme veya büro ara" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-100 disabled:text-slate-400">
+                          </div>
+                          <div class="md:col-span-5">
+                            <label class="block text-xs font-black text-slate-900 mb-1">Dosya Seç</label>
+                            <select [(ngModel)]="yeniOfisGoreviBagliDosyaAnahtari" [disabled]="!yeniOfisGoreviBagliDosyaTuru" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-100 disabled:text-slate-400">
+                              <option value="">{{ yeniOfisGoreviBagliDosyaTuru ? 'Dosya seç' : 'Önce dosya türü seç' }}</option>
+                              @for (secenek of yeniOfisGoreviFiltreliDosyaSecenekleri; track secenek.anahtar) {
+                                <option [value]="secenek.anahtar">{{ secenek.baslik }} · {{ secenek.taraflar }}</option>
                               }
                             </select>
+                            @if (yeniOfisGoreviBagliDosyaTuru) {
+                              <p class="mt-1 text-[11px] font-medium text-slate-500">{{ yeniOfisGoreviFiltreliDosyaSecenekleri.length }} sonuç gösteriliyor</p>
+                            }
                           </div>
                           <div class="md:col-span-10">
                             <label class="block text-xs font-black text-slate-900 mb-1">Not</label>
@@ -1399,10 +1415,17 @@
                                     <option value="Önemli">Önemli</option>
                                     <option value="Acil">Acil</option>
                                   </select>
-                                  <select [(ngModel)]="duzenlenenOfisGoreviBagliDosyaAnahtari" class="sm:col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                                    <option value="">Dosyaya bağlı değil</option>
-                                    @for (secenek of ofisGoreviDosyaSecenekleri; track secenek.anahtar) {
-                                      <option [value]="secenek.anahtar">{{ getAjandaKaynakEtiketi(secenek.tur) }} · {{ secenek.baslik }} · {{ secenek.taraflar }}</option>
+                                  <select [(ngModel)]="duzenlenenOfisGoreviBagliDosyaTuru" (ngModelChange)="ofisGoreviBagliDosyaTuruDegisti('duzenleme')" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                                    <option value="">Bağlantı yok</option>
+                                    <option value="dava">Dava</option>
+                                    <option value="icra">İcra</option>
+                                    <option value="arabuluculuk">Arabuluculuk</option>
+                                  </select>
+                                  <input [(ngModel)]="duzenlenenOfisGoreviBagliDosyaArama" [disabled]="!duzenlenenOfisGoreviBagliDosyaTuru" type="text" placeholder="Dosya ara" class="rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100 disabled:text-slate-400">
+                                  <select [(ngModel)]="duzenlenenOfisGoreviBagliDosyaAnahtari" [disabled]="!duzenlenenOfisGoreviBagliDosyaTuru" class="sm:col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100 disabled:text-slate-400">
+                                    <option value="">{{ duzenlenenOfisGoreviBagliDosyaTuru ? 'Dosya seç' : 'Önce dosya türü seç' }}</option>
+                                    @for (secenek of duzenlenenOfisGoreviFiltreliDosyaSecenekleri; track secenek.anahtar) {
+                                      <option [value]="secenek.anahtar">{{ secenek.baslik }} · {{ secenek.taraflar }}</option>
                                     }
                                   </select>
                                   <input [(ngModel)]="duzenlenenOfisGorevi.aciklama" type="text" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Not">

@@ -352,9 +352,13 @@ export class AppComponent implements OnInit {
   ajandaZamanFiltresi: 'all' | 'today' | '7days' | '30days' | 'overdue' = 'all';
   ajandaTurFiltresi: 'all' | AjandaTur = 'all';
   yeniOfisGorevi: Partial<OfisGorevi> = { tarih: new Date().toISOString().split('T')[0], saat: '', oncelik: 'Normal' };
+  yeniOfisGoreviBagliDosyaTuru: '' | OfisGoreviBagliDosyaTuru = '';
+  yeniOfisGoreviBagliDosyaArama = '';
   yeniOfisGoreviBagliDosyaAnahtari = '';
   duzenlenenOfisGoreviId: number | null = null;
   duzenlenenOfisGorevi: Partial<OfisGorevi> = {};
+  duzenlenenOfisGoreviBagliDosyaTuru: '' | OfisGoreviBagliDosyaTuru = '';
+  duzenlenenOfisGoreviBagliDosyaArama = '';
   duzenlenenOfisGoreviBagliDosyaAnahtari = '';
   aktifDosyaGorevFormu: Partial<OfisGorevi> = { tarih: new Date().toISOString().split('T')[0], saat: '', oncelik: 'Normal', baslik: '', aciklama: '' };
   
@@ -2906,6 +2910,8 @@ export class AppComponent implements OnInit {
 
   ofisGoreviFormunuSifirla() {
     this.yeniOfisGorevi = { tarih: new Date().toISOString().split('T')[0], saat: '', oncelik: 'Normal', baslik: '', aciklama: '' };
+    this.yeniOfisGoreviBagliDosyaTuru = '';
+    this.yeniOfisGoreviBagliDosyaArama = '';
     this.yeniOfisGoreviBagliDosyaAnahtari = '';
   }
 
@@ -2920,6 +2926,60 @@ export class AppComponent implements OnInit {
       ...this.arabuluculukDosyalar.map(dosya => this.ofisGoreviDosyaSecenegiOlustur('arabuluculuk', dosya))
     ];
     return secenekler.sort((a, b) => a.baslik.localeCompare(b.baslik, 'tr'));
+  }
+
+  get yeniOfisGoreviFiltreliDosyaSecenekleri() {
+    return this.ofisGoreviDosyaSecenekleriniFiltrele(
+      this.yeniOfisGoreviBagliDosyaTuru,
+      this.yeniOfisGoreviBagliDosyaArama
+    );
+  }
+
+  get duzenlenenOfisGoreviFiltreliDosyaSecenekleri() {
+    return this.ofisGoreviDosyaSecenekleriniFiltrele(
+      this.duzenlenenOfisGoreviBagliDosyaTuru,
+      this.duzenlenenOfisGoreviBagliDosyaArama
+    );
+  }
+
+  ofisGoreviDosyaSecenekleriniFiltrele(tur: '' | OfisGoreviBagliDosyaTuru, arama: string) {
+    if (!tur) return [];
+    const aranan = this.formatMetin(arama)?.toLocaleLowerCase('tr-TR').trim() || '';
+    return this.ofisGoreviDosyaSecenekleri
+      .filter(secenek => secenek.tur === tur)
+      .filter(secenek => !aranan || this.ofisGoreviDosyaAramaMetni(secenek).includes(aranan))
+      .slice(0, 80);
+  }
+
+  ofisGoreviDosyaAramaMetni(secenek: GorevBagliDosyaSecenegi) {
+    const dosya = secenek.dosya as any;
+    return [
+      secenek.baslik,
+      secenek.altBaslik,
+      secenek.taraflar,
+      dosya.dosyaNo,
+      dosya.icraDairesi,
+      dosya.buroNo,
+      dosya.arabuluculukNo,
+      dosya.buro,
+      dosya.mahkeme,
+      dosya.konu,
+      dosya.basvuruKonusu,
+      dosya.alacakli,
+      dosya.borclu,
+      dosya.muvekkil,
+      dosya.karsiTaraf
+    ].filter(Boolean).join(' ').toLocaleLowerCase('tr-TR');
+  }
+
+  ofisGoreviBagliDosyaTuruDegisti(hedef: 'yeni' | 'duzenleme') {
+    if (hedef === 'yeni') {
+      this.yeniOfisGoreviBagliDosyaAnahtari = '';
+      this.yeniOfisGoreviBagliDosyaArama = '';
+      return;
+    }
+    this.duzenlenenOfisGoreviBagliDosyaAnahtari = '';
+    this.duzenlenenOfisGoreviBagliDosyaArama = '';
   }
 
   ofisGoreviDosyaSecenegiOlustur(tur: OfisGoreviBagliDosyaTuru, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi): GorevBagliDosyaSecenegi {
@@ -3102,6 +3162,8 @@ export class AppComponent implements OnInit {
     event?.stopPropagation();
     this.duzenlenenOfisGoreviId = gorev.id;
     this.duzenlenenOfisGorevi = { ...gorev };
+    this.duzenlenenOfisGoreviBagliDosyaTuru = gorev.bagliDosyaTuru || '';
+    this.duzenlenenOfisGoreviBagliDosyaArama = '';
     this.duzenlenenOfisGoreviBagliDosyaAnahtari = this.ofisGoreviBagliDosyaAnahtari(gorev);
   }
 
@@ -3109,6 +3171,8 @@ export class AppComponent implements OnInit {
     event?.stopPropagation();
     this.duzenlenenOfisGoreviId = null;
     this.duzenlenenOfisGorevi = {};
+    this.duzenlenenOfisGoreviBagliDosyaTuru = '';
+    this.duzenlenenOfisGoreviBagliDosyaArama = '';
     this.duzenlenenOfisGoreviBagliDosyaAnahtari = '';
   }
 
