@@ -370,7 +370,7 @@ export class AppComponent implements OnInit {
   arabuluculukTarafAramaMetinleri: Record<number, string> = {};
   arabuluculukTarafVekilAramaMetinleri: Record<number, string> = {};
   hizliMuvekkilFormAcik = false;
-  hizliMuvekkilKayitBaglami: 'dava' | 'arabuluculuk' = 'dava';
+  hizliMuvekkilKayitBaglami: 'dava' | 'icra' | 'arabuluculuk' = 'dava';
   hizliMuvekkilKaydi: Partial<Muvekkil> = { tip: 'Müvekkil' };
 
   yetkiliSecimDropdownAcik = false;
@@ -4171,6 +4171,9 @@ export class AppComponent implements OnInit {
     this.yeniArsivKlasoru = '';
     this.icraMuvekkilDropdownAcik = false;
     this.icraMuvekkilArama = '';
+    this.hizliMuvekkilFormAcik = false;
+    this.hizliMuvekkilKayitBaglami = 'icra';
+    this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
     if (i) {
       this.formModu = 'duzenle';
       this.islemGorenIcra = { ...i };
@@ -4191,6 +4194,9 @@ export class AppComponent implements OnInit {
     this.icraMuvekkilDropdownAcik = false;
     this.icraMuvekkilArama = '';
     this.icraMuvekkilRolu = null;
+    this.hizliMuvekkilFormAcik = false;
+    this.hizliMuvekkilKayitBaglami = 'dava';
+    this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
     this.yeniArsivKlasoru = '';
   }
   
@@ -4442,12 +4448,13 @@ export class AppComponent implements OnInit {
     this.muvekkilFormAcik = true; 
   }
   muvekkilFormKapat() { this.muvekkilFormAcik = false; this.yetkiliSecimDropdownAcik = false; this.yetkiliSecimArama = ''; }
-  hizliMuvekkilKaydiAc(hedef: 'dava' | 'arabuluculuk' = 'dava') {
+  hizliMuvekkilKaydiAc(hedef: 'dava' | 'icra' | 'arabuluculuk' = 'dava') {
     this.formHata = '';
     this.hizliMuvekkilKayitBaglami = hedef;
     this.hizliMuvekkilFormAcik = true;
     this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
     if (hedef === 'arabuluculuk') this.arabuluculukMuvekkilDropdownAcik = false;
+    if (hedef === 'icra') this.icraMuvekkilDropdownAcik = false;
   }
   hizliMuvekkilKaydiIptal() {
     this.hizliMuvekkilFormAcik = false;
@@ -4475,14 +4482,31 @@ export class AppComponent implements OnInit {
       yetkililer: [],
       ekKayitlar: []
     };
+    if (this.hizliMuvekkilKayitBaglami === 'icra' && !this.icraMuvekkilRolu) {
+      this.formHata = 'Önce yeni müvekkilin alacaklı mı borçlu mu olacağını seçin.';
+      return;
+    }
     const basariMesaji = this.hizliMuvekkilKayitBaglami === 'arabuluculuk'
       ? 'Yeni kişi veya kurum arabuluculuk ekranından oluşturuldu.'
-      : 'Yeni müvekkil dava ekranından oluşturuldu.';
+      : this.hizliMuvekkilKayitBaglami === 'icra'
+        ? 'Yeni kişi veya kurum icra ekranından oluşturuldu.'
+        : 'Yeni müvekkil dava ekranından oluşturuldu.';
     this.muvekkilKaydetCloud(yeni, basariMesaji);
     if (this.hizliMuvekkilKayitBaglami === 'arabuluculuk') {
       this.islemGorenArabuluculuk.muvekkilId = yeni.id;
       this.arabuluculukMuvekkilDropdownAcik = false;
       this.arabuluculukMuvekkilArama = '';
+    } else if (this.hizliMuvekkilKayitBaglami === 'icra') {
+      const oncekiMuvekkilAdi = this.secilenMuvekkilAd(this.islemGorenIcra.muvekkilId);
+      this.islemGorenIcra.muvekkilId = yeni.id;
+      this.islemGorenIcra.muvekkil = adSoyad;
+      if (oncekiMuvekkilAdi && oncekiMuvekkilAdi !== adSoyad) {
+        if ((this.islemGorenIcra.alacakli || '').trim() === oncekiMuvekkilAdi) this.islemGorenIcra.alacakli = '';
+        if ((this.islemGorenIcra.borclu || '').trim() === oncekiMuvekkilAdi) this.islemGorenIcra.borclu = '';
+      }
+      this.icraMuvekkiliTarafaUygula(adSoyad);
+      this.icraMuvekkilDropdownAcik = false;
+      this.icraMuvekkilArama = '';
     } else {
       if (!this.islemGorenDava.muvekkiller) this.islemGorenDava.muvekkiller = [];
       const bosKayit = this.islemGorenDava.muvekkiller.find(kayit => !kayit.muvekkilId && !(kayit.isim || '').trim());
