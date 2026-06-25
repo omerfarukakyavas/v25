@@ -21,9 +21,15 @@
 
           <h3 class="text-lg font-bold text-slate-700 mb-6 text-center">{{ authModu === 'giris' ? 'Sisteme Giriş Yapın' : 'Yeni Hesap Oluşturun' }}</h3>
           @if(authHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium mb-4 text-center">{{ authHata }}</div> }
+          @if(authBilgi) { <div class="p-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-medium mb-4 text-center">{{ authBilgi }}</div> }
           <div class="space-y-4">
             <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1 tracking-wider">E-Posta Adresiniz</label><input [(ngModel)]="emailGiris" type="email" placeholder="ornek@mail.com" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700 font-medium"></div>
             <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1 tracking-wider">Şifreniz</label><input [(ngModel)]="sifreGiris" (keyup.enter)="authIslemi()" type="password" placeholder="********" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700 font-medium"></div>
+            @if (authModu === 'giris') {
+              <div class="-mt-2 text-right">
+                <button type="button" (click)="sifremiUnuttum()" [disabled]="authYukleniyor" class="text-xs font-bold uppercase tracking-wider text-blue-600 transition-colors hover:text-blue-800 hover:underline">Şifremi Unuttum</button>
+              </div>
+            }
             <button (click)="authIslemi()" [disabled]="authYukleniyor" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-all">{{ authModu === 'giris' ? 'Giriş Yap' : 'Hesabımı Oluştur' }}</button>
           </div>
           <div class="mt-8 text-center pt-6 border-t border-slate-100">
@@ -61,9 +67,12 @@
           <div class="p-4 border-t border-slate-800 flex justify-between items-center">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700"><svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-              <div class="overflow-hidden"><p class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[100px]">{{ user.email }}</p><p class="text-xs font-medium flex items-center gap-1 text-emerald-400">Bulut Aktif</p></div>
+              <button type="button" (click)="hesapAyarlariAc()" class="overflow-hidden text-left transition-colors hover:text-white" title="Hesap Ayarları"><p class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[100px]">{{ kullaniciGorunenAdi() }}</p><p class="text-xs font-medium flex items-center gap-1 text-emerald-400">Bulut Aktif</p></button>
             </div>
-            <button (click)="cikisYap()" class="p-2 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-all" title="Çıkış Yap"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
+            <div class="flex items-center gap-1">
+              <button (click)="hesapAyarlariAc()" class="p-2 text-slate-500 hover:text-blue-300 hover:bg-slate-800 rounded-lg transition-all" title="Hesap Ayarları"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.89 3.31.877 2.42 2.42a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.89 1.543-.877 3.31-2.42 2.42a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.89-3.31-.877-2.42-2.42a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.89-1.543.877-3.31 2.42-2.42.996.575 2.25.046 2.573-1.066z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+              <button (click)="cikisYap()" class="p-2 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-all" title="Çıkış Yap"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
+            </div>
           </div>
         </aside>
 
@@ -104,6 +113,10 @@
                   }
                 </button>
               </div>
+              <button (click)="hesapAyarlariAc()" class="px-3 py-2 text-slate-600 font-semibold border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1118.88 6.196 9 9 0 015.12 17.804z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Hesap
+              </button>
               <button (click)="cikisYap()" class="md:hidden px-3 py-2 text-slate-600 font-semibold border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 Çıkış
@@ -166,6 +179,72 @@
                 <button type="button" (click)="bildirimMerkeziAjandayiAc($event)" class="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-black text-white transition-colors hover:bg-slate-800">Ajandada Tümünü Gör</button>
               </div>
             </div>
+            </div>
+          }
+
+          @if (hesapAyarlariAcik) {
+            <div class="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+              <div class="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+                <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <p class="text-[11px] font-black uppercase tracking-[0.22em] text-blue-700">Hesap Ayarları</p>
+                      <h3 class="mt-2 text-xl font-black tracking-tight text-slate-900">Kişisel bilgiler ve şifre</h3>
+                      <p class="mt-2 text-sm font-medium leading-6 text-slate-600">E-posta veya şifre değişikliği için güvenlik amacıyla mevcut şifreniz gerekir.</p>
+                    </div>
+                    <button type="button" (click)="hesapAyarlariKapat()" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-100">Kapat</button>
+                  </div>
+                </div>
+                <div class="min-h-0 flex-1 overflow-y-auto p-5 custom-scrollbar sm:p-6">
+                  @if (hesapAyarlariHata) { <div class="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{{ hesapAyarlariHata }}</div> }
+                  @if (hesapAyarlariBilgi) { <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-700">{{ hesapAyarlariBilgi }}</div> }
+                  <div class="grid gap-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-800">Kişisel Bilgiler</p>
+                      <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label class="mb-1 block text-xs font-bold text-slate-800">Ad Soyad / Görünen Ad</label>
+                          <input [(ngModel)]="hesapAyarlariFormu.adSoyad" (paste)="temizMetinYapistir($event)" type="text" placeholder="Örn: Ömer Faruk Akyavaş" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-xs font-bold text-slate-800">E-Posta</label>
+                          <input [(ngModel)]="hesapAyarlariFormu.email" type="email" placeholder="ornek@mail.com" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 shadow-sm">
+                      <p class="text-xs font-black uppercase tracking-[0.18em] text-amber-800">Güvenlik</p>
+                      <p class="mt-2 text-sm font-medium leading-6 text-slate-600">Şifre değiştirmek istemiyorsanız yeni şifre alanlarını boş bırakabilirsiniz.</p>
+                      <div class="mt-4 grid gap-4">
+                        <div>
+                          <label class="mb-1 block text-xs font-bold text-slate-800">Mevcut Şifre</label>
+                          <input [(ngModel)]="hesapAyarlariFormu.mevcutSifre" type="password" placeholder="E-posta veya şifre değiştirirken zorunlu" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100">
+                        </div>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                          <div>
+                            <label class="mb-1 block text-xs font-bold text-slate-800">Yeni Şifre</label>
+                            <input [(ngModel)]="hesapAyarlariFormu.yeniSifre" type="password" placeholder="En az 6 karakter" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100">
+                          </div>
+                          <div>
+                            <label class="mb-1 block text-xs font-bold text-slate-800">Yeni Şifre Tekrar</label>
+                            <input [(ngModel)]="hesapAyarlariFormu.yeniSifreTekrar" type="password" placeholder="Yeni şifreyi tekrar yazın" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="shrink-0 border-t border-slate-200 bg-white px-5 py-4 sm:px-6">
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-xs font-semibold text-slate-500">Şifreniz sistemde görünmez; değişiklikler Firebase güvenlik altyapısıyla yapılır.</p>
+                    <div class="grid gap-3 sm:flex sm:justify-end">
+                      <button type="button" (click)="hesapAyarlariKapat()" class="rounded-xl px-4 py-2.5 text-center font-semibold text-slate-600 transition-colors hover:bg-slate-100">İptal</button>
+                      <button type="button" (click)="hesapAyarlariKaydet()" [disabled]="hesapAyarlariYukleniyor" class="rounded-xl bg-blue-600 px-6 py-3 text-center font-bold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:py-2.5">{{ hesapAyarlariYukleniyor ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet' }}</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           }
 

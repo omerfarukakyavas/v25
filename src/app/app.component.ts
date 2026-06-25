@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ElementRef, ViewChild } from '@angular/core';
 import { initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged, User, signInWithCustomToken, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, User, signInWithCustomToken, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 
 import { appId, getFirebaseConfig } from '../firebase.config';
@@ -273,7 +273,18 @@ export class AppComponent implements OnInit {
   app: any; auth: any; db: any; user: User | null = null;
   authInitialized = false; yukleniyor = false; islemYapiyor = false; sistemHatasi = '';
   
-  emailGiris = ''; sifreGiris = ''; authModu: 'giris' | 'kayit' = 'giris'; authHata = ''; authYukleniyor = false;
+  emailGiris = ''; sifreGiris = ''; authModu: 'giris' | 'kayit' = 'giris'; authHata = ''; authBilgi = ''; authYukleniyor = false;
+  hesapAyarlariAcik = false;
+  hesapAyarlariYukleniyor = false;
+  hesapAyarlariHata = '';
+  hesapAyarlariBilgi = '';
+  hesapAyarlariFormu = {
+    adSoyad: '',
+    email: '',
+    mevcutSifre: '',
+    yeniSifre: '',
+    yeniSifreTekrar: ''
+  };
   bildirimler: UygulamaBildirimi[] = [];
   bildirimPanelAcik = false;
   bildirimSayaci = 0;
@@ -529,17 +540,111 @@ export class AppComponent implements OnInit {
     } catch (e: any) { this.authInitialized = true; this.sistemHatasi = e.message; }
   }
 
-  authModDegistir() { this.authModu = this.authModu === 'giris' ? 'kayit' : 'giris'; this.authHata = ''; }
+  authModDegistir() { this.authModu = this.authModu === 'giris' ? 'kayit' : 'giris'; this.authHata = ''; this.authBilgi = ''; }
   async authIslemi() {
     if (!this.emailGiris || !this.sifreGiris) { this.authHata = "Lütfen alanları doldurun."; return; }
-    this.authYukleniyor = true; this.authHata = '';
+    this.authYukleniyor = true; this.authHata = ''; this.authBilgi = '';
     try {
       if (this.authModu === 'giris') await signInWithEmailAndPassword(this.auth, this.emailGiris, this.sifreGiris);
       else await createUserWithEmailAndPassword(this.auth, this.emailGiris, this.sifreGiris);
-    } catch (e: any) { this.authHata = "İşlem başarısız. Bilgileri kontrol ediniz."; } 
+    } catch (e: any) { this.authHata = this.authHataMesaji(e); }
     finally { this.authYukleniyor = false; this.cdr.detectChanges(); }
   }
-  async cikisYap() { await signOut(this.auth); this.emailGiris = ''; this.sifreGiris = ''; }
+  async sifremiUnuttum() {
+    const email = (this.emailGiris || '').trim();
+    this.authHata = '';
+    this.authBilgi = '';
+    if (!email) { this.authHata = 'Şifre sıfırlama maili için önce e-posta adresinizi yazın.'; return; }
+    this.authYukleniyor = true;
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+      this.authBilgi = 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Gelen kutusu ve spam klasörünü kontrol edin.';
+    } catch (e: any) {
+      this.authHata = this.authHataMesaji(e);
+    } finally {
+      this.authYukleniyor = false;
+      this.cdr.detectChanges();
+    }
+  }
+  async cikisYap() { await signOut(this.auth); this.emailGiris = ''; this.sifreGiris = ''; this.hesapAyarlariKapat(); }
+
+  kullaniciGorunenAdi() {
+    return this.user?.displayName || this.user?.email || 'Kullanıcı';
+  }
+  hesapAyarlariAc() {
+    if (!this.user) return;
+    this.hesapAyarlariHata = '';
+    this.hesapAyarlariBilgi = '';
+    this.hesapAyarlariFormu = {
+      adSoyad: this.user.displayName || '',
+      email: this.user.email || '',
+      mevcutSifre: '',
+      yeniSifre: '',
+      yeniSifreTekrar: ''
+    };
+    this.hesapAyarlariAcik = true;
+  }
+  hesapAyarlariKapat() {
+    this.hesapAyarlariAcik = false;
+    this.hesapAyarlariYukleniyor = false;
+    this.hesapAyarlariHata = '';
+    this.hesapAyarlariBilgi = '';
+    this.hesapAyarlariFormu = { adSoyad: '', email: '', mevcutSifre: '', yeniSifre: '', yeniSifreTekrar: '' };
+  }
+  async hesapAyarlariKaydet() {
+    const kullanici = this.auth?.currentUser as User | null;
+    if (!kullanici) { this.hesapAyarlariHata = 'Aktif kullanıcı bulunamadı. Lütfen tekrar giriş yapın.'; return; }
+
+    const yeniAd = (this.hesapAyarlariFormu.adSoyad || '').trim();
+    const yeniEmail = (this.hesapAyarlariFormu.email || '').trim();
+    const mevcutEmail = kullanici.email || '';
+    const emailDegisti = !!yeniEmail && yeniEmail !== mevcutEmail;
+    const sifreDegisecek = !!this.hesapAyarlariFormu.yeniSifre;
+    const adDegisti = yeniAd !== (kullanici.displayName || '');
+
+    this.hesapAyarlariHata = '';
+    this.hesapAyarlariBilgi = '';
+
+    if (!yeniEmail) { this.hesapAyarlariHata = 'E-posta adresi boş bırakılamaz.'; return; }
+    if (sifreDegisecek && this.hesapAyarlariFormu.yeniSifre.length < 6) { this.hesapAyarlariHata = 'Yeni şifre en az 6 karakter olmalı.'; return; }
+    if (sifreDegisecek && this.hesapAyarlariFormu.yeniSifre !== this.hesapAyarlariFormu.yeniSifreTekrar) { this.hesapAyarlariHata = 'Yeni şifre tekrar alanı aynı değil.'; return; }
+    if ((emailDegisti || sifreDegisecek) && !this.hesapAyarlariFormu.mevcutSifre) { this.hesapAyarlariHata = 'E-posta veya şifre değişikliği için mevcut şifrenizi yazmanız gerekir.'; return; }
+    if (!adDegisti && !emailDegisti && !sifreDegisecek) { this.hesapAyarlariBilgi = 'Değiştirilecek yeni bilgi bulunamadı.'; return; }
+
+    this.hesapAyarlariYukleniyor = true;
+    try {
+      if (emailDegisti || sifreDegisecek) {
+        const credential = EmailAuthProvider.credential(mevcutEmail, this.hesapAyarlariFormu.mevcutSifre);
+        await reauthenticateWithCredential(kullanici, credential);
+      }
+      if (adDegisti) await updateProfile(kullanici, { displayName: yeniAd || null });
+      if (emailDegisti) await updateEmail(kullanici, yeniEmail);
+      if (sifreDegisecek) await updatePassword(kullanici, this.hesapAyarlariFormu.yeniSifre);
+      await kullanici.reload();
+      this.user = this.auth.currentUser;
+      this.hesapAyarlariFormu.mevcutSifre = '';
+      this.hesapAyarlariFormu.yeniSifre = '';
+      this.hesapAyarlariFormu.yeniSifreTekrar = '';
+      this.hesapAyarlariBilgi = 'Hesap bilgileriniz güncellendi.';
+      this.bildirimGoster('success', 'Hesap güncellendi', 'Kullanıcı bilgileriniz başarıyla kaydedildi.');
+    } catch (e: any) {
+      this.hesapAyarlariHata = this.authHataMesaji(e);
+    } finally {
+      this.hesapAyarlariYukleniyor = false;
+      this.cdr.detectChanges();
+    }
+  }
+  private authHataMesaji(e: any) {
+    const kod = e?.code || '';
+    if (kod.includes('invalid-email')) return 'E-posta adresi geçerli görünmüyor.';
+    if (kod.includes('user-not-found') || kod.includes('wrong-password') || kod.includes('invalid-credential')) return 'E-posta veya şifre hatalı görünüyor.';
+    if (kod.includes('email-already-in-use')) return 'Bu e-posta adresi başka bir hesapta kullanılıyor.';
+    if (kod.includes('weak-password')) return 'Şifre en az 6 karakter olmalı.';
+    if (kod.includes('requires-recent-login')) return 'Güvenlik için çıkış yapıp tekrar giriş yaptıktan sonra yeniden deneyin.';
+    if (kod.includes('too-many-requests')) return 'Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin.';
+    if (kod.includes('network-request-failed')) return 'İnternet bağlantısı kurulamadı. Bağlantınızı kontrol edin.';
+    return 'İşlem tamamlanamadı. Bilgileri kontrol edip tekrar deneyin.';
+  }
 
   verileriDinle() {
     if (!this.user) return; this.yukleniyor = true;
