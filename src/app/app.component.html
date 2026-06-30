@@ -1052,20 +1052,44 @@
               }
 
               @case ('arabuluculuk') {
-                <div class="app-list-filter app-list-filter-violet bg-gradient-to-r from-violet-50 via-white to-fuchsia-50 p-4 rounded-xl shadow-sm border border-violet-100 mb-6 flex flex-col sm:flex-row gap-4">
-                  <div class="flex-1 relative"><input [(ngModel)]="aramaMetni" type="text" placeholder="Büro No, Arabuluculuk No veya Taraf ara..." class="w-full pl-4 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all"></div>
-                  <div class="sm:w-64">
+                <div class="app-list-filter app-list-filter-violet bg-gradient-to-r from-violet-50 via-white to-fuchsia-50 p-4 rounded-xl shadow-sm border border-violet-100 mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.3fr)_150px_170px_180px_180px_230px]">
+                  <div class="relative"><input [(ngModel)]="aramaMetni" type="text" placeholder="Büro No, Arabuluculuk No veya Taraf ara..." class="w-full pl-4 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all"></div>
+                  <div>
                     <select [(ngModel)]="durumFiltresi" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all bg-white font-medium text-slate-700">
                       <option value="Tümü">Tüm Durumlar</option><option value="Hazırlık">Hazırlık</option><option value="Müzakere">Müzakere</option><option value="İmza">İmza</option><option value="Tahsilat">Tahsilat</option><option value="Evrak Yükleme">Evrak Yükleme</option><option value="Kapalı">Kapalı</option>
                     </select>
                   </div>
-                  <div class="sm:w-56">
+                  <div>
                     <select [(ngModel)]="arabuluculukSonucFiltresi" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all bg-white font-medium text-slate-700">
                       <option value="Tümü">Tüm Sonuçlar</option>
                       <option value="Girilmedi">Sonuç Girilmedi</option>
                       @for (sonuc of arabuluculukSonucSecenekleri; track sonuc) {
                         <option [value]="sonuc">{{ sonuc }}</option>
                       }
+                    </select>
+                  </div>
+                  <div>
+                    <select [(ngModel)]="arabuluculukBasvuruTuruFiltresi" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all bg-white font-medium text-slate-700">
+                      <option value="Tümü">Tüm Başvuru Türleri</option>
+                      <option value="Dava Şartı">Dava Şartı</option>
+                      <option value="İhtiyari">İhtiyari</option>
+                    </select>
+                  </div>
+                  <div>
+                    <select [(ngModel)]="arabuluculukUyusmazlikTuruFiltresi" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all bg-white font-medium text-slate-700">
+                      <option value="Tümü">Tüm Uyuşmazlıklar</option>
+                      @for (tur of arabuluculukUyusmazlikTuruSecenekleri; track tur) {
+                        <option [value]="tur">{{ tur }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div>
+                    <select [(ngModel)]="arabuluculukSiralama" class="w-full px-4 py-2.5 border border-violet-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all bg-white font-bold text-slate-800">
+                      <option value="yeni">Sıralama: En yeni kayıt</option>
+                      <option value="eski">Sıralama: En eski kayıt</option>
+                      <option value="sureBitimiYakindanUzaga">Süre bitimi: Yakından uzağa</option>
+                      <option value="sureBitimiUzaktanYakina">Süre bitimi: Uzaktan yakına</option>
+                      <option value="toplantiYakindanUzaga">Toplantı tarihi: Yakından uzağa</option>
                     </select>
                   </div>
                 </div>
@@ -1085,7 +1109,7 @@
                         <div>
                           <p class="text-[10px] font-black uppercase tracking-[0.22em] text-violet-700">Sonuç Dağılımı</p>
                           <h3 class="mt-1 text-lg font-black text-slate-900">Anlaşma, Anlaşamama ve Vazgeçme özeti</h3>
-                          <p class="mt-1 text-sm leading-6 text-slate-600">Grafik, mevcut arama ve durum filtresine göre sonuç girilmiş arabuluculuk dosyalarını gösterir.</p>
+                          <p class="mt-1 text-sm leading-6 text-slate-600">Grafik, mevcut arama, durum, başvuru türü ve uyuşmazlık filtrelerine göre sonuç girilmiş arabuluculuk dosyalarını gösterir.</p>
                         </div>
                         <span class="inline-flex w-fit rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold text-slate-600">{{ arabuluculukSonucOzet.toplam }} dosya</span>
                       </div>

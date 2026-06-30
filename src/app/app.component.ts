@@ -231,6 +231,8 @@ type ArabuluculukSablonBolumGorunumu = {
   altBasliklar: ArabuluculukSablonAltBolumGorunumu[];
 };
 
+type ArabuluculukSiralamaTipi = 'yeni' | 'eski' | 'sureBitimiYakindanUzaga' | 'sureBitimiUzaktanYakina' | 'toplantiYakindanUzaga';
+
 type UygulamaGezinmeDurumu = {
   sayfa: SayfaTipi;
   seciliDavaId: number | null;
@@ -241,6 +243,9 @@ type UygulamaGezinmeDurumu = {
   aramaMetni: string;
   durumFiltresi: string;
   arabuluculukSonucFiltresi: 'Tümü' | 'Girilmedi' | ArabuluculukSonucu;
+  arabuluculukSiralama: ArabuluculukSiralamaTipi;
+  arabuluculukBasvuruTuruFiltresi: 'Tümü' | 'Dava Şartı' | 'İhtiyari';
+  arabuluculukUyusmazlikTuruFiltresi: string;
   muhasebeArama: string;
   muhasebeFiltre: string;
   aktifIliskiSekmesi: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer';
@@ -349,7 +354,11 @@ export class AppComponent implements OnInit {
 
   aramaMetni = ''; durumFiltresi = 'Tümü';
   arabuluculukSonucFiltresi: 'Tümü' | 'Girilmedi' | ArabuluculukSonucu = 'Tümü';
+  arabuluculukSiralama: ArabuluculukSiralamaTipi = 'yeni';
+  arabuluculukBasvuruTuruFiltresi: 'Tümü' | 'Dava Şartı' | 'İhtiyari' = 'Tümü';
+  arabuluculukUyusmazlikTuruFiltresi = 'Tümü';
   readonly arabuluculukSonucSecenekleri: ArabuluculukSonucu[] = ['Anlaşma', 'Anlaşamama', 'Vazgeçme'];
+  readonly arabuluculukUyusmazlikTuruSecenekleri = ['Kira', 'İşçi İşveren', 'Ticari', 'Boşanma', 'Ortaklığın Giderilmesi', 'Tüketici'];
   muhasebeArama = ''; muhasebeFiltre = 'Tümü';
   toplamBekleyenAlacakGizli = false;
   
@@ -1707,6 +1716,9 @@ export class AppComponent implements OnInit {
       aramaMetni: this.aramaMetni,
       durumFiltresi: this.durumFiltresi,
       arabuluculukSonucFiltresi: this.arabuluculukSonucFiltresi,
+      arabuluculukSiralama: this.arabuluculukSiralama,
+      arabuluculukBasvuruTuruFiltresi: this.arabuluculukBasvuruTuruFiltresi,
+      arabuluculukUyusmazlikTuruFiltresi: this.arabuluculukUyusmazlikTuruFiltresi,
       muhasebeArama: this.muhasebeArama,
       muhasebeFiltre: this.muhasebeFiltre,
       aktifIliskiSekmesi: this.aktifIliskiSekmesi,
@@ -1764,6 +1776,9 @@ export class AppComponent implements OnInit {
     this.aramaMetni = durum.aramaMetni;
     this.durumFiltresi = durum.durumFiltresi;
     this.arabuluculukSonucFiltresi = durum.arabuluculukSonucFiltresi || 'Tümü';
+    this.arabuluculukSiralama = durum.arabuluculukSiralama || 'yeni';
+    this.arabuluculukBasvuruTuruFiltresi = durum.arabuluculukBasvuruTuruFiltresi || 'Tümü';
+    this.arabuluculukUyusmazlikTuruFiltresi = durum.arabuluculukUyusmazlikTuruFiltresi || 'Tümü';
     this.muhasebeArama = durum.muhasebeArama;
     this.muhasebeFiltre = durum.muhasebeFiltre;
     this.aktifIliskiSekmesi = durum.aktifIliskiSekmesi;
@@ -1821,7 +1836,12 @@ export class AppComponent implements OnInit {
     if (s === 'davalar' || s === 'icralar' || s === 'arabuluculuk') {
       this.durumFiltresi = this.varsayilanDurumFiltresi(s);
     }
-    if (s === 'arabuluculuk') this.arabuluculukSonucFiltresi = 'Tümü';
+    if (s === 'arabuluculuk') {
+      this.arabuluculukSonucFiltresi = 'Tümü';
+      this.arabuluculukSiralama = 'yeni';
+      this.arabuluculukBasvuruTuruFiltresi = 'Tümü';
+      this.arabuluculukUyusmazlikTuruFiltresi = 'Tümü';
+    }
   }
 
   detayaGit(d: DavaDosyasi) { this.gezinmeGecmisineEkle(); this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.aktifDavaTarafDetayi = null; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
@@ -2345,13 +2365,48 @@ export class AppComponent implements OnInit {
         || (a.arabuluculukNo || '').toLocaleLowerCase('tr-TR').includes(s)
         || this.getArabuluculukTarafAramaMetni(a.taraflar).includes(s);
       const mD = this.durumFiltresi === 'Tümü' || a.durum === this.durumFiltresi;
-      return mS && mD;
+      const mBasvuru = this.arabuluculukBasvuruTuruFiltresi === 'Tümü' || a.basvuruTuru === this.arabuluculukBasvuruTuruFiltresi;
+      const mUyusmazlik = this.arabuluculukUyusmazlikTuruFiltresi === 'Tümü' || a.uyusmazlikTuru === this.arabuluculukUyusmazlikTuruFiltresi;
+      return mS && mD && mBasvuru && mUyusmazlik;
     });
   }
 
   get filtrelenmisArabuluculuk() {
-    return this.arabuluculukAramaDurumFiltreliListe.filter(a => this.arabuluculukSonucFiltresi === 'Tümü'
+    const liste = this.arabuluculukAramaDurumFiltreliListe.filter(a => this.arabuluculukSonucFiltresi === 'Tümü'
       || (this.arabuluculukSonucFiltresi === 'Girilmedi' ? !this.getArabuluculukSonucu(a) : this.getArabuluculukSonucu(a) === this.arabuluculukSonucFiltresi));
+    return this.arabuluculukListesiniSirala(liste);
+  }
+
+  private arabuluculukListesiniSirala(liste: ArabuluculukDosyasi[]) {
+    return [...liste].sort((a, b) => {
+      if (this.arabuluculukSiralama === 'eski') return (a.id || 0) - (b.id || 0);
+      if (this.arabuluculukSiralama === 'sureBitimiYakindanUzaga') {
+        const tarihFarki = this.arabuluculukSureBitimSirasi(a) - this.arabuluculukSureBitimSirasi(b);
+        return tarihFarki !== 0 ? tarihFarki : (b.id || 0) - (a.id || 0);
+      }
+      if (this.arabuluculukSiralama === 'sureBitimiUzaktanYakina') {
+        const tarihFarki = this.arabuluculukSureBitimSirasi(b) - this.arabuluculukSureBitimSirasi(a);
+        return tarihFarki !== 0 ? tarihFarki : (b.id || 0) - (a.id || 0);
+      }
+      if (this.arabuluculukSiralama === 'toplantiYakindanUzaga') {
+        const tarihFarki = this.arabuluculukToplantiSirasi(a) - this.arabuluculukToplantiSirasi(b);
+        return tarihFarki !== 0 ? tarihFarki : (b.id || 0) - (a.id || 0);
+      }
+      return (b.id || 0) - (a.id || 0);
+    });
+  }
+
+  private arabuluculukSureBitimSirasi(dosya: ArabuluculukDosyasi) {
+    const sayac = this.getArabuluculukSureSayaci(dosya);
+    if (sayac?.azamiSonTarih) return this.ajandaGunDamgasi(sayac.azamiSonTarih);
+    if (dosya.tutanakDuzenlemeTarihi) return this.ajandaGunDamgasi(dosya.tutanakDuzenlemeTarihi);
+    if (dosya.toplantiTarihi) return this.ajandaGunDamgasi(dosya.toplantiTarihi);
+    return Number.MAX_SAFE_INTEGER - (dosya.id || 0);
+  }
+
+  private arabuluculukToplantiSirasi(dosya: ArabuluculukDosyasi) {
+    if (!dosya.toplantiTarihi) return Number.MAX_SAFE_INTEGER - (dosya.id || 0);
+    return new Date(`${dosya.toplantiTarihi}T${dosya.toplantiSaati || '00:00'}`).getTime();
   }
 
   getArabuluculukSonucu(dosya?: Partial<ArabuluculukDosyasi> | null): ArabuluculukSonucu | '' {
