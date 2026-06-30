@@ -3342,10 +3342,103 @@
                                      </div>
                                    }
                                  </div>
-                               }
-                                <div class="app-document-add-card relative mb-4 flex flex-col gap-3 overflow-hidden rounded-xl border border-blue-100 bg-white p-3 shadow-sm sm:mb-6 sm:p-4">
-                                  <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
-                                  <p class="text-[10px] font-black uppercase text-blue-600 tracking-wider">Yeni Ana Evrak Ekle</p>
+                                }
+                                 <div class="mb-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:mb-6 sm:p-4">
+                                   <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                     <div>
+                                       <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-700">UYAP Evrakı İçe Aktar</p>
+                                       <p class="mt-1 text-xs leading-5 text-slate-500">UYAP'tan indirdiğiniz PDF, RTF veya metin dosyasını seçin. Sistem önce ön izleme çıkarır; onaylamadan kayıt yapmaz.</p>
+                                     </div>
+                                     <button type="button" (click)="uyapIceriAktarFormunuAcKapat()" class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-slate-800">
+                                       {{ uyapIceriAktarFormuAcik ? 'İçe Aktarmayı Kapat' : 'UYAP Evrakı İçe Aktar' }}
+                                     </button>
+                                   </div>
+
+                                   @if (uyapIceriAktarFormuAcik) {
+                                     <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                       <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                                         <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                           <label class="mb-2 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-600">Dosya Seç</label>
+                                           <input type="file" accept=".pdf,.txt,.rtf,.html,.htm,.xml,.csv,.udf" (change)="uyapEvrakDosyasiSecildi($event)" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white">
+                                           <p class="mt-2 text-[11px] leading-5 text-slate-500">PDF metni her zaman okunamayabilir. Okunamazsa alanları elle tamamlayabilirsiniz.</p>
+                                         </div>
+
+                                         <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                           <label class="mb-2 block text-[10px] font-black uppercase tracking-[0.16em] text-slate-600">Metin Yapıştır</label>
+                                           <textarea [(ngModel)]="uyapIceriAktarYapistirilanMetin" rows="4" placeholder="UYAP evrakındaki metni buraya yapıştırabilirsiniz..." class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs leading-5 text-slate-700 outline-none focus:ring-2 focus:ring-slate-300"></textarea>
+                                           <button type="button" (click)="uyapYapistirilanMetindenOnizlemeOlustur()" class="mt-2 rounded-lg bg-slate-800 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-700">Metinden Ön İzleme Oluştur</button>
+                                         </div>
+                                       </div>
+
+                                       @if (uyapIceriAktarOkunuyor) {
+                                         <div class="mt-3 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700">Dosya okunuyor, birazdan ön izleme hazırlanacak...</div>
+                                       }
+                                       @if (uyapIceriAktarHata) {
+                                         <div class="mt-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-semibold leading-5 text-amber-800">{{ uyapIceriAktarHata }}</div>
+                                       }
+
+                                       @if (uyapIceriAktarOnizleme; as uyapOnizleme) {
+                                         <div class="mt-4 rounded-xl border border-blue-100 bg-white p-3">
+                                           <div class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                                             <div>
+                                               <p class="text-[10px] font-black uppercase tracking-[0.18em] text-blue-700">Ön İzleme</p>
+                                               <p class="mt-1 text-xs leading-5 text-slate-500">{{ uyapOnizleme.okumaNotu }}</p>
+                                             </div>
+                                             <span class="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-600">{{ uyapOnizleme.dosyaAdi }}</span>
+                                           </div>
+
+                                           <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                                             <label class="block">
+                                               <span class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-600">Evrak Adı</span>
+                                               <input [(ngModel)]="uyapOnizleme.evrakAdi" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200">
+                                             </label>
+                                             <label class="block">
+                                               <span class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-600">Dosya No</span>
+                                               <input [(ngModel)]="uyapOnizleme.dosyaNo" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200">
+                                             </label>
+                                             <label class="block">
+                                               <span class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-600">Kurum / Mahkeme</span>
+                                               <input [(ngModel)]="uyapOnizleme.kurum" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200">
+                                             </label>
+                                             <label class="block">
+                                               <span class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-600">Evrak Tarihi</span>
+                                               <input [(ngModel)]="uyapOnizleme.tarih" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200">
+                                             </label>
+                                             <label class="block">
+                                               <span class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-600">Tebliğ Tarihi</span>
+                                               <input [(ngModel)]="uyapOnizleme.tebligTarihi" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200">
+                                             </label>
+                                             <label class="block">
+                                               <span class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-rose-600">Son Eylem Günü</span>
+                                               <input [(ngModel)]="uyapOnizleme.sonEylemTarihi" type="date" class="w-full rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-200">
+                                             </label>
+                                           </div>
+
+                                           <label class="mt-3 block">
+                                             <span class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-600">Bağlantı URL (Opsiyonel)</span>
+                                             <input [(ngModel)]="uyapOnizleme.baglantiUrl" type="text" placeholder="Dosyayı Drive'a yüklediyseniz bağlantısını buraya ekleyebilirsiniz." class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200">
+                                           </label>
+
+                                           @if (uyapOnizleme.hamMetin) {
+                                             <details class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                                               <summary class="cursor-pointer text-[10px] font-black uppercase tracking-[0.16em] text-slate-600">Okunan Metni Göster</summary>
+                                               <p class="mt-2 max-h-40 overflow-y-auto whitespace-pre-wrap text-xs leading-5 text-slate-600">{{ uyapOnizleme.hamMetin }}</p>
+                                             </details>
+                                           }
+
+                                           <div class="mt-4 flex flex-wrap justify-end gap-2">
+                                             <button type="button" (click)="uyapIceriAktarFormunuKapat()" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50">İptal</button>
+                                             <button type="button" (click)="uyapEvrakOnizlemeyiKaydet()" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-blue-700">Ön İzlemeyi Evraklara Ekle</button>
+                                           </div>
+                                         </div>
+                                       }
+                                     </div>
+                                   }
+                                 </div>
+
+                                 <div class="app-document-add-card relative mb-4 flex flex-col gap-3 overflow-hidden rounded-xl border border-blue-100 bg-white p-3 shadow-sm sm:mb-6 sm:p-4">
+                                   <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+                                   <p class="text-[10px] font-black uppercase text-blue-600 tracking-wider">Yeni Ana Evrak Ekle</p>
                                   <div class="flex w-full flex-col gap-2 sm:flex-row">
                                     <input [(ngModel)]="yeniEvrak.isim" type="text" placeholder="Evrak Adı (Örn: Dilekçe / Talep)" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 sm:w-1/3">
                                     <input [(ngModel)]="yeniEvrak.url" type="text" placeholder="Bağlantı URL (Google Drive, UYAP vs)" class="flex-1 rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">

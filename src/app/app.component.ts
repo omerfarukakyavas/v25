@@ -84,6 +84,20 @@ type GoogleCalendarAktarimKaydi = {
   aktarimTarihi: string;
 };
 
+type UyapEvrakIceriAktarOnizleme = {
+  dosyaAdi: string;
+  evrakAdi: string;
+  dosyaNo: string;
+  kurum: string;
+  tarih: string;
+  tebligTarihi: string;
+  sonEylemTarihi: string;
+  baglantiUrl: string;
+  aciklama: string;
+  hamMetin: string;
+  okumaNotu: string;
+};
+
 type GorevBagliDosyaSecenegi = {
   anahtar: string;
   tur: OfisGoreviBagliDosyaTuru;
@@ -428,6 +442,11 @@ export class AppComponent implements OnInit {
   yeniEkEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi }; duzenlenenEvrakId: number | null = null;
   duzenlenenEvrakParentId: number | null = null; duzenlenenEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi, sablonBolumu: 'ihtiyari', sablonKategori: 'toplu' };
   duzenlenenEvrakOrijinalSonEylemTarihi = '';
+  uyapIceriAktarFormuAcik = false;
+  uyapIceriAktarOkunuyor = false;
+  uyapIceriAktarHata = '';
+  uyapIceriAktarYapistirilanMetin = '';
+  uyapIceriAktarOnizleme: UyapEvrakIceriAktarOnizleme | null = null;
   yeniEvrakGorevMetinleri: Record<number, string> = {};
   acikEvrakGorevFormlari: Record<number, boolean> = {};
   duzenlenenEvrakGorevi: { evrakId: number; gorevId: number; metin: string } | null = null;
@@ -6720,6 +6739,290 @@ export class AppComponent implements OnInit {
       this.topluDosyaOlusturulanTarafSayisi = null;
       this.cdr.detectChanges();
     }
+  }
+
+  uyapIceriAktarFormunuAcKapat() {
+    if (this.uyapIceriAktarFormuAcik) {
+      this.uyapIceriAktarFormunuKapat();
+      return;
+    }
+    this.uyapIceriAktarFormuAcik = !this.uyapIceriAktarFormuAcik;
+    if (this.uyapIceriAktarFormuAcik) this.uyapIceriAktarHata = '';
+  }
+
+  uyapIceriAktarFormunuKapat() {
+    this.uyapIceriAktarFormuAcik = false;
+    this.uyapIceriAktarOkunuyor = false;
+    this.uyapIceriAktarHata = '';
+    this.uyapIceriAktarYapistirilanMetin = '';
+    this.uyapIceriAktarOnizleme = null;
+  }
+
+  async uyapEvrakDosyasiSecildi(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const dosya = input.files?.[0];
+    if (!dosya) return;
+
+    this.uyapIceriAktarOkunuyor = true;
+    this.uyapIceriAktarHata = '';
+
+    try {
+      const metin = await this.uyapEvrakDosyasindanMetinOku(dosya);
+      this.uyapIceriAktarYapistirilanMetin = metin;
+      this.uyapIceriAktarOnizleme = this.uyapEvrakOnizlemesiOlustur(dosya.name, metin);
+      if (!metin.trim()) {
+        this.uyapIceriAktarHata = 'Bu dosyanın metni tarayıcıda okunamadı. Evrak adını dosya adından aldım; diğer alanları elle doldurup kaydedebilirsiniz.';
+      }
+    } catch (e: any) {
+      this.uyapIceriAktarHata = e?.message || 'Dosya okunamadı. Metni aşağıdaki alana yapıştırarak tekrar deneyebilirsiniz.';
+      this.uyapIceriAktarOnizleme = this.uyapEvrakOnizlemesiOlustur(dosya.name, '');
+    } finally {
+      this.uyapIceriAktarOkunuyor = false;
+      input.value = '';
+    }
+  }
+
+  uyapYapistirilanMetindenOnizlemeOlustur() {
+    const metin = this.uyapIceriAktarYapistirilanMetin || '';
+    if (!metin.trim()) {
+      this.uyapIceriAktarHata = 'Ön izleme oluşturmak için UYAP metnini yapıştırın veya bir dosya seçin.';
+      return;
+    }
+    this.uyapIceriAktarHata = '';
+    this.uyapIceriAktarOnizleme = this.uyapEvrakOnizlemesiOlustur('UYAP metni', metin);
+  }
+
+  async uyapEvrakOnizlemeyiKaydet() {
+    const onizleme = this.uyapIceriAktarOnizleme;
+    if (!this.aktifDosya || !onizleme) return;
+
+    const evrakAdi = this.formatMetin(onizleme.evrakAdi) || this.uyapDosyaAdindanEvrakAdi(onizleme.dosyaAdi) || 'UYAP Evrakı';
+    let url = (onizleme.baglantiUrl || '').trim();
+    if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+    const yeni: EvrakBaglantisi = {
+      id: Date.now(),
+      isim: evrakAdi,
+      url,
+      tarih: onizleme.tarih || new Date().toISOString(),
+      ekler: [],
+      tebligTarihi: onizleme.tebligTarihi || undefined,
+      sonEylemTarihi: onizleme.sonEylemTarihi || undefined,
+      tamamlandiMi: false,
+      tamamlanmaTarihi: '',
+      yaziRengi: '#2563eb'
+    };
+
+    const k: any = { ...this.aktifDosya };
+    if (!k.evraklar) k.evraklar = [];
+    k.evraklar.unshift(yeni);
+
+    const detay = [
+      onizleme.dosyaNo ? `Dosya no: ${onizleme.dosyaNo}` : '',
+      onizleme.kurum ? `Kurum: ${onizleme.kurum}` : '',
+      onizleme.tebligTarihi ? `Tebliğ: ${this.formatTarihKisa(onizleme.tebligTarihi)}` : '',
+      onizleme.sonEylemTarihi ? `Son eylem: ${this.formatTarihKisa(onizleme.sonEylemTarihi)}` : ''
+    ].filter(Boolean).join(' * ');
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'UYAP evrakı içe aktarıldı', `${evrakAdi}${detay ? ' * ' + detay : ''}`);
+    const kaydedildi = await this.aktifDosyaKaydet(kayitli, 'UYAP evrakı evrak bağlantılarına eklendi.');
+    if (kaydedildi) this.uyapIceriAktarFormunuKapat();
+  }
+
+  async uyapEvrakDosyasindanMetinOku(dosya: File): Promise<string> {
+    const ad = (dosya.name || '').toLocaleLowerCase('tr-TR');
+    if (ad.endsWith('.docx') || ad.endsWith('.xlsx') || ad.endsWith('.xls') || ad.endsWith('.doc') || ad.endsWith('.udf')) return '';
+
+    if (ad.endsWith('.pdf') || dosya.type === 'application/pdf') {
+      return this.uyapPdfMetinDenemesi(await dosya.arrayBuffer());
+    }
+
+    const metin = await dosya.text();
+    if (ad.endsWith('.rtf')) return this.uyapRtfMetniniTemizle(metin);
+    if (ad.endsWith('.html') || ad.endsWith('.htm')) return this.uyapHtmlMetniniTemizle(metin);
+    return this.uyapMetniTemizle(metin);
+  }
+
+  uyapEvrakOnizlemesiOlustur(dosyaAdi: string, metin: string): UyapEvrakIceriAktarOnizleme {
+    const temizMetin = this.uyapMetniTemizle(metin);
+    const dosyaNo = this.uyapDosyaNoBul(temizMetin);
+    const kurum = this.uyapKurumBul(temizMetin);
+    const tebligTarihi = this.uyapTarihBul(temizMetin, ['tebliğ tarihi', 'teblig tarihi', 'tebliğ', 'teblig']);
+    const sonEylemTarihi = this.uyapTarihBul(temizMetin, ['son eylem', 'son gün', 'son gun', 'kesin süre', 'kesin sure']);
+    const tarih = this.uyapTarihBul(temizMetin, ['evrak tarihi', 'karar tarihi', 'düzenleme tarihi', 'duzenleme tarihi', 'tarih']) || new Date().toISOString();
+    const evrakAdi = this.uyapEvrakAdiBul(temizMetin, dosyaAdi);
+    const aciklama = [kurum, dosyaNo ? `Dosya No: ${dosyaNo}` : '', dosyaAdi].filter(Boolean).join(' | ');
+    const okumaNotu = temizMetin
+      ? 'Metin okundu. Lütfen ön izleme alanlarını kontrol edip onaylayın.'
+      : 'Dosya metni otomatik okunamadı. Alanları elle düzenleyerek güvenli şekilde kaydedebilirsiniz.';
+
+    return {
+      dosyaAdi,
+      evrakAdi,
+      dosyaNo,
+      kurum,
+      tarih,
+      tebligTarihi,
+      sonEylemTarihi,
+      baglantiUrl: '',
+      aciklama,
+      hamMetin: temizMetin.slice(0, 2400),
+      okumaNotu
+    };
+  }
+
+  uyapDosyaAdindanEvrakAdi(dosyaAdi: string) {
+    const temiz = (dosyaAdi || '')
+      .replace(/\.[^.]+$/g, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return this.formatMetin(temiz) || 'UYAP Evrakı';
+  }
+
+  uyapEvrakAdiBul(metin: string, dosyaAdi: string) {
+    const satirlar = metin.split('\n').map(satir => satir.trim()).filter(Boolean);
+    const alanDesenleri = [
+      /evrak\s*(?:adı|adi|türü|turu|cinsi)\s*[:\-]\s*(.{3,140})/i,
+      /belge\s*(?:adı|adi|türü|turu)\s*[:\-]\s*(.{3,140})/i,
+      /konu\s*[:\-]\s*(.{3,140})/i
+    ];
+
+    for (const desen of alanDesenleri) {
+      const eslesme = metin.match(desen);
+      if (eslesme?.[1]) return this.formatMetin(this.uyapAlanMetniniTemizle(eslesme[1]));
+    }
+
+    const anahtarSatir = satirlar.find(satir =>
+      /(tensip|dilekçe|dilekcesi|tutanak|karar|ara karar|cevap|beyan|mazbata|tebligat|müzekkere|muzekkere)/i.test(satir) &&
+      satir.length <= 140
+    );
+    return this.formatMetin(anahtarSatir || this.uyapDosyaAdindanEvrakAdi(dosyaAdi));
+  }
+
+  uyapDosyaNoBul(metin: string) {
+    const desenler = [
+      /(?:esas|dosya|arabuluculuk|icra|büro|buro)\s*(?:no|numarası|numarasi)?\s*[:\-]?\s*(\d{4}\/\d{1,8})/i,
+      /\b(\d{4}\/\d{1,8})\b/
+    ];
+    for (const desen of desenler) {
+      const eslesme = metin.match(desen);
+      if (eslesme?.[1]) return eslesme[1];
+    }
+    return '';
+  }
+
+  uyapKurumBul(metin: string) {
+    const satirlar = metin.split('\n').map(satir => this.uyapAlanMetniniTemizle(satir)).filter(Boolean);
+    const kurum = satirlar.find(satir =>
+      /(mahkemesi|müdürlüğü|mudurlugu|dairesi|başsavcılığı|bassavciligi|arabuluculuk bürosu|arabuluculuk burosu|noterliği|noterligi)/i.test(satir) &&
+      satir.length <= 180
+    );
+    return kurum ? this.formatMetin(kurum) : '';
+  }
+
+  uyapTarihBul(metin: string, anahtarlar: string[]) {
+    const tarihDeseni = '(\\d{1,2}[.\\/-]\\d{1,2}[.\\/-]\\d{4})';
+    for (const anahtar of anahtarlar) {
+      const desen = new RegExp(`${this.uyapRegexKacis(anahtar)}[^\\n]{0,90}${tarihDeseni}`, 'i');
+      const eslesme = metin.match(desen);
+      if (eslesme?.[1]) return this.uyapTarihiIsoCevir(eslesme[1]);
+    }
+
+    const ilkTarih = metin.match(new RegExp(tarihDeseni));
+    return ilkTarih?.[1] ? this.uyapTarihiIsoCevir(ilkTarih[1]) : '';
+  }
+
+  uyapTarihiIsoCevir(tarih: string) {
+    const eslesme = tarih.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);
+    if (!eslesme) return '';
+    const gun = Number(eslesme[1]);
+    const ay = Number(eslesme[2]);
+    const yil = Number(eslesme[3]);
+    if (!gun || !ay || !yil || ay > 12 || gun > 31) return '';
+    return `${yil}-${String(ay).padStart(2, '0')}-${String(gun).padStart(2, '0')}`;
+  }
+
+  uyapRegexKacis(metin: string) {
+    return metin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  uyapAlanMetniniTemizle(metin: string) {
+    return (metin || '').replace(/\s+/g, ' ').replace(/[|]+$/g, '').trim();
+  }
+
+  uyapMetniTemizle(metin: string) {
+    return (metin || '')
+      .replace(/\u0000/g, ' ')
+      .replace(/\r/g, '\n')
+      .replace(/[ \t]{2,}/g, ' ')
+      .replace(/\n[ \t]+/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  uyapHtmlMetniniTemizle(metin: string) {
+    return this.uyapMetniTemizle(
+      (metin || '')
+        .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+        .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n')
+        .replace(/<[^>]+>/g, ' ')
+    );
+  }
+
+  uyapRtfMetniniTemizle(metin: string) {
+    const cp1254 = (hex: string) => {
+      try {
+        return new TextDecoder('windows-1254').decode(new Uint8Array([parseInt(hex, 16)]));
+      } catch {
+        return String.fromCharCode(parseInt(hex, 16));
+      }
+    };
+    return this.uyapMetniTemizle(
+      (metin || '')
+        .replace(/\\'([0-9a-f]{2})/gi, (_, hex) => cp1254(hex))
+        .replace(/\\par[d]?/gi, '\n')
+        .replace(/\\tab/gi, ' ')
+        .replace(/\\[a-z]+\d* ?/gi, ' ')
+        .replace(/[{}]/g, ' ')
+    );
+  }
+
+  uyapPdfMetinDenemesi(buffer: ArrayBuffer) {
+    const bytes = new Uint8Array(buffer);
+    const ham = new TextDecoder('latin1').decode(bytes);
+    const parcalar: string[] = [];
+    const tekliDesen = /\(((?:\\.|[^\\()]){2,220})\)\s*Tj/g;
+    let eslesme: RegExpExecArray | null;
+
+    while ((eslesme = tekliDesen.exec(ham)) && parcalar.length < 700) {
+      parcalar.push(this.uyapPdfParcasiniCoz(eslesme[1]));
+    }
+
+    const diziDesen = /\[((?:\s*\((?:\\.|[^\\()]){1,220}\)\s*-?\d*)+)\]\s*TJ/g;
+    while ((eslesme = diziDesen.exec(ham)) && parcalar.length < 1000) {
+      const icerik = eslesme[1];
+      const icDesen = /\(((?:\\.|[^\\()]){1,220})\)/g;
+      let icEslesme: RegExpExecArray | null;
+      while ((icEslesme = icDesen.exec(icerik)) && parcalar.length < 1000) {
+        parcalar.push(this.uyapPdfParcasiniCoz(icEslesme[1]));
+      }
+    }
+
+    const metin = this.uyapMetniTemizle(parcalar.join(' '));
+    return /[A-Za-zÇĞİÖŞÜçğıöşü]{12,}/.test(metin) ? metin : '';
+  }
+
+  uyapPdfParcasiniCoz(metin: string) {
+    return (metin || '')
+      .replace(/\\([nrtbf()\\])/g, (_, karakter) => {
+        const harita: Record<string, string> = { n: '\n', r: '\n', t: ' ', b: '', f: '', '(': '(', ')': ')', '\\': '\\' };
+        return harita[karakter] ?? karakter;
+      })
+      .replace(/\\([0-7]{1,3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8)))
+      .replace(/[^\S\n]+/g, ' ')
+      .trim();
   }
 
   evrakEkle() {
