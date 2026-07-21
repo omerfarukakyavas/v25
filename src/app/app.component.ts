@@ -687,7 +687,9 @@ export class AppComponent implements OnInit {
       this.cdr.detectChanges();
     });
     onSnapshot(collection(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk'), (sn: any) => {
-      this.arabuluculukDosyalar = sn.docs.map((d: any) => ({ id: Number(d.id), ...d.data() })).sort((a: any, b: any) => b.id - a.id);
+      this.arabuluculukDosyalar = sn.docs
+        .map((d: any) => this.arabuluculukKapaliToplantiyiTamamla({ id: Number(d.id), ...d.data() }))
+        .sort((a: any, b: any) => b.id - a.id);
       if (this.seciliArabuluculuk) this.seciliArabuluculuk = this.arabuluculukDosyalar.find((a: any) => a.id === this.seciliArabuluculuk!.id) || null;
       this.cdr.detectChanges();
     });
@@ -763,11 +765,20 @@ export class AppComponent implements OnInit {
       return false;
     }
   }
+  arabuluculukKapaliToplantiyiTamamla<T extends Partial<ArabuluculukDosyasi>>(dosya: T): T {
+    if (dosya?.durum !== 'Kapalı' || dosya.toplantiTamamlandiMi) return dosya;
+    return {
+      ...dosya,
+      toplantiTamamlandiMi: true,
+      toplantiTamamlanmaTarihi: dosya.toplantiTamamlanmaTarihi || new Date().toISOString()
+    };
+  }
   async arabuluculukKaydetCloud(a: ArabuluculukDosyasi, basariMesaji?: string): Promise<boolean> {
     if (!this.user) return false;
     this.islemYapiyor = true;
     try {
-      await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk', a.id.toString()), JSON.parse(JSON.stringify(a)));
+      const kaydedilecek = this.arabuluculukKapaliToplantiyiTamamla(a);
+      await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk', kaydedilecek.id!.toString()), JSON.parse(JSON.stringify(kaydedilecek)));
       if (basariMesaji) this.bildirimGoster('success', 'Arabuluculuk dosyası kaydedildi', basariMesaji);
       return true;
     } catch (e: any) {
@@ -4893,6 +4904,10 @@ export class AppComponent implements OnInit {
   }
   async toplantiAjandayaGeriAl(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
     event?.stopPropagation();
+    if (arabuluculuk.durum === 'Kapalı') {
+      this.bildirimGoster('info', 'Kapalı dosyada toplantı tamamlandı kabul edilir', 'Dosyayı yeniden aktif aşamaya alırsanız toplantıyı tekrar ajandaya çekebilirsiniz.');
+      return;
+    }
     const oncekiKayit = this.veriKopyala(arabuluculuk);
     let k = { ...arabuluculuk, toplantiTamamlandiMi: false, toplantiTamamlanmaTarihi: '' };
     k = this.dosyayaTakvimKaydiEkle(k, 'Toplantı', 'Ajandaya Geri Alındı', arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati, 'Toplantı yeniden aktif ajandaya alındı.');
@@ -7487,14 +7502,14 @@ export class AppComponent implements OnInit {
     const tarih = this.getAktifDosyaKritikTarih();
     if (!tarih) return 'Takvim girilmedi';
     if (this.aktifSayfa === 'detay' && (this.aktifDosya as DavaDosyasi)?.durusmaTamamlandiMi) return 'Gerçekleşti';
-    if (this.aktifSayfa === 'arabuluculukDetay' && (this.aktifDosya as ArabuluculukDosyasi)?.toplantiTamamlandiMi) return 'Gerçekleşti';
+    if (this.aktifSayfa === 'arabuluculukDetay' && this.arabuluculukToplantisiTamamlanmisKabulEdilir(this.aktifDosya as ArabuluculukDosyasi)) return 'Gerçekleşti';
     if (this.aktifSayfa === 'icraDetay') return 'Takip açılış tarihi';
     return this.hesaplaKalanGun(tarih);
   }
   getAktifDosyaTakvimTamamlandiMi() {
     if (!this.aktifDosya) return false;
     if (this.aktifSayfa === 'detay') return !!(this.aktifDosya as DavaDosyasi).durusmaTamamlandiMi;
-    if (this.aktifSayfa === 'arabuluculukDetay') return !!(this.aktifDosya as ArabuluculukDosyasi).toplantiTamamlandiMi;
+    if (this.aktifSayfa === 'arabuluculukDetay') return this.arabuluculukToplantisiTamamlanmisKabulEdilir(this.aktifDosya as ArabuluculukDosyasi);
     return false;
   }
   getAktifDavaDosyasi() { return this.aktifSayfa === 'detay' ? this.aktifDosya as DavaDosyasi : null; }
@@ -7579,7 +7594,10 @@ export class AppComponent implements OnInit {
     const dosya = this.getAktifArabuluculukDosyasi();
     return this.formatTarihSaat(dosya?.toplantiTarihi, dosya?.toplantiSaati);
   }
-  aktifArabuluculukToplantiTamamlandiMi() { return !!this.getAktifArabuluculukDosyasi()?.toplantiTamamlandiMi; }
+  arabuluculukToplantisiTamamlanmisKabulEdilir(dosya?: Partial<ArabuluculukDosyasi> | null) {
+    return !!dosya?.toplantiTamamlandiMi || dosya?.durum === 'Kapalı';
+  }
+  aktifArabuluculukToplantiTamamlandiMi() { return this.arabuluculukToplantisiTamamlanmisKabulEdilir(this.getAktifArabuluculukDosyasi()); }
   aktifArabuluculukToplantiyiTamamla() { const dosya = this.getAktifArabuluculukDosyasi(); if (dosya) this.toplantiTamamlandiIsaretle(dosya); }
   aktifArabuluculukToplantiyiAjandayaGeriAl() { const dosya = this.getAktifArabuluculukDosyasi(); if (dosya) this.toplantiAjandayaGeriAl(dosya); }
   getAktifDosyaToplamEvrakSayisi() {
