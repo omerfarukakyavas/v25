@@ -5571,12 +5571,14 @@ export class AppComponent implements OnInit {
     };
     const k: any = { ...this.aktifDosya, finansalIslemler: [...(this.aktifDosya.finansalIslemler || [])] };
     k.finansalIslemler.unshift(islem);
+    const oncekiDurum = arabuluculukMu ? (k.durum || '') : '';
+    if (arabuluculukMu) k.durum = 'Kapalı';
     const ozet = arabuluculukMu && makbuzStopajli
-      ? `${islem.tur}: ${this.formatPara(tahsilatTutari)} * Net kapanan alacak: ${this.formatPara(kalanNetAlacak)} * Stopajlı ödeme`
-      : `${islem.tur}: ${this.formatPara(tahsilatTutari)} * Kalan alacak sıfırlandı`;
+      ? `${islem.tur}: ${this.formatPara(tahsilatTutari)} * Net kapanan alacak: ${this.formatPara(kalanNetAlacak)} * Stopajlı ödeme${oncekiDurum && oncekiDurum !== 'Kapalı' ? ' * Aşama: ' + oncekiDurum + ' -> Kapalı' : ' * Aşama: Kapalı'}`
+      : `${islem.tur}: ${this.formatPara(tahsilatTutari)} * Kalan alacak sıfırlandı${arabuluculukMu ? (oncekiDurum && oncekiDurum !== 'Kapalı' ? ' * Aşama: ' + oncekiDurum + ' -> Kapalı' : ' * Aşama: Kapalı') : ''}`;
     const kayitli = this.dosyayaIslemKaydiEkle(k, 'finans', 'Ödeme yapıldı olarak işaretlendi', ozet);
     this.finansalIslemDuzenlemeIptal();
-    this.aktifDosyaKaydet(kayitli, 'Ödeme yapıldı. Kalan alacak sıfırlandı.');
+    this.aktifDosyaKaydet(kayitli, arabuluculukMu ? 'Ödeme yapıldı. Kalan alacak sıfırlandı ve dosya kapalı aşamasına alındı.' : 'Ödeme yapıldı. Kalan alacak sıfırlandı.');
     this.finansalIslemFormunuSifirla(this.yeniIslem.tur as string);
   }
 
