@@ -166,6 +166,12 @@ export interface UygulamaBildirimi {
   geriAlKalanSaniye?: number;
 }
 
+export interface KullaniciAyarlari {
+  logoDataUrl?: string;
+  logoDosyaAdi?: string;
+  logoKayitTarihi?: string;
+}
+
 export interface IliskiDosyaKaydi {
   id: string;
   tur: 'dava' | 'icra' | 'arabuluculuk';

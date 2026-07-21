@@ -29,6 +29,7 @@ import {
   IcraDosyasi,
   IletisimNotu,
   IliskiDosyaKaydi,
+  KullaniciAyarlari,
   Muvekkil,
   MuvekkilGorusmeNotu,
   OfisGorevi,
@@ -317,6 +318,9 @@ export class AppComponent implements OnInit {
     yeniSifre: '',
     yeniSifreTekrar: ''
   };
+  kullaniciAyarlari: KullaniciAyarlari = {};
+  logoYukleniyor = false;
+  readonly varsayilanLogoKaynak = 'assets/brand-mark.svg';
   bildirimler: UygulamaBildirimi[] = [];
   bildirimPanelAcik = false;
   bildirimSayaci = 0;
@@ -581,6 +585,8 @@ export class AppComponent implements OnInit {
           this.googleCalendarYetkiIstendi = false;
           this.arsivKlasorleri = [...this.varsayilanArsivKlasorleri];
           this.yeniArsivKlasoru = '';
+          this.kullaniciAyarlari = {};
+          this.logoYukleniyor = false;
         }
         this.cdr.detectChanges();
       });
@@ -620,6 +626,139 @@ export class AppComponent implements OnInit {
 
   kullaniciGorunenAdi() {
     return this.user?.displayName || this.user?.email || 'Kullanıcı';
+  }
+  kullaniciLogoKaynak() {
+    return this.kullaniciAyarlari.logoDataUrl || this.varsayilanLogoKaynak;
+  }
+  ozelLogoVarMi() {
+    return !!this.kullaniciAyarlari.logoDataUrl;
+  }
+  async kullaniciLogoDosyasiSecildi(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const dosya = input.files?.[0];
+    input.value = '';
+    if (!dosya) return;
+
+    const oncekiAyarlar = { ...this.kullaniciAyarlari };
+    this.hesapAyarlariHata = '';
+    this.hesapAyarlariBilgi = '';
+    this.logoYukleniyor = true;
+    try {
+      const logoDataUrl = await this.logoDataUrlHazirla(dosya);
+      this.kullaniciAyarlari = {
+        ...this.kullaniciAyarlari,
+        logoDataUrl,
+        logoDosyaAdi: dosya.name,
+        logoKayitTarihi: new Date().toISOString()
+      };
+      const kaydedildi = await this.kullaniciAyarlariKaydetCloud();
+      if (!kaydedildi) {
+        this.kullaniciAyarlari = oncekiAyarlar;
+        return;
+      }
+      this.hesapAyarlariBilgi = 'Logo güncellendi. Sol menüde yeni logo kullanılacak.';
+      this.bildirimGoster('success', 'Logo güncellendi', 'Kullanıcı logonuz başarıyla kaydedildi.');
+    } catch (e: any) {
+      this.kullaniciAyarlari = oncekiAyarlar;
+      this.hesapAyarlariHata = e?.message || 'Logo yüklenemedi. Başka bir görsel deneyin.';
+    } finally {
+      this.logoYukleniyor = false;
+      this.cdr.detectChanges();
+    }
+  }
+  async kullaniciLogoyuSifirla() {
+    if (!this.ozelLogoVarMi()) {
+      this.hesapAyarlariBilgi = 'Zaten varsayılan logo kullanılıyor.';
+      return;
+    }
+    const oncekiAyarlar = { ...this.kullaniciAyarlari };
+    this.hesapAyarlariHata = '';
+    this.hesapAyarlariBilgi = '';
+    this.logoYukleniyor = true;
+    try {
+      this.kullaniciAyarlari = {};
+      const kaydedildi = await this.kullaniciAyarlariKaydetCloud();
+      if (!kaydedildi) {
+        this.kullaniciAyarlari = oncekiAyarlar;
+        return;
+      }
+      this.hesapAyarlariBilgi = 'Varsayılan sistem logosuna dönüldü.';
+      this.bildirimGoster('success', 'Logo sıfırlandı', 'Sol menüde varsayılan logo kullanılacak.');
+    } finally {
+      this.logoYukleniyor = false;
+      this.cdr.detectChanges();
+    }
+  }
+  private async kullaniciAyarlariKaydetCloud(): Promise<boolean> {
+    if (!this.user) return false;
+    try {
+      await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'kullanici'), JSON.parse(JSON.stringify(this.kullaniciAyarlari)));
+      return true;
+    } catch (e: any) {
+      this.hesapAyarlariHata = e?.message || 'Kullanıcı ayarları kaydedilemedi.';
+      this.bildirimGoster('error', 'Ayarlar kaydedilemedi', 'Bağlantıyı kontrol edip tekrar deneyin.');
+      return false;
+    }
+  }
+  private async logoDataUrlHazirla(dosya: File): Promise<string> {
+    const izinliTurler = ['image/png', 'image/jpeg', 'image/webp'];
+    if (!izinliTurler.includes(dosya.type)) {
+      throw new Error('Logo için PNG, JPG veya WEBP formatında bir görsel seçin.');
+    }
+    if (dosya.size > 4 * 1024 * 1024) {
+      throw new Error('Logo dosyası çok büyük. Lütfen 4 MB altında bir görsel seçin.');
+    }
+
+    const hamDataUrl = await this.dosyaDataUrlOku(dosya);
+    const gorsel = await this.gorselYukle(hamDataUrl);
+    return this.logoGorseliniKucult(gorsel);
+  }
+  private dosyaDataUrlOku(dosya: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const okuyucu = new FileReader();
+      okuyucu.onload = () => resolve(String(okuyucu.result || ''));
+      okuyucu.onerror = () => reject(new Error('Logo dosyası okunamadı.'));
+      okuyucu.readAsDataURL(dosya);
+    });
+  }
+  private gorselYukle(dataUrl: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const gorsel = new Image();
+      gorsel.onload = () => resolve(gorsel);
+      gorsel.onerror = () => reject(new Error('Seçilen görsel logo olarak işlenemedi.'));
+      gorsel.src = dataUrl;
+    });
+  }
+  private logoGorseliniKucult(gorsel: HTMLImageElement): string {
+    const boyut = 320;
+    const kenarBosluk = 28;
+    const canvas = document.createElement('canvas');
+    canvas.width = boyut;
+    canvas.height = boyut;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Tarayıcı logo önizlemesini hazırlayamadı.');
+
+    const oran = Math.min((boyut - kenarBosluk * 2) / gorsel.width, (boyut - kenarBosluk * 2) / gorsel.height);
+    const hedefGenislik = Math.max(1, gorsel.width * oran);
+    const hedefYukseklik = Math.max(1, gorsel.height * oran);
+    const x = (boyut - hedefGenislik) / 2;
+    const y = (boyut - hedefYukseklik) / 2;
+
+    ctx.clearRect(0, 0, boyut, boyut);
+    ctx.drawImage(gorsel, x, y, hedefGenislik, hedefYukseklik);
+    let dataUrl = canvas.toDataURL('image/png');
+    if (dataUrl.length > 700000) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-over';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, boyut, boyut);
+      ctx.restore();
+      dataUrl = canvas.toDataURL('image/jpeg', 0.86);
+    }
+    if (dataUrl.length > 900000) {
+      throw new Error('Logo sıkıştırılsa bile büyük kaldı. Daha sade veya küçük bir görsel seçin.');
+    }
+    return dataUrl;
   }
   hesapAyarlariAc() {
     if (!this.user) return;
@@ -737,6 +876,10 @@ export class AppComponent implements OnInit {
     onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'arsivKlasorleri'), (ds: any) => {
       const liste = ds.exists() ? ds.data()?.liste : undefined;
       this.arsivKlasorleri = this.arsivKlasorListesiniHazirla(liste);
+      this.cdr.detectChanges();
+    });
+    onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'kullanici'), (ds: any) => {
+      this.kullaniciAyarlari = ds.exists() ? (ds.data() as KullaniciAyarlari) : {};
       this.cdr.detectChanges();
     });
   }
