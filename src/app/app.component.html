@@ -3213,7 +3213,7 @@
                                   <h4 class="detail-section-title mt-1 text-slate-800">Dosya içindeki kişi görüşmelerini ayrı takip edin</h4>
                                   <p class="detail-section-copy mt-2 text-slate-500">Taraf, vekil, kalem, kurum veya üçüncü kişilerle yapılan iletişimleri en yeni kayıt üstte olacak şekilde saklayabilirsiniz.</p>
                                 </div>
-                                <div class="grid gap-3 p-4 xl:grid-cols-[minmax(0,1.1fr)_160px_190px_minmax(0,1fr)]">
+                                <div class="grid gap-3 p-4 xl:grid-cols-[minmax(0,1.1fr)_150px_120px_180px_minmax(0,1fr)]">
                                   <div>
                                     <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">Ad Soyad / Unvan</label>
                                     <input [(ngModel)]="yeniIletisimNotu.kisi" (paste)="temizMetinYapistir($event)" type="text" placeholder="Görüştüğünüz kişi veya kurum" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
@@ -3223,6 +3223,10 @@
                                     <input [(ngModel)]="yeniIletisimNotu.tarih" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
                                   </div>
                                   <div>
+                                    <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">Saat</label>
+                                    <input [(ngModel)]="yeniIletisimNotu.saat" type="time" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
+                                  </div>
+                                  <div>
                                     <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">İletişim Yöntemi</label>
                                     <select [(ngModel)]="yeniIletisimNotu.yontem" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
                                       @for (yontem of iletisimNotuYontemleri; track yontem) {
@@ -3230,11 +3234,23 @@
                                       }
                                     </select>
                                   </div>
+                                  @if (iletisimNotuTelefonAlaniGoster(yeniIletisimNotu.yontem)) {
+                                    <div>
+                                      <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">Telefon</label>
+                                      <input [(ngModel)]="yeniIletisimNotu.telefon" (paste)="temizMetinYapistir($event)" type="tel" placeholder="05xx xxx xx xx" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
+                                    </div>
+                                  }
+                                  @if (iletisimNotuEpostaAlaniGoster(yeniIletisimNotu.yontem)) {
+                                    <div>
+                                      <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">E-posta</label>
+                                      <input [(ngModel)]="yeniIletisimNotu.eposta" type="email" placeholder="ornek@alanadi.com" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
+                                    </div>
+                                  }
                                   <div>
                                     <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">Google Drive Bağlantısı</label>
                                     <input [(ngModel)]="yeniIletisimNotu.baglantiUrl" type="url" placeholder="drive.google.com/... veya docs.google.com/..." class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
                                   </div>
-                                  <div class="xl:col-span-4">
+                                  <div class="xl:col-span-5">
                                     <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">İletişim Notu</label>
                                     <textarea [(ngModel)]="yeniIletisimNotu.notlar" rows="3" placeholder="Görüşmenin özeti, verilen bilgi, istenen belge veya sonraki adımı yazın..." class="w-full resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm leading-6 outline-none focus:ring-2 focus:ring-cyan-500"></textarea>
                                   </div>
@@ -3253,9 +3269,9 @@
                                   @for (kayit of aktifDosyaIletisimNotlari; track kayit.id) {
                                     <div class="overflow-hidden rounded-2xl border border-cyan-100 bg-cyan-50/35 shadow-sm">
                                       <button (click)="iletisimNotuGorunumDegistir(kayit.id)" class="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-cyan-50/80">
-                                        <div class="grid min-w-0 flex-1 gap-2 md:grid-cols-[minmax(0,1.1fr)_140px_160px_minmax(0,1fr)] md:items-center">
+                                        <div class="grid min-w-0 flex-1 gap-2 md:grid-cols-[minmax(0,1.1fr)_160px_160px_minmax(0,1fr)] md:items-center">
                                           <div class="truncate text-sm font-black text-slate-900">{{ kayit.kisi }}</div>
-                                          <div class="text-sm font-semibold text-slate-800">{{ formatTarih(kayit.tarih) }}</div>
+                                          <div class="text-sm font-semibold text-slate-800">{{ formatTarihSaat(kayit.tarih, kayit.saat) }}</div>
                                           <div><span class="inline-flex rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-cyan-700 ring-1 ring-cyan-200">{{ kayit.yontem || '-' }}</span></div>
                                           <div class="min-w-0 text-sm text-slate-600">{{ iletisimNotuOnizleme(kayit.notlar) }}</div>
                                         </div>
@@ -3264,7 +3280,7 @@
                                       @if (iletisimNotuAcikMi(kayit.id)) {
                                         <div class="border-t border-cyan-100 bg-white px-4 py-4">
                                           @if (duzenlenenIletisimNotuId === kayit.id) {
-                                            <div class="grid gap-3 xl:grid-cols-[minmax(0,1.1fr)_160px_190px_minmax(0,1fr)]">
+                                            <div class="grid gap-3 xl:grid-cols-[minmax(0,1.1fr)_150px_120px_180px_minmax(0,1fr)]">
                                               <div>
                                                 <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">Ad Soyad / Unvan</label>
                                                 <input [(ngModel)]="duzenlenenIletisimNotu.kisi" (paste)="temizMetinYapistir($event)" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
@@ -3274,6 +3290,10 @@
                                                 <input [(ngModel)]="duzenlenenIletisimNotu.tarih" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
                                               </div>
                                               <div>
+                                                <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">Saat</label>
+                                                <input [(ngModel)]="duzenlenenIletisimNotu.saat" type="time" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
+                                              </div>
+                                              <div>
                                                 <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">İletişim Yöntemi</label>
                                                 <select [(ngModel)]="duzenlenenIletisimNotu.yontem" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
                                                   @for (yontem of iletisimNotuYontemleri; track yontem) {
@@ -3281,11 +3301,23 @@
                                                   }
                                                 </select>
                                               </div>
+                                              @if (iletisimNotuTelefonAlaniGoster(duzenlenenIletisimNotu.yontem)) {
+                                                <div>
+                                                  <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">Telefon</label>
+                                                  <input [(ngModel)]="duzenlenenIletisimNotu.telefon" (paste)="temizMetinYapistir($event)" type="tel" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
+                                                </div>
+                                              }
+                                              @if (iletisimNotuEpostaAlaniGoster(duzenlenenIletisimNotu.yontem)) {
+                                                <div>
+                                                  <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">E-posta</label>
+                                                  <input [(ngModel)]="duzenlenenIletisimNotu.eposta" type="email" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
+                                                </div>
+                                              }
                                               <div>
                                                 <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">Google Drive Bağlantısı</label>
                                                 <input [(ngModel)]="duzenlenenIletisimNotu.baglantiUrl" type="url" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-500">
                                               </div>
-                                              <div class="xl:col-span-4">
+                                              <div class="xl:col-span-5">
                                                 <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">İletişim Notu</label>
                                                 <textarea [(ngModel)]="duzenlenenIletisimNotu.notlar" rows="4" class="w-full resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm leading-6 outline-none focus:ring-2 focus:ring-cyan-500"></textarea>
                                               </div>
@@ -3295,11 +3327,22 @@
                                               <button (click)="iletisimNotuGuncelleKaydet()" class="rounded-xl bg-cyan-700 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-cyan-800">Değişikliği Kaydet</button>
                                             </div>
                                           } @else {
-                                            <div class="grid gap-3 sm:grid-cols-3">
+                                            <div class="grid gap-3 sm:grid-cols-4">
                                               <div><p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Kişi</p><p class="mt-1 text-sm font-semibold text-slate-900">{{ kayit.kisi }}</p></div>
                                               <div><p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Tarih</p><p class="mt-1 text-sm font-semibold text-slate-900">{{ formatTarih(kayit.tarih) }}</p></div>
+                                              <div><p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Saat</p><p class="mt-1 text-sm font-semibold text-slate-900">{{ kayit.saat ? formatSaat(kayit.saat) : '-' }}</p></div>
                                               <div><p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Yöntem</p><p class="mt-1 text-sm font-semibold text-slate-900">{{ kayit.yontem || '-' }}</p></div>
                                             </div>
+                                            @if (kayit.telefon || kayit.eposta) {
+                                              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                                                @if (kayit.telefon) {
+                                                  <div><p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Telefon</p><p class="mt-1 text-sm font-semibold text-slate-900">{{ kayit.telefon }}</p></div>
+                                                }
+                                                @if (kayit.eposta) {
+                                                  <div><p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">E-posta</p><p class="mt-1 text-sm font-semibold text-slate-900">{{ kayit.eposta }}</p></div>
+                                                }
+                                              </div>
+                                            }
                                             <div class="mt-4">
                                               <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">İletişim Notu</p>
                                               <p class="mt-2 whitespace-pre-line rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">{{ kayit.notlar }}</p>

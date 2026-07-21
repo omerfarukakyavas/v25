@@ -4034,7 +4034,7 @@ export class AppComponent implements OnInit {
     return [...(this.aktifDosya?.takvimGecmisi || [])].sort((a, b) => new Date(b.kayitTarihi).getTime() - new Date(a.kayitTarihi).getTime());
   }
   iletisimNotuVarsayilanFormu(): Partial<IletisimNotu> {
-    return { kisi: '', tarih: new Date().toISOString().split('T')[0], yontem: 'Telefon Araması', notlar: '', baglantiUrl: '' };
+    return { kisi: '', tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon Araması', telefon: '', eposta: '', notlar: '', baglantiUrl: '' };
   }
   get aktifDosyaIletisimNotlari() {
     return [...(this.aktifDosya?.iletisimNotlari || [])].sort((a, b) => {
@@ -4045,7 +4045,15 @@ export class AppComponent implements OnInit {
   }
   iletisimNotuZamanDamgasi(kayit?: Partial<IletisimNotu>) {
     if (!kayit?.tarih) return 0;
-    return new Date(`${kayit.tarih}T00:00`).getTime() || 0;
+    return new Date(`${kayit.tarih}T${(kayit.saat || '00:00').slice(0, 5) || '00:00'}`).getTime() || 0;
+  }
+  iletisimNotuTelefonAlaniGoster(yontem?: string) {
+    const temiz = (yontem || '').toLocaleLowerCase('tr-TR');
+    return temiz.includes('whatsapp') || temiz.includes('telefon') || temiz.includes('sms');
+  }
+  iletisimNotuEpostaAlaniGoster(yontem?: string) {
+    const temiz = (yontem || '').toLocaleLowerCase('tr-TR');
+    return temiz.includes('e-posta') || temiz.includes('eposta') || temiz.includes('mail');
   }
   iletisimNotuOnizleme(notlar?: string, limit = 120) {
     const metin = (notlar || '').replace(/\s+/g, ' ').trim();
@@ -4060,7 +4068,7 @@ export class AppComponent implements OnInit {
   }
   getIletisimNotuKayitOzetMetni(kayit?: Partial<IletisimNotu>) {
     if (!kayit?.tarih && !kayit?.kisi) return '-';
-    return [kayit?.kisi || '', kayit?.tarih ? this.formatTarih(kayit.tarih) : '', kayit?.yontem || ''].filter(Boolean).join(' * ');
+    return [kayit?.kisi || '', kayit?.tarih ? this.formatTarihSaat(kayit.tarih, kayit.saat) : '', kayit?.yontem || ''].filter(Boolean).join(' * ');
   }
   iletisimNotuFormunuSifirla() {
     this.yeniIletisimNotu = this.iletisimNotuVarsayilanFormu();
@@ -4092,7 +4100,10 @@ export class AppComponent implements OnInit {
 
     const kisi = this.formatMetin(this.yeniIletisimNotu.kisi) || '';
     const tarih = this.yeniIletisimNotu.tarih || new Date().toISOString().split('T')[0];
+    const saat = (this.yeniIletisimNotu.saat || '').trim().slice(0, 5);
     const yontem = this.formatMetin(this.yeniIletisimNotu.yontem) || 'Telefon Araması';
+    const telefon = this.duzMetinTrimle(this.yeniIletisimNotu.telefon) || '';
+    const eposta = this.epostaDegeriniTemizle(this.yeniIletisimNotu.eposta) || '';
     const notlar = (this.yeniIletisimNotu.notlar || '').trim();
     const baglantiUrl = this.hazirBaglantiUrl(this.yeniIletisimNotu.baglantiUrl);
     if (!kisi || !tarih || !notlar) {
@@ -4106,7 +4117,10 @@ export class AppComponent implements OnInit {
       id: this.yeniGecmisKaydiId(),
       kisi,
       tarih,
+      saat,
       yontem,
+      telefon,
+      eposta,
       notlar,
       baglantiUrl,
       kayitTarihi: new Date().toISOString()
@@ -4117,7 +4131,7 @@ export class AppComponent implements OnInit {
       k,
       'gorusme',
       'İletişim notu eklendi',
-      `${kisi} * ${this.formatTarih(tarih)} * ${yontem}${baglantiUrl ? ' * Bağlantı eklendi' : ''}`
+      `${kisi} * ${this.formatTarihSaat(tarih, saat)} * ${yontem}${telefon ? ' * Telefon: ' + telefon : ''}${eposta ? ' * E-posta: ' + eposta : ''}${baglantiUrl ? ' * Bağlantı eklendi' : ''}`
     );
     this.aktifDosyaYerelGuncelle(kayitli);
     this.acikIletisimNotlari[yeniKayit.id] = false;
@@ -4130,7 +4144,10 @@ export class AppComponent implements OnInit {
 
     const kisi = this.formatMetin(this.duzenlenenIletisimNotu.kisi) || '';
     const tarih = this.duzenlenenIletisimNotu.tarih || new Date().toISOString().split('T')[0];
+    const saat = (this.duzenlenenIletisimNotu.saat || '').trim().slice(0, 5);
     const yontem = this.formatMetin(this.duzenlenenIletisimNotu.yontem) || 'Telefon Araması';
+    const telefon = this.duzMetinTrimle(this.duzenlenenIletisimNotu.telefon) || '';
+    const eposta = this.epostaDegeriniTemizle(this.duzenlenenIletisimNotu.eposta) || '';
     const notlar = (this.duzenlenenIletisimNotu.notlar || '').trim();
     const baglantiUrl = this.hazirBaglantiUrl(this.duzenlenenIletisimNotu.baglantiUrl);
     if (!kisi || !tarih || !notlar) {
@@ -4144,7 +4161,10 @@ export class AppComponent implements OnInit {
 
     kayit.kisi = kisi;
     kayit.tarih = tarih;
+    kayit.saat = saat;
     kayit.yontem = yontem;
+    kayit.telefon = telefon;
+    kayit.eposta = eposta;
     kayit.notlar = notlar;
     kayit.baglantiUrl = baglantiUrl;
 

@@ -85,7 +85,10 @@ export interface IletisimNotu {
   id: number;
   kisi: string;
   tarih: string;
+  saat?: string;
   yontem?: string;
+  telefon?: string;
+  eposta?: string;
   notlar: string;
   baglantiUrl?: string;
   kayitTarihi?: string;
