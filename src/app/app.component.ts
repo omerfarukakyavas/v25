@@ -27,6 +27,7 @@ import {
   EvrakGorevi,
   FinansalIslem,
   IcraDosyasi,
+  IletisimNotu,
   IliskiDosyaKaydi,
   Muvekkil,
   MuvekkilGorusmeNotu,
@@ -485,6 +486,12 @@ export class AppComponent implements OnInit {
   gunlukOzetKopyalaniyor = false;
   gunlukOzetKartlari: GunlukOzetKart[] = [];
   gunlukOzetBolumleri: GunlukOzetBolum[] = [];
+  readonly iletisimNotuYontemleri = ['WhatsApp', 'E-posta', 'Telefon Araması', 'SMS', 'Yüz yüze', 'Diğer'];
+  yeniIletisimNotu: Partial<IletisimNotu> = this.iletisimNotuVarsayilanFormu();
+  acikIletisimNotlari: Record<number, boolean> = {};
+  duzenlenenIletisimNotuId: number | null = null;
+  duzenlenenIletisimNotu: Partial<IletisimNotu> = {};
+  silinecekIletisimNotuId: number | null = null;
   yeniMuvekkilGorusmeNotu: Partial<MuvekkilGorusmeNotu> = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
   readonly arabuluculukSureSayaciAktifDurumlari = ['Hazırlık', 'Müzakere', 'İmza'];
   readonly arabuluculukSureSayaciDuranDurumlari = ['Tahsilat', 'Evrak Yükleme', 'Kapalı'];
@@ -1794,6 +1801,11 @@ export class AppComponent implements OnInit {
     this.finansalIslemDuzenlemeIptal();
     this.evrakDuzenleIptal();
     this.ekEvrakFormKapat();
+    this.iletisimNotuFormunuSifirla();
+    this.acikIletisimNotlari = {};
+    this.duzenlenenIletisimNotuId = null;
+    this.duzenlenenIletisimNotu = {};
+    this.silinecekIletisimNotuId = null;
     this.yeniMuvekkilGorusmeNotu = { tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon', notlar: '' };
     this.acikMuvekkilGorusmeNotlari = {};
     this.duzenlenenMuvekkilGorusmeNotuId = null;
@@ -4020,6 +4032,155 @@ export class AppComponent implements OnInit {
   }
   get aktifDosyaTakvimGecmisi() {
     return [...(this.aktifDosya?.takvimGecmisi || [])].sort((a, b) => new Date(b.kayitTarihi).getTime() - new Date(a.kayitTarihi).getTime());
+  }
+  iletisimNotuVarsayilanFormu(): Partial<IletisimNotu> {
+    return { kisi: '', tarih: new Date().toISOString().split('T')[0], yontem: 'Telefon Araması', notlar: '', baglantiUrl: '' };
+  }
+  get aktifDosyaIletisimNotlari() {
+    return [...(this.aktifDosya?.iletisimNotlari || [])].sort((a, b) => {
+      const tarihFarki = this.iletisimNotuZamanDamgasi(b) - this.iletisimNotuZamanDamgasi(a);
+      if (tarihFarki !== 0) return tarihFarki;
+      return (new Date(b.kayitTarihi || '').getTime() || 0) - (new Date(a.kayitTarihi || '').getTime() || 0);
+    });
+  }
+  iletisimNotuZamanDamgasi(kayit?: Partial<IletisimNotu>) {
+    if (!kayit?.tarih) return 0;
+    return new Date(`${kayit.tarih}T00:00`).getTime() || 0;
+  }
+  iletisimNotuOnizleme(notlar?: string, limit = 120) {
+    const metin = (notlar || '').replace(/\s+/g, ' ').trim();
+    if (!metin) return 'Not girilmedi.';
+    return metin.length > limit ? `${metin.slice(0, limit)}...` : metin;
+  }
+  iletisimNotuAcikMi(id: number) {
+    return !!this.acikIletisimNotlari[id];
+  }
+  iletisimNotuGorunumDegistir(id: number) {
+    this.acikIletisimNotlari[id] = !this.acikIletisimNotlari[id];
+  }
+  getIletisimNotuKayitOzetMetni(kayit?: Partial<IletisimNotu>) {
+    if (!kayit?.tarih && !kayit?.kisi) return '-';
+    return [kayit?.kisi || '', kayit?.tarih ? this.formatTarih(kayit.tarih) : '', kayit?.yontem || ''].filter(Boolean).join(' * ');
+  }
+  iletisimNotuFormunuSifirla() {
+    this.yeniIletisimNotu = this.iletisimNotuVarsayilanFormu();
+  }
+  iletisimNotuDuzenlemeBaslat(kayit: IletisimNotu) {
+    this.duzenlenenIletisimNotuId = kayit.id;
+    this.duzenlenenIletisimNotu = { ...kayit };
+    this.silinecekIletisimNotuId = null;
+    this.acikIletisimNotlari[kayit.id] = true;
+  }
+  iletisimNotuDuzenlemeIptal() {
+    this.duzenlenenIletisimNotuId = null;
+    this.duzenlenenIletisimNotu = {};
+  }
+  iletisimNotuSilmeIste(id: number) {
+    this.silinecekIletisimNotuId = id;
+    this.acikIletisimNotlari[id] = true;
+  }
+  iletisimNotuSilmeIptal() {
+    this.silinecekIletisimNotuId = null;
+  }
+  aktifDosyaYerelGuncelle(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi) {
+    if (this.aktifSayfa === 'detay') this.seciliDava = dosya as DavaDosyasi;
+    else if (this.aktifSayfa === 'icraDetay') this.seciliIcra = dosya as IcraDosyasi;
+    else if (this.aktifSayfa === 'arabuluculukDetay') this.seciliArabuluculuk = dosya as ArabuluculukDosyasi;
+  }
+  async iletisimNotuKaydet() {
+    if (!this.aktifDosya) return;
+
+    const kisi = this.formatMetin(this.yeniIletisimNotu.kisi) || '';
+    const tarih = this.yeniIletisimNotu.tarih || new Date().toISOString().split('T')[0];
+    const yontem = this.formatMetin(this.yeniIletisimNotu.yontem) || 'Telefon Araması';
+    const notlar = (this.yeniIletisimNotu.notlar || '').trim();
+    const baglantiUrl = this.hazirBaglantiUrl(this.yeniIletisimNotu.baglantiUrl);
+    if (!kisi || !tarih || !notlar) {
+      this.bildirimGoster('info', 'İletişim notu eksik', 'Kişi adı, tarih ve iletişim notu alanlarını doldurup tekrar deneyin.');
+      return;
+    }
+
+    const k: any = JSON.parse(JSON.stringify(this.aktifDosya));
+    if (!k.iletisimNotlari) k.iletisimNotlari = [];
+    const yeniKayit: IletisimNotu = {
+      id: this.yeniGecmisKaydiId(),
+      kisi,
+      tarih,
+      yontem,
+      notlar,
+      baglantiUrl,
+      kayitTarihi: new Date().toISOString()
+    };
+    k.iletisimNotlari.unshift(yeniKayit);
+
+    const kayitli = this.dosyayaIslemKaydiEkle(
+      k,
+      'gorusme',
+      'İletişim notu eklendi',
+      `${kisi} * ${this.formatTarih(tarih)} * ${yontem}${baglantiUrl ? ' * Bağlantı eklendi' : ''}`
+    );
+    this.aktifDosyaYerelGuncelle(kayitli);
+    this.acikIletisimNotlari[yeniKayit.id] = false;
+    this.iletisimNotuFormunuSifirla();
+    await this.aktifDosyaKaydet(kayitli, 'İletişim notu kaydedildi.');
+    this.cdr.detectChanges();
+  }
+  async iletisimNotuGuncelleKaydet() {
+    if (!this.aktifDosya || !this.duzenlenenIletisimNotuId) return;
+
+    const kisi = this.formatMetin(this.duzenlenenIletisimNotu.kisi) || '';
+    const tarih = this.duzenlenenIletisimNotu.tarih || new Date().toISOString().split('T')[0];
+    const yontem = this.formatMetin(this.duzenlenenIletisimNotu.yontem) || 'Telefon Araması';
+    const notlar = (this.duzenlenenIletisimNotu.notlar || '').trim();
+    const baglantiUrl = this.hazirBaglantiUrl(this.duzenlenenIletisimNotu.baglantiUrl);
+    if (!kisi || !tarih || !notlar) {
+      this.bildirimGoster('info', 'İletişim notu eksik', 'Kişi adı, tarih ve iletişim notu alanlarını doldurup tekrar deneyin.');
+      return;
+    }
+
+    const k: any = JSON.parse(JSON.stringify(this.aktifDosya));
+    const kayit = (k.iletisimNotlari || []).find((item: IletisimNotu) => item.id === this.duzenlenenIletisimNotuId);
+    if (!kayit) return;
+
+    kayit.kisi = kisi;
+    kayit.tarih = tarih;
+    kayit.yontem = yontem;
+    kayit.notlar = notlar;
+    kayit.baglantiUrl = baglantiUrl;
+
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'gorusme', 'İletişim notu güncellendi', this.getIletisimNotuKayitOzetMetni(kayit));
+    this.aktifDosyaYerelGuncelle(kayitli);
+    this.duzenlenenIletisimNotuId = null;
+    this.duzenlenenIletisimNotu = {};
+    this.silinecekIletisimNotuId = null;
+    this.acikIletisimNotlari[kayit.id] = false;
+    await this.aktifDosyaKaydet(kayitli, 'İletişim notu güncellendi.');
+    this.cdr.detectChanges();
+  }
+  async iletisimNotuSil(id: number) {
+    if (!this.aktifDosya) return;
+    const oncekiKayit = this.veriKopyala(this.aktifDosya);
+    const kaydetFonk = this.aktifDetayKaydetFonksiyonu();
+    const k: any = JSON.parse(JSON.stringify(this.aktifDosya));
+    const silinen = (k.iletisimNotlari || []).find((item: IletisimNotu) => item.id === id);
+    if (!silinen) return;
+
+    k.iletisimNotlari = (k.iletisimNotlari || []).filter((item: IletisimNotu) => item.id !== id);
+    const kayitli = this.dosyayaIslemKaydiEkle(k, 'gorusme', 'İletişim notu silindi', this.getIletisimNotuKayitOzetMetni(silinen));
+    this.aktifDosyaYerelGuncelle(kayitli);
+    delete this.acikIletisimNotlari[id];
+    if (this.duzenlenenIletisimNotuId === id) this.iletisimNotuDuzenlemeIptal();
+    this.silinecekIletisimNotuId = null;
+    const kaydedildi = await kaydetFonk(kayitli);
+    if (!kaydedildi) return;
+    this.geriAlinabilirBasariBildirimiGoster(
+      'İletişim notu silindi',
+      'Kayıt dosyadan kaldırıldı.',
+      () => kaydetFonk(this.veriKopyala(oncekiKayit)),
+      'İletişim notu geri yüklendi',
+      'Silinen iletişim notu yeniden dosyaya işlendi.'
+    );
+    this.cdr.detectChanges();
   }
   get aktifDavaMuvekkilGorusmeNotlari() {
     const dava = this.getAktifDavaDosyasi();
