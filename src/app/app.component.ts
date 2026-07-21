@@ -108,6 +108,18 @@ type GorevBagliDosyaSecenegi = {
   dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi;
 };
 
+type KlasorSiralamaTipi = 'olusturma' | 'ad';
+
+type KlasorListeKaydi = {
+  ad: string;
+  sira: number;
+  kayitliMi: boolean;
+  davaSayisi: number;
+  icraSayisi: number;
+  arabuluculukSayisi: number;
+  toplam: number;
+};
+
 type BelgeCiktiFormu = {
   belgeTuru: string;
   belgeBasligi: string;
@@ -316,6 +328,9 @@ export class AppComponent implements OnInit {
   readonly varsayilanArsivKlasorleri = ['Hukuk Davaları 2', 'Arabuluculuk 4', 'Masada', 'Çantada'];
   arsivKlasorleri: string[] = [...this.varsayilanArsivKlasorleri];
   yeniArsivKlasoru = '';
+  klasorSiralama: KlasorSiralamaTipi = 'olusturma';
+  duzenlenenKlasorAdi: string | null = null;
+  duzenlenenKlasorYeniAdi = '';
   aktifSablonSekmesi: 'avukatlik' | 'arabuluculuk' = 'avukatlik';
   sablonArama = '';
   belgeCiktiFormu: BelgeCiktiFormu = this.belgeCiktiVarsayilanFormu();
@@ -713,7 +728,7 @@ export class AppComponent implements OnInit {
       this.cdr.detectChanges();
     });
     onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'arsivKlasorleri'), (ds: any) => {
-      const liste = ds.exists() ? ds.data()?.liste : [];
+      const liste = ds.exists() ? ds.data()?.liste : undefined;
       this.arsivKlasorleri = this.arsivKlasorListesiniHazirla(liste);
       this.cdr.detectChanges();
     });
@@ -2781,10 +2796,8 @@ export class AppComponent implements OnInit {
   }
 
   arsivKlasorListesiniHazirla(liste?: any[]) {
-    return this.tekilArsivKlasorListesi([
-      ...this.varsayilanArsivKlasorleri,
-      ...(Array.isArray(liste) ? liste : [])
-    ]);
+    const kaynak = Array.isArray(liste) ? liste : this.varsayilanArsivKlasorleri;
+    return this.tekilArsivKlasorListesi(kaynak);
   }
 
   tekilArsivKlasorListesi(liste: any[]) {
@@ -2817,10 +2830,137 @@ export class AppComponent implements OnInit {
     ]);
   }
 
-  async arsivKlasoruEkle(tur: 'dava' | 'icra' | 'arabuluculuk') {
+  get klasorListeKayitlari(): KlasorListeKaydi[] {
+    const kayitliSira = new Map<string, number>();
+    this.arsivKlasorleri.forEach((ad, index) => kayitliSira.set(ad.toLocaleLowerCase('tr-TR'), index));
+
+    const adlar = this.tekilArsivKlasorListesi([
+      ...this.arsivKlasorleri,
+      ...this.mevcutDosyaArsivKlasorleri
+    ]);
+
+    const kayitlar = adlar.map((ad, index) => {
+      const sayilar = this.klasorDosyaSayilari(ad);
+      const anahtar = ad.toLocaleLowerCase('tr-TR');
+      const sira = kayitliSira.has(anahtar) ? kayitliSira.get(anahtar)! : this.arsivKlasorleri.length + index;
+      return {
+        ad,
+        sira,
+        kayitliMi: kayitliSira.has(anahtar),
+        ...sayilar,
+        toplam: sayilar.davaSayisi + sayilar.icraSayisi + sayilar.arabuluculukSayisi
+      };
+    });
+
+    if (this.klasorSiralama === 'ad') {
+      return [...kayitlar].sort((a, b) => a.ad.localeCompare(b.ad, 'tr-TR', { sensitivity: 'base' }));
+    }
+    return [...kayitlar].sort((a, b) => a.sira - b.sira);
+  }
+
+  klasorDosyaSayilari(ad: string) {
+    const eslesir = (deger?: string | null) => this.metinEsit(deger || '', ad);
+    const davaSayisi = this.davalar.filter(dava => eslesir(dava.arsivYeri)).length;
+    const icraSayisi = this.icralar.filter(icra => eslesir(icra.arsivYeri)).length;
+    const arabuluculukSayisi = this.arabuluculukDosyalar.filter(arabuluculuk => eslesir(arabuluculuk.arsivYeri)).length;
+    return { davaSayisi, icraSayisi, arabuluculukSayisi };
+  }
+
+  klasorDosyaSayisi(ad: string) {
+    const sayilar = this.klasorDosyaSayilari(ad);
+    return sayilar.davaSayisi + sayilar.icraSayisi + sayilar.arabuluculukSayisi;
+  }
+
+  klasorDuzenleBaslat(ad: string) {
+    this.duzenlenenKlasorAdi = ad;
+    this.duzenlenenKlasorYeniAdi = ad;
+  }
+
+  klasorDuzenlemeIptal() {
+    this.duzenlenenKlasorAdi = null;
+    this.duzenlenenKlasorYeniAdi = '';
+  }
+
+  async klasorAdiniGuncelle(eskiAd: string) {
+    const yeniAd = this.formatMetin(this.duzenlenenKlasorYeniAdi)?.trim() || '';
+    if (!yeniAd) {
+      this.bildirimGoster('error', 'Klasör adı boş', 'Yeni klasör adını yazın.');
+      return;
+    }
+
+    if (this.metinEsit(eskiAd, yeniAd)) {
+      this.klasorDuzenlemeIptal();
+      return;
+    }
+
+    const ayniAdVar = this.klasorListeKayitlari.some(klasor => this.metinEsit(klasor.ad, yeniAd) && !this.metinEsit(klasor.ad, eskiAd));
+    if (ayniAdVar) {
+      this.bildirimGoster('error', 'Klasör adı zaten var', 'Aynı isimle ikinci bir klasör oluşturulamaz.');
+      return;
+    }
+
+    const oncekiListe = [...this.arsivKlasorleri];
+    const kayitliMi = this.arsivKlasorleri.some(ad => this.metinEsit(ad, eskiAd));
+    this.arsivKlasorleri = kayitliMi
+      ? this.tekilArsivKlasorListesi(this.arsivKlasorleri.map(ad => this.metinEsit(ad, eskiAd) ? yeniAd : ad))
+      : this.tekilArsivKlasorListesi([...this.arsivKlasorleri, yeniAd]);
+
+    const guncellenecekDavalar = this.davalar.filter(dava => this.metinEsit(dava.arsivYeri, eskiAd));
+    const guncellenecekIcralar = this.icralar.filter(icra => this.metinEsit(icra.arsivYeri, eskiAd));
+    const guncellenecekArabuluculuklar = this.arabuluculukDosyalar.filter(arabuluculuk => this.metinEsit(arabuluculuk.arsivYeri, eskiAd));
+
+    const kayitSonuclari = await Promise.all([
+      ...guncellenecekDavalar.map(dava => this.davaKaydetCloud({ ...dava, arsivYeri: yeniAd })),
+      ...guncellenecekIcralar.map(icra => this.icraKaydetCloud({ ...icra, arsivYeri: yeniAd })),
+      ...guncellenecekArabuluculuklar.map(arabuluculuk => this.arabuluculukKaydetCloud({ ...arabuluculuk, arsivYeri: yeniAd }))
+    ]);
+
+    if (kayitSonuclari.some(sonuc => !sonuc)) {
+      this.arsivKlasorleri = oncekiListe;
+      this.bildirimGoster('error', 'Klasör adı güncellenemedi', 'Bazı dosyalar yeni klasör adına taşınamadı. Lütfen tekrar deneyin.');
+      return;
+    }
+
+    const ayarlarKaydedildi = await this.arsivKlasorleriKaydetCloud();
+    if (!ayarlarKaydedildi) {
+      this.arsivKlasorleri = oncekiListe;
+      return;
+    }
+
+    this.klasorDuzenlemeIptal();
+    this.bildirimGoster('success', 'Klasör adı güncellendi', `${eskiAd} klasörü ${yeniAd} olarak kaydedildi.`);
+    this.cdr.detectChanges();
+  }
+
+  async klasorSil(ad: string) {
+    const dosyaSayisi = this.klasorDosyaSayisi(ad);
+    if (dosyaSayisi > 0) {
+      this.bildirimGoster('error', 'Klasör dolu', 'Bu klasörde dosya olduğu için silmedim. Önce dosyaları başka klasöre taşıyın veya klasör adını değiştirin.');
+      return;
+    }
+
+    const oncekiListe = [...this.arsivKlasorleri];
+    this.arsivKlasorleri = this.arsivKlasorleri.filter(klasor => !this.metinEsit(klasor, ad));
+    const kaydedildi = await this.arsivKlasorleriKaydetCloud();
+    if (!kaydedildi) {
+      this.arsivKlasorleri = oncekiListe;
+      return;
+    }
+
+    if (this.metinEsit(this.duzenlenenKlasorAdi || '', ad)) this.klasorDuzenlemeIptal();
+    this.bildirimGoster('success', 'Klasör silindi', `${ad} klasör listesinden kaldırıldı.`);
+  }
+
+  async arsivKlasoruEkle(tur?: 'dava' | 'icra' | 'arabuluculuk') {
     const ad = this.formatMetin(this.yeniArsivKlasoru)?.trim();
     if (!ad) {
       this.bildirimGoster('error', 'Klasör adı boş', 'Yeni klasör veya başlık adı yazın.');
+      return;
+    }
+
+    const zatenVar = this.getArsivKlasorSecenekleri().some(klasor => this.metinEsit(klasor, ad));
+    if (zatenVar) {
+      this.bildirimGoster('error', 'Klasör zaten var', 'Bu klasör / başlık listede zaten görünüyor.');
       return;
     }
 
