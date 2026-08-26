@@ -166,10 +166,13 @@ export interface UygulamaBildirimi {
   geriAlKalanSaniye?: number;
 }
 
+export type MobilGorunumBoyutu = 'kucuk' | 'normal' | 'buyuk' | 'cokBuyuk';
+
 export interface KullaniciAyarlari {
   logoDataUrl?: string;
   logoDosyaAdi?: string;
   logoKayitTarihi?: string;
+  mobilGorunumBoyutu?: MobilGorunumBoyutu;
 }
 
 export interface IliskiDosyaKaydi {

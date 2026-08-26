@@ -30,6 +30,7 @@ import {
   IletisimNotu,
   IliskiDosyaKaydi,
   KullaniciAyarlari,
+  MobilGorunumBoyutu,
   Muvekkil,
   MuvekkilGorusmeNotu,
   OfisGorevi,
@@ -321,6 +322,13 @@ export class AppComponent implements OnInit {
   kullaniciAyarlari: KullaniciAyarlari = {};
   logoYukleniyor = false;
   readonly varsayilanLogoKaynak = 'assets/brand-mark.svg';
+  readonly mobilGorunumBoyutuSecenekleri: { deger: MobilGorunumBoyutu; etiket: string; aciklama: string }[] = [
+    { deger: 'kucuk', etiket: 'Küçük', aciklama: 'Daha fazla kayıt görünür.' },
+    { deger: 'normal', etiket: 'Normal', aciklama: 'Varsayılan mobil görünüm.' },
+    { deger: 'buyuk', etiket: 'Büyük', aciklama: 'Okuma ve dokunma alanı artar.' },
+    { deger: 'cokBuyuk', etiket: 'Çok Büyük', aciklama: 'En rahat okuma modu.' }
+  ];
+  private readonly mobilGorunumDepolamaAnahtari = 'v25-mobil-gorunum-boyutu';
   bildirimler: UygulamaBildirimi[] = [];
   bildirimPanelAcik = false;
   bildirimSayaci = 0;
@@ -556,6 +564,9 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.toplamBekleyenAlacakGizli = this.toplamBekleyenAlacakGizliYukle();
+    const kayitliMobilGorunumBoyutu = this.mobilGorunumBoyutuLocalYukle();
+    this.kullaniciAyarlari = { ...this.kullaniciAyarlari, mobilGorunumBoyutu: kayitliMobilGorunumBoyutu };
+    this.mobilGorunumBoyutunuUygula(kayitliMobilGorunumBoyutu);
     this.initFirebase();
   }
 
@@ -586,7 +597,9 @@ export class AppComponent implements OnInit {
           this.googleCalendarYetkiIstendi = false;
           this.arsivKlasorleri = [...this.varsayilanArsivKlasorleri];
           this.yeniArsivKlasoru = '';
-          this.kullaniciAyarlari = {};
+          const kayitliMobilGorunumBoyutu = this.mobilGorunumBoyutuLocalYukle();
+          this.kullaniciAyarlari = { mobilGorunumBoyutu: kayitliMobilGorunumBoyutu };
+          this.mobilGorunumBoyutunuUygula(kayitliMobilGorunumBoyutu);
           this.logoYukleniyor = false;
         }
         this.cdr.detectChanges();
@@ -634,6 +647,67 @@ export class AppComponent implements OnInit {
   ozelLogoVarMi() {
     return !!this.kullaniciAyarlari.logoDataUrl;
   }
+  get mobilGorunumBoyutu(): MobilGorunumBoyutu {
+    return this.normalizeMobilGorunumBoyutu(this.kullaniciAyarlari.mobilGorunumBoyutu);
+  }
+  get mobilGorunumBoyutuKisaEtiket() {
+    return this.mobilGorunumBoyutuSecenekleri.find((secenek) => secenek.deger === this.mobilGorunumBoyutu)?.etiket || 'Normal';
+  }
+  getMobilGorunumBoyutuButonClass(boyut: MobilGorunumBoyutu) {
+    const aktif = this.mobilGorunumBoyutu === boyut;
+    return [
+      'rounded-xl border px-3 py-2 text-left transition-all',
+      aktif ? 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50'
+    ].join(' ');
+  }
+  async mobilGorunumBoyutunuSiradakiYap() {
+    const sira = this.mobilGorunumBoyutuSecenekleri.map((secenek) => secenek.deger);
+    const aktifIndex = sira.indexOf(this.mobilGorunumBoyutu);
+    const sonraki = sira[(aktifIndex + 1) % sira.length] || 'normal';
+    await this.mobilGorunumBoyutuDegistir(sonraki);
+  }
+  async mobilGorunumBoyutuDegistir(boyut: MobilGorunumBoyutu | string) {
+    const yeniBoyut = this.normalizeMobilGorunumBoyutu(boyut);
+    const oncekiAyarlar = { ...this.kullaniciAyarlari };
+    this.hesapAyarlariHata = '';
+    this.hesapAyarlariBilgi = '';
+    this.kullaniciAyarlari = { ...this.kullaniciAyarlari, mobilGorunumBoyutu: yeniBoyut };
+    this.mobilGorunumBoyutuLocalKaydet(yeniBoyut);
+    this.mobilGorunumBoyutunuUygula(yeniBoyut);
+
+    if (!this.user) return;
+    const kaydedildi = await this.kullaniciAyarlariKaydetCloud();
+    if (!kaydedildi) {
+      this.kullaniciAyarlari = oncekiAyarlar;
+      this.mobilGorunumBoyutunuUygula(this.mobilGorunumBoyutu);
+      return;
+    }
+    this.hesapAyarlariBilgi = `Mobil görünüm boyutu "${this.mobilGorunumBoyutuKisaEtiket}" olarak kaydedildi.`;
+    this.cdr.detectChanges();
+  }
+  private mobilGorunumBoyutuLocalYukle(): MobilGorunumBoyutu {
+    if (typeof localStorage === 'undefined') return 'normal';
+    try {
+      return this.normalizeMobilGorunumBoyutu(localStorage.getItem(this.mobilGorunumDepolamaAnahtari) || 'normal');
+    } catch {
+      return 'normal';
+    }
+  }
+  private mobilGorunumBoyutuLocalKaydet(boyut: MobilGorunumBoyutu) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      localStorage.setItem(this.mobilGorunumDepolamaAnahtari, boyut);
+    } catch {}
+  }
+  private normalizeMobilGorunumBoyutu(boyut?: string): MobilGorunumBoyutu {
+    return boyut === 'kucuk' || boyut === 'buyuk' || boyut === 'cokBuyuk' ? boyut : 'normal';
+  }
+  private mobilGorunumBoyutunuUygula(boyut: MobilGorunumBoyutu = this.mobilGorunumBoyutu) {
+    if (typeof document === 'undefined') return;
+    const siniflar = this.mobilGorunumBoyutuSecenekleri.map((secenek) => `app-mobile-scale-${secenek.deger}`);
+    document.documentElement.classList.remove(...siniflar);
+    document.documentElement.classList.add(`app-mobile-scale-${this.normalizeMobilGorunumBoyutu(boyut)}`);
+  }
   async kullaniciLogoDosyasiSecildi(event: Event) {
     const input = event.target as HTMLInputElement;
     const dosya = input.files?.[0];
@@ -677,7 +751,8 @@ export class AppComponent implements OnInit {
     this.hesapAyarlariBilgi = '';
     this.logoYukleniyor = true;
     try {
-      this.kullaniciAyarlari = {};
+      const { logoDataUrl, logoDosyaAdi, logoKayitTarihi, ...digerAyarlar } = this.kullaniciAyarlari;
+      this.kullaniciAyarlari = digerAyarlar;
       const kaydedildi = await this.kullaniciAyarlariKaydetCloud();
       if (!kaydedildi) {
         this.kullaniciAyarlari = oncekiAyarlar;
@@ -880,7 +955,11 @@ export class AppComponent implements OnInit {
       this.cdr.detectChanges();
     });
     onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'kullanici'), (ds: any) => {
-      this.kullaniciAyarlari = ds.exists() ? (ds.data() as KullaniciAyarlari) : {};
+      const bulutAyarlari = ds.exists() ? (ds.data() as KullaniciAyarlari) : {};
+      const mobilGorunumBoyutu = this.normalizeMobilGorunumBoyutu(bulutAyarlari.mobilGorunumBoyutu || this.mobilGorunumBoyutuLocalYukle());
+      this.kullaniciAyarlari = { ...bulutAyarlari, mobilGorunumBoyutu };
+      this.mobilGorunumBoyutuLocalKaydet(mobilGorunumBoyutu);
+      this.mobilGorunumBoyutunuUygula(mobilGorunumBoyutu);
       this.cdr.detectChanges();
     });
   }

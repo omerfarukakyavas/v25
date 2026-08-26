@@ -1575,6 +1575,22 @@ textarea {
     font-size: 16.5px;
   }
 
+  html.app-mobile-scale-kucuk {
+    font-size: 15.25px;
+  }
+
+  html.app-mobile-scale-normal {
+    font-size: 16.5px;
+  }
+
+  html.app-mobile-scale-buyuk {
+    font-size: 18px;
+  }
+
+  html.app-mobile-scale-cokBuyuk {
+    font-size: 19.25px;
+  }
+
   .app-topbar {
     backdrop-filter: none;
     min-height: auto !important;

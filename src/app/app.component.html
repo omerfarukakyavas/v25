@@ -118,6 +118,13 @@
                   }
                 </button>
               </div>
+              <button
+                type="button"
+                (click)="mobilGorunumBoyutunuSiradakiYap()"
+                class="md:hidden rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                title="Mobil görünüm boyutunu değiştir">
+                Aa {{ mobilGorunumBoyutuKisaEtiket }}
+              </button>
               <button (click)="hesapAyarlariAc()" class="px-3 py-2 text-slate-600 font-semibold border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1118.88 6.196 9 9 0 015.12 17.804z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 Hesap
@@ -215,6 +222,19 @@
                           <label class="mb-1 block text-xs font-bold text-slate-800">E-Posta</label>
                           <input [(ngModel)]="hesapAyarlariFormu.email" type="email" placeholder="ornek@mail.com" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         </div>
+                      </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-sm">
+                      <p class="text-xs font-black uppercase tracking-[0.18em] text-sky-900">Mobil Görünüm Boyutu</p>
+                      <p class="mt-2 text-sm font-medium leading-6 text-slate-700">Bu ayar küçük ekranlarda yazı, kart ve buton boyutunu kontrollü şekilde değiştirir. Masaüstü görünümü etkilemez.</p>
+                      <div class="mt-4 grid gap-2 sm:grid-cols-4">
+                        @for (secenek of mobilGorunumBoyutuSecenekleri; track secenek.deger) {
+                          <button type="button" (click)="mobilGorunumBoyutuDegistir(secenek.deger)" [class]="getMobilGorunumBoyutuButonClass(secenek.deger)">
+                            <span class="block text-sm font-black">{{ secenek.etiket }}</span>
+                            <span class="mt-1 block text-[11px] font-semibold opacity-80">{{ secenek.aciklama }}</span>
+                          </button>
+                        }
                       </div>
                     </div>
 
