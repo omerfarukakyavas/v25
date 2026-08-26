@@ -104,7 +104,7 @@
                 }
               </h2>
             </div>
-            <div class="flex flex-wrap gap-2 sm:gap-3 justify-end">
+            <div class="app-topbar-actions flex flex-wrap gap-2 sm:gap-3 justify-end">
               <div class="relative">
                 <button
                   type="button"
@@ -277,17 +277,17 @@
             </div>
           }
 
-          <div class="md:hidden border-b border-slate-200 bg-white/95 backdrop-blur-sm px-4 py-3 overflow-x-auto custom-scrollbar">
-            <div class="flex gap-2 min-w-max">
-              <button (click)="sayfaDegistir('dashboard')" [class]="getMobilMenuClass('dashboard')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Genel Özet</button>
-              <button (click)="sayfaDegistir('davalar')" [class]="getMobilMenuClass('davalar')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Davalar</button>
-              <button (click)="sayfaDegistir('icralar')" [class]="getMobilMenuClass('icralar')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">İcralar</button>
-              <button (click)="sayfaDegistir('arabuluculuk')" [class]="getMobilMenuClass('arabuluculuk')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Arabuluculuk</button>
-              <button (click)="sayfaDegistir('ajanda')" [class]="getMobilMenuClass('ajanda')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Ajanda</button>
-              <button (click)="sayfaDegistir('muhasebe')" [class]="getMobilMenuClass('muhasebe')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Muhasebe</button>
-              <button (click)="sayfaDegistir('iliskiler')" [class]="getMobilMenuClass('iliskiler')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">İlişkiler</button>
-              <button (click)="sayfaDegistir('sablonlar')" [class]="getMobilMenuClass('sablonlar')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Şablonlar</button>
-              <button (click)="sayfaDegistir('klasorler')" [class]="getMobilMenuClass('klasorler')" class="shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-all">Klasörler</button>
+          <div class="app-mobile-bottom-nav md:hidden" aria-label="Mobil ana menü">
+            <div class="app-mobile-bottom-nav__scroller custom-scrollbar">
+              <button type="button" (click)="sayfaDegistir('dashboard')" [class]="aktifSayfa === 'dashboard' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Özet</button>
+              <button type="button" (click)="sayfaDegistir('davalar')" [class]="aktifSayfa === 'davalar' || aktifSayfa === 'detay' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Davalar</button>
+              <button type="button" (click)="sayfaDegistir('icralar')" [class]="aktifSayfa === 'icralar' || aktifSayfa === 'icraDetay' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">İcra</button>
+              <button type="button" (click)="sayfaDegistir('arabuluculuk')" [class]="aktifSayfa === 'arabuluculuk' || aktifSayfa === 'arabuluculukDetay' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Arb.</button>
+              <button type="button" (click)="sayfaDegistir('ajanda')" [class]="aktifSayfa === 'ajanda' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Ajanda</button>
+              <button type="button" (click)="sayfaDegistir('muhasebe')" [class]="aktifSayfa === 'muhasebe' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Muhasebe</button>
+              <button type="button" (click)="sayfaDegistir('iliskiler')" [class]="aktifSayfa === 'iliskiler' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">İlişkiler</button>
+              <button type="button" (click)="sayfaDegistir('sablonlar')" [class]="aktifSayfa === 'sablonlar' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Şablon</button>
+              <button type="button" (click)="sayfaDegistir('klasorler')" [class]="aktifSayfa === 'klasorler' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Klasör</button>
             </div>
           </div>
 
