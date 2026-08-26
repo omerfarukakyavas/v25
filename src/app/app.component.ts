@@ -482,6 +482,7 @@ export class AppComponent implements OnInit {
   arabuluculukBelgeSecenekMenusu: 'belirleme' | 'sonTutanak' | 'anlasmaBelgesi' | null = null;
   googleDocsYetkiIstendi = false;
   googleCalendarYetkiIstendi = false;
+  arabuluculukDriveKlasorOlusturuluyorId: number | null = null;
   googleCalendarAktariliyorId: string | null = null;
   googleCalendarAktarimlari: Record<string, GoogleCalendarAktarimKaydi> = {};
   gunlukOzetYakinGunSayisi = 30;
@@ -4992,7 +4993,7 @@ export class AppComponent implements OnInit {
     }
     this.islemGorenArabuluculuk.taraflar.splice(i, 1);
   }
-  arabuluculukKaydet() {
+  async arabuluculukKaydet() {
     const t = this.arabuluculukTaraflariniHazirla(this.islemGorenArabuluculuk.taraflar);
     const isDavaSarti = this.islemGorenArabuluculuk.basvuruTuru === 'Dava Şartı';
     if ((isDavaSarti && !this.islemGorenArabuluculuk.buroNo) || !this.islemGorenArabuluculuk.arabuluculukNo || !this.islemGorenArabuluculuk.buro || !this.islemGorenArabuluculuk.buroyaBasvuruTarihi || !this.islemGorenArabuluculuk.arabulucuGorevlendirmeTarihi || t.length === 0 || !this.islemGorenArabuluculuk.muvekkilId) { this.formHata = "Zorunlu alanları, büroya başvuru ve görevlendirme tarihlerini, taraf ismini ve Hesap Muhatabını doldurun."; return; }
@@ -5037,7 +5038,12 @@ export class AppComponent implements OnInit {
         y = this.dosyayaTakvimKaydiEkle(y, 'Toplantı', 'Planlandı', y.toplantiTarihi, y.toplantiSaati, 'İlk toplantı planı kaydedildi.');
         y = this.dosyayaIslemKaydiEkle(y, 'takvim', 'Toplantı takvimi oluşturuldu', this.formatTarihSaat(y.toplantiTarihi, y.toplantiSaati));
       }
-      this.arabuluculukKaydetCloud(y, 'Yeni arabuluculuk dosyası buluta eklendi.');
+      const kaydedildi = await this.arabuluculukKaydetCloud(y, 'Yeni arabuluculuk dosyası buluta eklendi.');
+      if (kaydedildi) {
+        this.arabuluculukFormKapat();
+        await this.arabuluculukDriveKlasorunuOlusturVeKaydet(y);
+      }
+      return;
     } else {
       const mevcut = this.arabuluculukDosyalar.find(x => x.id === this.islemGorenArabuluculuk.id);
       const toplantiDegisti = (mevcut?.toplantiTarihi || '') !== (this.islemGorenArabuluculuk.toplantiTarihi || '') || (mevcut?.toplantiSaati || '') !== (this.islemGorenArabuluculuk.toplantiSaati || '');
@@ -5053,9 +5059,10 @@ export class AppComponent implements OnInit {
           g = this.dosyayaIslemKaydiEkle(g, 'takvim', 'Toplantı takvimi kaldırıldı', this.formatTarihSaat(mevcut.toplantiTarihi, mevcut.toplantiSaati));
         }
       }
-      this.arabuluculukKaydetCloud(g, 'Arabuluculuk dosyasındaki bilgiler güncellendi.');
+      const kaydedildi = await this.arabuluculukKaydetCloud(g, 'Arabuluculuk dosyasındaki bilgiler güncellendi.');
+      if (kaydedildi) this.arabuluculukFormKapat();
+      return;
     }
-    this.arabuluculukFormKapat();
   }
   async arabuluculukDurumGuncelle(a: ArabuluculukDosyasi, yD: string) {
     const oncekiKayit = this.veriKopyala(a);
@@ -6519,6 +6526,7 @@ export class AppComponent implements OnInit {
     if (!deger) return '';
 
     const eslesmeler = [
+      /\/folders\/([a-zA-Z0-9_-]+)/,
       /\/document\/d\/([a-zA-Z0-9_-]+)/,
       /\/file\/d\/([a-zA-Z0-9_-]+)/,
       /[?&]id=([a-zA-Z0-9_-]+)/
@@ -6650,6 +6658,8 @@ export class AppComponent implements OnInit {
       TOPLANTI_TARIHI: dosya.toplantiTarihi ? this.formatTarih(dosya.toplantiTarihi) : '-',
       TOPLANTI_SAATI: dosya.toplantiSaati ? this.formatSaat(dosya.toplantiSaati) : '-',
       TOPLANTI_YONTEMI: dosya.toplantiYontemi || '-',
+      DRIVE_KLASOR_ADI: dosya.driveKlasorAdi || '-',
+      DRIVE_KLASOR_LINKI: this.arabuluculukDriveKlasorUrl(dosya) || '-',
       ...odemeYerTutuculari,
       ...this.arabuluculukTaksitYerTutuculariniOlustur(dosya.taksitler || []),
       ...this.arabuluculukTarafYerTutuculariniOlustur('BASVURUCU', basvurucular),
@@ -6720,6 +6730,100 @@ export class AppComponent implements OnInit {
 
   googleCalendarEntegrasyonuHazirMi() {
     return GOOGLE_DOCS_CONFIG.clientId.trim() !== '' && (GOOGLE_DOCS_CONFIG.calendarScopes || []).length > 0;
+  }
+
+  arabuluculukDriveAnaKlasorId() {
+    return this.googleDosyaIdAyikla((GOOGLE_DOCS_CONFIG as any).arabuluculukDriveRootFolderId || '');
+  }
+  arabuluculukDriveKlasorEntegrasyonuHazirMi() {
+    return this.googleDocsEntegrasyonuHazirMi() && !!this.arabuluculukDriveAnaKlasorId();
+  }
+  googleDriveKlasorUrl(id?: string) {
+    return id ? `https://drive.google.com/drive/folders/${id}` : '';
+  }
+  arabuluculukDriveKlasorAdiOlustur(dosya: ArabuluculukDosyasi) {
+    const dosyaNo = [dosya.buroNo, dosya.arabuluculukNo].map(deger => this.formatMetin(deger)).filter(Boolean).join(' - ') || String(dosya.id || 'Arabuluculuk');
+    const taraflar = (dosya.taraflar || []).map(taraf => this.formatMetin(taraf.isim)).filter(Boolean).slice(0, 2).join(' - ');
+    const ekBilgi = [dosya.basvuruTuru, dosya.uyusmazlikTuru].map(deger => this.formatMetin(deger)).filter(Boolean).join(' - ');
+    const hamAd = [dosyaNo, taraflar, ekBilgi].filter(Boolean).join(' | ');
+    return this.googleDriveDosyaAdiTemizle(hamAd || `Arabuluculuk ${dosya.id || Date.now()}`);
+  }
+  googleDriveDosyaAdiTemizle(ad: string) {
+    return this.formatMetin(ad)
+      .replace(/[\\/:*?"<>|#{}%~&]/g, '-')
+      .replace(/\s+/g, ' ')
+      .replace(/\s+-\s+/g, ' - ')
+      .slice(0, 180)
+      .trim();
+  }
+  arabuluculukDriveKlasorUrl(dosya?: ArabuluculukDosyasi | null) {
+    return dosya?.driveKlasorUrl || this.googleDriveKlasorUrl(dosya?.driveKlasorId);
+  }
+  async aktifArabuluculukDriveKlasoruOlustur(event?: Event) {
+    event?.stopPropagation();
+    const dosya = this.getAktifArabuluculukDosyasi();
+    if (!dosya) {
+      this.bildirimGoster('error', 'Arabuluculuk dosyası bulunamadı', 'Önce bir arabuluculuk dosyası açın.');
+      return;
+    }
+
+    try {
+      await this.arabuluculukDriveKlasorunuHazirla(dosya, undefined, true);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Drive klasörü oluşturulamadı', e?.message || 'Google Drive bağlantısını kontrol edip tekrar deneyin.');
+    }
+  }
+  async arabuluculukDriveKlasorunuOlusturVeKaydet(dosya: ArabuluculukDosyasi) {
+    if (!this.arabuluculukDriveKlasorEntegrasyonuHazirMi() || dosya.driveKlasorId) return dosya;
+    try {
+      return await this.arabuluculukDriveKlasorunuHazirla(dosya, undefined, true);
+    } catch (e: any) {
+      this.bildirimGoster('error', 'Drive klasörü oluşturulamadı', e?.message || 'Arabuluculuk dosyası kaydedildi ancak Drive klasörü açılamadı.');
+      return dosya;
+    }
+  }
+  async arabuluculukDriveKlasorunuHazirla(dosya: ArabuluculukDosyasi, token?: string, basariBildirimi = false): Promise<ArabuluculukDosyasi> {
+    if (dosya.driveKlasorId) return dosya;
+
+    const anaKlasorId = this.arabuluculukDriveAnaKlasorId();
+    if (!anaKlasorId) {
+      throw new Error('Arabuluculuk ana Drive klasörü tanımlı değil.');
+    }
+
+    this.arabuluculukDriveKlasorOlusturuluyorId = dosya.id;
+    this.cdr.detectChanges();
+
+    try {
+      const accessToken = token || await this.googleErisimBelirteciAl();
+      const klasorAdi = this.arabuluculukDriveKlasorAdiOlustur(dosya);
+      const klasor = await this.googleJsonIstek('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true&fields=id,name,webViewLink', accessToken, {
+        method: 'POST',
+        body: JSON.stringify({
+          name: klasorAdi,
+          mimeType: 'application/vnd.google-apps.folder',
+          parents: [anaKlasorId]
+        })
+      });
+
+      let guncelDosya: ArabuluculukDosyasi = {
+        ...dosya,
+        driveKlasorId: klasor.id,
+        driveKlasorUrl: klasor.webViewLink || this.googleDriveKlasorUrl(klasor.id),
+        driveKlasorAdi: klasor.name || klasorAdi,
+        driveKlasorOlusturmaTarihi: new Date().toISOString()
+      };
+      guncelDosya = this.dosyayaIslemKaydiEkle(guncelDosya, 'dosya', 'Drive klasörü oluşturuldu', guncelDosya.driveKlasorAdi || klasorAdi);
+      await this.arabuluculukKaydetCloud(guncelDosya);
+      if (basariBildirimi) {
+        this.bildirimGoster('success', 'Drive klasörü hazır', 'Arabuluculuk dosyası için Google Drive klasörü oluşturuldu.');
+      }
+      return guncelDosya;
+    } finally {
+      if (this.arabuluculukDriveKlasorOlusturuluyorId === dosya.id) {
+        this.arabuluculukDriveKlasorOlusturuluyorId = null;
+      }
+      this.cdr.detectChanges();
+    }
   }
 
   googleCalendarDepolamaAnahtari() {
@@ -6937,15 +7041,20 @@ export class AppComponent implements OnInit {
     }
 
     const token = await this.googleErisimBelirteciAl();
+    const hedefDosya = this.arabuluculukDriveKlasorEntegrasyonuHazirMi()
+      ? await this.arabuluculukDriveKlasorunuHazirla(dosya, token)
+      : dosya;
     const belgeAdi = `${belgeBasligi} - ${dosya.buroNo ? `${dosya.buroNo} - ` : ''}${dosya.arabuluculukNo || dosya.id}`;
+    const kopyaGovdesi: Record<string, any> = { name: belgeAdi };
+    if (hedefDosya.driveKlasorId) kopyaGovdesi['parents'] = [hedefDosya.driveKlasorId];
     const kopya = await this.googleJsonIstek(`https://www.googleapis.com/drive/v3/files/${sablonDosyaId}/copy?supportsAllDrives=true&fields=id,webViewLink`, token, {
       method: 'POST',
-      body: JSON.stringify({ name: belgeAdi })
+      body: JSON.stringify(kopyaGovdesi)
     });
 
     let alanlarDolduruldu = false;
     try {
-      const yerTutucular = this.arabuluculukBelgeYerTutuculariniOlustur(dosya);
+      const yerTutucular = this.arabuluculukBelgeYerTutuculariniOlustur(hedefDosya);
       const requests = Object.entries(yerTutucular).map(([anahtar, deger]) => ({
         replaceAllText: {
           containsText: {
@@ -6965,7 +7074,7 @@ export class AppComponent implements OnInit {
       alanlarDolduruldu = false;
     }
 
-    const k: ArabuluculukDosyasi = JSON.parse(JSON.stringify(dosya));
+    const k: ArabuluculukDosyasi = JSON.parse(JSON.stringify(hedefDosya));
     if (!k.evraklar) k.evraklar = [];
     k.evraklar.unshift({
       id: Date.now(),

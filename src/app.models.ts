@@ -216,4 +216,8 @@ export interface ArabuluculukDosyasi {
   taksitleOdeme?: boolean;
   taksitSayisi?: number;
   taksitler?: ArabuluculukTaksit[];
+  driveKlasorId?: string;
+  driveKlasorUrl?: string;
+  driveKlasorAdi?: string;
+  driveKlasorOlusturmaTarihi?: string;
 }

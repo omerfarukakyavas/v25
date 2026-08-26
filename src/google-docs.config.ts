@@ -14,5 +14,6 @@ export const GOOGLE_DOCS_CONFIG = {
   ihtiyariAnlasmaBelgesiTemplateName: 'İhtiyari Anlaşma Belgesi',
   topluDosyaIkiTarafliTemplateName: 'Toplu Dosya Oluştur - 2 Taraflı',
   topluDosyaUcTarafliTemplateName: 'Toplu Dosya Oluştur - 3 Taraflı',
-  topluDosyaDortTarafliTemplateName: 'Toplu Dosya Oluştur - 4 Taraflı'
+  topluDosyaDortTarafliTemplateName: 'Toplu Dosya Oluştur - 4 Taraflı',
+  arabuluculukDriveRootFolderId: '1kZZbgJ7P-NiQFAqcr_KlM6BODS88qvCw'
 };
