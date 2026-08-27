@@ -40,40 +40,49 @@
     } 
     @else {
       <div class="app-shell flex h-screen bg-slate-50 font-sans overflow-hidden">
-        <aside class="app-sidebar w-64 bg-slate-900 text-white flex flex-col shadow-2xl z-10 hidden md:flex shrink-0">
-          <div class="p-6 border-b border-slate-800 flex flex-col items-center text-center">
-            <div class="flex h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/10 bg-gradient-to-br from-slate-800 via-slate-900 to-blue-700 shadow-xl shadow-black/25">
+        @if (mobilSolMenuAcik) {
+          <button type="button" (click)="mobilSolMenuyuKapat()" class="app-sidebar-mobile-backdrop md:hidden" aria-label="Sol menüyü kapat"></button>
+        }
+        <aside [class.app-sidebar--collapsed]="solMenuDarMi" [class.app-sidebar--mobile-open]="mobilSolMenuAcik" class="app-sidebar w-64 bg-slate-900 text-white flex flex-col shadow-2xl z-10 shrink-0">
+          <div class="app-sidebar-brand p-6 border-b border-slate-800 flex flex-col items-center text-center">
+            <div class="app-sidebar-brand-actions">
+              <button type="button" (click)="solMenuGorunumunuDegistir()" class="app-sidebar-collapse-button hidden md:inline-flex" [attr.aria-label]="solMenuDarMi ? 'Sol menüyü genişlet' : 'Sol menüyü daralt'" [title]="solMenuDarMi ? 'Sol menüyü genişlet' : 'Sol menüyü daralt'">
+                <svg class="h-4 w-4" [class.rotate-180]="solMenuDarMi" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+              </button>
+              <button type="button" (click)="mobilSolMenuyuKapat()" class="app-sidebar-mobile-close md:hidden">Kapat</button>
+            </div>
+            <div class="app-sidebar-logo flex h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/10 bg-gradient-to-br from-slate-800 via-slate-900 to-blue-700 shadow-xl shadow-black/25">
               <img [src]="kullaniciLogoKaynak()" alt="Kullanıcı logosu" class="h-16 w-16 object-contain">
             </div>
-            <div class="mt-4 flex flex-col justify-center">
+            <div class="app-sidebar-brand-copy mt-4 flex flex-col justify-center">
               <h1 class="text-[19px] font-black uppercase tracking-[0.22em] text-white">Akyavaş</h1>
               <p class="mt-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">Hukuk Bürosu</p>
             </div>
-            <p class="mt-3 text-[10px] font-bold uppercase tracking-[0.28em] text-slate-500">Hukuk Takip Sistemi</p>
+            <p class="app-sidebar-tagline mt-3 text-[10px] font-bold uppercase tracking-[0.28em] text-slate-500">Hukuk Takip Sistemi</p>
           </div>
           <nav class="flex-1 p-4 space-y-2 cursor-pointer overflow-y-auto custom-scrollbar">
-            <a (click)="sayfaDegistir('dashboard')" [class]="getMenuClass('dashboard')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group">
+            <a (click)="sayfaDegistir('dashboard')" [class]="getMenuClass('dashboard')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Genel Özet">
               <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-              <span>Genel Özet</span>
+              <span class="app-sidebar-label">Genel Özet</span>
             </a>
-            <a (click)="sayfaDegistir('davalar')" [class]="getMenuClass('davalar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span>Dava Dosyaları</span></a>
-            <a (click)="sayfaDegistir('icralar')" [class]="getMenuClass('icralar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg><span>İcra Takipleri</span></a>
-            <a (click)="sayfaDegistir('arabuluculuk')" [class]="getMenuClass('arabuluculuk')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Arabuluculuk</span></a>
-            <a (click)="sayfaDegistir('sablonlar')" [class]="getMenuClass('sablonlar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg><span>Şablonlar</span></a>
-            <a (click)="sayfaDegistir('muhasebe')" [class]="getMenuClass('muhasebe')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Muhasebe</span></a>
-            <a (click)="sayfaDegistir('iliskiler')" [class]="getMenuClass('iliskiler')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span>İlişkiler</span></a>
-            <a (click)="sayfaDegistir('ajanda')" [class]="getMenuClass('ajanda')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span>Ajanda</span></a>
-            <a (click)="sayfaDegistir('klasorler')" [class]="getMenuClass('klasorler')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group">
+            <a (click)="sayfaDegistir('davalar')" [class]="getMenuClass('davalar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Dava Dosyaları"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="app-sidebar-label">Dava Dosyaları</span></a>
+            <a (click)="sayfaDegistir('icralar')" [class]="getMenuClass('icralar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="İcra Takipleri"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg><span class="app-sidebar-label">İcra Takipleri</span></a>
+            <a (click)="sayfaDegistir('arabuluculuk')" [class]="getMenuClass('arabuluculuk')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Arabuluculuk"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="app-sidebar-label">Arabuluculuk</span></a>
+            <a (click)="sayfaDegistir('sablonlar')" [class]="getMenuClass('sablonlar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Şablonlar"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg><span class="app-sidebar-label">Şablonlar</span></a>
+            <a (click)="sayfaDegistir('muhasebe')" [class]="getMenuClass('muhasebe')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Muhasebe"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="app-sidebar-label">Muhasebe</span></a>
+            <a (click)="sayfaDegistir('iliskiler')" [class]="getMenuClass('iliskiler')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="İlişkiler"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="app-sidebar-label">İlişkiler</span></a>
+            <a (click)="sayfaDegistir('ajanda')" [class]="getMenuClass('ajanda')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Ajanda"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="app-sidebar-label">Ajanda</span></a>
+            <a (click)="sayfaDegistir('klasorler')" [class]="getMenuClass('klasorler')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Klasörler">
               <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7a2 2 0 012-2h5l2 2h7a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"></path></svg>
-              <span>Klasörler</span>
+              <span class="app-sidebar-label">Klasörler</span>
             </a>
           </nav>
-          <div class="p-4 border-t border-slate-800 flex justify-between items-center">
+          <div class="app-sidebar-footer p-4 border-t border-slate-800 flex justify-between items-center">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700"><svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-              <button type="button" (click)="hesapAyarlariAc()" class="overflow-hidden text-left transition-colors hover:text-white" title="Hesap Ayarları"><p class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[100px]">{{ kullaniciGorunenAdi() }}</p><p class="text-xs font-medium flex items-center gap-1 text-emerald-400">Bulut Aktif</p></button>
+              <button type="button" (click)="hesapAyarlariAc()" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 transition-colors hover:bg-slate-700" title="Hesap Ayarları"><svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></button>
+              <button type="button" (click)="hesapAyarlariAc()" class="app-sidebar-user-copy overflow-hidden text-left transition-colors hover:text-white" title="Hesap Ayarları"><p class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[100px]">{{ kullaniciGorunenAdi() }}</p><p class="text-xs font-medium flex items-center gap-1 text-emerald-400">Bulut Aktif</p></button>
             </div>
-            <div class="flex items-center gap-1">
+            <div class="app-sidebar-footer-actions flex items-center gap-1">
               <button (click)="hesapAyarlariAc()" class="p-2 text-slate-500 hover:text-blue-300 hover:bg-slate-800 rounded-lg transition-all" title="Hesap Ayarları"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.89 3.31.877 2.42 2.42a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.89 1.543-.877 3.31-2.42 2.42a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.89-3.31-.877-2.42-2.42a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.89-1.543.877-3.31 2.42-2.42.996.575 2.25.046 2.573-1.066z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
               <button (click)="cikisYap()" class="p-2 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-all" title="Çıkış Yap"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
             </div>
@@ -83,6 +92,15 @@
         <main class="flex-1 min-w-0 flex flex-col h-screen overflow-hidden relative">
           <header class="app-topbar bg-white border-b border-slate-200 min-h-16 flex flex-col gap-3 px-4 py-3 shadow-sm flex-shrink-0 sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:px-8">
             <div class="flex min-w-0 items-center gap-3">
+              <button
+                type="button"
+                (click)="mobilSolMenuyuAcKapat()"
+                class="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50 md:hidden"
+                [attr.aria-expanded]="mobilSolMenuAcik"
+                aria-label="Sol menüyü aç veya kapat">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16"></path></svg>
+                Menü
+              </button>
               @if (geriButonuGoster()) {
                 <button
                   type="button"

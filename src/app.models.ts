@@ -173,6 +173,7 @@ export interface KullaniciAyarlari {
   logoDosyaAdi?: string;
   logoKayitTarihi?: string;
   mobilGorunumBoyutu?: MobilGorunumBoyutu;
+  solMenuDarMi?: boolean;
 }
 
 export interface IliskiDosyaKaydi {

@@ -329,6 +329,9 @@ export class AppComponent implements OnInit {
     { deger: 'cokBuyuk', etiket: 'Çok Büyük', aciklama: 'En rahat okuma modu.' }
   ];
   private readonly mobilGorunumDepolamaAnahtari = 'v25-mobil-gorunum-boyutu';
+  solMenuDarMi = false;
+  mobilSolMenuAcik = false;
+  private readonly solMenuDarDepolamaAnahtari = 'v25-sol-menu-dar';
   bildirimler: UygulamaBildirimi[] = [];
   bildirimPanelAcik = false;
   bildirimSayaci = 0;
@@ -565,7 +568,9 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.toplamBekleyenAlacakGizli = this.toplamBekleyenAlacakGizliYukle();
     const kayitliMobilGorunumBoyutu = this.mobilGorunumBoyutuLocalYukle();
-    this.kullaniciAyarlari = { ...this.kullaniciAyarlari, mobilGorunumBoyutu: kayitliMobilGorunumBoyutu };
+    const kayitliSolMenuDarMi = this.solMenuDarMiLocalYukle();
+    this.solMenuDarMi = kayitliSolMenuDarMi;
+    this.kullaniciAyarlari = { ...this.kullaniciAyarlari, mobilGorunumBoyutu: kayitliMobilGorunumBoyutu, solMenuDarMi: kayitliSolMenuDarMi };
     this.mobilGorunumBoyutunuUygula(kayitliMobilGorunumBoyutu);
     this.initFirebase();
   }
@@ -598,7 +603,10 @@ export class AppComponent implements OnInit {
           this.arsivKlasorleri = [...this.varsayilanArsivKlasorleri];
           this.yeniArsivKlasoru = '';
           const kayitliMobilGorunumBoyutu = this.mobilGorunumBoyutuLocalYukle();
-          this.kullaniciAyarlari = { mobilGorunumBoyutu: kayitliMobilGorunumBoyutu };
+          const kayitliSolMenuDarMi = this.solMenuDarMiLocalYukle();
+          this.solMenuDarMi = kayitliSolMenuDarMi;
+          this.mobilSolMenuAcik = false;
+          this.kullaniciAyarlari = { mobilGorunumBoyutu: kayitliMobilGorunumBoyutu, solMenuDarMi: kayitliSolMenuDarMi };
           this.mobilGorunumBoyutunuUygula(kayitliMobilGorunumBoyutu);
           this.logoYukleniyor = false;
         }
@@ -685,6 +693,31 @@ export class AppComponent implements OnInit {
     this.hesapAyarlariBilgi = `Mobil görünüm boyutu "${this.mobilGorunumBoyutuKisaEtiket}" olarak kaydedildi.`;
     this.cdr.detectChanges();
   }
+  mobilSolMenuyuAcKapat() {
+    this.mobilSolMenuAcik = !this.mobilSolMenuAcik;
+  }
+  mobilSolMenuyuKapat() {
+    this.mobilSolMenuAcik = false;
+  }
+  async solMenuGorunumunuDegistir() {
+    await this.solMenuDarMiAyarla(!this.solMenuDarMi);
+  }
+  async solMenuDarMiAyarla(darMi: boolean) {
+    const oncekiAyarlar = { ...this.kullaniciAyarlari };
+    const oncekiDurum = this.solMenuDarMi;
+    this.solMenuDarMi = darMi;
+    this.kullaniciAyarlari = { ...this.kullaniciAyarlari, solMenuDarMi: darMi };
+    this.solMenuDarMiLocalKaydet(darMi);
+
+    if (!this.user) return;
+    const kaydedildi = await this.kullaniciAyarlariKaydetCloud();
+    if (!kaydedildi) {
+      this.kullaniciAyarlari = oncekiAyarlar;
+      this.solMenuDarMi = oncekiDurum;
+      this.solMenuDarMiLocalKaydet(oncekiDurum);
+    }
+    this.cdr.detectChanges();
+  }
   private mobilGorunumBoyutuLocalYukle(): MobilGorunumBoyutu {
     if (typeof localStorage === 'undefined') return 'normal';
     try {
@@ -707,6 +740,20 @@ export class AppComponent implements OnInit {
     const siniflar = this.mobilGorunumBoyutuSecenekleri.map((secenek) => `app-mobile-scale-${secenek.deger}`);
     document.documentElement.classList.remove(...siniflar);
     document.documentElement.classList.add(`app-mobile-scale-${this.normalizeMobilGorunumBoyutu(boyut)}`);
+  }
+  private solMenuDarMiLocalYukle(): boolean {
+    if (typeof localStorage === 'undefined') return false;
+    try {
+      return localStorage.getItem(this.solMenuDarDepolamaAnahtari) === '1';
+    } catch {
+      return false;
+    }
+  }
+  private solMenuDarMiLocalKaydet(darMi: boolean) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      localStorage.setItem(this.solMenuDarDepolamaAnahtari, darMi ? '1' : '0');
+    } catch {}
   }
   async kullaniciLogoDosyasiSecildi(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -957,8 +1004,11 @@ export class AppComponent implements OnInit {
     onSnapshot(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'ayarlar', 'kullanici'), (ds: any) => {
       const bulutAyarlari = ds.exists() ? (ds.data() as KullaniciAyarlari) : {};
       const mobilGorunumBoyutu = this.normalizeMobilGorunumBoyutu(bulutAyarlari.mobilGorunumBoyutu || this.mobilGorunumBoyutuLocalYukle());
-      this.kullaniciAyarlari = { ...bulutAyarlari, mobilGorunumBoyutu };
+      const solMenuDarMi = typeof bulutAyarlari.solMenuDarMi === 'boolean' ? bulutAyarlari.solMenuDarMi : this.solMenuDarMiLocalYukle();
+      this.kullaniciAyarlari = { ...bulutAyarlari, mobilGorunumBoyutu, solMenuDarMi };
+      this.solMenuDarMi = solMenuDarMi;
       this.mobilGorunumBoyutuLocalKaydet(mobilGorunumBoyutu);
+      this.solMenuDarMiLocalKaydet(solMenuDarMi);
       this.mobilGorunumBoyutunuUygula(mobilGorunumBoyutu);
       this.cdr.detectChanges();
     });
@@ -2082,6 +2132,7 @@ export class AppComponent implements OnInit {
     return this.geriGidilebilirMi() || this.aktifSayfa !== 'dashboard';
   }
   geriGit() {
+    this.mobilSolMenuyuKapat();
     const onceki = this.navigasyonGecmisi.pop();
     if (onceki) {
       this.gezinmeDurumunuUygula(onceki);
@@ -2101,6 +2152,7 @@ export class AppComponent implements OnInit {
     }
   }
   sayfaDegistir(s: SayfaTipi, gecmiseKaydet = true) {
+    this.mobilSolMenuyuKapat();
     if (gecmiseKaydet && this.aktifSayfa !== s) {
       this.gezinmeGecmisineEkle();
     }
@@ -2124,9 +2176,9 @@ export class AppComponent implements OnInit {
     }
   }
 
-  detayaGit(d: DavaDosyasi) { this.gezinmeGecmisineEkle(); this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.aktifDavaTarafDetayi = null; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
-  icraDetayinaGit(i: IcraDosyasi) { this.gezinmeGecmisineEkle(); this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
-  arabuluculukDetayinaGit(a: ArabuluculukDosyasi) { this.gezinmeGecmisineEkle(); this.seciliArabuluculuk = a; this.aktifSayfa = 'arabuluculukDetay'; this.aktifDetaySekmesi = 'notlar'; this.detayGecisiIcinArayuzuHazirla('Ödeme'); }
+  detayaGit(d: DavaDosyasi) { this.mobilSolMenuyuKapat(); this.gezinmeGecmisineEkle(); this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.aktifDavaTarafDetayi = null; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
+  icraDetayinaGit(i: IcraDosyasi) { this.mobilSolMenuyuKapat(); this.gezinmeGecmisineEkle(); this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
+  arabuluculukDetayinaGit(a: ArabuluculukDosyasi) { this.mobilSolMenuyuKapat(); this.gezinmeGecmisineEkle(); this.seciliArabuluculuk = a; this.aktifSayfa = 'arabuluculukDetay'; this.aktifDetaySekmesi = 'notlar'; this.detayGecisiIcinArayuzuHazirla('Ödeme'); }
 
   davayaGitId(id?: number) { if(!id) return; const d = this.davalar.find(x=>x.id===id); if(d) this.detayaGit(d); }
   icrayaGitId(id?: number) { if(!id) return; const i = this.icralar.find(x=>x.id===id); if(i) this.icraDetayinaGit(i); }
