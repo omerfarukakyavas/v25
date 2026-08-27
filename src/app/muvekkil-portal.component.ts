@@ -5,6 +5,7 @@ import { getApps, initializeApp } from 'firebase/app';
 import {
   User,
   createUserWithEmailAndPassword,
+  deleteUser,
   getAuth,
   onAuthStateChanged,
   sendEmailVerification,
@@ -34,6 +35,8 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
   private authUnsubscribe?: Unsubscribe;
   private dosyaUnsubscribe?: Unsubscribe;
   private authBaslatmaZamanlayicisi?: number;
+  private kayitIslemiSuruyor = false;
+  private bekleyenGirisBilgisi = '';
 
   app: any;
   auth: any;
@@ -56,6 +59,7 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
       this.app = getApps().find(app => app.name === MUVEKKIL_PORTAL_APP_ADI)
         || initializeApp(getFirebaseConfig(), MUVEKKIL_PORTAL_APP_ADI);
       this.auth = getAuth(this.app);
+      this.auth.languageCode = 'tr';
       this.db = getFirestore(this.app);
       this.authBaslatmaZamanlayicisi = window.setTimeout(() => {
         if (this.ekran !== 'yukleniyor') return;
@@ -66,6 +70,10 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
       this.authUnsubscribe = onAuthStateChanged(this.auth, async (user: User | null) => {
         if (this.authBaslatmaZamanlayicisi) window.clearTimeout(this.authBaslatmaZamanlayicisi);
         this.user = user;
+        if (this.kayitIslemiSuruyor) {
+          this.cdr.detectChanges();
+          return;
+        }
         this.hata = '';
         this.bilgi = '';
         this.dosyaUnsubscribe?.();
@@ -75,6 +83,10 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
 
         if (!user) {
           this.ekran = 'giris';
+          if (this.bekleyenGirisBilgisi) {
+            this.bilgi = this.bekleyenGirisBilgisi;
+            this.bekleyenGirisBilgisi = '';
+          }
           this.cdr.detectChanges();
           return;
         }
@@ -117,17 +129,30 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
     this.bilgi = '';
     try {
       if (this.girisModu === 'kayit') {
+        this.kayitIslemiSuruyor = true;
         const sonuc = await createUserWithEmailAndPassword(this.auth, email, this.sifre);
         if (this.adSoyad.trim()) await updateProfile(sonuc.user, { displayName: this.adSoyad.trim() });
-        await sendEmailVerification(sonuc.user);
+        try {
+          await this.davetBelgesiniGetir();
+        } catch {
+          try {
+            await deleteUser(sonuc.user);
+          } catch {
+            await signOut(this.auth);
+          }
+          throw new Error('portal-invite-email-mismatch');
+        }
+        this.user = sonuc.user;
         this.ekran = 'dogrulama';
-        this.bilgi = 'Doğrulama bağlantısı e-posta adresinize gönderildi.';
+        await this.dogrulamaEpostasiGonder(sonuc.user);
+        this.bilgi = `Doğrulama bağlantısı ${email} adresine gönderildi. Gelen Kutusu ile Gereksiz/Spam klasörünü kontrol edin.`;
       } else {
         await signInWithEmailAndPassword(this.auth, email, this.sifre);
       }
     } catch (error: any) {
       this.hata = this.authHataMesaji(error);
     } finally {
+      this.kayitIslemiSuruyor = false;
       this.islemYapiliyor = false;
       this.cdr.detectChanges();
     }
@@ -138,8 +163,8 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
     this.islemYapiliyor = true;
     this.hata = '';
     try {
-      await sendEmailVerification(this.auth.currentUser);
-      this.bilgi = 'Doğrulama e-postası yeniden gönderildi.';
+      await this.dogrulamaEpostasiGonder(this.auth.currentUser);
+      this.bilgi = `Doğrulama e-postası ${this.auth.currentUser.email || 'hesabınıza'} yeniden gönderildi. Gelen Kutusu ile Gereksiz/Spam klasörünü de kontrol edin.`;
     } catch (error: any) {
       this.hata = this.authHataMesaji(error);
     } finally {
@@ -218,6 +243,18 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
   private async portalOturumunuHazirla(user: User) {
     this.ekran = 'yukleniyor';
     this.cdr.detectChanges();
+    let davetBelgesi: Awaited<ReturnType<typeof getDoc>> | null = null;
+    if (this.gercekDavetTokeniVar()) {
+      try {
+        davetBelgesi = await this.davetBelgesiniGetir();
+      } catch {
+        this.girisModu = 'kayit';
+        this.email = '';
+        this.bekleyenGirisBilgisi = `Yeni davet ${user.email || 'açık olan hesap'} ile eşleşmediği için önceki müvekkil oturumu kapatıldı. Davetin gönderildiği e-posta adresiyle hesap oluşturun.`;
+        await signOut(this.auth);
+        return;
+      }
+    }
     const profilRef = doc(this.db, 'artifacts', appId, 'portalProfiles', user.uid);
     const profilBelgesi = await this.zamanAsimli(getDoc(profilRef));
 
@@ -227,7 +264,7 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.davetTokeni || this.davetTokeni === '1') {
+    if (!davetBelgesi) {
       this.ekran = 'engelli';
       this.hata = 'Bu hesap henüz bir müvekkil kaydıyla eşleştirilmemiş. Hukuk bürosundan yeni portal daveti isteyin.';
       return;
@@ -240,8 +277,6 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const davetBelgesi = await this.zamanAsimli(getDoc(doc(this.db, 'artifacts', appId, 'portalInvites', this.davetTokeni)));
-      if (!davetBelgesi.exists()) throw new Error('invite-not-found');
       const davet = davetBelgesi.data() as any;
       const profil: PortalProfil & { inviteToken: string } = {
         uid: user.uid,
@@ -260,6 +295,24 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
       this.ekran = 'engelli';
       this.hata = 'Davet bağlantısı geçersiz, süresi dolmuş veya farklı bir e-posta adresi için hazırlanmış.';
     }
+  }
+
+  private gercekDavetTokeniVar() {
+    return !!this.davetTokeni && this.davetTokeni !== '1';
+  }
+
+  private async davetBelgesiniGetir() {
+    if (!this.gercekDavetTokeniVar()) throw new Error('invite-not-found');
+    const davetBelgesi = await this.zamanAsimli(getDoc(doc(this.db, 'artifacts', appId, 'portalInvites', this.davetTokeni)));
+    if (!davetBelgesi.exists() || davetBelgesi.data()?.['aktif'] !== true) throw new Error('invite-not-found');
+    return davetBelgesi;
+  }
+
+  private dogrulamaEpostasiGonder(user: User) {
+    const portalParametresi = encodeURIComponent(this.gercekDavetTokeniVar() ? this.davetTokeni : '1');
+    return sendEmailVerification(user, {
+      url: `${window.location.origin}${window.location.pathname}?portal=${portalParametresi}`
+    });
   }
 
   private async portalProfiliniYukle(profil: PortalProfil) {
@@ -304,8 +357,10 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
     if (kod.includes('email-already-in-use')) return 'Bu e-posta adresiyle daha önce hesap oluşturulmuş. Giriş yapmayı deneyin.';
     if (kod.includes('weak-password')) return 'Şifre en az 6 karakter olmalı.';
     if (kod.includes('invalid-email')) return 'Geçerli bir e-posta adresi yazın.';
+    if (kod.includes('portal-invite-email-mismatch')) return 'Yazdığınız e-posta adresi bu portal davetiyle eşleşmiyor. Davetin gönderildiği adresi kullanın.';
     if (kod.includes('invalid-credential') || kod.includes('wrong-password') || kod.includes('user-not-found')) return 'E-posta veya şifre hatalı.';
-    if (kod.includes('too-many-requests')) return 'Çok fazla deneme yapıldı. Bir süre bekleyip tekrar deneyin.';
+    if (kod.includes('too-many-requests') || kod.includes('quota-exceeded')) return 'Firebase gönderim sınırına ulaşıldı. Bir süre bekleyip tekrar deneyin.';
+    if (kod.includes('unauthorized-continue-uri')) return 'Canlı portal adresi Firebase doğrulama ayarlarında yetkili değil.';
     if (kod.includes('network-request-failed')) return 'İnternet bağlantısı kurulamadı.';
     return 'İşlem tamamlanamadı. Bilgileri kontrol edip tekrar deneyin.';
   }

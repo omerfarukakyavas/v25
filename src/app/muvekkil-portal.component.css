@@ -71,6 +71,7 @@ button:disabled { cursor: wait; opacity: .6; }
 @keyframes portal-spin { to { transform: rotate(360deg); } }
 .portal-message-card { width: min(560px, calc(100vw - 34px)); box-sizing: border-box; padding: clamp(28px, 5vw, 52px); text-align: center; }
 .portal-message-card h1 { font-size: clamp(32px, 5vw, 48px); }
+.portal-message-card .portal-email-hint { margin-top: 16px; padding: 12px 14px; border: 1px solid #dbe5ee; border-radius: 12px; background: #f8fafc; color: #334155; font-size: 12px; line-height: 1.55; }
 .portal-message-icon { display: grid; width: 58px; height: 58px; margin: 0 auto 22px; place-items: center; border-radius: 18px; background: #ccfbf1; color: #0f766e; font-size: 24px; font-weight: 900; }
 .portal-message-icon-lock { background: #ffe4e6; color: #be123c; }
 .portal-message-actions { display: grid; gap: 10px; margin-top: 26px; }

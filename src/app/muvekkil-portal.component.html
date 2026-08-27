@@ -70,7 +70,8 @@
         <div class="portal-message-icon">@</div>
         <p class="portal-eyebrow">E-posta Doğrulama</p>
         <h1>Son bir güvenlik adımı kaldı.</h1>
-        <p>{{ user?.email }} adresine gönderilen doğrulama bağlantısına tıklayın. Ardından bu ekrana dönüp kontrol düğmesine basın.</p>
+        <p><strong>{{ user?.email }}</strong> adresine gönderilen doğrulama bağlantısına tıklayın. Ardından bu ekrana dönüp kontrol düğmesine basın.</p>
+        <p class="portal-email-hint">E-posta görünmüyorsa Gereksiz/Spam klasöründe <strong>noreply&#64;akyavas-hts.firebaseapp.com</strong> göndericisini arayın. Yukarıdaki adres yanlışsa “Farklı hesapla giriş yap” seçeneğini kullanın.</p>
         @if (hata) { <div class="portal-alert portal-alert-error">{{ hata }}</div> }
         @if (bilgi) { <div class="portal-alert portal-alert-success">{{ bilgi }}</div> }
         <div class="portal-message-actions">
