@@ -4,7 +4,7 @@
          <h2 class="text-xl font-bold tracking-widest uppercase italic">Akyavaş HTS</h2>
       </div>
     } 
-    @else if (!user) {
+    @else if (!user && !portalModuMu) {
       <div class="flex h-screen w-screen items-center justify-center bg-slate-900 font-sans p-4 relative overflow-hidden">
         <div class="absolute top-[-10%] left-[-10%] w-[30rem] h-[30rem] bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -38,7 +38,7 @@
         </div>
       </div>
     } 
-    @else {
+    @else if (!portalModuMu) {
       <div class="app-shell flex h-screen bg-slate-50 font-sans overflow-hidden" [class.app-shell--mobile-sidebar-open]="mobilSolMenuAcik">
         @if (mobilSolMenuAcik) {
           <button type="button" (click)="mobilSolMenuyuKapat()" class="app-sidebar-mobile-backdrop md:hidden" aria-label="Sol menüyü kapat"></button>
@@ -2363,7 +2363,8 @@
                   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     @for (muvekkil of filtrelenmisIliskiler; track muvekkil.id) {
                       <div (click)="iliskiKaydiSec(muvekkil)" [class.ring-2]="seciliIliskiId === muvekkil.id" [class.ring-indigo-200]="seciliIliskiId === muvekkil.id" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-all relative group flex flex-col h-full cursor-pointer">
-                        <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10 bg-white/90 backdrop-blur rounded-lg p-1 shadow-sm">
+                        <div class="absolute top-3 right-3 flex gap-1 z-10 rounded-lg bg-white/90 p-1 opacity-100 shadow-sm backdrop-blur transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+                           <button (click)="$event.stopPropagation(); muvekkilPortalYonetiminiAc(muvekkil)" class="p-1.5 text-teal-600 hover:bg-teal-50 rounded" title="Müvekkil Portalı"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0zm6 1a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></button>
                            <button (click)="$event.stopPropagation(); muvekkilFormunuAc(muvekkil)" class="p-1.5 text-amber-500 hover:bg-amber-50 rounded" title="Düzenle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
                            @if (silinecekMuvekkilId === muvekkil.id) {
                              <button (click)="$event.stopPropagation(); muvekkilSil(muvekkil.id)" class="p-1.5 text-white bg-red-500 hover:bg-red-600 rounded text-xs">Onayla</button>
@@ -2502,6 +2503,7 @@
                                   @if (silinecekMuvekkilId === muvekkil.id) {
                                     <span class="text-xs font-medium text-red-500 mr-2">Silinsin mi?</span><button (click)="$event.stopPropagation(); muvekkilSil(muvekkil.id)" class="bg-red-500 text-white hover:bg-red-600 p-1.5 rounded transition-colors">Evet</button><button (click)="$event.stopPropagation(); silmeIptal()" class="bg-slate-200 text-slate-700 hover:bg-slate-300 p-1.5 rounded transition-colors">İptal</button>
                                   } @else {
+                                    <button (click)="$event.stopPropagation(); muvekkilPortalYonetiminiAc(muvekkil)" class="text-teal-600 hover:bg-teal-50 p-2 rounded-lg transition-colors" title="Müvekkil Portalı"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0zm6 1a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></button>
                                     <button (click)="$event.stopPropagation(); muvekkilFormunuAc(muvekkil)" class="text-amber-500 hover:bg-amber-50 p-2 rounded-lg transition-colors" title="Düzenle"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
                                     <button (click)="$event.stopPropagation(); silmeOnayiIste(muvekkil.id, 'muvekkil')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors" title="Sil"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                                   }
@@ -5488,6 +5490,92 @@
         </div>
       }
 
+      @if (muvekkilPortalYonetimAcik && portalYonetilenMuvekkil) {
+        <div class="fixed inset-0 z-[80] overflow-y-auto bg-slate-950/65 p-2 backdrop-blur-sm sm:flex sm:items-center sm:justify-center sm:p-4">
+          <div class="mx-auto flex min-h-full w-full items-start sm:items-center sm:justify-center">
+            <div class="flex max-h-[calc(100dvh-1rem)] w-full max-w-4xl flex-col overflow-hidden rounded-[26px] bg-white shadow-2xl sm:max-h-[92vh]">
+              <div class="flex items-start justify-between gap-4 border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
+                <div>
+                  <p class="text-[11px] font-black uppercase tracking-[0.22em] text-teal-700">Müvekkil Portalı</p>
+                  <h3 class="mt-1 text-xl font-black text-slate-900">{{ portalYonetilenMuvekkil.adSoyad }}</h3>
+                  <p class="mt-1 text-xs font-medium text-slate-500">Portal davetini ve paylaşılacak dosyaları buradan yönetin.</p>
+                </div>
+                <button type="button" (click)="muvekkilPortalYonetiminiKapat()" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Kapat</button>
+              </div>
+
+              <div class="min-h-0 flex-1 space-y-4 overflow-y-auto bg-slate-50 p-4 custom-scrollbar sm:p-6">
+                @if (portalHata) { <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{{ portalHata }}</div> }
+                @if (portalBilgi) { <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">{{ portalBilgi }}</div> }
+
+                <section class="overflow-hidden rounded-2xl border border-teal-200 bg-white shadow-sm">
+                  <div class="flex flex-col gap-3 border-b border-teal-100 bg-teal-50/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p class="text-[10px] font-black uppercase tracking-[0.18em] text-teal-700">Portal Erişimi</p>
+                      <p class="mt-1 text-sm font-bold text-slate-900">{{ portalYonetilenMuvekkil.portalAktifMi ? 'Erişim açık' : 'Henüz etkinleştirilmedi' }}</p>
+                    </div>
+                    <span [class]="portalYonetilenMuvekkil.portalAktifMi ? 'border-emerald-200 bg-emerald-100 text-emerald-800' : 'border-slate-200 bg-white text-slate-600'" class="w-fit rounded-full border px-3 py-1 text-[11px] font-black">{{ portalYonetilenMuvekkil.portalAktifMi ? 'AKTİF' : 'KAPALI' }}</span>
+                  </div>
+                  <div class="p-5">
+                    <label class="block text-xs font-black text-slate-900">Davet Gönderilecek E-posta</label>
+                    <div class="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
+                      <input [(ngModel)]="portalDavetEpostasi" type="email" placeholder="muvekkil@email.com" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100">
+                      <button type="button" (click)="muvekkilPortalDavetiOlustur()" [disabled]="portalIslemYapiliyor" class="rounded-xl bg-teal-700 px-5 py-3 text-sm font-black text-white shadow-lg shadow-teal-700/15 hover:bg-teal-800 disabled:opacity-50">{{ portalYonetilenMuvekkil.portalAktifMi ? 'Yeni Davet Oluştur' : 'Portal Daveti Oluştur' }}</button>
+                    </div>
+                    <p class="mt-2 text-[11px] font-medium leading-5 text-slate-500">Davet bağlantısı 30 gün geçerlidir. Müvekkil yalnızca bu e-posta adresiyle hesap oluşturabilir.</p>
+
+                    @if (portalYonetilenMuvekkil.portalDavetTokeni) {
+                      <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                        <label class="block text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">Davet Bağlantısı</label>
+                        <div class="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
+                          <input [value]="portalDavetBaglantisi(portalYonetilenMuvekkil)" readonly class="min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 outline-none">
+                          <button type="button" (click)="portalDavetBaglantisiniKopyala()" class="rounded-lg border border-teal-200 bg-white px-4 py-2 text-xs font-black text-teal-700 hover:bg-teal-50">Bağlantıyı Kopyala</button>
+                        </div>
+                      </div>
+                    }
+
+                    @if (portalYonetilenMuvekkil.portalAktifMi) {
+                      <div class="mt-4 flex justify-end">
+                        <button type="button" (click)="muvekkilPortalErisiminiKapat()" [disabled]="portalIslemYapiliyor" class="rounded-lg px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 disabled:opacity-50">Portal Erişimini Kapat</button>
+                      </div>
+                    }
+                  </div>
+                </section>
+
+                <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p class="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-700">Paylaşılacak Dosyalar</p>
+                      <h4 class="mt-1 text-base font-black text-slate-900">Portal görünümünü dosya bazında belirleyin</h4>
+                    </div>
+                    <p class="text-[11px] font-medium text-slate-500">İç notlar ve finans bilgileri paylaşılmaz.</p>
+                  </div>
+                  <div class="mt-4 space-y-2">
+                    @for (kayit of portalYonetilenMuvekkilDosyalari; track kayit.id) {
+                      <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition-colors hover:border-teal-200 hover:bg-teal-50/40">
+                        <input type="checkbox" [checked]="portalDosyaPaylasimiAktifMi(kayit)" (change)="portalDosyaPaylasimiDegisti(kayit, $event)" [disabled]="!portalYonetilenMuvekkil.portalAktifMi || portalIslemYapiliyor" class="mt-1 h-4 w-4 accent-teal-700 disabled:opacity-40">
+                        <span class="min-w-0 flex-1">
+                          <span class="flex flex-wrap items-center gap-2">
+                            <span [class]="kayit.tur === 'dava' ? 'bg-blue-100 text-blue-700' : (kayit.tur === 'icra' ? 'bg-emerald-100 text-emerald-700' : 'bg-purple-100 text-purple-700')" class="rounded-full px-2 py-1 text-[9px] font-black uppercase">{{ kayit.tur }}</span>
+                            <strong class="text-sm text-slate-900">{{ kayit.baslik }}</strong>
+                          </span>
+                          <span class="mt-1 block text-xs font-medium leading-5 text-slate-600">{{ kayit.altBaslik }}</span>
+                          <span class="mt-1 block text-[11px] text-slate-500">{{ kayit.referans }}</span>
+                        </span>
+                      </label>
+                    } @empty {
+                      <div class="rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm font-medium text-slate-500">Bu kişiyle ilişkilendirilmiş bir dosya bulunmuyor.</div>
+                    }
+                  </div>
+                  @if (!portalYonetilenMuvekkil.portalAktifMi) {
+                    <p class="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-800">Dosya seçebilmek için önce portal daveti oluşturun.</p>
+                  }
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
       @if (muvekkilFormAcik) {
         <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 p-2 backdrop-blur-sm sm:flex sm:items-center sm:justify-center sm:p-4">
           <div class="mx-auto flex min-h-full w-full items-start sm:items-center sm:justify-center">
@@ -5633,5 +5721,8 @@
         </div>
       }
     }
-  
+
+    @if (portalModuMu) {
+      <app-muvekkil-portal></app-muvekkil-portal>
+    }
 

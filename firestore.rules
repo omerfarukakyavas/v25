@@ -1,0 +1,113 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(ownerUid) {
+      return signedIn() && request.auth.uid == ownerUid;
+    }
+
+    function portalProfilePath(applicationId, uid) {
+      return /databases/$(database)/documents/artifacts/$(applicationId)/portalProfiles/$(uid);
+    }
+
+    function portalAccessPath(applicationId, accessId) {
+      return /databases/$(database)/documents/artifacts/$(applicationId)/portalAccess/$(accessId);
+    }
+
+    function invitePath(applicationId, token) {
+      return /databases/$(database)/documents/artifacts/$(applicationId)/portalInvites/$(token);
+    }
+
+    function hasActivePortalAccess(applicationId, ownerUid, clientId) {
+      let profile = get(portalProfilePath(applicationId, request.auth.uid));
+      let access = get(portalAccessPath(applicationId, profile.data.accessId));
+      return signedIn()
+        && profile.data.ownerUid == ownerUid
+        && profile.data.muvekkilId == clientId
+        && access.data.ownerUid == ownerUid
+        && access.data.muvekkilId == clientId
+        && access.data.email == profile.data.email
+        && access.data.aktif == true;
+    }
+
+    // Büro verileri yalnızca ilgili Firebase hesabının sahibi tarafından okunabilir.
+    match /artifacts/{applicationId}/users/{userId}/{document=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /artifacts/{applicationId}/portalAccess/{accessId} {
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.muvekkilId is string
+        && request.resource.data.email is string
+        && request.resource.data.aktif is bool;
+      allow read: if signedIn() && (
+        resource.data.ownerUid == request.auth.uid
+        || (
+          exists(portalProfilePath(applicationId, request.auth.uid))
+          && get(portalProfilePath(applicationId, request.auth.uid)).data.accessId == accessId
+        )
+      );
+      allow update, delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /artifacts/{applicationId}/portalInvites/{token} {
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.aktif == true;
+      allow read: if signedIn() && (
+        resource.data.ownerUid == request.auth.uid
+        || (
+          resource.data.aktif == true
+          && request.auth.token.email != null
+          && request.auth.token.email == resource.data.email
+          && resource.data.sonKullanmaTarihi > request.time
+        )
+      );
+      allow update, delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /artifacts/{applicationId}/portalProfiles/{uid} {
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.auth.token.email_verified == true
+        && request.resource.data.uid == uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.inviteToken is string
+        && get(invitePath(applicationId, request.resource.data.inviteToken)).data.aktif == true
+        && get(invitePath(applicationId, request.resource.data.inviteToken)).data.email == request.auth.token.email
+        && get(invitePath(applicationId, request.resource.data.inviteToken)).data.ownerUid == request.resource.data.ownerUid
+        && get(invitePath(applicationId, request.resource.data.inviteToken)).data.muvekkilId == request.resource.data.muvekkilId
+        && get(invitePath(applicationId, request.resource.data.inviteToken)).data.accessId == request.resource.data.accessId
+        && get(invitePath(applicationId, request.resource.data.inviteToken)).data.sonKullanmaTarihi > request.time;
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.muvekkilId == resource.data.muvekkilId
+        && request.resource.data.accessId == resource.data.accessId
+        && request.resource.data.email == resource.data.email;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /artifacts/{applicationId}/portalOwners/{ownerUid}/clients/{clientId} {
+      allow read, write: if isOwner(ownerUid);
+
+      match /cases/{caseId} {
+        allow read: if isOwner(ownerUid)
+          || hasActivePortalAccess(applicationId, ownerUid, clientId);
+        allow create, update, delete: if isOwner(ownerUid);
+      }
+    }
+
+    // Tanımlanmayan her yol kapalıdır.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,137 @@
+<div class="portal-page">
+  <header class="portal-header">
+    <a class="portal-brand" href="/?portal=1" aria-label="Müvekkil portalı ana sayfa">
+      <span class="portal-brand-mark"><img src="assets/brand-mark.svg" alt="Akyavaş Hukuk Bürosu"></span>
+      <span>
+        <strong>Akyavaş</strong>
+        <small>Müvekkil Portalı</small>
+      </span>
+    </a>
+    @if (ekran === 'portal' || ekran === 'engelli') {
+      <button type="button" class="portal-quiet-button" (click)="cikisYap()">Güvenli Çıkış</button>
+    }
+  </header>
+
+  @if (ekran === 'yukleniyor') {
+    <main class="portal-centered">
+      <div class="portal-loader"></div>
+      <p>Portalınız hazırlanıyor...</p>
+    </main>
+  } @else if (ekran === 'giris') {
+    <main class="portal-auth-layout">
+      <section class="portal-welcome">
+        <p class="portal-eyebrow">Güvenli Dosya Takibi</p>
+        <h1>Dosyanızdaki gelişmeleri tek ekrandan izleyin.</h1>
+        <p>Hukuk bürosunun sizinle paylaştığı dava, icra ve arabuluculuk dosyalarına güvenli hesabınızla ulaşabilirsiniz.</p>
+        <div class="portal-feature-list">
+          <span>Dosya durumu ve taraf özeti</span>
+          <span>Yaklaşan duruşma ve toplantılar</span>
+          <span>Paylaşılan evrak bağlantıları</span>
+        </div>
+      </section>
+      <section class="portal-auth-card">
+        <div>
+          <p class="portal-eyebrow">{{ girisModu === 'giris' ? 'Hesabınıza Girin' : 'Davetinizi Tamamlayın' }}</p>
+          <h2>{{ girisModu === 'giris' ? 'Müvekkil girişi' : 'Portal hesabı oluştur' }}</h2>
+          <p class="portal-muted">{{ girisModu === 'giris' ? 'Kayıtlı e-posta adresinizi ve şifrenizi kullanın.' : 'Davet gönderilen e-posta adresiyle hesap açın.' }}</p>
+        </div>
+        @if (hata) { <div class="portal-alert portal-alert-error">{{ hata }}</div> }
+        @if (bilgi) { <div class="portal-alert portal-alert-success">{{ bilgi }}</div> }
+        <div class="portal-form">
+          @if (girisModu === 'kayit') {
+            <label>Ad Soyad<input [(ngModel)]="adSoyad" type="text" autocomplete="name" placeholder="Adınız ve soyadınız"></label>
+          }
+          <label>E-posta<input [(ngModel)]="email" type="email" autocomplete="email" placeholder="ornek@email.com"></label>
+          <label>Şifre<input [(ngModel)]="sifre" (keyup.enter)="girisVeyaKayit()" type="password" [attr.autocomplete]="girisModu === 'giris' ? 'current-password' : 'new-password'" placeholder="En az 6 karakter"></label>
+          <button type="button" class="portal-primary-button" (click)="girisVeyaKayit()" [disabled]="islemYapiliyor">{{ islemYapiliyor ? 'Lütfen bekleyin...' : (girisModu === 'giris' ? 'Portala Giriş Yap' : 'Hesabımı Oluştur') }}</button>
+        </div>
+        <div class="portal-auth-actions">
+          @if (girisModu === 'giris') {
+            <button type="button" (click)="sifremiUnuttum()">Şifremi unuttum</button>
+            @if (davetTokeni && davetTokeni !== '1') { <button type="button" (click)="girisModu = 'kayit'; hata = ''">İlk kez giriş yapacağım</button> }
+          } @else {
+            <button type="button" (click)="girisModu = 'giris'; hata = ''">Zaten hesabım var</button>
+          }
+        </div>
+      </section>
+    </main>
+  } @else if (ekran === 'dogrulama') {
+    <main class="portal-centered">
+      <section class="portal-message-card">
+        <div class="portal-message-icon">@</div>
+        <p class="portal-eyebrow">E-posta Doğrulama</p>
+        <h1>Son bir güvenlik adımı kaldı.</h1>
+        <p>{{ user?.email }} adresine gönderilen doğrulama bağlantısına tıklayın. Ardından bu ekrana dönüp kontrol düğmesine basın.</p>
+        @if (hata) { <div class="portal-alert portal-alert-error">{{ hata }}</div> }
+        @if (bilgi) { <div class="portal-alert portal-alert-success">{{ bilgi }}</div> }
+        <div class="portal-message-actions">
+          <button type="button" class="portal-primary-button" (click)="dogrulamayiKontrolEt()" [disabled]="islemYapiliyor">Doğrulamayı Kontrol Et</button>
+          <button type="button" class="portal-secondary-button" (click)="dogrulamaMailiniYenidenGonder()" [disabled]="islemYapiliyor">E-postayı Yeniden Gönder</button>
+          <button type="button" class="portal-link-button" (click)="cikisYap()">Farklı hesapla giriş yap</button>
+        </div>
+      </section>
+    </main>
+  } @else if (ekran === 'engelli') {
+    <main class="portal-centered">
+      <section class="portal-message-card">
+        <div class="portal-message-icon portal-message-icon-lock">!</div>
+        <p class="portal-eyebrow">Erişim Bilgisi</p>
+        <h1>Portal erişimi açılamadı.</h1>
+        <p>{{ hata }}</p>
+        <button type="button" class="portal-secondary-button" (click)="cikisYap()">Giriş ekranına dön</button>
+      </section>
+    </main>
+  } @else {
+    <main class="portal-dashboard">
+      <section class="portal-hero">
+        <div>
+          <p class="portal-eyebrow">Hoş Geldiniz</p>
+          <h1>{{ profil?.adSoyad || user?.displayName || 'Müvekkil' }}</h1>
+          <p>Hukuk bürosunun sizinle paylaştığı güncel dosya bilgileri aşağıda yer alıyor.</p>
+        </div>
+        <div class="portal-count-card"><strong>{{ dosyalar.length }}</strong><span>Paylaşılan dosya</span></div>
+      </section>
+
+      @if (hata) { <div class="portal-alert portal-alert-error">{{ hata }}</div> }
+      <section class="portal-section-head">
+        <div><p class="portal-eyebrow">Dosyalarım</p><h2>Güncel dosya takibi</h2></div>
+        <span>Son güncellenen kayıtlar üstte gösterilir.</span>
+      </section>
+
+      <section class="portal-case-list">
+        @for (dosya of dosyalar; track dosya.id) {
+          <article class="portal-case-card" [class.portal-case-card-open]="acikDosyaId === dosya.id">
+            <button type="button" class="portal-case-summary" (click)="dosyaAcKapat(dosya.id)">
+              <span class="portal-case-type" [attr.data-type]="dosya.tur">{{ turEtiketi(dosya.tur) }}</span>
+              <span class="portal-case-main"><strong>{{ dosya.baslik }}</strong><small>{{ dosya.altBaslik }}</small></span>
+              <span class="portal-case-status">{{ dosya.durum }}</span>
+              <span class="portal-chevron">⌄</span>
+            </button>
+            @if (acikDosyaId === dosya.id) {
+              <div class="portal-case-detail">
+                <div class="portal-detail-grid">
+                  <div><span>Kurum / Birim</span><strong>{{ dosya.kurum || '-' }}</strong></div>
+                  <div><span>Konu / Tür</span><strong>{{ dosya.konu || '-' }}</strong></div>
+                  <div><span>{{ dosya.sonrakiIslemEtiketi || 'Yaklaşan Tarih' }}</span><strong>{{ formatTarih(dosya.sonrakiTarih) }} @if (dosya.sonrakiSaat) { · {{ dosya.sonrakiSaat }} }</strong></div>
+                  <div><span>Son Güncelleme</span><strong>{{ dosya.guncellemeTarihi | date:'dd.MM.yyyy HH:mm' }}</strong></div>
+                </div>
+                <div class="portal-parties"><span>Taraflar</span><p>{{ dosya.taraflar.join(' · ') || '-' }}</p></div>
+                @if (dosya.evraklar && dosya.evraklar.length) {
+                  <div class="portal-documents">
+                    <span>Paylaşılan Evraklar</span>
+                    @for (evrak of dosya.evraklar; track evrak.id) {
+                      <a [href]="guvenliUrl(evrak.url)" target="_blank" rel="noopener noreferrer"><strong>{{ evrak.isim }}</strong><small>{{ formatTarih(evrak.tarih) }}</small></a>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </article>
+        } @empty {
+          <div class="portal-empty"><strong>Henüz paylaşılan dosya yok.</strong><p>Hukuk bürosu bir dosyayı portal erişiminize açtığında burada görünecek.</p></div>
+        }
+      </section>
+      <footer class="portal-footer">Bu portal yalnızca hukuk bürosunun sizinle paylaştığı bilgilendirme kayıtlarını gösterir.</footer>
+    </main>
+  }
+</div>

@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { ElementRef, ViewChild } from '@angular/core';
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, User, signInWithCustomToken, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
-import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, Timestamp } from 'firebase/firestore';
 
 import { appId, getFirebaseConfig } from '../firebase.config';
 import { GOOGLE_DOCS_CONFIG } from '../google-docs.config';
+import { MuvekkilPortalComponent } from './muvekkil-portal.component';
 import {
   AjandaKaydi,
   AjandaKaynak,
@@ -35,6 +36,8 @@ import {
   MuvekkilGorusmeNotu,
   OfisGorevi,
   OfisGoreviBagliDosyaTuru,
+  PortalDosyaKaydi,
+  PortalDosyaTuru,
   SayfaTipi,
   TakvimGecmisKaydi,
   TakvimGecmisiDurumu,
@@ -291,7 +294,7 @@ type UygulamaGezinmeDurumu = {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MuvekkilPortalComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -305,7 +308,8 @@ export class AppComponent implements OnInit {
   }
   
   app: any; auth: any; db: any; user: User | null = null;
-  authInitialized = false; yukleniyor = false; islemYapiyor = false; sistemHatasi = '';
+  readonly portalModuMu = new URLSearchParams(window.location.search).has('portal');
+  authInitialized = this.portalModuMu; yukleniyor = false; islemYapiyor = false; sistemHatasi = '';
   
   emailGiris = ''; sifreGiris = ''; authModu: 'giris' | 'kayit' = 'giris'; authHata = ''; authBilgi = ''; authYukleniyor = false;
   hesapAyarlariAcik = false;
@@ -413,6 +417,12 @@ export class AppComponent implements OnInit {
   iliskiFiltre = 'Tümü';
   iliskiSiralama = 'a-z';
   seciliIliskiId: number | null = null;
+  muvekkilPortalYonetimAcik = false;
+  portalYonetilenMuvekkil: Muvekkil | null = null;
+  portalDavetEpostasi = '';
+  portalIslemYapiliyor = false;
+  portalHata = '';
+  portalBilgi = '';
   ajandaArama = '';
   ajandaZamanFiltresi: 'all' | 'today' | '7days' | '30days' | 'overdue' = 'all';
   ajandaTurFiltresi: 'all' | AjandaTur = 'all';
@@ -566,6 +576,7 @@ export class AppComponent implements OnInit {
   arabuluculukBasvuruKonusuOtomatikMi = false;
 
   ngOnInit() {
+    if (this.portalModuMu) return;
     this.toplamBekleyenAlacakGizli = this.toplamBekleyenAlacakGizliYukle();
     const kayitliMobilGorunumBoyutu = this.mobilGorunumBoyutuLocalYukle();
     const kayitliSolMenuDarMi = this.solMenuDarMiLocalYukle();
@@ -1019,6 +1030,7 @@ export class AppComponent implements OnInit {
     this.islemYapiyor = true;
     try {
       await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'davalar', d.id.toString()), JSON.parse(JSON.stringify(d)));
+      await this.portalDosyasiniEsitle('dava', d);
       if (basariMesaji) this.bildirimGoster('success', 'Dava dosyası kaydedildi', basariMesaji);
       return true;
     } catch (e: any) {
@@ -1029,7 +1041,9 @@ export class AppComponent implements OnInit {
   async davaSilCloud(id: number, basariMesaji?: string): Promise<boolean> {
     if (!this.user) return false;
     try {
+      const silinenDosya = this.davalar.find(dosya => dosya.id === id);
       await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'davalar', id.toString()));
+      if (silinenDosya) await Promise.all((silinenDosya.portalMuvekkilIdleri || []).map(muvekkilId => this.portalDosyaOzetiniSil(muvekkilId, 'dava', id)));
       if (basariMesaji) this.bildirimGoster('success', 'Dava dosyası silindi', basariMesaji);
       return true;
     } catch (e: any) {
@@ -1042,6 +1056,7 @@ export class AppComponent implements OnInit {
     this.islemYapiyor = true;
     try {
       await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'icralar', i.id.toString()), JSON.parse(JSON.stringify(i)));
+      await this.portalDosyasiniEsitle('icra', i);
       if (basariMesaji) this.bildirimGoster('success', 'İcra dosyası kaydedildi', basariMesaji);
       return true;
     } catch (e: any) {
@@ -1052,7 +1067,9 @@ export class AppComponent implements OnInit {
   async icraSilCloud(id: number, basariMesaji?: string): Promise<boolean> {
     if (!this.user) return false;
     try {
+      const silinenDosya = this.icralar.find(dosya => dosya.id === id);
       await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'icralar', id.toString()));
+      if (silinenDosya) await Promise.all((silinenDosya.portalMuvekkilIdleri || []).map(muvekkilId => this.portalDosyaOzetiniSil(muvekkilId, 'icra', id)));
       if (basariMesaji) this.bildirimGoster('success', 'İcra dosyası silindi', basariMesaji);
       return true;
     } catch (e: any) {
@@ -1074,6 +1091,7 @@ export class AppComponent implements OnInit {
     try {
       const kaydedilecek = this.arabuluculukKapaliToplantiyiTamamla(a);
       await setDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk', kaydedilecek.id!.toString()), JSON.parse(JSON.stringify(kaydedilecek)));
+      await this.portalDosyasiniEsitle('arabuluculuk', kaydedilecek as ArabuluculukDosyasi);
       if (basariMesaji) this.bildirimGoster('success', 'Arabuluculuk dosyası kaydedildi', basariMesaji);
       return true;
     } catch (e: any) {
@@ -1084,7 +1102,9 @@ export class AppComponent implements OnInit {
   async arabuluculukSilCloud(id: number, basariMesaji?: string): Promise<boolean> {
     if (!this.user) return false;
     try {
+      const silinenDosya = this.arabuluculukDosyalar.find(dosya => dosya.id === id);
       await deleteDoc(doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk', id.toString()));
+      if (silinenDosya) await Promise.all((silinenDosya.portalMuvekkilIdleri || []).map(muvekkilId => this.portalDosyaOzetiniSil(muvekkilId, 'arabuluculuk', id)));
       if (basariMesaji) this.bildirimGoster('success', 'Arabuluculuk dosyası silindi', basariMesaji);
       return true;
     } catch (e: any) {
@@ -2955,6 +2975,11 @@ export class AppComponent implements OnInit {
     const muvekkil = this.seciliIliski;
     if (!muvekkil) return [];
 
+    return this.getMuvekkilBaglantiliDosyalari(muvekkil);
+  }
+
+  getMuvekkilBaglantiliDosyalari(muvekkil: Muvekkil): IliskiDosyaKaydi[] {
+
     const davaKayitlari = this.davalar
       .filter(dava =>
         dava.muvekkilId === muvekkil.id
@@ -3013,6 +3038,224 @@ export class AppComponent implements OnInit {
       icra: kayitlar.filter(kayit => kayit.tur === 'icra').length,
       arabuluculuk: kayitlar.filter(kayit => kayit.tur === 'arabuluculuk').length
     };
+  }
+  muvekkilPortalYonetiminiAc(muvekkil: Muvekkil) {
+    this.portalYonetilenMuvekkil = muvekkil;
+    this.portalDavetEpostasi = (muvekkil.portalEposta || muvekkil.eposta || '').trim().toLowerCase();
+    this.portalHata = '';
+    this.portalBilgi = '';
+    this.muvekkilPortalYonetimAcik = true;
+  }
+  muvekkilPortalYonetiminiKapat() {
+    this.muvekkilPortalYonetimAcik = false;
+    this.portalYonetilenMuvekkil = null;
+    this.portalDavetEpostasi = '';
+    this.portalHata = '';
+    this.portalBilgi = '';
+  }
+  get portalYonetilenMuvekkilDosyalari() {
+    return this.portalYonetilenMuvekkil ? this.getMuvekkilBaglantiliDosyalari(this.portalYonetilenMuvekkil) : [];
+  }
+  portalDosyaPaylasimiAktifMi(kayit: IliskiDosyaKaydi) {
+    const muvekkilId = this.portalYonetilenMuvekkil?.id;
+    return !!muvekkilId && ((kayit.dosya as any).portalMuvekkilIdleri || []).includes(muvekkilId);
+  }
+  portalDavetBaglantisi(muvekkil?: Muvekkil | null) {
+    const token = muvekkil?.portalDavetTokeni;
+    return token ? `${window.location.origin}/?portal=${encodeURIComponent(token)}` : '';
+  }
+  async muvekkilPortalDavetiOlustur() {
+    const muvekkil = this.portalYonetilenMuvekkil;
+    const email = this.portalDavetEpostasi.trim().toLowerCase();
+    if (!this.user || !muvekkil) return;
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      this.portalHata = 'Geçerli bir müvekkil e-posta adresi yazın.';
+      return;
+    }
+
+    this.portalIslemYapiliyor = true;
+    this.portalHata = '';
+    this.portalBilgi = '';
+    try {
+      if (muvekkil.portalDavetTokeni) {
+        await setDoc(doc(this.db, 'artifacts', appId, 'portalInvites', muvekkil.portalDavetTokeni), { aktif: false }, { merge: true });
+      }
+      const token = this.guvenliPortalTokeniUret();
+      const accessId = this.portalAccessId(muvekkil.id);
+      const sonKullanmaTarihi = new Date();
+      sonKullanmaTarihi.setDate(sonKullanmaTarihi.getDate() + 30);
+      await setDoc(doc(this.db, 'artifacts', appId, 'portalAccess', accessId), {
+        accessId,
+        ownerUid: this.user.uid,
+        muvekkilId: String(muvekkil.id),
+        adSoyad: muvekkil.adSoyad,
+        email,
+        aktif: true,
+        guncellemeTarihi: new Date().toISOString()
+      });
+      await setDoc(doc(this.db, 'artifacts', appId, 'portalInvites', token), {
+        accessId,
+        ownerUid: this.user.uid,
+        muvekkilId: String(muvekkil.id),
+        adSoyad: muvekkil.adSoyad,
+        email,
+        aktif: true,
+        olusturmaTarihi: Timestamp.now(),
+        sonKullanmaTarihi: Timestamp.fromDate(sonKullanmaTarihi)
+      });
+
+      muvekkil.portalAktifMi = true;
+      muvekkil.portalEposta = email;
+      muvekkil.portalDavetTokeni = token;
+      muvekkil.portalDavetTarihi = new Date().toISOString();
+      const kaydedildi = await this.muvekkilKaydetCloud(muvekkil);
+      if (!kaydedildi) throw new Error('Müvekkil kaydı güncellenemedi.');
+      await this.muvekkilPortalDosyalariniEsitle(muvekkil);
+      this.portalBilgi = 'Davet bağlantısı hazırlandı. Bağlantıyı müvekkilinizle paylaşabilirsiniz.';
+    } catch (error: any) {
+      this.portalHata = error?.message || 'Portal daveti oluşturulamadı.';
+    } finally {
+      this.portalIslemYapiliyor = false;
+      this.cdr.detectChanges();
+    }
+  }
+  async muvekkilPortalErisiminiKapat() {
+    const muvekkil = this.portalYonetilenMuvekkil;
+    if (!this.user || !muvekkil) return;
+    this.portalIslemYapiliyor = true;
+    this.portalHata = '';
+    try {
+      await setDoc(doc(this.db, 'artifacts', appId, 'portalAccess', this.portalAccessId(muvekkil.id)), {
+        accessId: this.portalAccessId(muvekkil.id),
+        ownerUid: this.user.uid,
+        muvekkilId: String(muvekkil.id),
+        adSoyad: muvekkil.adSoyad,
+        email: muvekkil.portalEposta || muvekkil.eposta || '',
+        aktif: false,
+        guncellemeTarihi: new Date().toISOString()
+      }, { merge: true });
+      if (muvekkil.portalDavetTokeni) {
+        await setDoc(doc(this.db, 'artifacts', appId, 'portalInvites', muvekkil.portalDavetTokeni), { aktif: false }, { merge: true });
+      }
+      muvekkil.portalAktifMi = false;
+      await this.muvekkilKaydetCloud(muvekkil);
+      this.portalBilgi = 'Müvekkilin portal erişimi kapatıldı.';
+    } catch (error: any) {
+      this.portalHata = error?.message || 'Portal erişimi kapatılamadı.';
+    } finally {
+      this.portalIslemYapiliyor = false;
+      this.cdr.detectChanges();
+    }
+  }
+  async portalDavetBaglantisiniKopyala() {
+    const baglanti = this.portalDavetBaglantisi(this.portalYonetilenMuvekkil);
+    if (!baglanti) return;
+    try {
+      await navigator.clipboard.writeText(baglanti);
+      this.portalBilgi = 'Davet bağlantısı panoya kopyalandı.';
+    } catch {
+      this.portalHata = 'Bağlantı otomatik kopyalanamadı. Metni seçerek kopyalayabilirsiniz.';
+    }
+  }
+  async portalDosyaPaylasimiDegisti(kayit: IliskiDosyaKaydi, event: Event) {
+    const muvekkil = this.portalYonetilenMuvekkil;
+    if (!muvekkil) return;
+    const paylasilsin = (event.target as HTMLInputElement).checked;
+    const dosya = kayit.dosya as DavaDosyasi & IcraDosyasi & ArabuluculukDosyasi;
+    const oncekiIdler = [...(dosya.portalMuvekkilIdleri || [])];
+    const yeniIdler = new Set(oncekiIdler);
+    if (paylasilsin) yeniIdler.add(muvekkil.id);
+    else yeniIdler.delete(muvekkil.id);
+    dosya.portalMuvekkilIdleri = [...yeniIdler];
+    this.portalHata = '';
+    try {
+      let kaydedildi = false;
+      if (kayit.tur === 'dava') kaydedildi = await this.davaKaydetCloud(dosya as DavaDosyasi);
+      else if (kayit.tur === 'icra') kaydedildi = await this.icraKaydetCloud(dosya as IcraDosyasi);
+      else kaydedildi = await this.arabuluculukKaydetCloud(dosya as ArabuluculukDosyasi);
+      if (!kaydedildi) throw new Error('Dosya paylaşım ayarı kaydedilemedi.');
+      if (!paylasilsin) await this.portalDosyaOzetiniSil(muvekkil.id, kayit.tur, dosya.id);
+      this.portalBilgi = paylasilsin ? 'Dosya müvekkil portalında gösterilecek.' : 'Dosya portal görünümünden kaldırıldı.';
+    } catch (error: any) {
+      dosya.portalMuvekkilIdleri = oncekiIdler;
+      (event.target as HTMLInputElement).checked = !paylasilsin;
+      this.portalHata = error?.message || 'Dosya paylaşım ayarı değiştirilemedi.';
+    }
+  }
+  private portalAccessId(muvekkilId: number) {
+    return `${this.user?.uid || 'unknown'}_${muvekkilId}`;
+  }
+  private guvenliPortalTokeniUret() {
+    const baytlar = crypto.getRandomValues(new Uint8Array(24));
+    return Array.from(baytlar, bayt => bayt.toString(16).padStart(2, '0')).join('');
+  }
+  private async muvekkilPortalDosyalariniEsitle(muvekkil: Muvekkil) {
+    const paylasilanlar = this.getMuvekkilBaglantiliDosyalari(muvekkil).filter(kayit => this.portalDosyaMuvekkileAcikMi(kayit.dosya, muvekkil.id));
+    await Promise.all(paylasilanlar.map(kayit => this.portalDosyaOzetiniKaydet(muvekkil.id, kayit.tur, kayit.dosya)));
+  }
+  private portalDosyaMuvekkileAcikMi(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi, muvekkilId: number) {
+    return (dosya.portalMuvekkilIdleri || []).includes(muvekkilId);
+  }
+  private async portalDosyasiniEsitle(tur: PortalDosyaTuru, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi) {
+    const muvekkilIdleri = [...new Set(dosya.portalMuvekkilIdleri || [])];
+    await Promise.all(muvekkilIdleri.map(async muvekkilId => {
+      const muvekkil = this.muvekkiller.find(kayit => kayit.id === muvekkilId);
+      if (!muvekkil?.portalAktifMi) return;
+      await this.portalDosyaOzetiniKaydet(muvekkilId, tur, dosya);
+    }));
+  }
+  private async portalDosyaOzetiniKaydet(muvekkilId: number, tur: PortalDosyaTuru, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi) {
+    if (!this.user) return;
+    const kayit = this.portalDosyaKaydiniOlustur(tur, dosya);
+    await setDoc(doc(this.db, 'artifacts', appId, 'portalOwners', this.user.uid, 'clients', String(muvekkilId), 'cases', kayit.id), JSON.parse(JSON.stringify(kayit)));
+  }
+  private async portalDosyaOzetiniSil(muvekkilId: number, tur: PortalDosyaTuru, dosyaId: number) {
+    if (!this.user) return;
+    await deleteDoc(doc(this.db, 'artifacts', appId, 'portalOwners', this.user.uid, 'clients', String(muvekkilId), 'cases', `${tur}-${dosyaId}`));
+  }
+  private portalDosyaKaydiniOlustur(tur: PortalDosyaTuru, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi): PortalDosyaKaydi {
+    const evraklar = this.portalEvraklariniHazirla(dosya.evraklar || []);
+    if (tur === 'dava') {
+      const dava = dosya as DavaDosyasi;
+      const tarafKayitlari = this.getDavaTarafKayitlari(dava);
+      const taraflar = [...tarafKayitlari.davacilar, ...tarafKayitlari.davalilar].map(taraf => taraf.isim).filter(Boolean);
+      return {
+        id: `dava-${dava.id}`, kaynakId: dava.id, tur, baslik: dava.dosyaNo || 'Dava dosyası',
+        altBaslik: dava.mahkeme || 'Mahkeme bilgisi yok', durum: dava.durum, taraflar,
+        kurum: dava.mahkeme, konu: dava.konu, sonrakiTarih: dava.durusmaTarihi, sonrakiSaat: dava.durusmaSaati,
+        sonrakiIslemEtiketi: 'Sonraki Duruşma', evraklar, guncellemeTarihi: new Date().toISOString()
+      };
+    }
+    if (tur === 'icra') {
+      const icra = dosya as IcraDosyasi;
+      return {
+        id: `icra-${icra.id}`, kaynakId: icra.id, tur, baslik: icra.dosyaNo || 'İcra dosyası',
+        altBaslik: icra.icraDairesi || 'İcra dairesi bilgisi yok', durum: icra.durum,
+        taraflar: [icra.alacakli, icra.borclu].filter(Boolean), kurum: icra.icraDairesi,
+        konu: icra.takipTipi, sonrakiTarih: icra.takipTarihi, sonrakiIslemEtiketi: 'Takip Tarihi',
+        evraklar, guncellemeTarihi: new Date().toISOString()
+      };
+    }
+    const arabuluculuk = dosya as ArabuluculukDosyasi;
+    return {
+      id: `arabuluculuk-${arabuluculuk.id}`, kaynakId: arabuluculuk.id, tur,
+      baslik: arabuluculuk.arabuluculukNo || 'Arabuluculuk dosyası',
+      altBaslik: arabuluculuk.buroNo ? `${arabuluculuk.buro} / ${arabuluculuk.buroNo}` : arabuluculuk.buro,
+      durum: arabuluculuk.durum, taraflar: (arabuluculuk.taraflar || []).map(taraf => taraf.isim).filter(Boolean),
+      kurum: arabuluculuk.buro, konu: `${arabuluculuk.basvuruTuru} - ${arabuluculuk.uyusmazlikTuru}`,
+      sonrakiTarih: arabuluculuk.toplantiTarihi, sonrakiSaat: arabuluculuk.toplantiSaati,
+      sonrakiIslemEtiketi: 'Toplantı Tarihi', evraklar, guncellemeTarihi: new Date().toISOString()
+    };
+  }
+  private portalEvraklariniHazirla(evraklar: EvrakBaglantisi[]): { id: string; isim: string; url: string; tarih?: string }[] {
+    const sonuc: { id: string; isim: string; url: string; tarih?: string }[] = [];
+    evraklar.forEach(evrak => {
+      if (evrak.portaldaGoster && /^https?:\/\//i.test((evrak.url || '').trim())) {
+        sonuc.push({ id: String(evrak.id), isim: evrak.isim, url: evrak.url.trim(), tarih: evrak.tarih });
+      }
+      sonuc.push(...this.portalEvraklariniHazirla(evrak.ekler || []));
+    });
+    return sonuc;
   }
   iliskiDosyasinaGit(kayit: IliskiDosyaKaydi) {
     if (kayit.tur === 'dava') this.detayaGit(kayit.dosya as DavaDosyasi);

@@ -2,7 +2,7 @@
 
 export interface FinansalIslem { id: number; tarih: string; tur: string; tutar: number; aciklama: string; makbuzUrl?: string; makbuzStopajli?: boolean; }
 export interface EvrakGorevi { id: number; metin: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; }
-export interface EvrakBaglantisi { id: number; isim: string; url: string; tarih: string; tebligTarihi?: string; sonEylemTarihi?: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; yaziRengi?: string; ekler?: EvrakBaglantisi[]; gorevler?: EvrakGorevi[]; sablonBolumu?: string; sablonKategori?: string; } 
+export interface EvrakBaglantisi { id: number; isim: string; url: string; tarih: string; tebligTarihi?: string; sonEylemTarihi?: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; yaziRengi?: string; ekler?: EvrakBaglantisi[]; gorevler?: EvrakGorevi[]; sablonBolumu?: string; sablonKategori?: string; portaldaGoster?: boolean; }
 export interface DosyaNumarasi { tur: string; no: string; }
 export interface ArabuluculukTaraf {
   id: number;
@@ -51,6 +51,7 @@ export interface DavaTarafKaydi {
 export interface DavaDosyasi { 
   id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; muvekkiller?: DavaTarafKaydi[]; karsiTaraf: string; mahkeme: string; eskiMahkeme?: string; eskiEsasNo?: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; notlar?: string; muvekkilGorusmeNotlari?: MuvekkilGorusmeNotu[]; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; baglantiliIcraIds?: number[]; baglantiliArabuluculukIds?: number[]; baglantiliTedbirDosyalari?: string[]; baglantiliDelilTespitiDosyalari?: string[]; baglantiliNoterlikDosyalari?: string[]; muvekkilPozisyonu?: string; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[]; davacilar?: DavaTarafKaydi[]; davalilar?: DavaTarafKaydi[];
   iletisimNotlari?: IletisimNotu[];
+  portalMuvekkilIdleri?: number[];
   icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
   buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; basvuruKonusu?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: string;
 }
@@ -58,6 +59,7 @@ export interface DavaDosyasi {
 export interface IcraDosyasi {
   id: number; icraDairesi: string; dosyaNo: string; eskiMahkeme?: string; eskiEsasNo?: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkilId?: number; muvekkil: string; muvekkilRolu?: 'Alacaklı' | 'Borçlu'; alacakli: string; borclu: string; takipTipi?: string; takipTarihi: string; durum: string; baglantiliDavaId?: number; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[];
   iletisimNotlari?: IletisimNotu[];
+  portalMuvekkilIdleri?: number[];
   karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string;
   buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; basvuruKonusu?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: string;
 }
@@ -65,12 +67,49 @@ export interface IcraDosyasi {
 export interface ArabuluculukDosyasi {
   id: number; buroNo: string; arabuluculukNo: string; buro: string; basvuruTuru: 'Dava Şartı' | 'İhtiyari'; uyusmazlikTuru: 'Kira' | 'İşçi İşveren' | 'Ticari' | 'Boşanma' | 'Ortaklığın Giderilmesi' | 'Tüketici'; basvuruKonusu?: string; taraflar: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: 'Yüzyüze' | 'Videokonferans' | 'Telekonferans'; durum: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; muvekkilId?: number; arsivYeri?: string; eskiMahkeme?: string; eskiEsasNo?: string;
   iletisimNotlari?: IletisimNotu[];
+  portalMuvekkilIdleri?: number[];
   islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[];
   dosyaNo?: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil?: string; karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string; icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
 }
 
 export interface MuvekkilEkKayit { id: number; baslik: string; deger: string; }
-export interface Muvekkil { id: number; tip?: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer'; _isNewDiger?: boolean; adSoyad: string; tcKimlik: string; telefon: string; eposta: string; adres: string; il?: string; ilce?: string; acikAdres?: string; bankaBilgileri: string; vergiDairesi?: string; vekaletnameUrl?: string; yetkililer?: { id: number; adSoyad: string; telefon: string; eposta?: string; pozisyon: string; }[]; ekKayitlar?: MuvekkilEkKayit[]; }
+export interface Muvekkil { id: number; tip?: 'Müvekkil' | 'Şirketler' | 'Borçlular' | 'Diğer'; _isNewDiger?: boolean; adSoyad: string; tcKimlik: string; telefon: string; eposta: string; adres: string; il?: string; ilce?: string; acikAdres?: string; bankaBilgileri: string; vergiDairesi?: string; vekaletnameUrl?: string; yetkililer?: { id: number; adSoyad: string; telefon: string; eposta?: string; pozisyon: string; }[]; ekKayitlar?: MuvekkilEkKayit[]; portalAktifMi?: boolean; portalEposta?: string; portalDavetTokeni?: string; portalDavetTarihi?: string; }
+
+export type PortalDosyaTuru = 'dava' | 'icra' | 'arabuluculuk';
+
+export interface PortalEvrakKaydi {
+  id: string;
+  isim: string;
+  url: string;
+  tarih?: string;
+}
+
+export interface PortalDosyaKaydi {
+  id: string;
+  kaynakId: number;
+  tur: PortalDosyaTuru;
+  baslik: string;
+  altBaslik: string;
+  durum: string;
+  taraflar: string[];
+  kurum?: string;
+  konu?: string;
+  sonrakiTarih?: string;
+  sonrakiSaat?: string;
+  sonrakiIslemEtiketi?: string;
+  evraklar?: PortalEvrakKaydi[];
+  guncellemeTarihi: string;
+}
+
+export interface PortalProfil {
+  uid: string;
+  accessId: string;
+  ownerUid: string;
+  muvekkilId: string;
+  adSoyad: string;
+  email: string;
+  olusturmaTarihi: string;
+}
 
 export interface MuvekkilGorusmeNotu {
   id: number;
