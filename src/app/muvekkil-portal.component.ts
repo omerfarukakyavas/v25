@@ -82,6 +82,7 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
         } catch {
           this.ekran = 'engelli';
           this.hata = 'Portal bilgileri alınamadı. İnternet bağlantınızı kontrol edip sayfayı yenileyin.';
+        } finally {
           this.cdr.detectChanges();
         }
       });
@@ -273,6 +274,7 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
 
     this.profil = profil;
     this.ekran = 'portal';
+    this.cdr.detectChanges();
     this.dosyaUnsubscribe = onSnapshot(
       collection(this.db, 'artifacts', appId, 'portalOwners', profil.ownerUid, 'clients', profil.muvekkilId, 'cases'),
       snapshot => {
