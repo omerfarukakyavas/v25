@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getApps, initializeApp } from 'firebase/app';
 import {
   User,
   createUserWithEmailAndPassword,
@@ -19,6 +19,7 @@ import { PortalDosyaKaydi, PortalProfil } from '../app.models';
 import { appId, getFirebaseConfig } from '../firebase.config';
 
 type PortalEkrani = 'yukleniyor' | 'giris' | 'dogrulama' | 'portal' | 'engelli';
+const MUVEKKIL_PORTAL_APP_ADI = 'muvekkil-portal';
 
 @Component({
   selector: 'app-muvekkil-portal',
@@ -52,7 +53,8 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     try {
-      this.app = getApps().length ? getApp() : initializeApp(getFirebaseConfig());
+      this.app = getApps().find(app => app.name === MUVEKKIL_PORTAL_APP_ADI)
+        || initializeApp(getFirebaseConfig(), MUVEKKIL_PORTAL_APP_ADI);
       this.auth = getAuth(this.app);
       this.db = getFirestore(this.app);
       this.authBaslatmaZamanlayicisi = window.setTimeout(() => {

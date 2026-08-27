@@ -7,9 +7,18 @@
         <small>Müvekkil Portalı</small>
       </span>
     </a>
-    @if (ekran === 'portal' || ekran === 'engelli') {
-      <button type="button" class="portal-quiet-button" (click)="cikisYap()">Güvenli Çıkış</button>
-    }
+    <div class="portal-header-actions">
+      <a class="portal-office-switch" href="/" aria-label="Büro portalına geç">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18m-6-6 6 6-6 6"></path></svg>
+        <span class="portal-switch-full">Büro Portalı</span><span class="portal-switch-short">Büro</span>
+      </a>
+      @if (ekran === 'portal' || ekran === 'engelli') {
+        <button type="button" class="portal-quiet-button" (click)="cikisYap()" aria-label="Müvekkil portalından güvenli çıkış" title="Güvenli Çıkış">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          <span class="portal-quiet-label">Güvenli Çıkış</span>
+        </button>
+      }
+    </div>
   </header>
 
   @if (ekran === 'yukleniyor') {
