@@ -39,11 +39,11 @@
       </div>
     } 
     @else {
-      <div class="app-shell flex h-screen bg-slate-50 font-sans overflow-hidden">
+      <div class="app-shell flex h-screen bg-slate-50 font-sans overflow-hidden" [class.app-shell--mobile-sidebar-open]="mobilSolMenuAcik">
         @if (mobilSolMenuAcik) {
           <button type="button" (click)="mobilSolMenuyuKapat()" class="app-sidebar-mobile-backdrop md:hidden" aria-label="Sol menüyü kapat"></button>
         }
-        <aside [class.app-sidebar--collapsed]="solMenuDarMi" [class.app-sidebar--mobile-open]="mobilSolMenuAcik" class="app-sidebar w-64 bg-slate-900 text-white flex flex-col shadow-2xl z-10 shrink-0">
+        <aside [class.app-sidebar--collapsed]="solMenuDarMi" [class.app-sidebar--mobile-open]="mobilSolMenuAcik" class="app-sidebar w-64 bg-slate-900 text-white flex flex-col shadow-2xl shrink-0">
           <div class="app-sidebar-brand p-6 border-b border-slate-800 flex flex-col items-center text-center">
             <div class="app-sidebar-brand-actions">
               <button type="button" (click)="solMenuGorunumunuDegistir()" class="app-sidebar-collapse-button hidden md:inline-flex" [attr.aria-label]="solMenuDarMi ? 'Sol menüyü genişlet' : 'Sol menüyü daralt'" [title]="solMenuDarMi ? 'Sol menüyü genişlet' : 'Sol menüyü daralt'">
@@ -315,7 +315,7 @@
             </div>
           }
 
-          <div class="app-mobile-bottom-nav md:hidden" aria-label="Mobil ana menü">
+          <div class="app-mobile-bottom-nav md:hidden" [class.app-mobile-bottom-nav--sidebar-open]="mobilSolMenuAcik" aria-label="Mobil ana menü">
             <div class="app-mobile-bottom-nav__scroller custom-scrollbar">
               <button type="button" (click)="sayfaDegistir('dashboard')" [class]="aktifSayfa === 'dashboard' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Özet</button>
               <button type="button" (click)="sayfaDegistir('davalar')" [class]="aktifSayfa === 'davalar' || aktifSayfa === 'detay' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Davalar</button>
