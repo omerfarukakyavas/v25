@@ -1,8 +1,17 @@
 // Shared application models extracted from the legacy single-file component.
 
-export interface FinansalIslem { id: number; tarih: string; tur: string; tutar: number; aciklama: string; makbuzUrl?: string; makbuzStopajli?: boolean; }
+export interface FinansalIslem {
+  id: number;
+  tarih: string;
+  tur: string;
+  tutar: number;
+  aciklama: string;
+  makbuzUrl?: string;
+  makbuzStopajli?: boolean;
+  portalMuvekkilIdleri?: number[];
+}
 export interface EvrakGorevi { id: number; metin: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; }
-export interface EvrakBaglantisi { id: number; isim: string; url: string; tarih: string; tebligTarihi?: string; sonEylemTarihi?: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; yaziRengi?: string; ekler?: EvrakBaglantisi[]; gorevler?: EvrakGorevi[]; sablonBolumu?: string; sablonKategori?: string; portaldaGoster?: boolean; }
+export interface EvrakBaglantisi { id: number; isim: string; url: string; tarih: string; tebligTarihi?: string; sonEylemTarihi?: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; yaziRengi?: string; ekler?: EvrakBaglantisi[]; gorevler?: EvrakGorevi[]; sablonBolumu?: string; sablonKategori?: string; portaldaGoster?: boolean; portalMuvekkilIdleri?: number[]; }
 export interface DosyaNumarasi { tur: string; no: string; }
 export interface ArabuluculukTaraf {
   id: number;
@@ -52,6 +61,7 @@ export interface DavaDosyasi {
   id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; muvekkiller?: DavaTarafKaydi[]; karsiTaraf: string; mahkeme: string; eskiMahkeme?: string; eskiEsasNo?: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; notlar?: string; muvekkilGorusmeNotlari?: MuvekkilGorusmeNotu[]; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; baglantiliIcraIds?: number[]; baglantiliArabuluculukIds?: number[]; baglantiliTedbirDosyalari?: string[]; baglantiliDelilTespitiDosyalari?: string[]; baglantiliNoterlikDosyalari?: string[]; muvekkilPozisyonu?: string; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[]; davacilar?: DavaTarafKaydi[]; davalilar?: DavaTarafKaydi[];
   iletisimNotlari?: IletisimNotu[];
   portalMuvekkilIdleri?: number[];
+  portalFinansOzetiMuvekkilIdleri?: number[];
   icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
   buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; basvuruKonusu?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: string;
 }
@@ -60,6 +70,7 @@ export interface IcraDosyasi {
   id: number; icraDairesi: string; dosyaNo: string; eskiMahkeme?: string; eskiEsasNo?: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkilId?: number; muvekkil: string; muvekkilRolu?: 'Alacaklı' | 'Borçlu'; alacakli: string; borclu: string; takipTipi?: string; takipTarihi: string; durum: string; baglantiliDavaId?: number; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[];
   iletisimNotlari?: IletisimNotu[];
   portalMuvekkilIdleri?: number[];
+  portalFinansOzetiMuvekkilIdleri?: number[];
   karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string;
   buroNo?: string; arabuluculukNo?: string; buro?: string; basvuruTuru?: string; uyusmazlikTuru?: string; basvuruKonusu?: string; taraflar?: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: string;
 }
@@ -68,6 +79,7 @@ export interface ArabuluculukDosyasi {
   id: number; buroNo: string; arabuluculukNo: string; buro: string; basvuruTuru: 'Dava Şartı' | 'İhtiyari'; uyusmazlikTuru: 'Kira' | 'İşçi İşveren' | 'Ticari' | 'Boşanma' | 'Ortaklığın Giderilmesi' | 'Tüketici'; basvuruKonusu?: string; taraflar: ArabuluculukTaraf[]; toplantiTarihi?: string; toplantiSaati?: string; toplantiTamamlandiMi?: boolean; toplantiTamamlanmaTarihi?: string; toplantiYontemi?: 'Yüzyüze' | 'Videokonferans' | 'Telekonferans'; durum: string; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; muvekkilId?: number; arsivYeri?: string; eskiMahkeme?: string; eskiEsasNo?: string;
   iletisimNotlari?: IletisimNotu[];
   portalMuvekkilIdleri?: number[];
+  portalFinansOzetiMuvekkilIdleri?: number[];
   islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[];
   dosyaNo?: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil?: string; karsiTaraf?: string; mahkeme?: string; konu?: string; istinafMahkemesi?: string; durusmaTarihi?: string; baglantiliIcraId?: number; muvekkilPozisyonu?: string; icraDairesi?: string; alacakli?: string; borclu?: string; takipTipi?: string; takipTarihi?: string; baglantiliDavaId?: number;
 }
@@ -84,6 +96,23 @@ export interface PortalEvrakKaydi {
   tarih?: string;
 }
 
+export interface PortalFinansOzeti {
+  hizmetUcreti: number;
+  tahsilEdilen: number;
+  kalanUcret: number;
+  masrafAvansi: number;
+  masrafHarcamasi: number;
+  masrafBakiyesi: number;
+}
+
+export interface PortalFinansHareketi {
+  id: string;
+  tarih?: string;
+  tur: string;
+  tutar: number;
+  makbuzUrl?: string;
+}
+
 export interface PortalDosyaKaydi {
   id: string;
   kaynakId: number;
@@ -98,6 +127,8 @@ export interface PortalDosyaKaydi {
   sonrakiSaat?: string;
   sonrakiIslemEtiketi?: string;
   evraklar?: PortalEvrakKaydi[];
+  finansOzeti?: PortalFinansOzeti;
+  finansHareketleri?: PortalFinansHareketi[];
   guncellemeTarihi: string;
 }
 

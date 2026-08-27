@@ -229,6 +229,10 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
     return `${parcalar[2]}.${parcalar[1]}.${parcalar[0]}`;
   }
 
+  formatPara(tutar?: number) {
+    return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(Number(tutar || 0));
+  }
+
   turEtiketi(tur: PortalDosyaKaydi['tur']) {
     if (tur === 'dava') return 'Dava';
     if (tur === 'icra') return 'İcra';

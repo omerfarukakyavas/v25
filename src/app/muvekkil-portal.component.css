@@ -101,11 +101,28 @@ button:disabled { cursor: wait; opacity: .6; }
 .portal-case-card-open .portal-chevron { transform: rotate(180deg); }
 .portal-case-detail { padding: 0 20px 22px; border-top: 1px solid #e2e8f0; background: #fbfcfd; }
 .portal-detail-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding-top: 18px; }
-.portal-detail-grid div, .portal-parties, .portal-documents { padding: 13px; border: 1px solid #dde5eb; border-radius: 12px; background: #fff; }
-.portal-detail-grid span, .portal-parties > span, .portal-documents > span { display: block; margin-bottom: 7px; color: #64748b; font-size: 9px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
+.portal-detail-grid div, .portal-parties, .portal-documents, .portal-finance { padding: 13px; border: 1px solid #dde5eb; border-radius: 12px; background: #fff; }
+.portal-detail-grid span, .portal-parties > span, .portal-documents > span, .portal-finance > span { display: block; margin-bottom: 7px; color: #64748b; font-size: 9px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
 .portal-detail-grid strong { color: #1e293b; font-size: 12px; line-height: 1.5; }
-.portal-parties, .portal-documents { margin-top: 10px; }
+.portal-parties, .portal-documents, .portal-finance { margin-top: 10px; }
 .portal-parties p { margin: 0; color: #1e293b; font-size: 13px; font-weight: 700; line-height: 1.7; }
+.portal-finance { border-color: #b9ded7; background: #f8fffd; }
+.portal-finance-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.portal-finance-summary div { display: grid; gap: 5px; padding: 11px; border: 1px solid #d7e7e3; border-radius: 10px; background: #fff; }
+.portal-finance-summary small { color: #64748b; font-size: 9px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.portal-finance-summary strong { color: #1e293b; font-size: 14px; }
+.portal-finance-summary .portal-finance-balance { border-color: #8bcfc0; background: #eafbf6; }
+.portal-finance-summary .portal-finance-balance strong { color: #0f6259; font-size: 17px; }
+.portal-finance-movements { margin-top: 12px; overflow: hidden; border: 1px solid #d7e7e3; border-radius: 10px; background: #fff; }
+.portal-finance-movements > p { margin: 0; padding: 9px 11px; border-bottom: 1px solid #e4eeeb; background: #f0f9f7; color: #315f59; font-size: 9px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.portal-finance-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 11px; border-top: 1px solid #eef3f2; }
+.portal-finance-row:first-of-type { border-top: 0; }
+.portal-finance-row > span { display: grid; gap: 3px; }
+.portal-finance-row strong { color: #1e293b; font-size: 12px; }
+.portal-finance-row small { color: #64748b; font-size: 10px; }
+.portal-finance-row-actions { justify-items: end; text-align: right; }
+.portal-finance-row-actions a { color: #0f766e; font-size: 10px; font-weight: 850; text-decoration: none; }
+.portal-finance-row-actions a:hover { text-decoration: underline; }
 .portal-documents a { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; border-top: 1px solid #eef2f6; color: #0f766e; text-decoration: none; }
 .portal-documents a:first-of-type { border-top: 0; }
 .portal-documents small { color: #64748b; }
@@ -131,6 +148,7 @@ button:disabled { cursor: wait; opacity: .6; }
   .portal-case-status { grid-column: 2; width: fit-content; }
   .portal-chevron { grid-column: 3; grid-row: 1 / span 2; }
   .portal-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .portal-finance-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 480px) {
@@ -152,4 +170,6 @@ button:disabled { cursor: wait; opacity: .6; }
   .portal-dashboard { width: min(100% - 20px, 1180px); padding-top: 18px; }
   .portal-hero { padding: 22px; border-radius: 18px; }
   .portal-detail-grid { grid-template-columns: 1fr; }
+  .portal-finance-summary { grid-template-columns: 1fr; }
+  .portal-finance-row { align-items: flex-start; }
 }

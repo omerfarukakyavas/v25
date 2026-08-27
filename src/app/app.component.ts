@@ -423,6 +423,7 @@ export class AppComponent implements OnInit {
   portalIslemYapiliyor = false;
   portalHata = '';
   portalBilgi = '';
+  portalAyarAcikDosyaId: string | null = null;
   ajandaArama = '';
   ajandaZamanFiltresi: 'all' | 'today' | '7days' | '30days' | 'overdue' = 'all';
   ajandaTurFiltresi: 'all' | AjandaTur = 'all';
@@ -3041,6 +3042,7 @@ export class AppComponent implements OnInit {
   }
   muvekkilPortalYonetiminiAc(muvekkil: Muvekkil) {
     this.portalYonetilenMuvekkil = muvekkil;
+    this.portalAyarAcikDosyaId = null;
     this.portalDavetEpostasi = (muvekkil.portalEposta || muvekkil.eposta || '').trim().toLowerCase();
     this.portalHata = '';
     this.portalBilgi = '';
@@ -3049,6 +3051,7 @@ export class AppComponent implements OnInit {
   muvekkilPortalYonetiminiKapat() {
     this.muvekkilPortalYonetimAcik = false;
     this.portalYonetilenMuvekkil = null;
+    this.portalAyarAcikDosyaId = null;
     this.portalDavetEpostasi = '';
     this.portalHata = '';
     this.portalBilgi = '';
@@ -3059,6 +3062,45 @@ export class AppComponent implements OnInit {
   portalDosyaPaylasimiAktifMi(kayit: IliskiDosyaKaydi) {
     const muvekkilId = this.portalYonetilenMuvekkil?.id;
     return !!muvekkilId && ((kayit.dosya as any).portalMuvekkilIdleri || []).includes(muvekkilId);
+  }
+  portalDosyaAyarlariniAcKapat(kayit: IliskiDosyaKaydi) {
+    this.portalAyarAcikDosyaId = this.portalAyarAcikDosyaId === kayit.id ? null : kayit.id;
+  }
+  portalFinansOzetiPaylasimiAktifMi(kayit: IliskiDosyaKaydi) {
+    const muvekkilId = this.portalYonetilenMuvekkil?.id;
+    return !!muvekkilId && ((kayit.dosya as any).portalFinansOzetiMuvekkilIdleri || []).includes(muvekkilId);
+  }
+  portalEvrakPaylasimiAktifMi(evrak: EvrakBaglantisi) {
+    const muvekkilId = this.portalYonetilenMuvekkil?.id;
+    return !!muvekkilId && (evrak.portalMuvekkilIdleri || []).includes(muvekkilId);
+  }
+  portalFinansHareketiPaylasimiAktifMi(islem: FinansalIslem) {
+    const muvekkilId = this.portalYonetilenMuvekkil?.id;
+    return !!muvekkilId && (islem.portalMuvekkilIdleri || []).includes(muvekkilId);
+  }
+  portalYonetimEvraklari(kayit: IliskiDosyaKaydi) {
+    return this.portalEvrakYonetimListesiniHazirla(kayit.dosya.evraklar || []);
+  }
+  portalYonetimFinansHareketleri(kayit: IliskiDosyaKaydi) {
+    return [...(kayit.dosya.finansalIslemler || [])]
+      .sort((a, b) => (b.tarih || '').localeCompare(a.tarih || '') || b.id - a.id);
+  }
+  portalEvrakBaglantisiGecerliMi(evrak: EvrakBaglantisi) {
+    return /^https?:\/\//i.test((evrak.url || '').trim());
+  }
+  portalPaylasimSecimiSayisi(kayit: IliskiDosyaKaydi) {
+    const finansOzeti = this.portalFinansOzetiPaylasimiAktifMi(kayit) ? 1 : 0;
+    const evrakSayisi = this.portalYonetimEvraklari(kayit).filter(kayitli => this.portalEvrakPaylasimiAktifMi(kayitli.evrak)).length;
+    const finansSayisi = this.portalYonetimFinansHareketleri(kayit).filter(islem => this.portalFinansHareketiPaylasimiAktifMi(islem)).length;
+    return finansOzeti + evrakSayisi + finansSayisi;
+  }
+  private portalEvrakYonetimListesiniHazirla(evraklar: EvrakBaglantisi[], derinlik = 0, ustEvrakIsmi = ''): { evrak: EvrakBaglantisi; derinlik: number; ustEvrakIsmi: string }[] {
+    const sonuc: { evrak: EvrakBaglantisi; derinlik: number; ustEvrakIsmi: string }[] = [];
+    evraklar.forEach(evrak => {
+      sonuc.push({ evrak, derinlik, ustEvrakIsmi });
+      sonuc.push(...this.portalEvrakYonetimListesiniHazirla(evrak.ekler || [], derinlik + 1, evrak.isim));
+    });
+    return sonuc;
   }
   portalDavetBaglantisi(muvekkil?: Muvekkil | null) {
     const token = muvekkil?.portalDavetTokeni;
@@ -3162,25 +3204,116 @@ export class AppComponent implements OnInit {
     if (!muvekkil) return;
     const paylasilsin = (event.target as HTMLInputElement).checked;
     const dosya = kayit.dosya as DavaDosyasi & IcraDosyasi & ArabuluculukDosyasi;
-    const oncekiIdler = [...(dosya.portalMuvekkilIdleri || [])];
-    const yeniIdler = new Set(oncekiIdler);
-    if (paylasilsin) yeniIdler.add(muvekkil.id);
-    else yeniIdler.delete(muvekkil.id);
-    dosya.portalMuvekkilIdleri = [...yeniIdler];
+    const oncekiDosya = this.veriKopyala(dosya);
+    dosya.portalMuvekkilIdleri = this.portalMuvekkilSeciminiDegistir(dosya.portalMuvekkilIdleri, muvekkil.id, paylasilsin);
+    if (!paylasilsin) this.portalAyrintiliPaylasimlariTemizle(dosya, muvekkil.id);
+
+    try {
+      // Paylaşım kapatılırken portal kopyasını önce silerek olası hata halinde kapalı tarafta kalırız.
+      if (!paylasilsin) await this.portalDosyaOzetiniSil(muvekkil.id, kayit.tur, dosya.id);
+      const kaydedildi = await this.portalPaylasimDosyasiniKaydet(
+        kayit,
+        oncekiDosya,
+        paylasilsin ? 'Dosya portalda açıldı. Evrak ve finans alanları ayrıca seçilene kadar kapalıdır.' : 'Dosya ve dosyaya ait tüm ayrıntılı paylaşımlar portaldan kaldırıldı.'
+      );
+      if (!kaydedildi) (event.target as HTMLInputElement).checked = !paylasilsin;
+    } catch (error: any) {
+      this.portalDosyaAnlikGoruntusunuGeriYukle(dosya, oncekiDosya);
+      (event.target as HTMLInputElement).checked = !paylasilsin;
+      this.portalHata = error?.message || 'Dosya paylaşım ayarı değiştirilemedi.';
+      this.cdr.detectChanges();
+    }
+  }
+  async portalFinansOzetiPaylasimiDegisti(kayit: IliskiDosyaKaydi, event: Event) {
+    const muvekkil = this.portalYonetilenMuvekkil;
+    if (!muvekkil || !this.portalDosyaPaylasimiAktifMi(kayit)) return;
+    const paylasilsin = (event.target as HTMLInputElement).checked;
+    const dosya = kayit.dosya as DavaDosyasi & IcraDosyasi & ArabuluculukDosyasi;
+    const oncekiDosya = this.veriKopyala(dosya);
+    dosya.portalFinansOzetiMuvekkilIdleri = this.portalMuvekkilSeciminiDegistir(dosya.portalFinansOzetiMuvekkilIdleri, muvekkil.id, paylasilsin);
+    const kaydedildi = await this.portalPaylasimDosyasiniKaydet(
+      kayit,
+      oncekiDosya,
+      paylasilsin ? 'Finans özeti müvekkil portalında gösterilecek.' : 'Finans özeti portal görünümünden kaldırıldı.'
+    );
+    if (!kaydedildi) (event.target as HTMLInputElement).checked = !paylasilsin;
+  }
+  async portalEvrakPaylasimiDegisti(kayit: IliskiDosyaKaydi, evrak: EvrakBaglantisi, event: Event) {
+    const muvekkil = this.portalYonetilenMuvekkil;
+    if (!muvekkil || !this.portalDosyaPaylasimiAktifMi(kayit)) return;
+    const paylasilsin = (event.target as HTMLInputElement).checked;
+    if (paylasilsin && !this.portalEvrakBaglantisiGecerliMi(evrak)) {
+      (event.target as HTMLInputElement).checked = false;
+      this.portalHata = 'Bu evrakın portalda açılabilmesi için bağlantısı http:// veya https:// ile başlamalıdır.';
+      return;
+    }
+    const dosya = kayit.dosya as DavaDosyasi & IcraDosyasi & ArabuluculukDosyasi;
+    const oncekiDosya = this.veriKopyala(dosya);
+    evrak.portalMuvekkilIdleri = this.portalMuvekkilSeciminiDegistir(evrak.portalMuvekkilIdleri, muvekkil.id, paylasilsin);
+    const kaydedildi = await this.portalPaylasimDosyasiniKaydet(
+      kayit,
+      oncekiDosya,
+      paylasilsin ? `${evrak.isim} portal paylaşımına eklendi.` : `${evrak.isim} portal paylaşımından kaldırıldı.`
+    );
+    if (!kaydedildi) (event.target as HTMLInputElement).checked = !paylasilsin;
+  }
+  async portalFinansHareketiPaylasimiDegisti(kayit: IliskiDosyaKaydi, islem: FinansalIslem, event: Event) {
+    const muvekkil = this.portalYonetilenMuvekkil;
+    if (!muvekkil || !this.portalDosyaPaylasimiAktifMi(kayit)) return;
+    const paylasilsin = (event.target as HTMLInputElement).checked;
+    const dosya = kayit.dosya as DavaDosyasi & IcraDosyasi & ArabuluculukDosyasi;
+    const oncekiDosya = this.veriKopyala(dosya);
+    islem.portalMuvekkilIdleri = this.portalMuvekkilSeciminiDegistir(islem.portalMuvekkilIdleri, muvekkil.id, paylasilsin);
+    const kaydedildi = await this.portalPaylasimDosyasiniKaydet(
+      kayit,
+      oncekiDosya,
+      paylasilsin ? 'Seçilen finans hareketi müvekkil portalında gösterilecek.' : 'Finans hareketi portal görünümünden kaldırıldı.'
+    );
+    if (!kaydedildi) (event.target as HTMLInputElement).checked = !paylasilsin;
+  }
+  private portalMuvekkilSeciminiDegistir(idler: number[] | undefined, muvekkilId: number, secili: boolean) {
+    const sonuc = new Set(idler || []);
+    if (secili) sonuc.add(muvekkilId);
+    else sonuc.delete(muvekkilId);
+    return [...sonuc];
+  }
+  private portalAyrintiliPaylasimlariTemizle(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi, muvekkilId: number) {
+    dosya.portalFinansOzetiMuvekkilIdleri = this.portalMuvekkilSeciminiDegistir(dosya.portalFinansOzetiMuvekkilIdleri, muvekkilId, false);
+    (dosya.finansalIslemler || []).forEach(islem => {
+      islem.portalMuvekkilIdleri = this.portalMuvekkilSeciminiDegistir(islem.portalMuvekkilIdleri, muvekkilId, false);
+    });
+    const evrakPaylasimlariniTemizle = (evraklar: EvrakBaglantisi[]) => evraklar.forEach(evrak => {
+      evrak.portalMuvekkilIdleri = this.portalMuvekkilSeciminiDegistir(evrak.portalMuvekkilIdleri, muvekkilId, false);
+      evrakPaylasimlariniTemizle(evrak.ekler || []);
+    });
+    evrakPaylasimlariniTemizle(dosya.evraklar || []);
+  }
+  private async portalPaylasimDosyasiniKaydet(kayit: IliskiDosyaKaydi, oncekiDosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi, basariMesaji: string) {
+    const dosya = kayit.dosya as DavaDosyasi & IcraDosyasi & ArabuluculukDosyasi;
+    this.portalIslemYapiliyor = true;
     this.portalHata = '';
+    this.portalBilgi = '';
     try {
       let kaydedildi = false;
       if (kayit.tur === 'dava') kaydedildi = await this.davaKaydetCloud(dosya as DavaDosyasi);
       else if (kayit.tur === 'icra') kaydedildi = await this.icraKaydetCloud(dosya as IcraDosyasi);
       else kaydedildi = await this.arabuluculukKaydetCloud(dosya as ArabuluculukDosyasi);
-      if (!kaydedildi) throw new Error('Dosya paylaşım ayarı kaydedilemedi.');
-      if (!paylasilsin) await this.portalDosyaOzetiniSil(muvekkil.id, kayit.tur, dosya.id);
-      this.portalBilgi = paylasilsin ? 'Dosya müvekkil portalında gösterilecek.' : 'Dosya portal görünümünden kaldırıldı.';
+      if (!kaydedildi) throw new Error('Portal paylaşım ayarı kaydedilemedi.');
+      this.portalBilgi = basariMesaji;
+      return true;
     } catch (error: any) {
-      dosya.portalMuvekkilIdleri = oncekiIdler;
-      (event.target as HTMLInputElement).checked = !paylasilsin;
-      this.portalHata = error?.message || 'Dosya paylaşım ayarı değiştirilemedi.';
+      this.portalDosyaAnlikGoruntusunuGeriYukle(dosya, oncekiDosya);
+      this.portalHata = error?.message || 'Portal paylaşım ayarı değiştirilemedi.';
+      return false;
+    } finally {
+      this.portalIslemYapiliyor = false;
+      this.cdr.detectChanges();
     }
+  }
+  private portalDosyaAnlikGoruntusunuGeriYukle(hedef: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi, kaynak: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi) {
+    const hedefKaydi = hedef as unknown as Record<string, unknown>;
+    Object.keys(hedefKaydi).forEach(anahtar => delete hedefKaydi[anahtar]);
+    Object.assign(hedefKaydi, this.veriKopyala(kaynak));
   }
   private portalAccessId(muvekkilId: number) {
     return `${this.user?.uid || 'unknown'}_${muvekkilId}`;
@@ -3206,15 +3339,20 @@ export class AppComponent implements OnInit {
   }
   private async portalDosyaOzetiniKaydet(muvekkilId: number, tur: PortalDosyaTuru, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi) {
     if (!this.user) return;
-    const kayit = this.portalDosyaKaydiniOlustur(tur, dosya);
+    const kayit = this.portalDosyaKaydiniOlustur(muvekkilId, tur, dosya);
     await setDoc(doc(this.db, 'artifacts', appId, 'portalOwners', this.user.uid, 'clients', String(muvekkilId), 'cases', kayit.id), JSON.parse(JSON.stringify(kayit)));
   }
   private async portalDosyaOzetiniSil(muvekkilId: number, tur: PortalDosyaTuru, dosyaId: number) {
     if (!this.user) return;
     await deleteDoc(doc(this.db, 'artifacts', appId, 'portalOwners', this.user.uid, 'clients', String(muvekkilId), 'cases', `${tur}-${dosyaId}`));
   }
-  private portalDosyaKaydiniOlustur(tur: PortalDosyaTuru, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi): PortalDosyaKaydi {
-    const evraklar = this.portalEvraklariniHazirla(dosya.evraklar || []);
+  private portalDosyaKaydiniOlustur(muvekkilId: number, tur: PortalDosyaTuru, dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi): PortalDosyaKaydi {
+    const evraklar = this.portalEvraklariniHazirla(dosya.evraklar || [], muvekkilId);
+    const finansOzeti = (dosya.portalFinansOzetiMuvekkilIdleri || []).includes(muvekkilId)
+      ? this.portalFinansOzetiniHazirla(dosya)
+      : undefined;
+    const finansHareketleri = this.portalFinansHareketleriniHazirla(dosya, muvekkilId);
+    const paylasilanAyrintilar = { evraklar, finansOzeti, finansHareketleri };
     if (tur === 'dava') {
       const dava = dosya as DavaDosyasi;
       const tarafKayitlari = this.getDavaTarafKayitlari(dava);
@@ -3223,7 +3361,7 @@ export class AppComponent implements OnInit {
         id: `dava-${dava.id}`, kaynakId: dava.id, tur, baslik: dava.dosyaNo || 'Dava dosyası',
         altBaslik: dava.mahkeme || 'Mahkeme bilgisi yok', durum: dava.durum, taraflar,
         kurum: dava.mahkeme, konu: dava.konu, sonrakiTarih: dava.durusmaTarihi, sonrakiSaat: dava.durusmaSaati,
-        sonrakiIslemEtiketi: 'Sonraki Duruşma', evraklar, guncellemeTarihi: new Date().toISOString()
+        sonrakiIslemEtiketi: 'Sonraki Duruşma', ...paylasilanAyrintilar, guncellemeTarihi: new Date().toISOString()
       };
     }
     if (tur === 'icra') {
@@ -3233,7 +3371,7 @@ export class AppComponent implements OnInit {
         altBaslik: icra.icraDairesi || 'İcra dairesi bilgisi yok', durum: icra.durum,
         taraflar: [icra.alacakli, icra.borclu].filter(Boolean), kurum: icra.icraDairesi,
         konu: icra.takipTipi, sonrakiTarih: icra.takipTarihi, sonrakiIslemEtiketi: 'Takip Tarihi',
-        evraklar, guncellemeTarihi: new Date().toISOString()
+        ...paylasilanAyrintilar, guncellemeTarihi: new Date().toISOString()
       };
     }
     const arabuluculuk = dosya as ArabuluculukDosyasi;
@@ -3244,18 +3382,45 @@ export class AppComponent implements OnInit {
       durum: arabuluculuk.durum, taraflar: (arabuluculuk.taraflar || []).map(taraf => taraf.isim).filter(Boolean),
       kurum: arabuluculuk.buro, konu: `${arabuluculuk.basvuruTuru} - ${arabuluculuk.uyusmazlikTuru}`,
       sonrakiTarih: arabuluculuk.toplantiTarihi, sonrakiSaat: arabuluculuk.toplantiSaati,
-      sonrakiIslemEtiketi: 'Toplantı Tarihi', evraklar, guncellemeTarihi: new Date().toISOString()
+      sonrakiIslemEtiketi: 'Toplantı Tarihi', ...paylasilanAyrintilar, guncellemeTarihi: new Date().toISOString()
     };
   }
-  private portalEvraklariniHazirla(evraklar: EvrakBaglantisi[]): { id: string; isim: string; url: string; tarih?: string }[] {
+  private portalEvraklariniHazirla(evraklar: EvrakBaglantisi[], muvekkilId: number): { id: string; isim: string; url: string; tarih?: string }[] {
     const sonuc: { id: string; isim: string; url: string; tarih?: string }[] = [];
     evraklar.forEach(evrak => {
-      if (evrak.portaldaGoster && /^https?:\/\//i.test((evrak.url || '').trim())) {
+      if ((evrak.portalMuvekkilIdleri || []).includes(muvekkilId) && /^https?:\/\//i.test((evrak.url || '').trim())) {
         sonuc.push({ id: String(evrak.id), isim: evrak.isim, url: evrak.url.trim(), tarih: evrak.tarih });
       }
-      sonuc.push(...this.portalEvraklariniHazirla(evrak.ekler || []));
+      sonuc.push(...this.portalEvraklariniHazirla(evrak.ekler || [], muvekkilId));
     });
     return sonuc;
+  }
+  private portalFinansOzetiniHazirla(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi): NonNullable<PortalDosyaKaydi['finansOzeti']> {
+    const finans = this.getDosyaFinans(dosya);
+    const para = (deger: number) => Number(Number(deger || 0).toFixed(2));
+    return {
+      hizmetUcreti: para(finans.anlasilanUcret),
+      tahsilEdilen: para(finans.toplamTahsilat),
+      kalanUcret: para(finans.kalanVekalet),
+      masrafAvansi: para(finans.masrafAvansi),
+      masrafHarcamasi: para(finans.masrafHarcamasi),
+      masrafBakiyesi: para(finans.emanetBakiye)
+    };
+  }
+  private portalFinansHareketleriniHazirla(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi, muvekkilId: number): NonNullable<PortalDosyaKaydi['finansHareketleri']> {
+    return (dosya.finansalIslemler || [])
+      .filter(islem => (islem.portalMuvekkilIdleri || []).includes(muvekkilId))
+      .map(islem => {
+        const makbuzUrl = /^https?:\/\//i.test((islem.makbuzUrl || '').trim()) ? islem.makbuzUrl!.trim() : undefined;
+        return {
+          id: String(islem.id),
+          tarih: islem.tarih,
+          tur: islem.tur,
+          tutar: Number(Number(islem.tutar || 0).toFixed(2)),
+          makbuzUrl
+        };
+      })
+      .sort((a, b) => (b.tarih || '').localeCompare(a.tarih || '') || Number(b.id) - Number(a.id));
   }
   iliskiDosyasinaGit(kayit: IliskiDosyaKaydi) {
     if (kayit.tur === 'dava') this.detayaGit(kayit.dosya as DavaDosyasi);
@@ -8147,7 +8312,14 @@ export class AppComponent implements OnInit {
       }
     });
     let anaUcret = dosya.vekaletUcreti || 0; if (isArabuluculuk) anaUcret = this.getArabuluculukHizmetUcretiHesabi(dosya)?.netTutar || 0;
-    return { kalanVekalet: Math.max(0, anaUcret - v), emanetBakiye: g - c, toplamTahsilat: t };
+    return {
+      anlasilanUcret: anaUcret,
+      kalanVekalet: Math.max(0, anaUcret - v),
+      toplamTahsilat: t,
+      masrafAvansi: g,
+      masrafHarcamasi: c,
+      emanetBakiye: g - c
+    };
   }
 
   hesaplaMuvekkilFinans(mId: number) {

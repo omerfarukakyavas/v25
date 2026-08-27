@@ -36,6 +36,7 @@
           <span>Dosya durumu ve taraf özeti</span>
           <span>Yaklaşan duruşma ve toplantılar</span>
           <span>Paylaşılan evrak bağlantıları</span>
+          <span>Paylaşılan finans özeti</span>
         </div>
       </section>
       <section class="portal-auth-card">
@@ -126,6 +127,35 @@
                   <div><span>Son Güncelleme</span><strong>{{ dosya.guncellemeTarihi | date:'dd.MM.yyyy HH:mm' }}</strong></div>
                 </div>
                 <div class="portal-parties"><span>Taraflar</span><p>{{ dosya.taraflar.join(' · ') || '-' }}</p></div>
+                @if (dosya.finansOzeti || (dosya.finansHareketleri && dosya.finansHareketleri.length)) {
+                  <div class="portal-finance">
+                    <span>Paylaşılan Finans Bilgileri</span>
+                    @if (dosya.finansOzeti; as finans) {
+                      <div class="portal-finance-summary">
+                        <div><small>Hizmet Ücreti</small><strong>{{ formatPara(finans.hizmetUcreti) }}</strong></div>
+                        <div><small>Tahsil Edilen</small><strong>{{ formatPara(finans.tahsilEdilen) }}</strong></div>
+                        <div class="portal-finance-balance"><small>Kalan Ücret</small><strong>{{ formatPara(finans.kalanUcret) }}</strong></div>
+                        <div><small>Masraf Avansı</small><strong>{{ formatPara(finans.masrafAvansi) }}</strong></div>
+                        <div><small>Masraf Harcaması</small><strong>{{ formatPara(finans.masrafHarcamasi) }}</strong></div>
+                        <div><small>Masraf Bakiyesi</small><strong>{{ formatPara(finans.masrafBakiyesi) }}</strong></div>
+                      </div>
+                    }
+                    @if (dosya.finansHareketleri && dosya.finansHareketleri.length) {
+                      <div class="portal-finance-movements">
+                        <p>Paylaşılan Hareketler</p>
+                        @for (islem of dosya.finansHareketleri; track islem.id) {
+                          <div class="portal-finance-row">
+                            <span><strong>{{ islem.tur }}</strong><small>{{ formatTarih(islem.tarih) }}</small></span>
+                            <span class="portal-finance-row-actions">
+                              <strong>{{ formatPara(islem.tutar) }}</strong>
+                              @if (islem.makbuzUrl) { <a [href]="guvenliUrl(islem.makbuzUrl)" target="_blank" rel="noopener noreferrer">Makbuzu Aç</a> }
+                            </span>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
                 @if (dosya.evraklar && dosya.evraklar.length) {
                   <div class="portal-documents">
                     <span>Paylaşılan Evraklar</span>
