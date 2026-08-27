@@ -859,7 +859,7 @@
                       <table class="app-list-table w-full table-fixed text-left border-collapse">
                         <thead>
                           <tr class="bg-blue-50/80 border-b border-blue-100 text-blue-700 uppercase text-xs font-semibold tracking-wider">
-                            <th class="w-[21%] p-4">Dosya Numaraları</th><th class="w-[22%] p-4">Taraflar</th><th class="w-[21%] p-4">Mahkeme / Konu</th><th class="w-[15%] p-4">Sonraki Duruşma</th><th class="w-[10%] p-4">Durum</th><th class="w-[12%] p-4 text-right">İşlemler</th>
+                            <th class="w-[20%] p-4">Dosya Numaraları</th><th class="w-[24%] p-4">Taraflar</th><th class="w-[22%] p-4">Mahkeme / Konu</th><th class="w-[18%] p-4">Sonraki Duruşma</th><th class="w-[16%] p-4 text-center">Durum / İşlemler</th>
                           </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -894,18 +894,17 @@
                                @if(dava.durusmaTarihi) { <span class="inline-flex max-w-full items-start gap-2 rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold leading-5 text-blue-700 shadow-sm"><svg class="mt-0.5 h-4 w-4 shrink-0 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="break-words">{{ formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati) }}</span></span> } 
                                @else { <span class="text-slate-400 text-sm">-</span> }
                               </td>
-                              <td class="p-4 align-top">
-                                <div class="relative inline-block">
-                                  <select [ngModel]="dava.durum" (ngModelChange)="durumGuncelle(dava, $event)" [class]="getDurumClass(dava.durum)" class="pl-3 pr-7 py-1 rounded-full text-xs font-bold border cursor-pointer hover:shadow-md transition-all outline-none appearance-none">
-                                    <option value="Derdest" class="text-slate-700 bg-white">Derdest</option><option value="İstinaf/Temyiz" class="text-slate-700 bg-white">İstinaf/Temyiz</option><option value="Kapalı" class="text-slate-700 bg-white">Kapalı</option>
-                                  </select>
-                                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 opacity-60"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
-                                </div>
-                              </td>
-                              <td class="p-4 align-top text-right">
-                                <div class="inline-flex min-w-[124px] items-center justify-end gap-1.5 rounded-xl border border-slate-200 bg-white/90 px-2 py-1 shadow-sm">
+                              <td class="p-4 align-top text-center">
+                                <div class="flex flex-col items-center gap-2">
+                                  <div class="relative w-full max-w-[150px]">
+                                    <select [ngModel]="dava.durum" (ngModelChange)="durumGuncelle(dava, $event)" [class]="getDurumClass(dava.durum)" class="w-full appearance-none rounded-full border py-1.5 pl-3 pr-7 text-xs font-bold outline-none transition-all hover:shadow-md cursor-pointer">
+                                      <option value="Derdest" class="text-slate-700 bg-white">Derdest</option><option value="İstinaf/Temyiz" class="text-slate-700 bg-white">İstinaf/Temyiz</option><option value="Kapalı" class="text-slate-700 bg-white">Kapalı</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 opacity-60"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                                  </div>
+                                  <div class="flex flex-wrap items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white/90 px-2 py-1 shadow-sm">
                                   @if (silinecekDavaId === dava.id) {
-                                    <span class="text-xs font-medium text-red-500 mr-2">Silinsin mi?</span>
+                                    <span class="w-full text-xs font-medium text-red-500">Silinsin mi?</span>
                                     <button (click)="dosyaSil(dava.id)" class="bg-red-500 text-white hover:bg-red-600 p-1.5 rounded transition-colors" title="Evet, Sil">Onayla</button>
                                     <button (click)="silmeIptal()" class="bg-slate-200 text-slate-700 hover:bg-slate-300 p-1.5 rounded transition-colors" title="İptal">İptal</button>
                                   } @else {
@@ -913,10 +912,11 @@
                                      <button (click)="dosyaFormunuAc(dava)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600 transition-colors hover:bg-amber-100" title="Düzenle"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
                                      <button (click)="silmeOnayiIste(dava.id, 'dava')" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-600 transition-colors hover:bg-red-100" title="Sil"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                                   }
+                                  </div>
                                 </div>
                               </td>
                             </tr>
-                          } @empty { <tr><td colspan="6" class="p-10 text-center text-slate-400">Kriterlere uygun dava dosyası bulunamadı.</td></tr> }
+                          } @empty { <tr><td colspan="5" class="p-10 text-center text-slate-400">Kriterlere uygun dava dosyası bulunamadı.</td></tr> }
                         </tbody>
                       </table>
                     </div>
@@ -1057,10 +1057,10 @@
                   </div>
                   <div class="hidden md:block">
                     <div class="overflow-x-auto custom-scrollbar">
-                      <table class="app-list-table w-full text-left border-collapse min-w-max">
+                      <table class="app-list-table w-full table-fixed text-left border-collapse">
                         <thead>
                           <tr class="bg-emerald-50/80 border-b border-emerald-100 text-emerald-700 uppercase text-xs font-semibold tracking-wider">
-                            <th class="p-5">İcra Dairesi / No</th><th class="p-5">Alacaklı</th><th class="p-5">Borçlu</th><th class="p-5">Takip Tarihi</th><th class="p-5">Durum</th><th class="p-5 text-right">İşlemler</th>
+                            <th class="w-[25%] p-5">İcra Dairesi / No</th><th class="w-[20%] p-5">Alacaklı</th><th class="w-[20%] p-5">Borçlu</th><th class="w-[18%] p-5">Takip Tarihi</th><th class="w-[17%] p-5 text-center">Durum / İşlemler</th>
                           </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -1079,18 +1079,17 @@
                               <td class="p-5"><div class="rounded-xl border border-teal-100 bg-teal-50/70 px-3 py-2 text-slate-700 font-medium">{{ icra.alacakli }}</div></td>
                               <td class="p-5"><div class="rounded-xl border border-emerald-100 bg-white px-3 py-2 text-slate-700 font-medium">{{ icra.borclu }}</div></td>
                               <td class="p-5 text-slate-600"><span class="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-emerald-700 font-semibold shadow-sm"><svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {{ formatTarih(icra.takipTarihi) }}</span></td>
-                              <td class="p-5">
-                                <div class="relative inline-block">
-                                  <select [ngModel]="icra.durum" (ngModelChange)="icraDurumGuncelle(icra, $event)" [class]="getIcraDurumClass(icra.durum)" class="pl-3 pr-7 py-1 rounded-full text-xs font-bold border cursor-pointer hover:shadow-md transition-all outline-none appearance-none">
-                                    <option value="Aktif" class="text-slate-700 bg-white">Aktif</option><option value="İtiraz Edildi" class="text-slate-700 bg-white">İtiraz Edildi</option><option value="Tehir-i İcra" class="text-slate-700 bg-white">Tehir-i İcra</option><option value="İnfaz/Kapalı" class="text-slate-700 bg-white">İnfaz/Kapalı</option>
-                                  </select>
-                                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 opacity-60"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
-                                </div>
-                              </td>
-                              <td class="p-5 text-right">
-                                <div class="flex items-center justify-end gap-1">
+                              <td class="p-5 align-top text-center">
+                                <div class="flex flex-col items-center gap-2">
+                                  <div class="relative w-full max-w-[150px]">
+                                    <select [ngModel]="icra.durum" (ngModelChange)="icraDurumGuncelle(icra, $event)" [class]="getIcraDurumClass(icra.durum)" class="w-full appearance-none rounded-full border py-1.5 pl-3 pr-7 text-xs font-bold outline-none transition-all hover:shadow-md cursor-pointer">
+                                      <option value="Aktif" class="text-slate-700 bg-white">Aktif</option><option value="İtiraz Edildi" class="text-slate-700 bg-white">İtiraz Edildi</option><option value="Tehir-i İcra" class="text-slate-700 bg-white">Tehir-i İcra</option><option value="İnfaz/Kapalı" class="text-slate-700 bg-white">İnfaz/Kapalı</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 opacity-60"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                                  </div>
+                                  <div class="flex flex-wrap items-center justify-center gap-1">
                                   @if (silinecekIcraId === icra.id) {
-                                    <span class="text-xs font-medium text-red-500 mr-2">Silinsin mi?</span>
+                                    <span class="w-full text-xs font-medium text-red-500">Silinsin mi?</span>
                                     <button (click)="icraSil(icra.id)" class="bg-red-500 text-white hover:bg-red-600 p-1.5 rounded transition-colors" title="Evet, Sil">Onayla</button>
                                     <button (click)="silmeIptal()" class="bg-slate-200 text-slate-700 hover:bg-slate-300 p-1.5 rounded transition-colors" title="İptal">İptal</button>
                                   } @else {
@@ -1098,10 +1097,11 @@
                                     <button (click)="icraFormunuAc(icra)" class="text-amber-500 hover:bg-amber-50 p-2 rounded-lg transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
                                     <button (click)="silmeOnayiIste(icra.id, 'icra')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                                   }
+                                  </div>
                                 </div>
                               </td>
                             </tr>
-                          } @empty { <tr><td colspan="6" class="p-10 text-center text-slate-400">İcra dosyası bulunamadı.</td></tr> }
+                          } @empty { <tr><td colspan="5" class="p-10 text-center text-slate-400">İcra dosyası bulunamadı.</td></tr> }
                         </tbody>
                       </table>
                     </div>
