@@ -76,6 +76,10 @@
             <a (click)="sayfaDegistir('muhasebe')" [class]="getMenuClass('muhasebe')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Muhasebe"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="app-sidebar-label">Muhasebe</span></a>
             <a (click)="sayfaDegistir('iliskiler')" [class]="getMenuClass('iliskiler')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="İlişkiler"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="app-sidebar-label">İlişkiler</span></a>
             <a (click)="sayfaDegistir('ajanda')" [class]="getMenuClass('ajanda')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Ajanda"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="app-sidebar-label">Ajanda</span></a>
+            <a (click)="sayfaDegistir('uyapAktarim')" [class]="getMenuClass('uyapAktarim')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="UYAP Aktarım">
+              <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.9A5 5 0 0115.9 6H16a5 5 0 011 9.9M12 12v9m0-9l-3 3m3-3l3 3"></path></svg>
+              <span class="app-sidebar-label">UYAP Aktarım</span>
+            </a>
             <a (click)="sayfaDegistir('klasorler')" [class]="getMenuClass('klasorler')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Klasörler">
               <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7a2 2 0 012-2h5l2 2h7a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"></path></svg>
               <span class="app-sidebar-label">Klasörler</span>
@@ -118,6 +122,7 @@
               <h2 class="app-topbar-title min-w-0 text-lg sm:text-2xl font-bold text-slate-800 leading-tight">
                 @switch (aktifSayfa) {
                   @case ('dashboard') { Genel Özet ve İstatistikler }
+                  @case ('uyapAktarim') { UYAP Toplu Aktarım }
                   @case ('klasorler') { Klasörler }
                   @case ('davalar') { Dava Dosyaları } @case ('icralar') { İcra Takipleri } @case ('arabuluculuk') { Arabuluculuk Dosyaları }
                   @case ('sablonlar') { Belge Şablonları } @case ('muhasebe') { Muhasebe ve Finans } @case ('iliskiler') { İlişkiler Yönetimi }
@@ -333,6 +338,7 @@
               <button type="button" (click)="sayfaDegistir('muhasebe')" [class]="aktifSayfa === 'muhasebe' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Muhasebe</button>
               <button type="button" (click)="sayfaDegistir('iliskiler')" [class]="aktifSayfa === 'iliskiler' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">İlişkiler</button>
               <button type="button" (click)="sayfaDegistir('sablonlar')" [class]="aktifSayfa === 'sablonlar' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Şablon</button>
+              <button type="button" (click)="sayfaDegistir('uyapAktarim')" [class]="aktifSayfa === 'uyapAktarim' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">UYAP</button>
               <button type="button" (click)="sayfaDegistir('klasorler')" [class]="aktifSayfa === 'klasorler' ? 'app-mobile-nav-item app-mobile-nav-item-active' : 'app-mobile-nav-item'">Klasör</button>
             </div>
           </div>
@@ -621,6 +627,246 @@
                        </div>
                     </div>
                   </div>
+                </div>
+              }
+
+              @case ('uyapAktarim') {
+                <div class="app-page mx-auto max-w-7xl space-y-6 pb-12">
+                  <section class="overflow-hidden rounded-3xl border border-slate-700 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white shadow-xl shadow-slate-900/10">
+                    <div class="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+                      <div>
+                        <p class="text-[11px] font-black uppercase tracking-[0.28em] text-sky-300">Güvenli Toplu Kayıt</p>
+                        <h3 class="mt-3 text-2xl font-black tracking-tight sm:text-3xl">UYAP dosyalarını tek tek yazmadan sisteme alın</h3>
+                        <p class="mt-3 max-w-3xl text-sm font-medium leading-6 text-slate-300">UYAP dosya listenizi Excel/CSV olarak yükleyin veya başlıklarıyla birlikte yapıştırın. Sistem dava, icra ve arabuluculuk kayıtlarını ayırır; kayıt yapmadan önce eksikleri ve mükerrerleri gösterir.</p>
+                        <div class="mt-5 flex flex-wrap gap-2 text-xs font-bold text-slate-200">
+                          <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">UYAP şifresi istenmez</span>
+                          <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">Mevcut dosyalar değiştirilmez</span>
+                          <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">Onaydan önce ön izleme</span>
+                        </div>
+                      </div>
+                      <button type="button" (click)="uyapTopluAktarimSablonunuIndir()" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-black text-slate-950 shadow-lg transition-colors hover:bg-sky-50">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2h-5.586a1 1 0 00-.707.293L9.414 5.586A2 2 0 018 6.172V8a2 2 0 01-2 2H4"></path></svg>
+                        Örnek Excel Şablonu
+                      </button>
+                    </div>
+                  </section>
+
+                  <section class="grid gap-5 lg:grid-cols-2">
+                    <div class="rounded-2xl border-2 border-sky-200 bg-sky-50/60 p-5 shadow-sm">
+                      <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-700 text-sm font-black text-white">1</div>
+                        <div>
+                          <h4 class="text-lg font-black text-slate-950">Excel veya CSV yükleyin</h4>
+                          <p class="mt-1 text-sm font-medium leading-5 text-slate-600">`.xlsx`, `.csv`, `.tsv` ve `.txt` dosyaları desteklenir. Eski `.xls` dosyasını önce `.xlsx` olarak kaydedin.</p>
+                        </div>
+                      </div>
+                      <label class="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-sky-300 bg-white px-5 py-7 text-center transition-colors hover:border-sky-500 hover:bg-sky-50">
+                        <svg class="h-8 w-8 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.9A5 5 0 0115.9 6H16a5 5 0 011 9.9M12 12v9m0-9l-3 3m3-3l3 3"></path></svg>
+                        <span class="mt-2 text-sm font-black text-slate-900">{{ uyapTopluAktarimOkunuyor ? 'Dosya okunuyor...' : 'Dosya seçmek için dokunun' }}</span>
+                        <span class="mt-1 text-xs font-semibold text-slate-500">Veri tarayıcınızda okunur; üçüncü taraf servise gönderilmez.</span>
+                        <input type="file" accept=".xlsx,.csv,.tsv,.txt" (change)="uyapTopluAktarimDosyasiSecildi($event)" [disabled]="uyapTopluAktarimOkunuyor || uyapTopluAktarimKaydediliyor" class="hidden">
+                      </label>
+                    </div>
+
+                    <div class="rounded-2xl border-2 border-slate-300 bg-white p-5 shadow-sm">
+                      <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-black text-white">2</div>
+                        <div>
+                          <h4 class="text-lg font-black text-slate-950">Listeyi doğrudan yapıştırın</h4>
+                          <p class="mt-1 text-sm font-medium leading-5 text-slate-600">UYAP’taki tabloyu sütun başlıklarıyla birlikte seçip kopyalayın. Excel’den kopyalanan hücreler de doğrudan çalışır.</p>
+                        </div>
+                      </div>
+                      <textarea [(ngModel)]="uyapTopluAktarimYapistirilanMetin" rows="5" placeholder="Tür&#9;Dosya No&#9;Mahkeme / İcra Dairesi / Büro&#9;Müvekkil&#9;Karşı Taraf..." class="mt-5 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-800 outline-none transition-colors focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100"></textarea>
+                      <button type="button" (click)="uyapTopluYapistirilanMetniOnizle()" [disabled]="!uyapTopluAktarimYapistirilanMetin.trim() || uyapTopluAktarimKaydediliyor" class="mt-3 w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">Yapıştırılan Listeyi Ön İzle</button>
+                    </div>
+                  </section>
+
+                  @if (uyapTopluAktarimHata) {
+                    <div class="rounded-2xl border-2 border-rose-200 bg-rose-50 px-5 py-4 text-sm font-bold leading-6 text-rose-800">{{ uyapTopluAktarimHata }}</div>
+                  }
+                  @if (uyapTopluAktarimBilgi) {
+                    <div class="rounded-2xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm font-bold leading-6 text-blue-900">{{ uyapTopluAktarimBilgi }}</div>
+                  }
+
+                  @if (uyapTopluAktarimSatirlari.length > 0) {
+                    <section class="space-y-5">
+                      <div class="rounded-2xl border-2 border-slate-300 bg-white p-5 shadow-sm">
+                        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                          <div>
+                            <p class="text-[11px] font-black uppercase tracking-[0.24em] text-slate-600">Aktarım Ön İzlemesi</p>
+                            <h4 class="mt-1 text-xl font-black text-slate-950">{{ uyapTopluAktarimDosyaAdi }}</h4>
+                            <p class="mt-1 text-sm font-medium text-slate-600">Kayıtlar yalnızca aşağıdaki “Seçilenleri Sisteme Aktar” düğmesine bastığınızda oluşturulur.</p>
+                          </div>
+                          <div class="flex flex-wrap gap-2">
+                            <button type="button" (click)="uyapTopluHazirlariSec(true)" class="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-xs font-black text-emerald-800 hover:bg-emerald-100">Hazırların Tümünü Seç</button>
+                            <button type="button" (click)="uyapTopluHazirlariSec(false)" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-black text-slate-700 hover:bg-slate-50">Seçimi Kaldır</button>
+                            <button type="button" (click)="uyapTopluAktarimiTemizle()" [disabled]="uyapTopluAktarimKaydediliyor" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-black text-rose-700 hover:bg-rose-100 disabled:opacity-50">Listeyi Temizle</button>
+                          </div>
+                        </div>
+
+                        <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+                          <button type="button" (click)="uyapTopluAktarimFiltre = 'tumu'" [class.ring-2]="uyapTopluAktarimFiltre === 'tumu'" class="rounded-xl border border-slate-300 bg-slate-50 p-3 text-left ring-slate-500">
+                            <p class="text-[10px] font-black uppercase tracking-wider text-slate-600">Toplam</p><p class="mt-1 text-2xl font-black text-slate-950">{{ uyapTopluAktarimOzeti.toplam }}</p>
+                          </button>
+                          <button type="button" (click)="uyapTopluAktarimFiltre = 'hazir'" [class.ring-2]="uyapTopluAktarimFiltre === 'hazir'" class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-left ring-emerald-500">
+                            <p class="text-[10px] font-black uppercase tracking-wider text-emerald-700">Hazır</p><p class="mt-1 text-2xl font-black text-emerald-900">{{ uyapTopluAktarimOzeti.hazir }}</p>
+                          </button>
+                          <button type="button" (click)="uyapTopluAktarimFiltre = 'kontrol'" [class.ring-2]="uyapTopluAktarimFiltre === 'kontrol'" class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-left ring-amber-500">
+                            <p class="text-[10px] font-black uppercase tracking-wider text-amber-700">Kontrol</p><p class="mt-1 text-2xl font-black text-amber-900">{{ uyapTopluAktarimOzeti.kontrol }}</p>
+                          </button>
+                          <button type="button" (click)="uyapTopluAktarimFiltre = 'mukerrer'" [class.ring-2]="uyapTopluAktarimFiltre === 'mukerrer'" class="rounded-xl border border-slate-300 bg-slate-100 p-3 text-left ring-slate-500">
+                            <p class="text-[10px] font-black uppercase tracking-wider text-slate-600">Kayıtlı</p><p class="mt-1 text-2xl font-black text-slate-900">{{ uyapTopluAktarimOzeti.mukerrer }}</p>
+                          </button>
+                          <button type="button" (click)="uyapTopluAktarimFiltre = 'hata'" [class.ring-2]="uyapTopluAktarimFiltre === 'hata'" class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-left ring-rose-500">
+                            <p class="text-[10px] font-black uppercase tracking-wider text-rose-700">Hatalı</p><p class="mt-1 text-2xl font-black text-rose-900">{{ uyapTopluAktarimOzeti.hata }}</p>
+                          </button>
+                          <button type="button" (click)="uyapTopluAktarimFiltre = 'aktarildi'" [class.ring-2]="uyapTopluAktarimFiltre === 'aktarildi'" class="rounded-xl border border-blue-200 bg-blue-50 p-3 text-left ring-blue-500">
+                            <p class="text-[10px] font-black uppercase tracking-wider text-blue-700">Aktarıldı</p><p class="mt-1 text-2xl font-black text-blue-900">{{ uyapTopluAktarimOzeti.aktarildi }}</p>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="space-y-3">
+                        @for (satir of uyapTopluFiltrelenmisSatirlar; track satir.id) {
+                          <article class="overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition-colors" [ngClass]="satir.aktarimDurumu === 'hazir' ? 'border-emerald-200' : satir.aktarimDurumu === 'kontrol' ? 'border-amber-200' : satir.aktarimDurumu === 'hata' ? 'border-rose-200' : satir.aktarimDurumu === 'aktarildi' ? 'border-blue-200 opacity-75' : 'border-slate-300'">
+                            <div class="grid gap-3 p-4 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+                              <div class="flex items-center gap-3">
+                                <input type="checkbox" [(ngModel)]="satir.secili" [disabled]="satir.aktarimDurumu !== 'hazir' || uyapTopluAktarimKaydediliyor" class="h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 disabled:opacity-40">
+                                <span class="text-xs font-black text-slate-500">#{{ satir.sira }}</span>
+                              </div>
+                              <button type="button" (click)="uyapTopluSatiriAcKapat(satir)" class="min-w-0 text-left">
+                                <div class="flex flex-wrap items-center gap-2">
+                                  <span class="rounded-full bg-slate-900 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white">{{ uyapTopluTurEtiketi(satir.tur) }}</span>
+                                  <span class="rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider" [ngClass]="uyapTopluDurumSinifi(satir.aktarimDurumu)">{{ uyapTopluDurumEtiketi(satir.aktarimDurumu) }}</span>
+                                  <span class="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-bold text-slate-600">{{ uyapTopluMuvekkilEslesmeMetni(satir) }}</span>
+                                </div>
+                                <p class="mt-2 truncate text-base font-black text-slate-950">{{ satir.dosyaNo || 'Dosya numarası eksik' }} <span class="font-semibold text-slate-500">• {{ satir.kurum || 'Kurum eksik' }}</span></p>
+                                <p class="mt-1 truncate text-sm font-medium text-slate-600">{{ satir.muvekkil || 'Müvekkil eksik' }} ↔ {{ satir.karsiTaraf || 'Karşı taraf eksik' }}</p>
+                              </button>
+                              <button type="button" (click)="uyapTopluSatiriAcKapat(satir)" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-700 hover:bg-slate-50">
+                                {{ satir.acik ? 'Daralt' : 'Kontrol Et' }}
+                                <svg class="h-4 w-4 transition-transform" [class.rotate-180]="satir.acik" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                              </button>
+                            </div>
+
+                            @if (satir.uyarilar.length > 0) {
+                              <div class="border-t border-slate-200 bg-slate-50 px-4 py-3">
+                                @for (uyari of satir.uyarilar; track $index) {
+                                  <p class="text-xs font-bold leading-5" [class.text-rose-700]="satir.aktarimDurumu === 'hata'" [class.text-amber-800]="satir.aktarimDurumu !== 'hata'">{{ uyari }}</p>
+                                }
+                              </div>
+                            }
+
+                            @if (satir.acik && satir.aktarimDurumu !== 'aktarildi') {
+                              <div class="border-t-2 border-slate-200 bg-slate-50/80 p-4 sm:p-5">
+                                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                                  <div>
+                                    <label class="mb-1 block text-xs font-black text-slate-800">Dosya Türü</label>
+                                    <select [(ngModel)]="satir.tur" (ngModelChange)="uyapTopluSatirTuruDegisti(satir)" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-sky-500">
+                                      <option value="dava">Dava</option><option value="icra">İcra</option><option value="arabuluculuk">Arabuluculuk</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label class="mb-1 block text-xs font-black text-slate-800">{{ satir.tur === 'arabuluculuk' ? 'Arabuluculuk No' : 'Dosya No' }} *</label>
+                                    <input [(ngModel)]="satir.dosyaNo" (ngModelChange)="uyapTopluSatirlariYenidenDogrula()" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500">
+                                  </div>
+                                  @if (satir.tur === 'arabuluculuk') {
+                                    <div>
+                                      <label class="mb-1 block text-xs font-black text-slate-800">Büro No {{ satir.basvuruTuru === 'Dava Şartı' ? '*' : '' }}</label>
+                                      <input [(ngModel)]="satir.buroNo" (ngModelChange)="uyapTopluSatirlariYenidenDogrula()" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500">
+                                    </div>
+                                  }
+                                  <div [class.xl:col-span-2]="satir.tur !== 'arabuluculuk'">
+                                    <label class="mb-1 block text-xs font-black text-slate-800">{{ satir.tur === 'dava' ? 'Mahkeme' : satir.tur === 'icra' ? 'İcra Dairesi' : 'Arabuluculuk Bürosu' }} *</label>
+                                    <input [(ngModel)]="satir.kurum" (ngModelChange)="uyapTopluSatirlariYenidenDogrula()" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500">
+                                  </div>
+                                  <div>
+                                    <label class="mb-1 block text-xs font-black text-slate-800">{{ satir.tur === 'arabuluculuk' ? 'Başvurucu' : 'Müvekkil' }} *</label>
+                                    <input [(ngModel)]="satir.muvekkil" (ngModelChange)="uyapTopluSatirlariYenidenDogrula()" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500">
+                                  </div>
+                                  <div>
+                                    <label class="mb-1 block text-xs font-black text-slate-800">Karşı / Diğer Taraf *</label>
+                                    <input [(ngModel)]="satir.karsiTaraf" (ngModelChange)="uyapTopluSatirlariYenidenDogrula()" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500">
+                                  </div>
+                                  @if (satir.tur !== 'arabuluculuk') {
+                                    <div>
+                                      <label class="mb-1 block text-xs font-black text-slate-800">Müvekkil Rolü</label>
+                                      <select [(ngModel)]="satir.muvekkilRolu" (ngModelChange)="uyapTopluSatirlariYenidenDogrula()" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-sky-500">
+                                        @if (satir.tur === 'dava') { <option value="Davacı">Davacı</option><option value="Davalı">Davalı</option> }
+                                        @else { <option value="Alacaklı">Alacaklı</option><option value="Borçlu">Borçlu</option> }
+                                      </select>
+                                    </div>
+                                  }
+                                  <div>
+                                    <label class="mb-1 block text-xs font-black text-slate-800">Durum / Aşama</label>
+                                    <select [(ngModel)]="satir.durum" (ngModelChange)="uyapTopluSatirlariYenidenDogrula()" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-sky-500">
+                                      @if (satir.tur === 'dava') { <option value="Derdest">Derdest</option><option value="İstinaf/Temyiz">İstinaf/Temyiz</option><option value="Kapalı">Kapalı</option> }
+                                      @else if (satir.tur === 'icra') { <option value="Aktif">Aktif</option><option value="İtiraz Edildi">İtiraz Edildi</option><option value="Tehir-i İcra">Tehir-i İcra</option><option value="İnfaz/Kapalı">İnfaz/Kapalı</option> }
+                                      @else { <option value="Hazırlık">Hazırlık</option><option value="Müzakere">Müzakere</option><option value="İmza">İmza</option><option value="Tahsilat">Tahsilat</option><option value="Evrak Yükleme">Evrak Yükleme</option><option value="Kapalı">Kapalı</option> }
+                                    </select>
+                                  </div>
+                                  <div class="sm:col-span-2">
+                                    <label class="mb-1 block text-xs font-black text-slate-800">{{ satir.tur === 'icra' ? 'Takip Tipi / Kaynak Konu' : 'Konu' }}</label>
+                                    <input [(ngModel)]="satir.konu" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500">
+                                  </div>
+                                  @if (satir.tur === 'arabuluculuk') {
+                                    <div>
+                                      <label class="mb-1 block text-xs font-black text-slate-800">Başvuru Türü</label>
+                                      <select [(ngModel)]="satir.basvuruTuru" (ngModelChange)="uyapTopluSatirlariYenidenDogrula()" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-sky-500"><option value="Dava Şartı">Dava Şartı</option><option value="İhtiyari">İhtiyari</option></select>
+                                    </div>
+                                    <div>
+                                      <label class="mb-1 block text-xs font-black text-slate-800">Uyuşmazlık Türü *</label>
+                                      <select [(ngModel)]="satir.uyusmazlikTuru" (ngModelChange)="uyapTopluSatirlariYenidenDogrula()" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-sky-500">
+                                        <option value="">Seçin</option>
+                                        @for (tur of arabuluculukUyusmazlikTuruSecenekleri; track tur) { <option [value]="tur">{{ tur }}</option> }
+                                      </select>
+                                    </div>
+                                  }
+                                  <div>
+                                    <label class="mb-1 block text-xs font-black text-slate-800">{{ satir.tur === 'arabuluculuk' ? 'Büroya Başvuru Tarihi' : satir.tur === 'icra' ? 'Takip Tarihi' : 'Kayıt Tarihi' }}</label>
+                                    <input [(ngModel)]="satir.kayitTarihi" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500">
+                                  </div>
+                                  @if (satir.tur === 'arabuluculuk') {
+                                    <div>
+                                      <label class="mb-1 block text-xs font-black text-slate-800">Arabulucu Görevlendirme Tarihi</label>
+                                      <input [(ngModel)]="satir.gorevlendirmeTarihi" (ngModelChange)="uyapTopluSatirlariYenidenDogrula()" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500">
+                                    </div>
+                                  }
+                                  <div>
+                                    <label class="mb-1 block text-xs font-black text-slate-800">{{ satir.tur === 'arabuluculuk' ? 'Toplantı Tarihi' : satir.tur === 'dava' ? 'Duruşma Tarihi' : 'Sonraki Tarih' }}</label>
+                                    <input [(ngModel)]="satir.sonrakiTarih" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500">
+                                  </div>
+                                  <div>
+                                    <label class="mb-1 block text-xs font-black text-slate-800">Saat</label>
+                                    <input [(ngModel)]="satir.saat" type="time" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500">
+                                  </div>
+                                </div>
+                                <div class="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                  <p class="text-xs font-semibold leading-5 text-slate-500">Kaynak satır: {{ satir.kaynakOzeti }}</p>
+                                  <button type="button" (click)="uyapTopluSatirSil(satir.id)" class="rounded-xl border border-rose-200 bg-white px-4 py-2 text-xs font-black text-rose-700 hover:bg-rose-50">Bu Satırı Listeden Çıkar</button>
+                                </div>
+                              </div>
+                            }
+                          </article>
+                        } @empty {
+                          <div class="rounded-2xl border-2 border-dashed border-slate-300 bg-white p-10 text-center text-sm font-bold text-slate-500">Bu filtrede kayıt bulunmuyor.</div>
+                        }
+                      </div>
+
+                      <div class="sticky bottom-4 z-20 rounded-2xl border-2 border-slate-800 bg-slate-950 p-4 text-white shadow-2xl shadow-slate-950/30">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-300">Toplu Kayıt</p>
+                            <p class="mt-1 text-sm font-bold text-white">{{ uyapTopluAktarimOzeti.secili }} hazır dosya seçildi</p>
+                            <p class="mt-1 text-xs font-medium text-slate-400">Mükerrer, hatalı ve kontrol bekleyen satırlar aktarılmaz.</p>
+                          </div>
+                          <button type="button" (click)="uyapTopluSecilenleriAktar()" [disabled]="uyapTopluAktarimOzeti.secili === 0 || uyapTopluAktarimKaydediliyor" class="rounded-xl bg-emerald-500 px-6 py-3 text-sm font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400">
+                            {{ uyapTopluAktarimKaydediliyor ? 'Dosyalar Aktarılıyor...' : 'Seçilenleri Sisteme Aktar' }}
+                          </button>
+                        </div>
+                      </div>
+                    </section>
+                  }
                 </div>
               }
 

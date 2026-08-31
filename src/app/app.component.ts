@@ -10,6 +10,17 @@ import { appId, getFirebaseConfig } from '../firebase.config';
 import { GOOGLE_DOCS_CONFIG } from '../google-docs.config';
 import { MuvekkilPortalComponent } from './muvekkil-portal.component';
 import {
+  UYAP_TOPLU_AKTARIM_SABLON_BASLIKLARI,
+  UyapTopluAktarimDurumu,
+  UyapTopluAktarimSatiri,
+  UyapTopluKayitTuru,
+  uyapDosyaNumarasiniNormalizeEt,
+  uyapKurumunuNormalizeEt,
+  uyapMatrisiniAktarimSatirlarinaDonustur,
+  uyapMetniniNormalizeEt,
+  uyapTabloMetniniMatriseDonustur
+} from './uyap-toplu-aktarim';
+import {
   AjandaKaydi,
   AjandaKaynak,
   AjandaTur,
@@ -484,6 +495,14 @@ export class AppComponent implements OnInit {
   yeniEkEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi }; duzenlenenEvrakId: number | null = null;
   duzenlenenEvrakParentId: number | null = null; duzenlenenEvrak: Partial<EvrakBaglantisi> = { yaziRengi: this.varsayilanEvrakYaziRengi, sablonBolumu: 'ihtiyari', sablonKategori: 'toplu' };
   duzenlenenEvrakOrijinalSonEylemTarihi = '';
+  uyapTopluAktarimSatirlari: UyapTopluAktarimSatiri[] = [];
+  uyapTopluAktarimDosyaAdi = '';
+  uyapTopluAktarimYapistirilanMetin = '';
+  uyapTopluAktarimHata = '';
+  uyapTopluAktarimBilgi = '';
+  uyapTopluAktarimOkunuyor = false;
+  uyapTopluAktarimKaydediliyor = false;
+  uyapTopluAktarimFiltre: 'tumu' | UyapTopluAktarimDurumu = 'tumu';
   uyapIceriAktarFormuAcik = false;
   uyapIceriAktarOkunuyor = false;
   uyapIceriAktarHata = '';
@@ -612,6 +631,9 @@ export class AppComponent implements OnInit {
           this.googleCalendarAktarimlari = {};
           this.googleCalendarAktariliyorId = null;
           this.googleCalendarYetkiIstendi = false;
+          this.uyapTopluAktarimiTemizle();
+          this.uyapTopluAktarimKaydediliyor = false;
+          this.uyapTopluAktarimOkunuyor = false;
           this.arsivKlasorleri = [...this.varsayilanArsivKlasorleri];
           this.yeniArsivKlasoru = '';
           const kayitliMobilGorunumBoyutu = this.mobilGorunumBoyutuLocalYukle();
@@ -7867,6 +7889,542 @@ export class AppComponent implements OnInit {
       this.topluDosyaOlusturuluyor = false;
       this.topluDosyaOlusturulanTarafSayisi = null;
       this.cdr.detectChanges();
+    }
+  }
+
+  get uyapTopluAktarimOzeti() {
+    const say = (durum: UyapTopluAktarimDurumu) => this.uyapTopluAktarimSatirlari.filter(satir => satir.aktarimDurumu === durum).length;
+    return {
+      toplam: this.uyapTopluAktarimSatirlari.length,
+      hazir: say('hazir'),
+      kontrol: say('kontrol'),
+      mukerrer: say('mukerrer'),
+      hata: say('hata'),
+      aktarildi: say('aktarildi'),
+      secili: this.uyapTopluAktarimSatirlari.filter(satir => satir.secili && satir.aktarimDurumu === 'hazir').length
+    };
+  }
+
+  get uyapTopluFiltrelenmisSatirlar() {
+    if (this.uyapTopluAktarimFiltre === 'tumu') return this.uyapTopluAktarimSatirlari;
+    return this.uyapTopluAktarimSatirlari.filter(satir => satir.aktarimDurumu === this.uyapTopluAktarimFiltre);
+  }
+
+  uyapTopluDurumEtiketi(durum: UyapTopluAktarimDurumu) {
+    return ({
+      hazir: 'Aktarıma Hazır',
+      kontrol: 'Kontrol Gerekli',
+      mukerrer: 'Zaten Kayıtlı',
+      hata: 'Hatalı Satır',
+      aktarildi: 'Aktarıldı'
+    } as Record<UyapTopluAktarimDurumu, string>)[durum];
+  }
+
+  uyapTopluDurumSinifi(durum: UyapTopluAktarimDurumu) {
+    return ({
+      hazir: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+      kontrol: 'border-amber-200 bg-amber-50 text-amber-800',
+      mukerrer: 'border-slate-300 bg-slate-100 text-slate-700',
+      hata: 'border-rose-200 bg-rose-50 text-rose-800',
+      aktarildi: 'border-blue-200 bg-blue-50 text-blue-800'
+    } as Record<UyapTopluAktarimDurumu, string>)[durum];
+  }
+
+  uyapTopluTurEtiketi(tur: UyapTopluKayitTuru) {
+    return tur === 'dava' ? 'Dava' : tur === 'icra' ? 'İcra' : 'Arabuluculuk';
+  }
+
+  async uyapTopluAktarimDosyasiSecildi(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const dosya = input.files?.[0];
+    if (!dosya) return;
+    this.uyapTopluAktarimOkunuyor = true;
+    this.uyapTopluAktarimHata = '';
+    this.uyapTopluAktarimBilgi = '';
+    try {
+      const uzanti = (dosya.name.split('.').pop() || '').toLocaleLowerCase('tr-TR');
+      if (uzanti === 'xls') throw new Error('Eski .xls biçimi tarayıcıda güvenli okunamıyor. Dosyayı Excel veya LibreOffice ile .xlsx olarak kaydedip yeniden seçin.');
+      const matris = uzanti === 'xlsx'
+        ? await this.uyapTopluExcelMatrisiOku(dosya)
+        : uyapTabloMetniniMatriseDonustur(await dosya.text());
+      this.uyapTopluMatrisiOnizle(matris, dosya.name);
+    } catch (e: any) {
+      this.uyapTopluAktarimHata = e?.message || 'Dosya okunamadı. Örnek şablonu kullanarak yeniden deneyin.';
+    } finally {
+      this.uyapTopluAktarimOkunuyor = false;
+      input.value = '';
+      this.cdr.detectChanges();
+    }
+  }
+
+  uyapTopluYapistirilanMetniOnizle() {
+    this.uyapTopluAktarimHata = '';
+    this.uyapTopluAktarimBilgi = '';
+    try {
+      const matris = uyapTabloMetniniMatriseDonustur(this.uyapTopluAktarimYapistirilanMetin);
+      this.uyapTopluMatrisiOnizle(matris, 'Yapıştırılan UYAP tablosu');
+    } catch (e: any) {
+      this.uyapTopluAktarimHata = e?.message || 'Yapıştırılan tablo okunamadı.';
+    }
+  }
+
+  private uyapTopluMatrisiOnizle(matris: unknown[][], dosyaAdi: string) {
+    const sonuc = uyapMatrisiniAktarimSatirlarinaDonustur(matris);
+    this.uyapTopluAktarimSatirlari = sonuc.satirlar.map(satir => ({
+      ...satir,
+      durum: satir.tur === 'dava'
+        ? this.uyapTopluDavaDurumu(satir.durum)
+        : satir.tur === 'icra'
+          ? this.uyapTopluIcraDurumu(satir.durum)
+          : this.uyapTopluArabuluculukDurumu(satir.durum),
+      uyusmazlikTuru: this.uyapTopluUyusmazlikTurunuEsle(satir.uyusmazlikTuru) || satir.uyusmazlikTuru
+    }));
+    this.uyapTopluAktarimDosyaAdi = dosyaAdi;
+    this.uyapTopluAktarimFiltre = 'tumu';
+    this.uyapTopluSatirlariYenidenDogrula(true);
+    const atlanan = sonuc.atlananSatirSayisi ? ` ${sonuc.atlananSatirSayisi} boş satır atlandı.` : '';
+    this.uyapTopluAktarimBilgi = `${sonuc.satirlar.length} kayıt bulundu. Başlıklar ${sonuc.baslikSatiri}. satırdan okundu.${atlanan}`;
+  }
+
+  private async uyapTopluExcelMatrisiOku(dosya: File) {
+    const ExcelJSModule: any = await import('exceljs/dist/exceljs.min.js');
+    const ExcelJS = ExcelJSModule.default || ExcelJSModule;
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(await dosya.arrayBuffer());
+    const sayfa = workbook.worksheets.find((worksheet: any) => Number(worksheet.actualRowCount || worksheet.rowCount || 0) > 1);
+    if (!sayfa) throw new Error('Excel dosyasında okunabilir bir çalışma sayfası bulunamadı.');
+    const satirSayisi = Math.min(Number(sayfa.actualRowCount || sayfa.rowCount || 0), 5000);
+    const sutunSayisi = Math.min(Math.max(Number(sayfa.actualColumnCount || sayfa.columnCount || 0), 1), 60);
+    const matris: string[][] = [];
+    for (let satirIndex = 1; satirIndex <= satirSayisi; satirIndex += 1) {
+      const satir: string[] = [];
+      for (let sutunIndex = 1; sutunIndex <= sutunSayisi; sutunIndex += 1) {
+        satir.push(this.uyapTopluExcelHucreMetni(sayfa.getRow(satirIndex).getCell(sutunIndex)));
+      }
+      matris.push(satir);
+    }
+    return matris;
+  }
+
+  private uyapTopluExcelHucreMetni(hucre: any) {
+    const deger = hucre?.value;
+    if (deger instanceof Date) {
+      const yil = deger.getFullYear();
+      const ay = String(deger.getMonth() + 1).padStart(2, '0');
+      const gun = String(deger.getDate()).padStart(2, '0');
+      return `${yil}-${ay}-${gun}`;
+    }
+    if (deger && typeof deger === 'object') {
+      if (Array.isArray(deger.richText)) return deger.richText.map((parca: any) => parca.text || '').join('').trim();
+      if (deger.result !== undefined && deger.result !== null) return String(deger.result).trim();
+      if (deger.text) return String(deger.text).trim();
+    }
+    return String(hucre?.text ?? deger ?? '').trim();
+  }
+
+  uyapTopluAktarimiTemizle() {
+    this.uyapTopluAktarimSatirlari = [];
+    this.uyapTopluAktarimDosyaAdi = '';
+    this.uyapTopluAktarimYapistirilanMetin = '';
+    this.uyapTopluAktarimHata = '';
+    this.uyapTopluAktarimBilgi = '';
+    this.uyapTopluAktarimFiltre = 'tumu';
+  }
+
+  uyapTopluSatirlariYenidenDogrula(ilkYukleme = false) {
+    const yuklemeAnahtarlari = new Set<string>();
+    this.uyapTopluAktarimSatirlari.forEach(satir => {
+      if (satir.aktarimDurumu === 'aktarildi') return;
+      const oncekiDurum = satir.aktarimDurumu;
+      const oncekiSecim = satir.secili;
+      const uyarilar: string[] = [];
+      const kritikEksikler: string[] = [];
+      const kontrolEksikleri: string[] = [];
+      const dosyaNo = uyapDosyaNumarasiniNormalizeEt(satir.dosyaNo);
+
+      if (!dosyaNo) kritikEksikler.push('Dosya numarası');
+      if (!(satir.kurum || '').trim()) kritikEksikler.push(satir.tur === 'dava' ? 'Mahkeme' : satir.tur === 'icra' ? 'İcra dairesi' : 'Arabuluculuk bürosu');
+      if (!(satir.muvekkil || '').trim()) kontrolEksikleri.push(satir.tur === 'arabuluculuk' ? 'Başvurucu' : 'Müvekkil');
+      if (!(satir.karsiTaraf || '').trim()) kontrolEksikleri.push('Karşı taraf');
+      if (satir.tur === 'arabuluculuk') {
+        if (satir.basvuruTuru === 'Dava Şartı' && !(satir.buroNo || '').trim()) kontrolEksikleri.push('Büro numarası');
+        if (!this.uyapTopluUyusmazlikTurunuEsle(satir.uyusmazlikTuru)) kontrolEksikleri.push('Uyuşmazlık türü');
+        if (satir.basvuruTuru === 'Dava Şartı' && !satir.gorevlendirmeTarihi) uyarilar.push('Görevlendirme tarihi yok; yasal süre sayacı tarih eklenene kadar çalışmaz.');
+      }
+
+      const yuklemeAnahtari = this.uyapTopluKayitAnahtari(satir);
+      const yuklemeIcindeMukerrer = !!yuklemeAnahtari && yuklemeAnahtarlari.has(yuklemeAnahtari);
+      if (yuklemeAnahtari) yuklemeAnahtarlari.add(yuklemeAnahtari);
+
+      if (kritikEksikler.length) {
+        satir.aktarimDurumu = 'hata';
+        uyarilar.unshift(`Zorunlu alanlar eksik: ${kritikEksikler.join(', ')}.`);
+      } else if (this.uyapTopluMevcutKayitMi(satir) || yuklemeIcindeMukerrer) {
+        satir.aktarimDurumu = 'mukerrer';
+        uyarilar.unshift(yuklemeIcindeMukerrer ? 'Aynı yükleme içinde bu dosyanın başka bir satırı daha var.' : 'Bu dosya numarası ve kurum mevcut kayıtlardan biriyle eşleşiyor.');
+      } else if (kontrolEksikleri.length) {
+        satir.aktarimDurumu = 'kontrol';
+        uyarilar.unshift(`Kontrol edilmesi gereken alanlar: ${kontrolEksikleri.join(', ')}.`);
+      } else {
+        satir.aktarimDurumu = 'hazir';
+      }
+
+      const muvekkilEslesmesi = this.uyapTopluMuvekkilKaydiBul(satir.muvekkil);
+      if (satir.muvekkil && !muvekkilEslesmesi) uyarilar.push('Müvekkil adı kişilerde bulunamadı; dosya isimle oluşur ve daha sonra bir kişiyle ilişkilendirilebilir.');
+      satir.uyarilar = uyarilar;
+      satir.acik = ilkYukleme ? satir.aktarimDurumu === 'kontrol' || satir.aktarimDurumu === 'hata' : satir.acik;
+      satir.secili = satir.aktarimDurumu === 'hazir' && (ilkYukleme || oncekiDurum !== 'hazir' ? true : oncekiSecim);
+    });
+  }
+
+  uyapTopluSatirTuruDegisti(satir: UyapTopluAktarimSatiri) {
+    if (satir.tur === 'dava') {
+      satir.muvekkilRolu = satir.muvekkilRolu === 'Davalı' ? 'Davalı' : 'Davacı';
+      satir.durum = this.uyapTopluDavaDurumu(satir.durum);
+    } else if (satir.tur === 'icra') {
+      satir.muvekkilRolu = satir.muvekkilRolu === 'Borçlu' ? 'Borçlu' : 'Alacaklı';
+      satir.durum = this.uyapTopluIcraDurumu(satir.durum);
+    } else {
+      satir.durum = this.uyapTopluArabuluculukDurumu(satir.durum);
+    }
+    this.uyapTopluSatirlariYenidenDogrula();
+  }
+
+  uyapTopluSatiriAcKapat(satir: UyapTopluAktarimSatiri) {
+    satir.acik = !satir.acik;
+  }
+
+  uyapTopluSatirSil(satirId: number) {
+    this.uyapTopluAktarimSatirlari = this.uyapTopluAktarimSatirlari.filter(satir => satir.id !== satirId);
+    this.uyapTopluSatirlariYenidenDogrula();
+  }
+
+  uyapTopluHazirlariSec(secili: boolean) {
+    this.uyapTopluAktarimSatirlari.forEach(satir => {
+      if (satir.aktarimDurumu === 'hazir') satir.secili = secili;
+    });
+  }
+
+  uyapTopluMuvekkilEslesmeMetni(satir: UyapTopluAktarimSatiri) {
+    return this.uyapTopluMuvekkilKaydiBul(satir.muvekkil) ? 'Kişilerde eşleşti' : 'Kişi eşleşmesi yok';
+  }
+
+  private uyapTopluKayitAnahtari(satir: UyapTopluAktarimSatiri) {
+    const no = uyapDosyaNumarasiniNormalizeEt(satir.dosyaNo);
+    const kurum = uyapKurumunuNormalizeEt(satir.kurum);
+    if (!no) return '';
+    if (satir.tur === 'arabuluculuk') return `${satir.tur}|${no}|${uyapDosyaNumarasiniNormalizeEt(satir.buroNo)}`;
+    return `${satir.tur}|${no}|${kurum}`;
+  }
+
+  private uyapTopluMevcutKayitMi(satir: UyapTopluAktarimSatiri) {
+    const no = uyapDosyaNumarasiniNormalizeEt(satir.dosyaNo);
+    if (!no) return false;
+    if (satir.tur === 'arabuluculuk') {
+      const buroNo = uyapDosyaNumarasiniNormalizeEt(satir.buroNo);
+      return this.arabuluculukDosyalar.some(dosya => {
+        const arabuluculukNoEslesiyor = uyapDosyaNumarasiniNormalizeEt(dosya.arabuluculukNo) === no;
+        const buroNoEslesiyor = !!buroNo && uyapDosyaNumarasiniNormalizeEt(dosya.buroNo) === buroNo;
+        return arabuluculukNoEslesiyor || buroNoEslesiyor;
+      });
+    }
+    const kurum = uyapKurumunuNormalizeEt(satir.kurum);
+    const kayitlar = satir.tur === 'dava' ? this.davalar : this.icralar;
+    return kayitlar.some((dosya: DavaDosyasi | IcraDosyasi) => {
+      const numaralar = [dosya.dosyaNo, ...(dosya.dosyaNumaralari || []).map(numara => numara.no)]
+        .map(uyapDosyaNumarasiniNormalizeEt);
+      if (!numaralar.includes(no)) return false;
+      const kayitliKurum = uyapKurumunuNormalizeEt(satir.tur === 'dava' ? (dosya as DavaDosyasi).mahkeme : (dosya as IcraDosyasi).icraDairesi);
+      return !kurum || !kayitliKurum || kurum === kayitliKurum || kurum.includes(kayitliKurum) || kayitliKurum.includes(kurum);
+    });
+  }
+
+  private uyapTopluMuvekkilKaydiBul(isim: string) {
+    const aranan = uyapMetniniNormalizeEt(isim);
+    if (!aranan) return undefined;
+    return this.muvekkiller.find(muvekkil => uyapMetniniNormalizeEt(muvekkil.adSoyad) === aranan);
+  }
+
+  private uyapTopluUyusmazlikTurunuEsle(metin: string): ArabuluculukDosyasi['uyusmazlikTuru'] | '' {
+    const normal = uyapMetniniNormalizeEt(metin);
+    if (normal.includes('isci') || normal.includes('isveren')) return 'İşçi İşveren';
+    if (normal.includes('ortakligin') || normal.includes('giderilmesi')) return 'Ortaklığın Giderilmesi';
+    if (normal.includes('tuketici')) return 'Tüketici';
+    if (normal.includes('ticari')) return 'Ticari';
+    if (normal.includes('bosanma')) return 'Boşanma';
+    if (normal.includes('kira')) return 'Kira';
+    return '';
+  }
+
+  private uyapTopluDavaDurumu(metin: string) {
+    const normal = uyapMetniniNormalizeEt(metin);
+    if (normal.includes('istinaf') || normal.includes('temyiz')) return 'İstinaf/Temyiz';
+    if (normal.includes('kapali') || normal.includes('karara cikmis') || normal.includes('kesinles')) return 'Kapalı';
+    return 'Derdest';
+  }
+
+  private uyapTopluIcraDurumu(metin: string) {
+    const normal = uyapMetniniNormalizeEt(metin);
+    if (normal.includes('itiraz')) return 'İtiraz Edildi';
+    if (normal.includes('tehir')) return 'Tehir-i İcra';
+    if (normal.includes('kapali') || normal.includes('infaz')) return 'İnfaz/Kapalı';
+    return 'Aktif';
+  }
+
+  private uyapTopluArabuluculukDurumu(metin: string) {
+    const normal = uyapMetniniNormalizeEt(metin);
+    if (normal.includes('kapali') || normal.includes('sonuclan')) return 'Kapalı';
+    if (normal.includes('evrak')) return 'Evrak Yükleme';
+    if (normal.includes('tahsil')) return 'Tahsilat';
+    if (normal.includes('imza')) return 'İmza';
+    if (normal.includes('muzakere')) return 'Müzakere';
+    return 'Hazırlık';
+  }
+
+  private uyapTopluIcraTakipTipi(metin: string) {
+    const normal = uyapMetniniNormalizeEt(metin);
+    if (normal.includes('kambiyo')) return 'Kambiyo';
+    if (normal.includes('rehin')) return 'Rehnin Paraya Çevrilmesi';
+    if (normal.includes('ihtiyati haciz')) return 'İhtiyati Haciz';
+    if (normal.includes('ilamli')) return 'İlamlı';
+    return 'İlamsız';
+  }
+
+  private uyapTopluDosyaNoMetni(metin: string) {
+    const normal = uyapDosyaNumarasiniNormalizeEt(metin);
+    return normal || (metin || '').replace(/^(esas|dosya|takip|arabuluculuk)\s*(no|numarası)?\s*[:\-]?\s*/i, '').trim();
+  }
+
+  private uyapTopluTarafAdlari(metin: string) {
+    return (metin || '').split(/\r?\n|;|\|/).map(ad => ad.trim()).filter(Boolean);
+  }
+
+  private uyapTopluDavaOlustur(satir: UyapTopluAktarimSatiri, id: number) {
+    const dosyaNo = this.uyapTopluDosyaNoMetni(satir.dosyaNo);
+    const muvekkilKaydi = this.uyapTopluMuvekkilKaydiBul(satir.muvekkil);
+    const muvekkilTarafi = this.davaTarafBosOlustur(id + 1);
+    muvekkilTarafi.isim = this.formatMetin(satir.muvekkil) || satir.muvekkil;
+    if (muvekkilKaydi) this.davaTarafBilgileriniMuvekkildenDoldur(muvekkilTarafi, muvekkilKaydi);
+    const karsiTaraflar = this.uyapTopluTarafAdlari(satir.karsiTaraf).map((isim, index) => ({ id: id + index + 2, isim: this.formatMetin(isim) || isim } as DavaTarafKaydi));
+    const muvekkilDavali = satir.muvekkilRolu === 'Davalı';
+    const davacilar = muvekkilDavali ? karsiTaraflar : [muvekkilTarafi];
+    const davalilar = muvekkilDavali ? [muvekkilTarafi] : karsiTaraflar;
+    let dosya: DavaDosyasi = {
+      id,
+      dosyaNo: `ESAS: ${dosyaNo}`,
+      dosyaNumaralari: [{ tur: 'ESAS', no: dosyaNo }],
+      muvekkil: muvekkilTarafi.isim,
+      muvekkilId: muvekkilKaydi?.id,
+      muvekkiller: [muvekkilTarafi],
+      muvekkilPozisyonu: muvekkilDavali ? 'Davalı' : 'Davacı',
+      davacilar,
+      davalilar,
+      karsiTaraf: karsiTaraflar.map(taraf => taraf.isim).join(', '),
+      mahkeme: this.formatMetin(satir.kurum) || satir.kurum,
+      konu: this.formatMetin(satir.konu) || 'UYAP toplu aktarımı',
+      durum: this.uyapTopluDavaDurumu(satir.durum),
+      durusmaTarihi: satir.sonrakiTarih || '',
+      durusmaSaati: satir.saat || '',
+      durusmaTamamlandiMi: false,
+      takipTarihi: satir.kayitTarihi || '',
+      notlar: 'Bu kayıt UYAP Toplu Aktarım ekranından oluşturuldu.',
+      muvekkilGorusmeNotlari: [],
+      finansalIslemler: [],
+      evraklar: [],
+      iletisimNotlari: [],
+      islemGecmisi: [],
+      takvimGecmisi: [],
+      arsivYeri: '',
+      vekaletUcreti: 0
+    };
+    dosya = this.dosyayaIslemKaydiEkle(dosya, 'dosya', 'UYAP toplu aktarımıyla dava dosyası açıldı', `${dosya.mahkeme} / ${dosyaNo}`);
+    if (dosya.durusmaTarihi) {
+      dosya = this.dosyayaTakvimKaydiEkle(dosya, 'Duruşma', 'Planlandı', dosya.durusmaTarihi, dosya.durusmaSaati, 'UYAP toplu aktarımındaki duruşma tarihi ajandaya eklendi.');
+    }
+    return dosya;
+  }
+
+  private uyapTopluIcraOlustur(satir: UyapTopluAktarimSatiri, id: number) {
+    const dosyaNo = this.uyapTopluDosyaNoMetni(satir.dosyaNo);
+    const muvekkilKaydi = this.uyapTopluMuvekkilKaydiBul(satir.muvekkil);
+    const borcluMu = satir.muvekkilRolu === 'Borçlu';
+    const muvekkil = this.formatMetin(satir.muvekkil) || satir.muvekkil;
+    const karsiTaraf = this.formatMetin(satir.karsiTaraf) || satir.karsiTaraf;
+    let dosya: IcraDosyasi = {
+      id,
+      icraDairesi: this.formatMetin(satir.kurum) || satir.kurum,
+      dosyaNo,
+      dosyaNumaralari: [{ tur: 'DOSYA', no: dosyaNo }],
+      muvekkilId: muvekkilKaydi?.id,
+      muvekkil,
+      muvekkilRolu: borcluMu ? 'Borçlu' : 'Alacaklı',
+      alacakli: borcluMu ? karsiTaraf : muvekkil,
+      borclu: borcluMu ? muvekkil : karsiTaraf,
+      takipTipi: this.uyapTopluIcraTakipTipi(satir.konu),
+      takipTarihi: satir.kayitTarihi || '',
+      durum: this.uyapTopluIcraDurumu(satir.durum),
+      notlar: `Bu kayıt UYAP Toplu Aktarım ekranından oluşturuldu.${satir.konu ? ` Kaynak konu/takip bilgisi: ${satir.konu}` : ''}`,
+      finansalIslemler: [],
+      evraklar: [],
+      iletisimNotlari: [],
+      islemGecmisi: [],
+      takvimGecmisi: [],
+      arsivYeri: '',
+      vekaletUcreti: 0
+    };
+    dosya = this.dosyayaIslemKaydiEkle(dosya, 'dosya', 'UYAP toplu aktarımıyla icra dosyası açıldı', `${dosya.icraDairesi} / ${dosyaNo}`);
+    return dosya;
+  }
+
+  private uyapTopluArabuluculukOlustur(satir: UyapTopluAktarimSatiri, id: number) {
+    const arabuluculukNo = this.uyapTopluDosyaNoMetni(satir.dosyaNo);
+    const muvekkilKaydi = this.uyapTopluMuvekkilKaydiBul(satir.muvekkil);
+    const basvurucu = this.arabuluculukTarafBosOlustur('Başvurucu', id + 1);
+    basvurucu.isim = this.formatMetin(satir.muvekkil) || satir.muvekkil;
+    if (muvekkilKaydi) this.arabuluculukTarafBilgileriniMuvekkildenDoldur(basvurucu, muvekkilKaydi);
+    const digerTaraflar = this.uyapTopluTarafAdlari(satir.karsiTaraf).map((isim, index) => ({
+      ...this.arabuluculukTarafBosOlustur('Diğer Taraf', id + index + 2),
+      isim: this.formatMetin(isim) || isim
+    }));
+    let dosya: ArabuluculukDosyasi = {
+      id,
+      buroNo: satir.buroNo || '',
+      arabuluculukNo,
+      buro: this.formatMetin(satir.kurum) || satir.kurum,
+      basvuruTuru: satir.basvuruTuru,
+      uyusmazlikTuru: this.uyapTopluUyusmazlikTurunuEsle(satir.uyusmazlikTuru) || 'Ticari',
+      basvuruKonusu: this.formatMetin(satir.konu) || '',
+      taraflar: [basvurucu, ...digerTaraflar],
+      muvekkilId: muvekkilKaydi?.id,
+      buroyaBasvuruTarihi: satir.kayitTarihi || '',
+      arabulucuGorevlendirmeTarihi: satir.gorevlendirmeTarihi || '',
+      toplantiTarihi: satir.sonrakiTarih || '',
+      toplantiSaati: satir.saat || '',
+      toplantiYontemi: 'Yüzyüze',
+      toplantiTamamlandiMi: false,
+      durum: this.uyapTopluArabuluculukDurumu(satir.durum),
+      notlar: 'Bu kayıt UYAP Toplu Aktarım ekranından oluşturuldu.',
+      finansalIslemler: [],
+      evraklar: [],
+      iletisimNotlari: [],
+      islemGecmisi: [],
+      takvimGecmisi: [],
+      arsivYeri: '',
+      vekaletUcreti: 0,
+      hizmetUcretiStopajli: true
+    };
+    dosya = this.dosyayaIslemKaydiEkle(dosya, 'dosya', 'UYAP toplu aktarımıyla arabuluculuk dosyası açıldı', `${dosya.buroNo ? dosya.buroNo + ' / ' : ''}${arabuluculukNo}`);
+    if (dosya.toplantiTarihi) {
+      dosya = this.dosyayaTakvimKaydiEkle(dosya, 'Toplantı', 'Planlandı', dosya.toplantiTarihi, dosya.toplantiSaati, 'UYAP toplu aktarımındaki toplantı tarihi ajandaya eklendi.');
+    }
+    return dosya;
+  }
+
+  async uyapTopluSecilenleriAktar() {
+    if (this.uyapTopluAktarimKaydediliyor) return;
+    this.uyapTopluSatirlariYenidenDogrula();
+    const aktarilacaklar = this.uyapTopluAktarimSatirlari.filter(satir => satir.secili && satir.aktarimDurumu === 'hazir');
+    if (!aktarilacaklar.length) {
+      this.uyapTopluAktarimHata = 'Aktarılabilecek seçili kayıt yok. Kontrol gereken satırları düzeltin veya hazır kayıtlardan seçim yapın.';
+      return;
+    }
+
+    this.uyapTopluAktarimKaydediliyor = true;
+    this.uyapTopluAktarimHata = '';
+    this.uyapTopluAktarimBilgi = `${aktarilacaklar.length} kayıt buluta aktarılıyor...`;
+    let basarili = 0;
+    let basarisiz = 0;
+    const tabanId = Date.now();
+    for (let index = 0; index < aktarilacaklar.length; index += 1) {
+      const satir = aktarilacaklar[index];
+      try {
+        const id = tabanId + index * 100;
+        const kayit = satir.tur === 'dava'
+          ? this.uyapTopluDavaOlustur(satir, id)
+          : satir.tur === 'icra'
+            ? this.uyapTopluIcraOlustur(satir, id)
+            : this.uyapTopluArabuluculukOlustur(satir, id);
+        const kaydedildi = satir.tur === 'dava'
+          ? await this.davaKaydetCloud(kayit as DavaDosyasi)
+          : satir.tur === 'icra'
+            ? await this.icraKaydetCloud(kayit as IcraDosyasi)
+            : await this.arabuluculukKaydetCloud(kayit as ArabuluculukDosyasi);
+        if (!kaydedildi) throw new Error('Bulut kaydı tamamlanamadı.');
+        satir.aktarimDurumu = 'aktarildi';
+        satir.secili = false;
+        satir.acik = false;
+        satir.uyarilar = [];
+        basarili += 1;
+      } catch (e: any) {
+        satir.aktarimDurumu = 'hata';
+        satir.secili = false;
+        satir.acik = true;
+        satir.uyarilar = [e?.message || 'Kayıt sırasında beklenmeyen bir hata oluştu.'];
+        basarisiz += 1;
+      }
+      this.uyapTopluAktarimBilgi = `${basarili + basarisiz}/${aktarilacaklar.length} kayıt işlendi.`;
+      this.cdr.detectChanges();
+    }
+    this.uyapTopluAktarimKaydediliyor = false;
+    this.uyapTopluAktarimBilgi = basarisiz
+      ? `${basarili} kayıt aktarıldı, ${basarisiz} kayıt tamamlanamadı. Hatalı satırları açıp kontrol edin.`
+      : `${basarili} dosya başarıyla sisteme aktarıldı. Mevcut kayıtların hiçbiri değiştirilmedi.`;
+    this.bildirimGoster(
+      basarisiz ? 'info' : 'success',
+      basarisiz ? 'UYAP aktarımı kısmen tamamlandı' : 'UYAP aktarımı tamamlandı',
+      this.uyapTopluAktarimBilgi
+    );
+    this.cdr.detectChanges();
+  }
+
+  async uyapTopluAktarimSablonunuIndir() {
+    try {
+      const ExcelJSModule: any = await import('exceljs/dist/exceljs.min.js');
+      const ExcelJS = ExcelJSModule.default || ExcelJSModule;
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Akyavaş Hukuk Takip Sistemi';
+      const veriSayfasi = workbook.addWorksheet('Aktarılacak Dosyalar', { views: [{ state: 'frozen', ySplit: 1 }] });
+      veriSayfasi.addRow([...UYAP_TOPLU_AKTARIM_SABLON_BASLIKLARI]);
+      veriSayfasi.getRow(1).eachCell((cell: any) => {
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+        cell.alignment = { vertical: 'middle', wrapText: true };
+      });
+      veriSayfasi.getRow(1).height = 34;
+      const genislikler = [16, 26, 20, 38, 30, 30, 18, 32, 18, 18, 24, 22, 26, 26, 12];
+      genislikler.forEach((genislik, index) => { veriSayfasi.getColumn(index + 1).width = genislik; });
+      veriSayfasi.autoFilter = { from: 'A1', to: `O1` };
+
+      const ornekler = workbook.addWorksheet('Örnekler');
+      ornekler.addRow([...UYAP_TOPLU_AKTARIM_SABLON_BASLIKLARI]);
+      ornekler.addRows([
+        ['Dava', '2026/123', '', 'İstanbul Anadolu 5. İş Mahkemesi', 'Ayşe Yılmaz', 'Örnek Şirket A.Ş.', 'Davacı', 'İşçilik alacağı', 'Derdest', '', '', '01.06.2026', '', '15.09.2026', '10:30'],
+        ['İcra', '2026/4567', '', 'İstanbul Anadolu 10. İcra Dairesi', 'Örnek Şirket A.Ş.', 'Mehmet Demir', 'Alacaklı', 'İlamsız', 'Aktif', '', '', '05.06.2026', '', '', ''],
+        ['Arabuluculuk', '2026/98765', '2026/54321', 'İstanbul Anadolu Arabuluculuk Bürosu', 'Fatma Kaya', 'Örnek İşveren Ltd. Şti.', 'Davacı', 'İşçilik alacağı', 'Hazırlık', 'Dava Şartı', 'İşçi İşveren', '08.06.2026', '10.06.2026', '20.06.2026', '14:00']
+      ]);
+      ornekler.columns.forEach((sutun: any, index: number) => { sutun.width = genislikler[index] || 20; });
+      ornekler.getRow(1).font = { bold: true };
+
+      const aciklama = workbook.addWorksheet('Kullanım');
+      aciklama.addRows([
+        ['UYAP Toplu Aktarım Şablonu'],
+        ['1. UYAP dosya listesindeki bilgileri “Aktarılacak Dosyalar” sayfasına yapıştırın.'],
+        ['2. Her satırda Tür, Dosya No, Kurum, Müvekkil/Başvurucu ve Karşı Taraf alanlarını doldurun.'],
+        ['3. Dava şartı arabuluculukta hem Büro No hem Arabuluculuk No yazın.'],
+        ['4. Dosyayı .xlsx biçiminde kaydedip uygulamadaki UYAP Aktarım ekranından seçin.'],
+        ['5. Uygulama kayıt yapmadan önce mükerrerleri ve eksik alanları ön izlemede gösterecektir.'],
+        ['Not: UYAP kullanıcı adı, şifre veya e-imza bilgisi bu dosyaya yazılmaz.']
+      ]);
+      aciklama.getColumn(1).width = 110;
+      aciklama.getRow(1).font = { bold: true, size: 16, color: { argb: 'FF0F172A' } };
+      aciklama.eachRow((row: any) => { row.alignment = { wrapText: true, vertical: 'top' }; });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      this.belgeCiktiBlobIndir(blob, 'uyap-toplu-aktarim-sablonu.xlsx');
+      this.bildirimGoster('success', 'UYAP aktarım şablonu indirildi', 'Şablondaki ilk sayfaya dosya listenizi ekleyip yeniden yükleyebilirsiniz.');
+    } catch (e: any) {
+      this.uyapTopluAktarimHata = e?.message || 'Excel şablonu oluşturulamadı.';
     }
   }
 
