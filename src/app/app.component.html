@@ -5321,17 +5321,38 @@
 
               <div class="flex flex-col gap-4">
 
-              <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <p class="text-xs font-black uppercase tracking-[0.22em] text-purple-700">Dosya Kimliği</p>
-                <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+              <details class="app-form-accordion overflow-hidden rounded-2xl border-2 border-slate-300 bg-white shadow-sm">
+                <summary class="app-form-accordion__summary flex cursor-pointer items-center justify-between gap-4 px-4 py-4 transition-colors hover:bg-purple-50/60">
+                  <div>
+                    <p class="text-sm font-black uppercase tracking-[0.18em] text-purple-800">Dosya Kimliği</p>
+                    <p class="mt-1 text-xs font-medium text-slate-500">Dosya numaraları, büro ve hesap muhatabı</p>
+                  </div>
+                  <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-purple-200 bg-purple-50 text-purple-700">
+                    <svg class="app-form-accordion__chevron h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </span>
+                </summary>
+                <div class="space-y-3 border-t border-slate-200 bg-slate-50/60 p-3 sm:p-4">
+                <details class="app-form-subaccordion overflow-hidden rounded-xl border border-slate-300 bg-white">
+                  <summary class="app-form-subaccordion__summary flex cursor-pointer items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50">
+                    <span class="text-sm font-black text-slate-900">Dosya Numaraları ve Büro</span>
+                    <svg class="app-form-subaccordion__chevron h-4 w-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </summary>
+                  <div class="border-t border-slate-200 p-4">
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
                   <div><label class="mb-1 block text-xs font-bold uppercase text-slate-500">Büro No @if(islemGorenArabuluculuk.basvuruTuru === 'Dava Şartı'){<span class="text-red-500">*</span>}</label><input [(ngModel)]="islemGorenArabuluculuk.buroNo" type="text" placeholder="Örn: 2024/123" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                   <div><label class="mb-1 block text-xs font-bold uppercase text-slate-500">Arabuluculuk No <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenArabuluculuk.arabuluculukNo" type="text" placeholder="Örn: 2024/456" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 </div>
 
                 <div class="mt-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Büro <span class="text-red-500">*</span></label><input [(ngModel)]="islemGorenArabuluculuk.buro" type="text" placeholder="Örn: İstanbul Arabuluculuk Bürosu" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                  </div>
+                </details>
               
-                <div class="border-t border-slate-100 pt-4 mt-4 relative">
-                <label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Hesap Muhatabı (Kayıtlı İlişki) <span class="text-red-500">*</span></label>
+                <details class="app-form-subaccordion overflow-hidden rounded-xl border border-emerald-200 bg-white">
+                <summary class="app-form-subaccordion__summary flex cursor-pointer items-center justify-between gap-3 bg-emerald-50/60 px-4 py-3 hover:bg-emerald-50">
+                  <span class="text-sm font-black text-emerald-800">Hesap Muhatabı (Kayıtlı İlişki) <span class="text-red-500">*</span></span>
+                  <svg class="app-form-subaccordion__chevron h-4 w-4 shrink-0 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </summary>
+                <div class="relative border-t border-emerald-100 p-4">
                 
                 <div (click)="arabuluculukMuvekkilDropdownAcik = !arabuluculukMuvekkilDropdownAcik" class="w-full px-3 py-2 border border-emerald-200 bg-emerald-50 rounded-lg outline-none text-sm font-medium cursor-pointer flex justify-between items-center text-slate-800">
                   <span>{{ secilenMuvekkilAd(islemGorenArabuluculuk.muvekkilId) || 'Kişi/Kurum Seçiniz' }}</span>
@@ -5399,12 +5420,28 @@
                   }
                 </div>
               </div>
+              </details>
               </div>
+              </details>
 
-              <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <p class="text-xs font-black uppercase tracking-[0.22em] text-purple-700">Süreç ve Taraflar</p>
-                <p class="mt-2 text-sm leading-6 text-slate-500">Başvuru türü, uyuşmazlık başlığı ve taraf listesi daha net bir iş akışında sunulur.</p>
-                <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <details class="app-form-accordion overflow-hidden rounded-2xl border-2 border-slate-300 bg-white shadow-sm">
+                <summary class="app-form-accordion__summary flex cursor-pointer items-center justify-between gap-4 px-4 py-4 transition-colors hover:bg-purple-50/60">
+                  <div>
+                    <p class="text-sm font-black uppercase tracking-[0.18em] text-purple-800">Süreç ve Taraflar</p>
+                    <p class="mt-1 text-xs font-medium text-slate-500">Başvuru, anlaşma ve taraf bilgileri</p>
+                  </div>
+                  <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-purple-200 bg-purple-50 text-purple-700">
+                    <svg class="app-form-accordion__chevron h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </span>
+                </summary>
+                <div class="space-y-3 border-t border-slate-200 bg-slate-50/60 p-3 sm:p-4">
+                <details class="app-form-subaccordion overflow-hidden rounded-xl border border-slate-300 bg-white">
+                  <summary class="app-form-subaccordion__summary flex cursor-pointer items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50">
+                    <span class="text-sm font-black text-slate-900">Başvuru ve Süreç Bilgileri</span>
+                    <svg class="app-form-subaccordion__chevron h-4 w-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </summary>
+                  <div class="border-t border-slate-200 p-4">
+                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <div>
                   <label class="mb-1 block text-[13px] font-black uppercase tracking-[0.08em] text-slate-900">Başvuru Türü <span class="text-red-500">*</span></label>
                   <select [(ngModel)]="islemGorenArabuluculuk.basvuruTuru" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
@@ -5449,15 +5486,18 @@
                     <input [(ngModel)]="islemGorenArabuluculuk.tutanakDuzenlemeTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
                   </div>
                 </div>
-                @if (arabuluculukDosyasiIsciIsverenMi(islemGorenArabuluculuk)) {
-                <div class="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 shadow-sm">
-                  <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p class="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Anlaşma ve Ödeme Kalemleri</p>
-                      <p class="mt-1 text-sm leading-6 text-slate-600">Bu alanlar özellikle işçilik ve ihtiyari anlaşma belgelerinde kullanılacak ek verileri tutar.</p>
-                    </div>
-                    <span class="inline-flex rounded-full border border-emerald-200 bg-white px-3 py-1 text-[11px] font-bold text-emerald-700">Yer tutucuya bağlı</span>
                   </div>
+                </details>
+                @if (arabuluculukDosyasiIsciIsverenMi(islemGorenArabuluculuk)) {
+                <details class="app-form-subaccordion overflow-hidden rounded-xl border border-emerald-200 bg-white shadow-sm">
+                  <summary class="app-form-subaccordion__summary flex cursor-pointer items-center justify-between gap-3 bg-emerald-50/70 px-4 py-3 hover:bg-emerald-50">
+                    <div>
+                      <p class="text-sm font-black text-emerald-900">Anlaşma ve Ödeme Kalemleri</p>
+                      <p class="mt-1 text-xs font-medium text-emerald-700">İşçilik kalemleri ve taksitli ödeme planı</p>
+                    </div>
+                    <svg class="app-form-subaccordion__chevron h-4 w-4 shrink-0 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </summary>
+                  <div class="border-t border-emerald-100 bg-emerald-50/40 p-4">
                   <div class="mt-4 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
                     <div class="rounded-xl border border-emerald-200 bg-white p-4 shadow-sm">
                       <p class="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Ödenecek Toplam Tutar (Otomatik)</p>
@@ -5542,11 +5582,16 @@
                       </div>
                     }
                   </div>
-                </div>
+                  </div>
+                </details>
                 }
 
-                <div class="mt-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-3">Taraflar <span class="text-red-500">*</span></label>
+                <details class="app-form-subaccordion overflow-hidden rounded-xl border border-blue-200 bg-white">
+                <summary class="app-form-subaccordion__summary flex cursor-pointer items-center justify-between gap-3 bg-blue-50/70 px-4 py-3 hover:bg-blue-50">
+                  <span class="text-sm font-black text-blue-900">Taraflar <span class="text-red-500">*</span> <span class="ml-1 text-xs font-bold text-blue-600">({{ islemGorenArabuluculuk.taraflar?.length || 0 }})</span></span>
+                  <svg class="app-form-subaccordion__chevron h-4 w-4 shrink-0 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </summary>
+                <div class="border-t border-blue-100 bg-blue-50/30 p-4">
                 <div class="space-y-3">
                   @for(taraf of islemGorenArabuluculuk.taraflar; track $index) {
                     <div
@@ -5666,12 +5711,28 @@
                 </div>
                 <button (click)="tarafEkle()" class="mt-4 px-3 py-1.5 bg-purple-100 text-purple-700 text-xs font-bold rounded-lg hover:bg-purple-200 transition-colors">Taraf Ekle</button>
               </div>
+              </details>
               </div>
+              </details>
               
-              <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <p class="text-xs font-black uppercase tracking-[0.22em] text-purple-700">Toplantı ve Finans</p>
-                <p class="mt-2 text-sm leading-6 text-slate-500">Toplantı, arşiv ve ücret bilgileri bir arada durarak dosyanın son durumunu daha rahat gösterir.</p>
-                <div class="mt-4 grid gap-4 md:grid-cols-3">
+              <details class="app-form-accordion overflow-hidden rounded-2xl border-2 border-slate-300 bg-white shadow-sm">
+                <summary class="app-form-accordion__summary flex cursor-pointer items-center justify-between gap-4 px-4 py-4 transition-colors hover:bg-purple-50/60">
+                  <div>
+                    <p class="text-sm font-black uppercase tracking-[0.18em] text-purple-800">Toplantı ve Finans</p>
+                    <p class="mt-1 text-xs font-medium text-slate-500">Toplantı, arşiv, durum ve ücret bilgileri</p>
+                  </div>
+                  <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-purple-200 bg-purple-50 text-purple-700">
+                    <svg class="app-form-accordion__chevron h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </span>
+                </summary>
+                <div class="space-y-3 border-t border-slate-200 bg-slate-50/60 p-3 sm:p-4">
+                <details class="app-form-subaccordion overflow-hidden rounded-xl border border-slate-300 bg-white">
+                  <summary class="app-form-subaccordion__summary flex cursor-pointer items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50">
+                    <span class="text-sm font-black text-slate-900">Toplantı Bilgileri</span>
+                    <svg class="app-form-subaccordion__chevron h-4 w-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </summary>
+                  <div class="border-t border-slate-200 p-4">
+                <div class="grid gap-4 md:grid-cols-3">
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Toplantı Tarihi</label><input [(ngModel)]="islemGorenArabuluculuk.toplantiTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Toplantı Saati</label><input [(ngModel)]="islemGorenArabuluculuk.toplantiSaati" type="time" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white"></div>
                 <div>
@@ -5681,9 +5742,15 @@
                   </select>
                 </div>
                 </div>
+                  </div>
+                </details>
 
-                <div class="mt-4">
-                  <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label>
+                <details class="app-form-subaccordion overflow-hidden rounded-xl border border-amber-200 bg-white">
+                  <summary class="app-form-subaccordion__summary flex cursor-pointer items-center justify-between gap-3 bg-amber-50/70 px-4 py-3 hover:bg-amber-50">
+                    <span class="text-sm font-black text-amber-900">Arşiv / Klasör Konumu <span class="text-xs font-semibold text-amber-700">(Opsiyonel)</span></span>
+                    <svg class="app-form-subaccordion__chevron h-4 w-4 shrink-0 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </summary>
+                  <div class="border-t border-amber-100 bg-amber-50/30 p-4">
                   <select [(ngModel)]="islemGorenArabuluculuk.arsivYeri" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
                     <option value="">Seçim yok</option>
                     @for (klasor of getArsivKlasorSecenekleri(islemGorenArabuluculuk.arsivYeri); track klasor) {
@@ -5696,8 +5763,15 @@
                   </div>
                   <p class="mt-1 text-[11px] font-medium text-slate-500">Fiziksel yeni klasör açtığınızda başlığı buradan listeye ekleyebilirsiniz.</p>
                 </div>
+                </details>
 
-                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                <details class="app-form-subaccordion overflow-hidden rounded-xl border border-purple-200 bg-white">
+                  <summary class="app-form-subaccordion__summary flex cursor-pointer items-center justify-between gap-3 bg-purple-50/70 px-4 py-3 hover:bg-purple-50">
+                    <span class="text-sm font-black text-purple-900">Durum ve Hizmet Ücreti</span>
+                    <svg class="app-form-subaccordion__chevron h-4 w-4 shrink-0 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </summary>
+                  <div class="border-t border-purple-100 bg-purple-50/30 p-4">
+                <div class="grid gap-4 md:grid-cols-2">
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Durum</label>
                   <select [(ngModel)]="islemGorenArabuluculuk.durum" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
@@ -5730,8 +5804,11 @@
                   </div>
                 }
               </div>
+              </details>
               </div>
+              </details>
 
+              </div>
             </div>
             <div class="px-5 py-3.5 bg-white border-t border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <span></span>
