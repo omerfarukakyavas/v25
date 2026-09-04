@@ -101,6 +101,12 @@ type GoogleCalendarAktarimKaydi = {
   aktarimTarihi: string;
 };
 
+type TakvimDosyaDerinBaglantisi = {
+  tur: OfisGoreviBagliDosyaTuru;
+  id: number;
+  sekme: DetaySekmesi;
+};
+
 type UyapEvrakIceriAktarOnizleme = {
   dosyaAdi: string;
   evrakAdi: string;
@@ -526,6 +532,7 @@ export class AppComponent implements OnInit {
   arabuluculukDriveKlasorOlusturuluyorId: number | null = null;
   googleCalendarAktariliyorId: string | null = null;
   googleCalendarAktarimlari: Record<string, GoogleCalendarAktarimKaydi> = {};
+  private bekleyenTakvimDosyaBaglantisi: TakvimDosyaDerinBaglantisi | null = null;
   gunlukOzetYakinGunSayisi = 30;
   gunlukOzetMetni = '';
   gunlukOzetOlusturulmaTarihi = '';
@@ -597,6 +604,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     if (this.portalModuMu) return;
+    this.bekleyenTakvimDosyaBaglantisi = this.takvimDosyaDerinBaglantisiniOku();
     this.toplamBekleyenAlacakGizli = this.toplamBekleyenAlacakGizliYukle();
     const kayitliMobilGorunumBoyutu = this.mobilGorunumBoyutuLocalYukle();
     const kayitliSolMenuDarMi = this.solMenuDarMiLocalYukle();
@@ -997,11 +1005,13 @@ export class AppComponent implements OnInit {
     onSnapshot(collection(this.db, 'artifacts', appId, 'users', this.user.uid, 'davalar'), (sn: any) => {
       this.davalar = sn.docs.map((d: any) => ({ id: Number(d.id), ...d.data() })).sort((a: any, b: any) => b.id - a.id);
       if (this.seciliDava) this.seciliDava = this.davalar.find((d: any) => d.id === this.seciliDava!.id) || null;
+      this.bekleyenTakvimDosyaBaglantisiniAc('dava');
       this.yukleniyor = false; this.cdr.detectChanges();
     });
     onSnapshot(collection(this.db, 'artifacts', appId, 'users', this.user.uid, 'icralar'), (sn: any) => {
       this.icralar = sn.docs.map((d: any) => ({ id: Number(d.id), ...d.data() })).sort((a: any, b: any) => b.id - a.id);
       if (this.seciliIcra) this.seciliIcra = this.icralar.find((i: any) => i.id === this.seciliIcra!.id) || null;
+      this.bekleyenTakvimDosyaBaglantisiniAc('icra');
       this.cdr.detectChanges();
     });
     onSnapshot(collection(this.db, 'artifacts', appId, 'users', this.user.uid, 'arabuluculuk'), (sn: any) => {
@@ -1009,6 +1019,7 @@ export class AppComponent implements OnInit {
         .map((d: any) => this.arabuluculukKapaliToplantiyiTamamla({ id: Number(d.id), ...d.data() }))
         .sort((a: any, b: any) => b.id - a.id);
       if (this.seciliArabuluculuk) this.seciliArabuluculuk = this.arabuluculukDosyalar.find((a: any) => a.id === this.seciliArabuluculuk!.id) || null;
+      this.bekleyenTakvimDosyaBaglantisiniAc('arabuluculuk');
       this.cdr.detectChanges();
     });
     onSnapshot(collection(this.db, 'artifacts', appId, 'users', this.user.uid, 'muvekkiller'), (sn: any) => {
@@ -2222,6 +2233,37 @@ export class AppComponent implements OnInit {
   detayaGit(d: DavaDosyasi) { this.mobilSolMenuyuKapat(); this.gezinmeGecmisineEkle(); this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.aktifDavaTarafDetayi = null; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
   icraDetayinaGit(i: IcraDosyasi) { this.mobilSolMenuyuKapat(); this.gezinmeGecmisineEkle(); this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
   arabuluculukDetayinaGit(a: ArabuluculukDosyasi) { this.mobilSolMenuyuKapat(); this.gezinmeGecmisineEkle(); this.seciliArabuluculuk = a; this.aktifSayfa = 'arabuluculukDetay'; this.aktifDetaySekmesi = 'notlar'; this.detayGecisiIcinArayuzuHazirla('Ödeme'); }
+
+  private takvimDosyaDerinBaglantisiniOku(): TakvimDosyaDerinBaglantisi | null {
+    const parametreler = new URLSearchParams(window.location.search);
+    const tur = parametreler.get('dosyaTuru');
+    const id = Number(parametreler.get('dosyaId'));
+    if ((tur !== 'dava' && tur !== 'icra' && tur !== 'arabuluculuk') || !Number.isSafeInteger(id) || id <= 0) return null;
+
+    return {
+      tur,
+      id,
+      sekme: parametreler.get('detaySekmesi') === 'sureliIsler' ? 'sureliIsler' : 'notlar'
+    };
+  }
+
+  private bekleyenTakvimDosyaBaglantisiniAc(yuklenenTur: OfisGoreviBagliDosyaTuru) {
+    const baglanti = this.bekleyenTakvimDosyaBaglantisi;
+    if (!baglanti || baglanti.tur !== yuklenenTur) return;
+
+    const dosya = baglanti.tur === 'dava'
+      ? this.davalar.find(kayit => kayit.id === baglanti.id)
+      : baglanti.tur === 'icra'
+        ? this.icralar.find(kayit => kayit.id === baglanti.id)
+        : this.arabuluculukDosyalar.find(kayit => kayit.id === baglanti.id);
+    if (!dosya) return;
+
+    this.bekleyenTakvimDosyaBaglantisi = null;
+    if (baglanti.tur === 'dava') this.detayaGit(dosya as DavaDosyasi);
+    else if (baglanti.tur === 'icra') this.icraDetayinaGit(dosya as IcraDosyasi);
+    else this.arabuluculukDetayinaGit(dosya as ArabuluculukDosyasi);
+    this.aktifDetaySekmesi = baglanti.sekme;
+  }
 
   davayaGitId(id?: number) { if(!id) return; const d = this.davalar.find(x=>x.id===id); if(d) this.detayaGit(d); }
   icrayaGitId(id?: number) { if(!id) return; const i = this.icralar.find(x=>x.id===id); if(i) this.icraDetayinaGit(i); }
@@ -7426,7 +7468,19 @@ export class AppComponent implements OnInit {
 
   getGoogleCalendarButonMetni(kayit: AjandaKaydi) {
     if (this.googleCalendarAktariliyorId === kayit.id) return 'Aktarılıyor';
-    return this.googleCalendarAktarildiMi(kayit) ? 'Takvime Aktarıldı' : 'Google Takvim’e Aktar';
+    return this.googleCalendarAktarildiMi(kayit) ? 'Takvim Bağlantısını Güncelle' : 'Google Takvim’e Aktar';
+  }
+
+  googleCalendarDosyaBaglantisi(kayit: AjandaKaydi) {
+    if (kayit.kaynak === 'ofis' || !kayit.dosya?.id) return '';
+
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    url.searchParams.set('dosyaTuru', kayit.kaynak);
+    url.searchParams.set('dosyaId', String(kayit.dosya.id));
+    if (kayit.tur === 'sureliIs') url.searchParams.set('detaySekmesi', 'sureliIsler');
+    return url.toString();
   }
 
   googleCalendarSaatMetni(kayit: AjandaKaydi) {
@@ -7492,6 +7546,7 @@ export class AppComponent implements OnInit {
   }
 
   googleCalendarEtkinlikAciklamasi(kayit: AjandaKaydi) {
+    const dosyaBaglantisi = this.googleCalendarDosyaBaglantisi(kayit);
     const satirlar = [
       `Tür: ${this.getAjandaTurEtiketi(kayit.tur)}`,
       `Kaynak: ${this.getAjandaKaynakEtiketi(kayit.kaynak)}`,
@@ -7501,6 +7556,8 @@ export class AppComponent implements OnInit {
       kayit.altBaslik ? `Açıklama: ${kayit.altBaslik}` : '',
       kayit.anaEvrakIsmi ? `Bağlı ana evrak: ${kayit.anaEvrakIsmi}` : '',
       kayit.evrakIsmi ? `Süreli iş evrakı: ${kayit.evrakIsmi}` : '',
+      '',
+      dosyaBaglantisi ? `Dosyayı sistemde aç: ${dosyaBaglantisi}` : '',
       '',
       'Akyavaş Hukuk Takip Sistemi üzerinden Google Takvim’e aktarılmıştır.'
     ];
@@ -7555,10 +7612,8 @@ export class AppComponent implements OnInit {
     }
 
     const aktarimAnahtari = this.getGoogleCalendarAktarimAnahtari(kayit);
-    if (this.googleCalendarAktarimlari[aktarimAnahtari]) {
-      this.bildirimGoster('info', 'Zaten aktarıldı', 'Bu ajanda kaydı aynı tarih ve saatle daha önce Google Takvim’e aktarılmış.');
-      return;
-    }
+    const mevcutAktarim = this.googleCalendarAktarimlari[aktarimAnahtari];
+    const guncellemeMi = Boolean(mevcutAktarim?.eventId);
 
     this.googleCalendarAktariliyorId = kayit.id;
     this.cdr.detectChanges();
@@ -7566,27 +7621,43 @@ export class AppComponent implements OnInit {
     try {
       const token = await this.googleErisimBelirteciAl(GOOGLE_DOCS_CONFIG.calendarScopes, 'calendar');
       const zaman = this.googleCalendarEtkinlikZamani(kayit);
-      const etkinlik = await this.googleJsonIstek('https://www.googleapis.com/calendar/v3/calendars/primary/events', token, {
-        method: 'POST',
-        body: JSON.stringify({
-          summary: this.googleCalendarEtkinlikBasligi(kayit),
-          description: this.googleCalendarEtkinlikAciklamasi(kayit),
-          location: this.googleCalendarEtkinlikKonumu(kayit),
-          ...zaman,
-          reminders: { useDefault: false, overrides: this.googleCalendarHatirlaticilari(kayit) }
-        })
+      const dosyaBaglantisi = this.googleCalendarDosyaBaglantisi(kayit);
+      const etkinlikGovdesi: Record<string, any> = {
+        summary: this.googleCalendarEtkinlikBasligi(kayit),
+        description: this.googleCalendarEtkinlikAciklamasi(kayit),
+        location: this.googleCalendarEtkinlikKonumu(kayit),
+        ...zaman,
+        reminders: { useDefault: false, overrides: this.googleCalendarHatirlaticilari(kayit) }
+      };
+      if (dosyaBaglantisi) {
+        etkinlikGovdesi['source'] = {
+          title: 'Dosyayı Sistemde Aç',
+          url: dosyaBaglantisi
+        };
+      }
+
+      const etkinlikUrl = guncellemeMi
+        ? `https://www.googleapis.com/calendar/v3/calendars/primary/events/${encodeURIComponent(mevcutAktarim.eventId)}`
+        : 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
+      const etkinlik = await this.googleJsonIstek(etkinlikUrl, token, {
+        method: guncellemeMi ? 'PATCH' : 'POST',
+        body: JSON.stringify(etkinlikGovdesi)
       });
 
       this.googleCalendarAktarimlari = {
         ...this.googleCalendarAktarimlari,
         [aktarimAnahtari]: {
-          eventId: etkinlik.id,
-          htmlLink: etkinlik.htmlLink,
+          eventId: etkinlik.id || mevcutAktarim?.eventId,
+          htmlLink: etkinlik.htmlLink || mevcutAktarim?.htmlLink,
           aktarimTarihi: new Date().toISOString()
         }
       };
       this.googleCalendarAktarimlariniKaydet();
-      this.bildirimGoster('success', 'Google Takvim’e aktarıldı', `${kayit.baslik} takvimine eklendi.`);
+      this.bildirimGoster(
+        'success',
+        guncellemeMi ? 'Takvim bağlantısı güncellendi' : 'Google Takvim’e aktarıldı',
+        guncellemeMi ? 'Etkinliğe sistemdeki ilgili dosyanın bağlantısı eklendi.' : `${kayit.baslik} takvime, dosya bağlantısıyla birlikte eklendi.`
+      );
     } catch (e: any) {
       this.bildirimGoster('error', 'Google Takvim’e aktarılamadı', this.googleCalendarHataMesaji(e));
     } finally {
