@@ -39,6 +39,8 @@ import {
   EvrakGorevi,
   FinansalIslem,
   IcraDosyasi,
+  IcraKapakHesabi,
+  IcraKapakKalemiKodu,
   IletisimNotu,
   IliskiDosyaKaydi,
   KullaniciAyarlari,
@@ -93,6 +95,28 @@ type HazirExcelMakbuz = {
   url: string;
   dosyaAdi: string;
   olusturmaTarihi: string;
+};
+
+type IcraKapakKalemiOzeti = {
+  kod: IcraKapakKalemiKodu;
+  etiket: string;
+  tutar: number;
+  muhasebeyeDahil: boolean;
+};
+
+type IcraKapakHesabiSonucu = {
+  hesapTarihi: string;
+  faizBaslangicTarihi: string;
+  faizGunSayisi: number;
+  gunlukFaiz: number;
+  isleyenFaiz: number;
+  kapakToplami: number;
+  kapakTahsilati: number;
+  kalanKapak: number;
+  buroToplamAlacak: number;
+  buroTahsilati: number;
+  buroKalanAlacak: number;
+  kalemler: IcraKapakKalemiOzeti[];
 };
 
 type GoogleCalendarAktarimKaydi = {
@@ -490,6 +514,16 @@ export class AppComponent implements OnInit {
 
   davaFormAcik = false; icraFormAcik = false; arabuluculukFormAcik = false; muvekkilFormAcik = false; formModu: 'ekle' | 'duzenle' = 'ekle';
   islemGorenDava: Partial<DavaDosyasi> = {}; islemGorenIcra: Partial<IcraDosyasi> = {}; islemGorenArabuluculuk: Partial<ArabuluculukDosyasi> = {}; islemGorenMuvekkil: Partial<Muvekkil> = {};
+  islemGorenIcraKapakHesabi: IcraKapakHesabi = this.bosIcraKapakHesabi();
+  readonly icraKapakMuhasebeKalemSecenekleri: Array<{ kod: IcraKapakKalemiKodu; etiket: string }> = [
+    { kod: 'asilAlacak', etiket: 'Asıl Alacak' },
+    { kod: 'takipOncesiIslemisFaiz', etiket: 'Takip Öncesi İşlemiş Faiz' },
+    { kod: 'isleyenFaiz', etiket: 'Takip Sonrası İşleyen Faiz' },
+    { kod: 'karsiTarafVekaletUcreti', etiket: 'Karşı Taraf Vekalet Ücreti' },
+    { kod: 'harclar', etiket: 'Harçlar' },
+    { kod: 'dosyaMasraflari', etiket: 'Dosya Masrafları' },
+    { kod: 'digerFeriler', etiket: 'Diğer Feriler' }
+  ];
   
   yeniIslem: Partial<FinansalIslem> = { tur: 'Vekalet Ücreti' }; 
   duzenlenenFinansalIslemId: number | null = null;
@@ -2201,7 +2235,7 @@ export class AppComponent implements OnInit {
     this.aktifSablonSekmesi = durum.aktifSablonSekmesi;
 
     if (hedefSayfa === 'detay') this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti');
-    if (hedefSayfa === 'icraDetay') this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti');
+    if (hedefSayfa === 'icraDetay') this.detayGecisiIcinArayuzuHazirla('Kapak Tahsilatı (Müvekkil Payı)');
     if (hedefSayfa === 'arabuluculukDetay') this.detayGecisiIcinArayuzuHazirla('Ödeme');
   }
   geriGidilebilirMi() {
@@ -2256,7 +2290,7 @@ export class AppComponent implements OnInit {
   }
 
   detayaGit(d: DavaDosyasi) { this.mobilSolMenuyuKapat(); this.gezinmeGecmisineEkle(); this.seciliDava = d; this.aktifSayfa = 'detay'; this.aktifDetaySekmesi = 'notlar'; this.aktifDavaTarafDetayi = null; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
-  icraDetayinaGit(i: IcraDosyasi) { this.mobilSolMenuyuKapat(); this.gezinmeGecmisineEkle(); this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti'); }
+  icraDetayinaGit(i: IcraDosyasi) { this.mobilSolMenuyuKapat(); this.gezinmeGecmisineEkle(); this.seciliIcra = i; this.aktifSayfa = 'icraDetay'; this.aktifDetaySekmesi = 'notlar'; this.detayGecisiIcinArayuzuHazirla('Kapak Tahsilatı (Müvekkil Payı)'); }
   arabuluculukDetayinaGit(a: ArabuluculukDosyasi) { this.mobilSolMenuyuKapat(); this.gezinmeGecmisineEkle(); this.seciliArabuluculuk = a; this.aktifSayfa = 'arabuluculukDetay'; this.aktifDetaySekmesi = 'notlar'; this.detayGecisiIcinArayuzuHazirla('Ödeme'); }
 
   private takvimDosyaDerinBaglantisiniOku(): TakvimDosyaDerinBaglantisi | null {
@@ -2485,7 +2519,9 @@ export class AppComponent implements OnInit {
       { etiket: 'Borçlu', onceki: onceki?.borclu, sonraki: sonraki.borclu },
       { etiket: 'Takip tipi', onceki: onceki?.takipTipi, sonraki: sonraki.takipTipi },
       { etiket: 'Takip tarihi', onceki: onceki?.takipTarihi, sonraki: sonraki.takipTarihi },
-      { etiket: 'Arşiv yeri', onceki: onceki?.arsivYeri, sonraki: sonraki.arsivYeri }
+      { etiket: 'Arşiv yeri', onceki: onceki?.arsivYeri, sonraki: sonraki.arsivYeri },
+      { etiket: 'Kapak hesabı', onceki: JSON.stringify(onceki?.kapakHesabi || {}), sonraki: JSON.stringify(sonraki.kapakHesabi || {}) },
+      { etiket: 'Akdi vekalet ücreti', onceki: onceki?.vekaletUcreti, sonraki: sonraki.vekaletUcreti }
     ]);
   }
   arabuluculukGuncellemeOzeti(onceki: ArabuluculukDosyasi | undefined, sonraki: ArabuluculukDosyasi) {
@@ -3525,9 +3561,8 @@ export class AppComponent implements OnInit {
       if (kalan > 0.01) liste.push({ tip: 'Avukatlık', isim: d.dosyaNo || 'İsimsiz Dosya', muvekkil: d.muvekkil, toplam: d.vekaletUcreti || 0, tahsilat: odenen, kalan: kalan, id: d.id, detayFonk: () => this.detayaGit(d) });
     });
     this.icralar.forEach(i => {
-      let odenen = 0; (i.finansalIslemler || []).forEach(islem => { if (islem.tur === 'Vekalet Ücreti') odenen += islem.tutar; });
-      const kalan = Math.max(0, Number(((i.vekaletUcreti || 0) - odenen).toFixed(2)));
-      if (kalan > 0.01) liste.push({ tip: 'İcra', isim: i.icraDairesi + ' ' + i.dosyaNo, muvekkil: i.muvekkil, toplam: i.vekaletUcreti || 0, tahsilat: odenen, kalan: kalan, id: i.id, detayFonk: () => this.icraDetayinaGit(i) });
+      const finans = this.getDosyaFinans(i);
+      if (finans.kalanVekalet > 0.01) liste.push({ tip: 'İcra', isim: i.icraDairesi + ' ' + i.dosyaNo, muvekkil: i.muvekkil, toplam: finans.anlasilanUcret, tahsilat: finans.toplamTahsilat, kalan: finans.kalanVekalet, id: i.id, detayFonk: () => this.icraDetayinaGit(i) });
     });
     this.arabuluculukDosyalar.forEach(a => {
       let odenen = 0; (a.finansalIslemler || []).forEach(islem => { 
@@ -5614,6 +5649,7 @@ export class AppComponent implements OnInit {
     if (i) {
       this.formModu = 'duzenle';
       this.islemGorenIcra = { ...i };
+      this.islemGorenIcraKapakHesabi = this.bosIcraKapakHesabi(i.kapakHesabi);
       this.icraMuvekkilRolu = i.muvekkilRolu
         || ((i.alacakli || '').trim() === (i.muvekkil || '').trim() ? 'Alacaklı'
           : (i.borclu || '').trim() === (i.muvekkil || '').trim() ? 'Borçlu'
@@ -5622,6 +5658,7 @@ export class AppComponent implements OnInit {
     else {
       this.formModu = 'ekle';
       this.islemGorenIcra = { durum: 'Aktif', muvekkilId: undefined, takipTipi: 'İlamsız' };
+      this.islemGorenIcraKapakHesabi = this.bosIcraKapakHesabi();
       this.icraMuvekkilRolu = null;
     }
     this.icraFormAcik = true;
@@ -5634,6 +5671,7 @@ export class AppComponent implements OnInit {
     this.hizliMuvekkilFormAcik = false;
     this.hizliMuvekkilKayitBaglami = 'dava';
     this.hizliMuvekkilKaydi = { tip: 'Müvekkil' };
+    this.islemGorenIcraKapakHesabi = this.bosIcraKapakHesabi();
     this.yeniArsivKlasoru = '';
   }
   
@@ -5648,12 +5686,13 @@ export class AppComponent implements OnInit {
     this.islemGorenIcra.arsivYeri = this.formatMetin(this.islemGorenIcra.arsivYeri);
 
     const m = this.muvekkiller.find(x => x.id == this.islemGorenIcra.muvekkilId);
+    const kapakHesabi = this.bosIcraKapakHesabi(this.islemGorenIcraKapakHesabi);
     if (this.formModu === 'ekle') {
-      let y: IcraDosyasi = { id: Date.now(), icraDairesi: this.islemGorenIcra.icraDairesi || '', dosyaNo: this.islemGorenIcra.dosyaNo || '', eskiMahkeme: this.islemGorenIcra.eskiMahkeme || '', eskiEsasNo: this.islemGorenIcra.eskiEsasNo || '', muvekkilId: m?.id, muvekkil: m?.adSoyad || 'Bilinmiyor', muvekkilRolu: this.icraMuvekkilRolu, alacakli: this.islemGorenIcra.alacakli || '-', borclu: this.islemGorenIcra.borclu || '-', takipTipi: this.islemGorenIcra.takipTipi || '', takipTarihi: this.islemGorenIcra.takipTarihi || '', durum: this.islemGorenIcra.durum as any, baglantiliDavaId: this.islemGorenIcra.baglantiliDavaId, arsivYeri: this.islemGorenIcra.arsivYeri || '', vekaletUcreti: this.islemGorenIcra.vekaletUcreti || 0, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
+      let y: IcraDosyasi = { id: Date.now(), icraDairesi: this.islemGorenIcra.icraDairesi || '', dosyaNo: this.islemGorenIcra.dosyaNo || '', eskiMahkeme: this.islemGorenIcra.eskiMahkeme || '', eskiEsasNo: this.islemGorenIcra.eskiEsasNo || '', muvekkilId: m?.id, muvekkil: m?.adSoyad || 'Bilinmiyor', muvekkilRolu: this.icraMuvekkilRolu, alacakli: this.islemGorenIcra.alacakli || '-', borclu: this.islemGorenIcra.borclu || '-', takipTipi: this.islemGorenIcra.takipTipi || '', takipTarihi: this.islemGorenIcra.takipTarihi || '', durum: this.islemGorenIcra.durum as any, baglantiliDavaId: this.islemGorenIcra.baglantiliDavaId, arsivYeri: this.islemGorenIcra.arsivYeri || '', vekaletUcreti: this.islemGorenIcra.vekaletUcreti || 0, kapakHesabi, notlar: '', finansalIslemler: [], evraklar: [], islemGecmisi: [], takvimGecmisi: [] };
       y = this.dosyayaIslemKaydiEkle(y, 'dosya', 'İcra dosyası açıldı', `${y.icraDairesi} / ${y.dosyaNo} referansıyla yeni takip oluşturuldu.`);
       this.icraKaydetCloud(y, 'Yeni icra dosyası buluta eklendi.');
     } else {
-      let g = { ...this.islemGorenIcra, muvekkil: m?.adSoyad || this.islemGorenIcra.muvekkil, muvekkilRolu: this.icraMuvekkilRolu } as IcraDosyasi;
+      let g = { ...this.islemGorenIcra, muvekkil: m?.adSoyad || this.islemGorenIcra.muvekkil, muvekkilRolu: this.icraMuvekkilRolu, kapakHesabi } as IcraDosyasi;
       const mevcut = this.icralar.find(x => x.id === this.islemGorenIcra.id);
       g = this.dosyayaIslemKaydiEkle(g, 'dosya', 'İcra dosyası güncellendi', this.icraGuncellemeOzeti(mevcut, g));
       this.icraKaydetCloud(g, 'İcra dosyasındaki bilgiler güncellendi.');
@@ -6331,11 +6370,124 @@ export class AppComponent implements OnInit {
     return 'Tamamlandı';
   }
 
+  bosIcraKapakHesabi(kaynak?: Partial<IcraKapakHesabi>): IcraKapakHesabi {
+    return {
+      asilAlacak: this.pozitifParaDegeri(kaynak?.asilAlacak),
+      faizBaslangicTarihi: kaynak?.faizBaslangicTarihi || '',
+      hesapTarihi: kaynak?.hesapTarihi || '',
+      yillikFaizOrani: this.pozitifParaDegeri(kaynak?.yillikFaizOrani),
+      takipOncesiIslemisFaiz: this.pozitifParaDegeri(kaynak?.takipOncesiIslemisFaiz),
+      karsiTarafVekaletUcreti: this.pozitifParaDegeri(kaynak?.karsiTarafVekaletUcreti),
+      harclar: this.pozitifParaDegeri(kaynak?.harclar),
+      dosyaMasraflari: this.pozitifParaDegeri(kaynak?.dosyaMasraflari),
+      digerFeriler: this.pozitifParaDegeri(kaynak?.digerFeriler),
+      muhasebeyeDahilKalemler: kaynak?.muhasebeyeDahilKalemler
+        ? [...new Set(kaynak.muhasebeyeDahilKalemler)]
+        : ['karsiTarafVekaletUcreti']
+    };
+  }
+
+  private pozitifParaDegeri(deger: unknown) {
+    const sayi = Number(deger || 0);
+    return Number.isFinite(sayi) ? Math.max(0, Math.round(sayi * 100) / 100) : 0;
+  }
+
+  private icraKapakTarihGunFarki(baslangic: string, bitis: string) {
+    const tarihParcala = (deger: string) => {
+      const [yil, ay, gun] = (deger || '').split('-').map(Number);
+      if (!yil || !ay || !gun) return null;
+      return Date.UTC(yil, ay - 1, gun);
+    };
+    const baslangicMs = tarihParcala(baslangic);
+    const bitisMs = tarihParcala(bitis);
+    if (baslangicMs === null || bitisMs === null || bitisMs <= baslangicMs) return 0;
+    return Math.floor((bitisMs - baslangicMs) / 86_400_000);
+  }
+
+  icraKapakKalemiMuhasebeyeDahilMi(kod: IcraKapakKalemiKodu, hesap: Partial<IcraKapakHesabi> = this.islemGorenIcraKapakHesabi) {
+    return (hesap.muhasebeyeDahilKalemler || []).includes(kod);
+  }
+
+  icraKapakMuhasebeSeciminiDegistir(kod: IcraKapakKalemiKodu, secili: boolean) {
+    const mevcut = new Set(this.islemGorenIcraKapakHesabi.muhasebeyeDahilKalemler || []);
+    if (secili) mevcut.add(kod);
+    else mevcut.delete(kod);
+    this.islemGorenIcraKapakHesabi.muhasebeyeDahilKalemler = [...mevcut];
+  }
+
+  getIcraKapakHesabiSonucu(dosya?: Partial<IcraDosyasi> | null, kapakKaydi?: Partial<IcraKapakHesabi>): IcraKapakHesabiSonucu {
+    const hesap = this.bosIcraKapakHesabi(kapakKaydi || dosya?.kapakHesabi);
+    const bugun = this.gunBazliIsoTarih(new Date());
+    const faizBaslangicTarihi = hesap.faizBaslangicTarihi || dosya?.takipTarihi || '';
+    const hesapTarihi = hesap.hesapTarihi || bugun;
+    const faizGunSayisi = this.icraKapakTarihGunFarki(faizBaslangicTarihi, hesapTarihi);
+    const asilAlacak = this.pozitifParaDegeri(hesap.asilAlacak);
+    const yillikFaizOrani = this.pozitifParaDegeri(hesap.yillikFaizOrani);
+    const gunlukFaiz = Math.round((asilAlacak * yillikFaizOrani / 100 / 365) * 100) / 100;
+    const isleyenFaiz = Math.round((asilAlacak * yillikFaizOrani / 100 * faizGunSayisi / 365) * 100) / 100;
+    const muhasebeSecimleri = new Set(hesap.muhasebeyeDahilKalemler || []);
+    const kalemler: IcraKapakKalemiOzeti[] = [
+      { kod: 'asilAlacak', etiket: 'Asıl Alacak', tutar: asilAlacak, muhasebeyeDahil: muhasebeSecimleri.has('asilAlacak') },
+      { kod: 'takipOncesiIslemisFaiz', etiket: 'Takip Öncesi İşlemiş Faiz', tutar: this.pozitifParaDegeri(hesap.takipOncesiIslemisFaiz), muhasebeyeDahil: muhasebeSecimleri.has('takipOncesiIslemisFaiz') },
+      { kod: 'isleyenFaiz', etiket: `Takip Sonrası İşleyen Faiz (${faizGunSayisi} gün)`, tutar: isleyenFaiz, muhasebeyeDahil: muhasebeSecimleri.has('isleyenFaiz') },
+      { kod: 'karsiTarafVekaletUcreti', etiket: 'Karşı Taraf Vekalet Ücreti', tutar: this.pozitifParaDegeri(hesap.karsiTarafVekaletUcreti), muhasebeyeDahil: muhasebeSecimleri.has('karsiTarafVekaletUcreti') },
+      { kod: 'harclar', etiket: 'Harçlar', tutar: this.pozitifParaDegeri(hesap.harclar), muhasebeyeDahil: muhasebeSecimleri.has('harclar') },
+      { kod: 'dosyaMasraflari', etiket: 'Dosya Masrafları', tutar: this.pozitifParaDegeri(hesap.dosyaMasraflari), muhasebeyeDahil: muhasebeSecimleri.has('dosyaMasraflari') },
+      { kod: 'digerFeriler', etiket: 'Diğer Feriler', tutar: this.pozitifParaDegeri(hesap.digerFeriler), muhasebeyeDahil: muhasebeSecimleri.has('digerFeriler') }
+    ];
+    const kapakToplami = Math.round(kalemler.reduce((toplam, kalem) => toplam + kalem.tutar, 0) * 100) / 100;
+    const islemler = dosya?.finansalIslemler || [];
+    const kapakTahsilati = Math.round(islemler.reduce((toplam, islem) => {
+      return this.icraKapakTahsilatiMi(islem.tur) ? toplam + this.pozitifParaDegeri(islem.tutar) : toplam;
+    }, 0) * 100) / 100;
+    const akdiVekaletUcreti = this.pozitifParaDegeri(dosya?.vekaletUcreti);
+    const buroToplamAlacak = Math.round((akdiVekaletUcreti + kalemler.filter(kalem => kalem.muhasebeyeDahil).reduce((toplam, kalem) => toplam + kalem.tutar, 0)) * 100) / 100;
+    const buroTahsilati = Math.round(islemler.reduce((toplam, islem) => {
+      return this.icraBuroTahsilatiMi(islem.tur) ? toplam + this.pozitifParaDegeri(islem.tutar) : toplam;
+    }, 0) * 100) / 100;
+    return {
+      hesapTarihi,
+      faizBaslangicTarihi,
+      faizGunSayisi,
+      gunlukFaiz,
+      isleyenFaiz,
+      kapakToplami,
+      kapakTahsilati,
+      kalanKapak: Math.max(0, Math.round((kapakToplami - kapakTahsilati) * 100) / 100),
+      buroToplamAlacak,
+      buroTahsilati,
+      buroKalanAlacak: Math.max(0, Math.round((buroToplamAlacak - buroTahsilati) * 100) / 100),
+      kalemler
+    };
+  }
+
+  icraKapakTahsilatiMi(tur?: string) {
+    return tur === 'Kapak Tahsilatı (Müvekkil Payı)' || tur === 'Kapak Tahsilatı (Büro Payı)';
+  }
+
+  icraBuroTahsilatiMi(tur?: string) {
+    return tur === 'Vekalet Ücreti' || tur === 'Kapak Tahsilatı (Büro Payı)';
+  }
+
+  aktifIcraKapakHesabiniDuzenle() {
+    const dosya = this.getAktifIcraDosyasi();
+    if (dosya) this.icraFormunuAc(dosya);
+  }
+
   getFinansalIslemTurSecenekleri() {
     if (this.aktifSayfa === 'arabuluculukDetay') {
       return [
         { value: 'Ödeme Talep Tarihi', label: 'Ödeme Talep Tarihi' },
         { value: 'Ödeme', label: 'Ödeme' }
+      ];
+    }
+    if (this.aktifSayfa === 'icraDetay') {
+      return [
+        { value: 'Kapak Tahsilatı (Müvekkil Payı)', label: 'Kapak Tahsilatı - Müvekkil Payı' },
+        { value: 'Kapak Tahsilatı (Büro Payı)', label: 'Kapak Tahsilatı - Büro Payı' },
+        { value: 'Vekalet Ücreti', label: 'Müvekkilden Büro Ücreti Tahsilatı' },
+        { value: 'Masraf Avansı (Giriş)', label: 'Masraf Avansı' },
+        { value: 'Masraf Harcaması (Çıkış)', label: 'Masraf Harcaması' }
       ];
     }
     return [
@@ -9105,6 +9257,7 @@ export class AppComponent implements OnInit {
 
   getDosyaFinans(dosya: any) {
     let isArabuluculuk = dosya.buroNo !== undefined;
+    const isIcra = !isArabuluculuk && dosya.icraDairesi !== undefined && dosya.alacakli !== undefined && dosya.borclu !== undefined;
     let v = 0, g = 0, c = 0, t = 0;
     (dosya.finansalIslemler || []).forEach((i:any) => { 
       if (isArabuluculuk) {
@@ -9114,12 +9267,14 @@ export class AppComponent implements OnInit {
           t += hesap?.netTutar || 0;
         }
       } else {
-        if (i.tur === 'Vekalet Ücreti') { v += i.tutar; t += i.tutar; } 
+        if ((isIcra && this.icraBuroTahsilatiMi(i.tur)) || (!isIcra && i.tur === 'Vekalet Ücreti')) { v += i.tutar; t += i.tutar; }
         if (i.tur === 'Masraf Avansı (Giriş)') g += i.tutar; 
         if (i.tur === 'Masraf Harcaması (Çıkış)') c += i.tutar; 
       }
     });
-    let anaUcret = dosya.vekaletUcreti || 0; if (isArabuluculuk) anaUcret = this.getArabuluculukHizmetUcretiHesabi(dosya)?.netTutar || 0;
+    let anaUcret = dosya.vekaletUcreti || 0;
+    if (isArabuluculuk) anaUcret = this.getArabuluculukHizmetUcretiHesabi(dosya)?.netTutar || 0;
+    else if (isIcra) anaUcret = this.getIcraKapakHesabiSonucu(dosya).buroToplamAlacak;
     return {
       anlasilanUcret: anaUcret,
       kalanVekalet: Math.max(0, anaUcret - v),

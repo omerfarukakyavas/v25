@@ -2698,7 +2698,7 @@
                       <table class="w-full text-left border-collapse min-w-max">
                         <thead>
                           <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-xs font-semibold tracking-wider">
-                            <th class="p-5">Tür</th><th class="p-5">Dosya / No</th><th class="p-5">Muhatap (Kişi/Kurum)</th><th class="p-5 text-right">Anlaşılan Ücret</th><th class="p-5 text-right">Tahsil Edilen</th><th class="p-5 text-right">Kalan Alacak</th><th class="p-5 text-right">İşlem</th>
+                            <th class="p-5">Tür</th><th class="p-5">Dosya / No</th><th class="p-5">Muhatap (Kişi/Kurum)</th><th class="p-5 text-right">Büro Alacağı</th><th class="p-5 text-right">Tahsil Edilen</th><th class="p-5 text-right">Kalan Alacak</th><th class="p-5 text-right">İşlem</th>
                           </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -3058,9 +3058,15 @@
                           <p class="mt-2 inline-flex rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">{{ getAktifDosyaKritikTarihDurumu() }}</p>
                         </div>
                         <div class="rounded-2xl border border-white/70 bg-white/90 px-3 py-3 shadow-sm sm:px-4 sm:py-4">
-                          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kalan Ücret</p>
-                          <p class="mt-2 text-sm font-black text-slate-900 sm:text-base">{{ formatPara(getDosyaFinans(aktifDosya).kalanVekalet) }}</p>
-                          <p class="mt-2 text-[10px] font-bold text-emerald-600">Tahsil edilen: {{ formatPara(getDosyaFinans(aktifDosya).toplamTahsilat) }}</p>
+                          @if (aktifSayfa === 'icraDetay') {
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kapak Bakiyesi</p>
+                            <p class="mt-2 text-sm font-black text-slate-900 sm:text-base">{{ formatPara(getIcraKapakHesabiSonucu(aktifDosya).kalanKapak) }}</p>
+                            <p class="mt-2 text-[10px] font-bold text-emerald-600">Büro alacağı: {{ formatPara(getIcraKapakHesabiSonucu(aktifDosya).buroKalanAlacak) }}</p>
+                          } @else {
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kalan Ücret</p>
+                            <p class="mt-2 text-sm font-black text-slate-900 sm:text-base">{{ formatPara(getDosyaFinans(aktifDosya).kalanVekalet) }}</p>
+                            <p class="mt-2 text-[10px] font-bold text-emerald-600">Tahsil edilen: {{ formatPara(getDosyaFinans(aktifDosya).toplamTahsilat) }}</p>
+                          }
                         </div>
                         <div class="rounded-2xl border border-white/70 bg-white/90 px-3 py-3 shadow-sm sm:px-4 sm:py-4">
                           <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Toplam Evrak</p>
@@ -4542,8 +4548,8 @@
                              <div class="space-y-4">
                                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                           <div class="border-b border-emerald-200 bg-emerald-50 p-3 sm:p-4">
-                            <h4 class="text-sm font-bold tracking-[0.02em] text-emerald-900 sm:text-base">Dosya Finans ve Masraf Takibi</h4>
-                            <p class="mt-1 text-[11px] font-medium text-emerald-800">Tahsilat, emanet ve masraf hareketlerini tek blokta izleyin.</p>
+                            <h4 class="text-sm font-bold tracking-[0.02em] text-emerald-900 sm:text-base">{{ aktifSayfa === 'icraDetay' ? 'İcra Kapak Hesabı ve Büro Muhasebesi' : 'Dosya Finans ve Masraf Takibi' }}</h4>
+                            <p class="mt-1 text-[11px] font-medium text-emerald-800">{{ aktifSayfa === 'icraDetay' ? 'Dosya borcunu, müvekkil payını ve büroya ait alacakları birbirine karıştırmadan izleyin.' : 'Tahsilat, emanet ve masraf hareketlerini tek blokta izleyin.' }}</p>
                          </div>
                          <div class="space-y-4 p-3 sm:space-y-5 sm:p-5">
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -4556,6 +4562,25 @@
                                   <p class="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-900">Net Tahsil Edilen</p>
                                   <p class="text-lg font-black text-emerald-800">{{ formatPara(getDosyaFinans(aktifDosya).toplamTahsilat) }}</p>
                                 </div>
+                              } @else if (aktifSayfa === 'icraDetay') {
+                                @if (getIcraKapakHesabiSonucu(aktifDosya); as kapak) {
+                                  <div class="rounded-lg border-2 border-sky-200 bg-sky-50 p-3 shadow-sm">
+                                    <p class="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-sky-900">Kalan Kapak Borcu</p>
+                                    <p class="text-xl font-black text-sky-950">{{ formatPara(kapak.kalanKapak) }}</p>
+                                  </div>
+                                  <div class="rounded-lg border-2 border-emerald-200 bg-emerald-50 p-3 shadow-sm">
+                                    <p class="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-900">Kalan Büro Alacağı</p>
+                                    <p class="text-xl font-black text-emerald-900">{{ formatPara(kapak.buroKalanAlacak) }}</p>
+                                  </div>
+                                  <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 shadow-sm">
+                                    <p class="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-700">Kapak Tahsilatı</p>
+                                    <p class="text-lg font-black text-slate-900">{{ formatPara(kapak.kapakTahsilati) }}</p>
+                                  </div>
+                                  <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 shadow-sm">
+                                    <p class="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-900">Günlük Basit Faiz</p>
+                                    <p class="text-lg font-black text-amber-900">{{ formatPara(kapak.gunlukFaiz) }}</p>
+                                  </div>
+                                }
                               } @else {
                                 <div class="rounded-lg border border-rose-200 bg-rose-50/90 p-3 shadow-sm">
                                   <p class="mb-1 text-[10px] font-black uppercase tracking-[0.12em] text-rose-900">Kalan Vekalet / Hizmet Ücreti</p>
@@ -4567,11 +4592,51 @@
                                 </div>
                               }
                             </div>
+                            @if (aktifSayfa === 'icraDetay' && getIcraKapakHesabiSonucu(aktifDosya); as kapak) {
+                              <div class="overflow-hidden rounded-xl border-2 border-sky-200 bg-white shadow-sm">
+                                <div class="flex flex-col gap-3 border-b border-sky-200 bg-sky-50 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+                                  <div>
+                                    <p class="text-xs font-black uppercase tracking-[0.16em] text-sky-950">Kapak Hesabı Dökümü</p>
+                                    <p class="mt-1 text-[11px] font-medium text-sky-800">{{ kapak.faizBaslangicTarihi ? formatTarihKisa(kapak.faizBaslangicTarihi) : 'Faiz başlangıcı girilmedi' }} - {{ formatTarihKisa(kapak.hesapTarihi) }} tarihleri için ön hesap</p>
+                                  </div>
+                                  <button type="button" (click)="aktifIcraKapakHesabiniDuzenle()" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-sky-800 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-sky-900 sm:w-auto">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    Kapak Hesabını Düzenle
+                                  </button>
+                                </div>
+                                <div class="overflow-x-auto">
+                                  <table class="min-w-full divide-y divide-slate-100 text-sm">
+                                    <thead class="bg-slate-50 text-left text-[10px] font-black uppercase tracking-[0.12em] text-slate-600">
+                                      <tr><th class="px-3 py-2">Kalem</th><th class="px-3 py-2 text-center">Muhasebe</th><th class="px-3 py-2 text-right">Tutar</th></tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                      @for (kalem of kapak.kalemler; track kalem.kod) {
+                                        <tr>
+                                          <td class="px-3 py-2 font-semibold text-slate-700">{{ kalem.etiket }}</td>
+                                          <td class="px-3 py-2 text-center">
+                                            @if (kalem.muhasebeyeDahil) {
+                                              <span class="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-800">Büro alacağı</span>
+                                            } @else {
+                                              <span class="text-xs font-bold text-slate-400">-</span>
+                                            }
+                                          </td>
+                                          <td class="px-3 py-2 text-right font-black text-slate-900">{{ formatPara(kalem.tutar) }}</td>
+                                        </tr>
+                                      }
+                                      <tr class="bg-sky-50"><td class="px-3 py-3 font-black uppercase tracking-[0.1em] text-sky-950" colspan="2">Toplam Kapak Tutarı</td><td class="px-3 py-3 text-right text-lg font-black text-sky-950">{{ formatPara(kapak.kapakToplami) }}</td></tr>
+                                      <tr><td class="px-3 py-2 font-bold text-slate-600" colspan="2">Kapak Tahsilatı</td><td class="px-3 py-2 text-right font-black text-emerald-700">-{{ formatPara(kapak.kapakTahsilati) }}</td></tr>
+                                      <tr class="bg-slate-900 text-white"><td class="px-3 py-3 font-black uppercase tracking-[0.1em]" colspan="2">Kalan Kapak Borcu</td><td class="px-3 py-3 text-right text-xl font-black">{{ formatPara(kapak.kalanKapak) }}</td></tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <div class="border-t border-amber-200 bg-amber-50 px-3 py-2.5 text-[11px] font-semibold leading-5 text-amber-900">Bu hesap çalışma amaçlıdır. Faiz türü, oran, harç ve vekalet ücreti UYAP veya icra müdürlüğü kapak hesabıyla karşılaştırılmalıdır.</div>
+                              </div>
+                            }
                             @if (getDosyaFinans(aktifDosya); as finansOzeti) {
                               <div class="flex flex-col gap-3 rounded-xl border border-emerald-200 bg-emerald-50/80 p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                                 <div>
-                                  <p class="text-xs font-black uppercase tracking-[0.14em] text-emerald-900">Hızlı ödeme kapatma</p>
-                                  <p class="mt-1 text-[11px] font-semibold text-emerald-800">Kalan alacak kadar otomatik tahsilat kaydı açar ve dosyanın alacağını sıfırlar.</p>
+                                  <p class="text-xs font-black uppercase tracking-[0.14em] text-emerald-900">{{ aktifSayfa === 'icraDetay' ? 'Büro alacağını hızlı kapat' : 'Hızlı ödeme kapatma' }}</p>
+                                  <p class="mt-1 text-[11px] font-semibold text-emerald-800">{{ aktifSayfa === 'icraDetay' ? 'Yalnız büro muhasebesindeki kalan alacak kadar tahsilat oluşturur; kapak hesabını değiştirmez.' : 'Kalan alacak kadar otomatik tahsilat kaydı açar ve dosyanın alacağını sıfırlar.' }}</p>
                                 </div>
                                 <button
                                   type="button"
@@ -4580,7 +4645,7 @@
                                   [style.color]="finansOzeti.kalanVekalet > 0.01 ? '#ffffff' : null"
                                   class="app-payment-complete-button inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-black text-white shadow-sm transition-colors hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:w-auto">
                                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                  Ödeme Yapıldı
+                                  {{ aktifSayfa === 'icraDetay' ? 'Büro Alacağı Ödendi' : 'Ödeme Yapıldı' }}
                                 </button>
                               </div>
                             }
@@ -4626,6 +4691,11 @@
                                    <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Makbuz / Evrak Linki (Opsiyonel)</label>
                                    <input [(ngModel)]="yeniIslem.makbuzUrl" (keyup.enter)="finansalIslemEkle()" type="text" placeholder="Örn: drive.google.com/... veya docs.google.com/..." class="w-full px-2 py-1.5 text-sm border border-slate-300 rounded outline-none">
                                  </div>
+                                 @if (aktifSayfa === 'icraDetay') {
+                                   <div class="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-[11px] font-semibold leading-5 text-sky-900">
+                                     Müvekkil payı yalnız kapak borcunu; büro payı hem kapak borcunu hem büro alacağını azaltır. Müvekkilin ayrıca ödediği akdi ücret için “Müvekkilden Büro Ücreti Tahsilatı”nı seçin.
+                                   </div>
+                                 }
                                  @if (aktifSayfa === 'arabuluculukDetay') {
                                     <div class="flex flex-col gap-2 rounded-xl border border-violet-200 bg-violet-50/80 px-3 py-2.5">
                                       <div class="flex flex-wrap items-center justify-between gap-2">
@@ -4684,7 +4754,7 @@
                                               <span class="text-[9px] text-slate-400 font-normal leading-none mt-0.5">Brüt: {{ formatPara(islem.tutar) }}</span>
                                             }
                                           } @else {
-                                            <span>{{ islem.tur === 'Masraf Harcaması (Çıkış)' ? '-' : '+' }}{{ formatPara(islem.tutar) }}</span>
+                                            <span>{{ islem.tur === 'Masraf Harcaması (Çıkış)' || (aktifSayfa === 'icraDetay' && icraKapakTahsilatiMi(islem.tur)) ? '-' : '+' }}{{ formatPara(islem.tutar) }}</span>
                                           }
                                         </span>
                                       </div>
@@ -5428,8 +5498,8 @@
               </div>
 
               <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
-                <p class="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Durum ve Finans</p>
-                <p class="mt-2 text-sm leading-6 text-slate-500">Takibin mevcut aşaması, tarihi ve vekalet ücreti tek alanda öne çıkarıldı.</p>
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Durum, Kapak ve Büro Alacağı</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Borçlunun kapak hesabı ile büroya ait alacaklar birbirinden ayrı izlenir.</p>
                 <div class="mt-4 grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Durum</label>
@@ -5439,7 +5509,78 @@
                 </div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Takip Tarihi</label><input [(ngModel)]="islemGorenIcra.takipTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 </div>
-                <div class="border-t border-slate-100 pt-4 mt-4"><label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Anlaşılan Vekalet Ücreti (â‚º)</label><input [(ngModel)]="islemGorenIcra.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-emerald-200 bg-emerald-50 rounded-lg outline-none"></div>
+
+                <div class="mt-5 overflow-hidden rounded-2xl border-2 border-sky-200 bg-sky-50/50">
+                  <div class="border-b border-sky-200 bg-sky-100/80 px-4 py-3">
+                    <p class="text-sm font-black text-sky-950">İcra Kapak Hesabı</p>
+                    <p class="mt-1 text-xs font-medium leading-5 text-sky-800">Faiz basit faiz yöntemiyle 365 gün üzerinden ön hesaplanır. Hesap tarihi boş bırakılırsa güncel tarih kullanılır.</p>
+                  </div>
+                  <div class="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div>
+                      <label class="mb-1 block text-xs font-bold text-slate-800">Asıl Alacak (₺)</label>
+                      <input [(ngModel)]="islemGorenIcraKapakHesabi.asilAlacak" type="number" min="0" step="0.01" class="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-slate-900 outline-none">
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-xs font-bold text-slate-800">Yıllık Faiz Oranı (%)</label>
+                      <input [(ngModel)]="islemGorenIcraKapakHesabi.yillikFaizOrani" type="number" min="0" step="0.01" class="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-slate-900 outline-none">
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-xs font-bold text-slate-800">Faiz Başlangıç Tarihi</label>
+                      <input [(ngModel)]="islemGorenIcraKapakHesabi.faizBaslangicTarihi" type="date" class="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-slate-900 outline-none">
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-xs font-bold text-slate-800">Kapak Hesap Tarihi</label>
+                      <input [(ngModel)]="islemGorenIcraKapakHesabi.hesapTarihi" type="date" class="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-slate-900 outline-none">
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-xs font-bold text-slate-800">Takip Öncesi İşlemiş Faiz (₺)</label>
+                      <input [(ngModel)]="islemGorenIcraKapakHesabi.takipOncesiIslemisFaiz" type="number" min="0" step="0.01" class="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-slate-900 outline-none">
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-xs font-bold text-slate-800">Karşı Taraf Vekalet Ücreti (₺)</label>
+                      <input [(ngModel)]="islemGorenIcraKapakHesabi.karsiTarafVekaletUcreti" type="number" min="0" step="0.01" class="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-slate-900 outline-none">
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-xs font-bold text-slate-800">Harçlar (₺)</label>
+                      <input [(ngModel)]="islemGorenIcraKapakHesabi.harclar" type="number" min="0" step="0.01" class="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-slate-900 outline-none">
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-xs font-bold text-slate-800">Dosya Masrafları (₺)</label>
+                      <input [(ngModel)]="islemGorenIcraKapakHesabi.dosyaMasraflari" type="number" min="0" step="0.01" class="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-slate-900 outline-none">
+                    </div>
+                    <div class="sm:col-span-2 xl:col-span-4">
+                      <label class="mb-1 block text-xs font-bold text-slate-800">Diğer Feriler (₺)</label>
+                      <input [(ngModel)]="islemGorenIcraKapakHesabi.digerFeriler" type="number" min="0" step="0.01" class="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-slate-900 outline-none">
+                    </div>
+                  </div>
+
+                  <div class="border-t border-sky-200 bg-white p-4">
+                    <p class="text-xs font-black uppercase tracking-[0.14em] text-slate-900">Muhasebede Benim Alacağım Olarak Göster</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-600">İşaretlenen kapak kalemleri büro alacağına eklenir. Karşı taraf vekalet ücreti varsayılan olarak seçilidir.</p>
+                    <div class="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                      @for (secenek of icraKapakMuhasebeKalemSecenekleri; track secenek.kod) {
+                        <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-800 hover:border-sky-300 hover:bg-sky-50">
+                          <input type="checkbox" [checked]="icraKapakKalemiMuhasebeyeDahilMi(secenek.kod)" (change)="icraKapakMuhasebeSeciminiDegistir(secenek.kod, $any($event.target).checked)" class="h-4 w-4 accent-sky-700">
+                          <span>{{ secenek.etiket }}</span>
+                        </label>
+                      }
+                    </div>
+                  </div>
+
+                  @if (getIcraKapakHesabiSonucu(islemGorenIcra, islemGorenIcraKapakHesabi); as kapakOnizleme) {
+                    <div class="grid gap-3 border-t border-sky-200 bg-slate-900 p-4 text-white sm:grid-cols-3">
+                      <div><p class="text-[10px] font-black uppercase tracking-[0.14em] text-sky-200">Kapak Toplamı</p><p class="mt-1 text-lg font-black">{{ formatPara(kapakOnizleme.kapakToplami) }}</p></div>
+                      <div><p class="text-[10px] font-black uppercase tracking-[0.14em] text-sky-200">İşleyen Faiz</p><p class="mt-1 text-lg font-black">{{ formatPara(kapakOnizleme.isleyenFaiz) }}</p><p class="text-[10px] text-slate-300">{{ kapakOnizleme.faizGunSayisi }} gün</p></div>
+                      <div><p class="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-200">Büro Alacağı</p><p class="mt-1 text-lg font-black">{{ formatPara(kapakOnizleme.buroToplamAlacak) }}</p></div>
+                    </div>
+                  }
+                </div>
+
+                <div class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                  <label class="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-emerald-900">Akdi Vekalet Ücreti / Büro Alacağı (₺)</label>
+                  <input [(ngModel)]="islemGorenIcra.vekaletUcreti" type="number" min="0" step="0.01" class="w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-slate-900 outline-none">
+                  <p class="mt-1 text-[11px] font-medium text-emerald-800">Bu tutar kapak borcuna eklenmez; yalnızca büro muhasebesinde takip edilir.</p>
+                </div>
               </div>
               </div>
             </div>

@@ -10,6 +10,27 @@ export interface FinansalIslem {
   makbuzStopajli?: boolean;
   portalMuvekkilIdleri?: number[];
 }
+export type IcraKapakKalemiKodu =
+  | 'asilAlacak'
+  | 'takipOncesiIslemisFaiz'
+  | 'isleyenFaiz'
+  | 'karsiTarafVekaletUcreti'
+  | 'harclar'
+  | 'dosyaMasraflari'
+  | 'digerFeriler';
+
+export interface IcraKapakHesabi {
+  asilAlacak?: number;
+  faizBaslangicTarihi?: string;
+  hesapTarihi?: string;
+  yillikFaizOrani?: number;
+  takipOncesiIslemisFaiz?: number;
+  karsiTarafVekaletUcreti?: number;
+  harclar?: number;
+  dosyaMasraflari?: number;
+  digerFeriler?: number;
+  muhasebeyeDahilKalemler?: IcraKapakKalemiKodu[];
+}
 export interface EvrakGorevi { id: number; metin: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; }
 export interface EvrakBaglantisi { id: number; isim: string; url: string; tarih: string; tebligTarihi?: string; sonEylemTarihi?: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; yaziRengi?: string; ekler?: EvrakBaglantisi[]; gorevler?: EvrakGorevi[]; sablonBolumu?: string; sablonKategori?: string; portaldaGoster?: boolean; portalMuvekkilIdleri?: number[]; }
 export interface DosyaNumarasi { tur: string; no: string; }
@@ -68,6 +89,7 @@ export interface DavaDosyasi {
 
 export interface IcraDosyasi {
   id: number; icraDairesi: string; dosyaNo: string; eskiMahkeme?: string; eskiEsasNo?: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkilId?: number; muvekkil: string; muvekkilRolu?: 'Alacaklı' | 'Borçlu'; alacakli: string; borclu: string; takipTipi?: string; takipTarihi: string; durum: string; baglantiliDavaId?: number; notlar?: string; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[];
+  kapakHesabi?: IcraKapakHesabi;
   iletisimNotlari?: IletisimNotu[];
   portalMuvekkilIdleri?: number[];
   portalFinansOzetiMuvekkilIdleri?: number[];
