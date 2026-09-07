@@ -282,6 +282,18 @@ type ArabuluculukSablonBolumGorunumu = {
 
 type ArabuluculukSiralamaTipi = 'yeni' | 'eski' | 'sureBitimiYakindanUzaga' | 'sureBitimiUzaktanYakina' | 'toplantiYakindanUzaga';
 
+type AjandaGorunumTipi = 'liste' | 'ay' | 'hafta';
+
+type AjandaTakvimGunu = {
+  tarih: string;
+  gun: number;
+  ayIciMi: boolean;
+  bugunMu: boolean;
+  seciliMi: boolean;
+  kayitlar: AjandaKaydi[];
+  gorunenKayitlar: AjandaKaydi[];
+};
+
 type UygulamaGezinmeDurumu = {
   sayfa: SayfaTipi;
   seciliDavaId: number | null;
@@ -305,6 +317,9 @@ type UygulamaGezinmeDurumu = {
   ajandaArama: string;
   ajandaZamanFiltresi: 'all' | 'today' | '7days' | '30days' | 'overdue';
   ajandaTurFiltresi: 'all' | AjandaTur;
+  ajandaGorunum: AjandaGorunumTipi;
+  ajandaTakvimOdakTarihi: string;
+  ajandaTakvimSeciliTarih: string;
   aktifSablonSekmesi: 'avukatlik' | 'arabuluculuk';
 };
 
@@ -444,6 +459,10 @@ export class AppComponent implements OnInit {
   ajandaArama = '';
   ajandaZamanFiltresi: 'all' | 'today' | '7days' | '30days' | 'overdue' = 'all';
   ajandaTurFiltresi: 'all' | AjandaTur = 'all';
+  ajandaGorunum: AjandaGorunumTipi = 'ay';
+  ajandaTakvimOdakTarihi = this.gunBazliIsoTarih(new Date());
+  ajandaTakvimSeciliTarih = this.ajandaTakvimOdakTarihi;
+  readonly ajandaHaftaGunEtiketleri = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
   yeniOfisGorevi: Partial<OfisGorevi> = { tarih: new Date().toISOString().split('T')[0], saat: '', oncelik: 'Normal' };
   yeniOfisGoreviBagliDosyaTuru: '' | OfisGoreviBagliDosyaTuru = '';
   yeniOfisGoreviBagliDosyaArama = '';
@@ -2108,6 +2127,9 @@ export class AppComponent implements OnInit {
       ajandaArama: this.ajandaArama,
       ajandaZamanFiltresi: this.ajandaZamanFiltresi,
       ajandaTurFiltresi: this.ajandaTurFiltresi,
+      ajandaGorunum: this.ajandaGorunum,
+      ajandaTakvimOdakTarihi: this.ajandaTakvimOdakTarihi,
+      ajandaTakvimSeciliTarih: this.ajandaTakvimSeciliTarih,
       aktifSablonSekmesi: this.aktifSablonSekmesi
     };
   }
@@ -2173,6 +2195,9 @@ export class AppComponent implements OnInit {
     this.ajandaArama = durum.ajandaArama;
     this.ajandaZamanFiltresi = durum.ajandaZamanFiltresi;
     this.ajandaTurFiltresi = durum.ajandaTurFiltresi;
+    this.ajandaGorunum = durum.ajandaGorunum || 'ay';
+    this.ajandaTakvimOdakTarihi = durum.ajandaTakvimOdakTarihi || this.gunBazliIsoTarih(new Date());
+    this.ajandaTakvimSeciliTarih = durum.ajandaTakvimSeciliTarih || this.ajandaTakvimOdakTarihi;
     this.aktifSablonSekmesi = durum.aktifSablonSekmesi;
 
     if (hedefSayfa === 'detay') this.detayGecisiIcinArayuzuHazirla('Vekalet Ücreti');
@@ -4456,6 +4481,20 @@ export class AppComponent implements OnInit {
       });
     });
 
+    this.icralar.forEach(icra => {
+      if ((icra.durum || '').toLowerCase().includes('kap') || !icra.takipTarihi) return;
+      kayitlar.push({
+        id: `icra-takip-${icra.id}`,
+        tarih: icra.takipTarihi,
+        tur: 'takip',
+        kaynak: 'icra',
+        dosya: icra,
+        baslik: `${icra.icraDairesi || 'İcra Takibi'} ${icra.dosyaNo || ''}`.trim(),
+        altBaslik: icra.takipTipi || 'Takip tarihi',
+        taraflar: this.getTaraflarMetni({ tur: 'icra', dosya: icra })
+      });
+    });
+
     this.arabuluculukDosyalar.forEach(arabuluculuk => {
       if (arabuluculuk.durum.toLowerCase().includes('kap') || !arabuluculuk.toplantiTarihi || arabuluculuk.toplantiTamamlandiMi) return;
       kayitlar.push({
@@ -4523,6 +4562,145 @@ export class AppComponent implements OnInit {
     });
   }
 
+  ajandaTakvimGorunumunuDegistir(gorunum: AjandaGorunumTipi) {
+    this.ajandaGorunum = gorunum;
+    if (gorunum !== 'liste' && !this.gunBazliTarihOlustur(this.ajandaTakvimOdakTarihi)) {
+      this.ajandaTakvimBuguneGit();
+    }
+  }
+
+  ajandaTakvimBuguneGit() {
+    const bugun = this.gunBazliIsoTarih(new Date());
+    this.ajandaTakvimOdakTarihi = bugun;
+    this.ajandaTakvimSeciliTarih = bugun;
+  }
+
+  ajandaTakvimDonemDegistir(yon: -1 | 1) {
+    const odak = this.gunBazliTarihOlustur(this.ajandaTakvimOdakTarihi) || new Date();
+    const yeniOdak = new Date(odak);
+
+    if (this.ajandaGorunum === 'hafta') {
+      yeniOdak.setDate(yeniOdak.getDate() + (yon * 7));
+    } else {
+      yeniOdak.setDate(1);
+      yeniOdak.setMonth(yeniOdak.getMonth() + yon);
+    }
+
+    const tarih = this.gunBazliIsoTarih(yeniOdak);
+    this.ajandaTakvimOdakTarihi = tarih;
+    this.ajandaTakvimSeciliTarih = tarih;
+  }
+
+  ajandaTakvimTarihSec(tarih: string) {
+    if (!this.gunBazliTarihOlustur(tarih)) return;
+    this.ajandaTakvimSeciliTarih = tarih;
+    this.ajandaTakvimOdakTarihi = tarih;
+  }
+
+  get ajandaAyTakvimGunleri(): AjandaTakvimGunu[] {
+    const odak = this.gunBazliTarihOlustur(this.ajandaTakvimOdakTarihi) || new Date();
+    const ayinIlkGunu = new Date(odak.getFullYear(), odak.getMonth(), 1);
+    const pazartesiBazliBosluk = (ayinIlkGunu.getDay() + 6) % 7;
+    const baslangic = new Date(ayinIlkGunu);
+    baslangic.setDate(baslangic.getDate() - pazartesiBazliBosluk);
+    return this.ajandaTakvimGunleriniOlustur(baslangic, 42, odak.getMonth());
+  }
+
+  get ajandaHaftaTakvimGunleri(): AjandaTakvimGunu[] {
+    const odak = this.gunBazliTarihOlustur(this.ajandaTakvimOdakTarihi) || new Date();
+    const baslangic = new Date(odak);
+    baslangic.setDate(baslangic.getDate() - ((baslangic.getDay() + 6) % 7));
+    return this.ajandaTakvimGunleriniOlustur(baslangic, 7);
+  }
+
+  get ajandaTakvimDonemBasligi() {
+    const odak = this.gunBazliTarihOlustur(this.ajandaTakvimOdakTarihi) || new Date();
+    if (this.ajandaGorunum === 'ay') {
+      return odak.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+    }
+
+    const hafta = this.ajandaHaftaTakvimGunleri;
+    const ilkGun = this.gunBazliTarihOlustur(hafta[0]?.tarih);
+    const sonGun = this.gunBazliTarihOlustur(hafta[hafta.length - 1]?.tarih);
+    if (!ilkGun || !sonGun) return '';
+    const ilkMetin = ilkGun.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+    const sonMetin = sonGun.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `${ilkMetin} - ${sonMetin}`;
+  }
+
+  get ajandaTakvimSeciliTarihBasligi() {
+    const tarih = this.gunBazliTarihOlustur(this.ajandaTakvimSeciliTarih);
+    return tarih?.toLocaleDateString('tr-TR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }) || 'Tarih seçilmedi';
+  }
+
+  get ajandaTakvimSeciliGunKayitlari() {
+    return this.filtrelenmisAjandaKayitlari.filter(kayit => this.ajandaTakvimKayitTarihAnahtari(kayit) === this.ajandaTakvimSeciliTarih);
+  }
+
+  get ajandaTakvimDonemKayitSayisi() {
+    const gunler = this.ajandaGorunum === 'hafta' ? this.ajandaHaftaTakvimGunleri : this.ajandaAyTakvimGunleri.filter(gun => gun.ayIciMi);
+    return gunler.reduce((toplam, gun) => toplam + gun.kayitlar.length, 0);
+  }
+
+  ajandaTakvimKayitSaatMetni(kayit: AjandaKaydi) {
+    const tarihIcindekiSaat = kayit.tarih.includes('T') ? kayit.tarih.slice(11, 16) : '';
+    const saat = kayit.saat || tarihIcindekiSaat;
+    return saat ? this.formatSaat(saat) : 'Tüm gün';
+  }
+
+  getAjandaTakvimEtkinlikClass(kayit: AjandaKaydi) {
+    if (kayit.tur === 'durusma') return 'app-calendar-event--hearing';
+    if (kayit.tur === 'toplanti') return 'app-calendar-event--meeting';
+    if (kayit.tur === 'sureliIs') return 'app-calendar-event--deadline';
+    if (kayit.tur === 'takip') return 'app-calendar-event--enforcement';
+    return 'app-calendar-event--office';
+  }
+
+  private ajandaTakvimKayitTarihAnahtari(kayit: AjandaKaydi) {
+    return (kayit.tarih || '').trim().slice(0, 10);
+  }
+
+  private ajandaTakvimKayitHaritasi() {
+    const harita = new Map<string, AjandaKaydi[]>();
+    this.filtrelenmisAjandaKayitlari.forEach(kayit => {
+      const tarih = this.ajandaTakvimKayitTarihAnahtari(kayit);
+      if (!tarih) return;
+      const gunKayitlari = harita.get(tarih) || [];
+      gunKayitlari.push(kayit);
+      harita.set(tarih, gunKayitlari);
+    });
+    return harita;
+  }
+
+  private ajandaTakvimGunleriniOlustur(baslangic: Date, gunSayisi: number, ay?: number): AjandaTakvimGunu[] {
+    const harita = this.ajandaTakvimKayitHaritasi();
+    const bugun = this.gunBazliIsoTarih(new Date());
+    const gunler: AjandaTakvimGunu[] = [];
+
+    for (let index = 0; index < gunSayisi; index += 1) {
+      const tarih = new Date(baslangic);
+      tarih.setDate(tarih.getDate() + index);
+      const tarihAnahtari = this.gunBazliIsoTarih(tarih);
+      const kayitlar = harita.get(tarihAnahtari) || [];
+      gunler.push({
+        tarih: tarihAnahtari,
+        gun: tarih.getDate(),
+        ayIciMi: ay === undefined || tarih.getMonth() === ay,
+        bugunMu: tarihAnahtari === bugun,
+        seciliMi: tarihAnahtari === this.ajandaTakvimSeciliTarih,
+        kayitlar,
+        gorunenKayitlar: kayitlar.slice(0, 3)
+      });
+    }
+
+    return gunler;
+  }
+
   get ajandaOzet() {
     const kayitlar = this.ajandaKayitlari;
     return {
@@ -4535,6 +4713,7 @@ export class AppComponent implements OnInit {
       gecmis: kayitlar.filter(kayit => this.ajandaGunFarki(kayit.tarih) < 0).length,
       durusma: kayitlar.filter(kayit => kayit.tur === 'durusma').length,
       toplanti: kayitlar.filter(kayit => kayit.tur === 'toplanti').length,
+      takip: kayitlar.filter(kayit => kayit.tur === 'takip').length,
       sureliIs: kayitlar.filter(kayit => kayit.tur === 'sureliIs').length,
       ofisGorevi: kayitlar.filter(kayit => kayit.tur === 'ofisGorevi').length
     };
