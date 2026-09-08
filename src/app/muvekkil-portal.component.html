@@ -113,7 +113,7 @@
         @for (dosya of dosyalar; track dosya.id) {
           <article class="portal-case-card" [class.portal-case-card-open]="acikDosyaId === dosya.id">
             <button type="button" class="portal-case-summary" (click)="dosyaAcKapat(dosya.id)">
-              <span class="portal-case-type" [attr.data-type]="dosya.tur">{{ turEtiketi(dosya.tur) }}</span>
+              <span class="portal-case-type" [attr.data-type]="dosya.tur">{{ turEtiketi(dosya.tur, dosya.dosyaTuru) }}</span>
               <span class="portal-case-main"><strong>{{ dosya.baslik }}</strong><small>{{ dosya.altBaslik }}</small></span>
               <span class="portal-case-status">{{ dosya.durum }}</span>
               <span class="portal-chevron">⌄</span>

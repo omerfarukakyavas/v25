@@ -78,7 +78,19 @@ export interface DavaTarafKaydi {
   acikAdres?: string;
 }
 
+export type DavaDosyaTuru = 'hukuk' | 'ceza' | 'sorusturma';
+export type CezaTarafRolu = 'Şüpheli' | 'Sanık' | 'Şikâyetçi' | 'Mağdur' | 'Katılan';
+export interface CezaTarafKaydi extends DavaTarafKaydi {
+  rol: CezaTarafRolu | '';
+  muvekkilMi: boolean;
+}
+
 export interface DavaDosyasi { 
+  dosyaTuru?: DavaDosyaTuru;
+  cezaTaraflari?: CezaTarafKaydi[];
+  kararTarihi?: string;
+  kararTuru?: string;
+  baglantiliSorusturmaId?: number;
   id: number; dosyaNo: string; dosyaNumaralari?: DosyaNumarasi[]; muvekkil: string; muvekkilId?: number; muvekkiller?: DavaTarafKaydi[]; karsiTaraf: string; mahkeme: string; eskiMahkeme?: string; eskiEsasNo?: string; konu: string; durum: string; istinafMahkemesi?: string; durusmaTarihi?: string; durusmaSaati?: string; durusmaTamamlandiMi?: boolean; durusmaTamamlanmaTarihi?: string; notlar?: string; muvekkilGorusmeNotlari?: MuvekkilGorusmeNotu[]; vekaletUcreti?: number; finansalIslemler?: FinansalIslem[]; evraklar?: EvrakBaglantisi[]; baglantiliIcraId?: number; baglantiliIcraIds?: number[]; baglantiliArabuluculukIds?: number[]; baglantiliTedbirDosyalari?: string[]; baglantiliDelilTespitiDosyalari?: string[]; baglantiliNoterlikDosyalari?: string[]; muvekkilPozisyonu?: string; arsivYeri?: string; islemGecmisi?: DosyaIslemKaydi[]; takvimGecmisi?: TakvimGecmisKaydi[]; davacilar?: DavaTarafKaydi[]; davalilar?: DavaTarafKaydi[];
   iletisimNotlari?: IletisimNotu[];
   portalMuvekkilIdleri?: number[];
@@ -136,6 +148,7 @@ export interface PortalFinansHareketi {
 }
 
 export interface PortalDosyaKaydi {
+  dosyaTuru?: DavaDosyaTuru;
   id: string;
   kaynakId: number;
   tur: PortalDosyaTuru;

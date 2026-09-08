@@ -10,6 +10,13 @@
         "build": {
           "builder": "@angular/build:application",
           "configurations": {
+            "ceza-preview": {
+              "browser": "tests/ceza-preview.ts",
+              "tsConfig": "tests/tsconfig.preview.json",
+              "outputPath": "dist/ceza-preview",
+              "optimization": false,
+              "sourceMap": true
+            },
             "development": {
               "extractLicenses": false,
               "namedChunks": true,

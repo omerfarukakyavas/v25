@@ -17,6 +17,7 @@ import {
 import { Unsubscribe, collection, doc, getDoc, getFirestore, onSnapshot, setDoc } from 'firebase/firestore';
 
 import { PortalDosyaKaydi, PortalProfil } from '../app.models';
+import { davaTurEtiketi } from './ceza-dosyalari';
 import { appId, getFirebaseConfig } from '../firebase.config';
 
 type PortalEkrani = 'yukleniyor' | 'giris' | 'dogrulama' | 'portal' | 'engelli';
@@ -233,7 +234,8 @@ export class MuvekkilPortalComponent implements OnInit, OnDestroy {
     return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(Number(tutar || 0));
   }
 
-  turEtiketi(tur: PortalDosyaKaydi['tur']) {
+  turEtiketi(tur: PortalDosyaKaydi['tur'], dosyaTuru?: PortalDosyaKaydi['dosyaTuru']) {
+    if (tur === 'dava' && dosyaTuru) return davaTurEtiketi({ dosyaTuru });
     if (tur === 'dava') return 'Dava';
     if (tur === 'icra') return 'İcra';
     return 'Arabuluculuk';

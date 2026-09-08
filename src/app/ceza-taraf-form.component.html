@@ -1,0 +1,36 @@
+<div class="head">
+  <h4>Taraflar ve Müvekkiller</h4>
+  <button type="button" (click)="ekle.emit()">Taraf Ekle</button>
+</div>
+<p>Her tarafın rolünü seçin. Temsil ettiğiniz kişide “Müvekkilim” kutusunu işaretleyin. Bir kişi birden fazla roldeyse ayrı satır ekleyebilirsiniz.</p>
+@for (taraf of taraflar; track taraf.id; let index = $index) {
+  <section class="party-card" [class.client]="taraf.muvekkilMi">
+    <div class="head">
+      <label class="check"><input type="checkbox" [(ngModel)]="taraf.muvekkilMi"> Taraf {{ index + 1 }} · Müvekkilim</label>
+      <button type="button" class="remove" (click)="taraflar.splice(index, 1)" [attr.aria-label]="'Taraf ' + (index + 1) + ' sil'">Sil</button>
+    </div>
+    <div class="fields">
+      <label>Tarafın Rolü *
+        <select [(ngModel)]="taraf.rol">
+          <option value="">Rol seçin</option>
+          @for (rol of roller; track rol) { <option [value]="rol">{{ rol }}</option> }
+          @if (taraf.rol && !roller.includes($any(taraf.rol))) { <option [value]="taraf.rol">{{ taraf.rol }} (bu tür için yeniden seçin)</option> }
+        </select>
+      </label>
+      <label>Kayıtlı Kişi Ara<input [(ngModel)]="aramalar[taraf.id]" placeholder="Ad, TC/VKN veya telefon" type="search"></label>
+      <label class="wide">Kayıtlı Kişi / Kurum
+        <select [ngModel]="taraf.muvekkilId" (ngModelChange)="kisiSecildi.emit({ taraf: taraf, id: $event })">
+          <option [ngValue]="undefined">Manuel bilgi gir</option>
+          @for (kisi of secenekler(taraf); track kisi.id) { <option [ngValue]="kisi.id">{{ kisi.adSoyad }}</option> }
+        </select>
+      </label>
+      <label class="wide">Ad Soyad / Unvan *<input [ngModel]="taraf.isim" (ngModelChange)="isimDegisti.emit({ taraf: taraf, isim: $event })" autocomplete="off"></label>
+      <label>TC / VKN<input [(ngModel)]="taraf.tcKimlikVergiNo" inputmode="numeric"></label>
+      <label>Telefon<input [(ngModel)]="taraf.telefon" type="tel"></label>
+      <label class="wide">E-posta<input [(ngModel)]="taraf.eposta" type="email"></label>
+      <label>İl<input [(ngModel)]="taraf.il"></label>
+      <label>İlçe<input [(ngModel)]="taraf.ilce"></label>
+      <label class="wide">Açık Adres<textarea [(ngModel)]="taraf.acikAdres" rows="2"></textarea></label>
+    </div>
+  </section>
+} @empty { <p>Taraf Ekle düğmesiyle başlayın.</p> }

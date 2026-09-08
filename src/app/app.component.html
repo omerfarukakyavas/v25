@@ -69,7 +69,7 @@
               <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
               <span class="app-sidebar-label">Genel Özet</span>
             </a>
-            <a (click)="sayfaDegistir('davalar')" [class]="getMenuClass('davalar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Dava Dosyaları"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="app-sidebar-label">Dava Dosyaları</span></a>
+            <a (click)="sayfaDegistir('davalar')" [class]="getMenuClass('davalar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Dava ve Soruşturma"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="app-sidebar-label">Dava ve Soruşturma</span></a>
             <a (click)="sayfaDegistir('icralar')" [class]="getMenuClass('icralar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="İcra Takipleri"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg><span class="app-sidebar-label">İcra Takipleri</span></a>
             <a (click)="sayfaDegistir('arabuluculuk')" [class]="getMenuClass('arabuluculuk')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Arabuluculuk"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="app-sidebar-label">Arabuluculuk</span></a>
             <a (click)="sayfaDegistir('sablonlar')" [class]="getMenuClass('sablonlar')" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all group" title="Şablonlar"><svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg><span class="app-sidebar-label">Şablonlar</span></a>
@@ -124,9 +124,9 @@
                   @case ('dashboard') { Genel Özet ve İstatistikler }
                   @case ('uyapAktarim') { UYAP Toplu Aktarım }
                   @case ('klasorler') { Klasörler }
-                  @case ('davalar') { Dava Dosyaları } @case ('icralar') { İcra Takipleri } @case ('arabuluculuk') { Arabuluculuk Dosyaları }
+                  @case ('davalar') { Dava ve Soruşturma } @case ('icralar') { İcra Takipleri } @case ('arabuluculuk') { Arabuluculuk Dosyaları }
                   @case ('sablonlar') { Belge Şablonları } @case ('muhasebe') { Muhasebe ve Finans } @case ('iliskiler') { İlişkiler Yönetimi }
-                  @case ('ajanda') { Duruşma Takvimi } @case ('detay') { Dava Yönetimi ve Finans } @case ('icraDetay') { İcra Yönetimi ve Finans }
+                  @case ('ajanda') { Duruşma Takvimi } @case ('detay') { {{ getAktifDosyaTurEtiketi() }} } @case ('icraDetay') { İcra Yönetimi ve Finans }
                   @case ('arabuluculukDetay') { Arabuluculuk Yönetimi ve Finans }
                 }
               </h2>
@@ -363,7 +363,7 @@
                         <p [class.blur-md]="toplamBekleyenAlacakGizli" [class.select-none]="toplamBekleyenAlacakGizli" class="text-2xl font-black text-slate-800 transition duration-200">{{ formatPara(muhasebeOzet.toplam) }}</p>
                      </div>
                      <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer" (click)="sayfaDegistir('davalar')">
-                        <div class="flex items-center gap-3 mb-2"><div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg></div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Dava Dosyaları</p></div>
+                        <div class="flex items-center gap-3 mb-2"><div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg></div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Dava ve Soruşturma</p></div>
                         <p class="text-2xl font-black text-slate-800">{{istatistikler.totalDava}} <span class="text-xs font-medium text-slate-400">Kayıt</span></p>
                      </div>
                      <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer" (click)="sayfaDegistir('icralar')">
@@ -429,7 +429,7 @@
                               <button (click)="ajandaKaydinaGit(kayit)" class="w-full text-left rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                                 <div class="flex flex-wrap items-center gap-2 mb-2">
                                   <span [class]="getAjandaTurClass(kayit.tur)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
-                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
+                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{{ getAjandaKaynakEtiketi(kayit.kaynak, kayit.dosya) }}</span>
                                   <span [class]="getAjandaDurumClass(kayit)" class="app-agenda-pill px-2.5 py-1 rounded-full border text-[10px]">{{ getAjandaDurumMetni(kayit) }}</span>
                                 </div>
                                 <p class="text-sm font-bold text-slate-800">{{ kayit.baslik }}</p>
@@ -584,7 +584,7 @@
                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6 flex items-center gap-2"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg> Dosya Durum Özetleri</h3>
                        <div class="space-y-6">
                          <div>
-                           <div class="flex justify-between mb-1.5 text-sm font-medium"><span class="text-blue-700 font-bold">Dava Dosyaları</span><span class="text-slate-500">{{istatistikler.davaAcik}} Derdest / {{istatistikler.davaKapali}} Kapalı</span></div>
+                           <div class="flex justify-between mb-1.5 text-sm font-medium"><span class="text-blue-700 font-bold">Dava ve Soruşturma</span><span class="text-slate-500">{{istatistikler.davaAcik}} Derdest / {{istatistikler.davaKapali}} Kapalı</span></div>
                            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden flex">
                               <div class="bg-blue-500 h-3 transition-all duration-1000" [style.width.%]="istatistikler.totalDava ? (istatistikler.davaAcik / istatistikler.totalDava) * 100 : 0"></div>
                               <div class="bg-slate-300 h-3 transition-all duration-1000" [style.width.%]="istatistikler.totalDava ? (istatistikler.davaKapali / istatistikler.totalDava) * 100 : 0"></div>
@@ -972,7 +972,14 @@
                 </div>
 
                 <div class="app-list-filter app-list-filter-blue bg-gradient-to-r from-blue-50 via-white to-sky-50 p-4 rounded-xl shadow-sm border border-blue-100 mb-6 flex flex-col sm:flex-row gap-4">
-                <div class="flex-1 relative"><input [(ngModel)]="aramaMetni" type="text" placeholder="Dosya No, eski esas, müvekkil, diğer taraf veya mahkeme ara..." class="w-full pl-4 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"></div>
+                <div class="flex-1 relative"><input [(ngModel)]="aramaMetni" type="search" aria-label="Dava ve soruşturma ara" placeholder="Numara, taraf, mahkeme / başsavcılık veya konu ara..." class="w-full pl-4 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"></div>
+                  <div class="sm:w-56">
+                    <select [(ngModel)]="davaTuruFiltresi" aria-label="Dosya türü filtresi" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-900">
+                      <option value="Tümü">Tüm Dosya Türleri</option>
+                      @for (tur of davaDosyaTurleri; track tur.kod) { <option [value]="tur.kod">{{ tur.etiket }}</option> }
+                      <option value="belirtilmemis">Türü belirtilmemiş eski kayıtlar</option>
+                    </select>
+                  </div>
                   <div class="sm:w-64">
                     <select [(ngModel)]="durumFiltresi" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white font-medium text-slate-700">
                       <option value="Tümü">Tüm Durumlar</option><option value="Derdest">Derdest Dosyalar</option><option value="İstinaf/Temyiz">İstinaf/Temyizdekiler</option><option value="Kapalı">Kapalı Dosyalar</option>
@@ -996,7 +1003,7 @@
                         <button type="button" class="mobile-record-trigger" (click)="mobilKayitGecis('dava', dava.id)" [attr.aria-expanded]="mobilKayitAcikMi('dava', dava.id)">
                           <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
-                              <span class="rounded-full bg-blue-100 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-blue-700">Dava</span>
+                              <span class="rounded-full bg-blue-100 px-2.5 py-1 text-[11px] font-bold text-blue-800">{{ davaTurEtiketi(dava) }}</span>
                               <span [class]="getDurumClass(dava.durum) + ' inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold shadow-sm'">{{ dava.durum }}</span>
                             </div>
                             <p class="mt-3 text-base font-extrabold leading-6 text-slate-900">{{ dava.dosyaNumaralari && dava.dosyaNumaralari.length > 0 ? dava.dosyaNumaralari[0].no : dava.dosyaNo }}</p>
@@ -1013,7 +1020,7 @@
                             </div>
                             <div class="mt-3 flex flex-wrap gap-2">
                               <span class="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
-                                {{ dava.durusmaTarihi ? formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati) : 'Duruşma planı yok' }}
+                                {{ dava.dosyaTuru === 'sorusturma' ? 'Açılış: ' + (dava.takipTarihi ? (dava.takipTarihi | date:'dd.MM.yyyy') : '-') : (dava.durusmaTarihi ? formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati) : 'Duruşma planı yok') }}
                               </span>
                               @if (dava.eskiMahkeme || dava.eskiEsasNo) {
                                 <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">Eski esas bilgisi var</span>
@@ -1048,7 +1055,7 @@
 
                             <div class="mobile-record-section">
                               <div class="mobile-record-section-head">
-                                <p class="mobile-record-section-title">Mahkeme ve Konu</p>
+                                <p class="mobile-record-section-title">{{ dava.dosyaTuru === 'sorusturma' ? 'Başsavcılık ve Konu' : 'Mahkeme ve Konu' }}</p>
                               </div>
                               <p class="text-sm font-semibold leading-5 text-slate-900">{{ dava.mahkeme }}</p>
                               <p class="mt-1 text-sm leading-6 text-slate-600">{{ dava.konu }}</p>
@@ -1068,16 +1075,16 @@
 
                             <div class="mobile-record-section">
                               <div class="mobile-record-section-head">
-                                <p class="mobile-record-section-title">Duruşma ve Durum</p>
+                                <p class="mobile-record-section-title">Tarih ve Durum</p>
                               </div>
                               <div class="grid gap-3">
                                 <div class="rounded-xl border border-blue-100 bg-blue-50/70 px-3 py-3">
-                                  <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-700">Sonraki Duruşma</p>
-                                  <p class="mt-2 text-sm font-semibold text-slate-900">{{ dava.durusmaTarihi ? formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati) : 'Henüz duruşma planı yok' }}</p>
+                                  <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-700">{{ dava.dosyaTuru === 'sorusturma' ? 'Dosya Açılış Tarihi' : 'Sonraki Duruşma' }}</p>
+                                  <p class="mt-2 text-sm font-semibold text-slate-900">{{ dava.dosyaTuru === 'sorusturma' ? (dava.takipTarihi ? (dava.takipTarihi | date:'dd.MM.yyyy') : '-') : (dava.durusmaTarihi ? formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati) : 'Henüz duruşma planı yok') }}</p>
                                 </div>
                                 <div class="relative">
                                   <select [ngModel]="dava.durum" (ngModelChange)="durumGuncelle(dava, $event)" [class]="getDurumClass(dava.durum)" class="w-full appearance-none rounded-2xl border px-4 py-3 pr-10 text-sm font-bold shadow-sm outline-none transition-all">
-                                    <option value="Derdest" class="text-slate-700 bg-white">Derdest</option><option value="İstinaf/Temyiz" class="text-slate-700 bg-white">İstinaf/Temyiz</option><option value="Kapalı" class="text-slate-700 bg-white">Kapalı</option>
+                                    @for (durum of davaDurumlari(dava); track durum) { <option [value]="durum" class="text-slate-700 bg-white">{{ durum }}</option> }
                                   </select>
                                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 opacity-60"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
                                 </div>
@@ -1113,7 +1120,7 @@
                       <table class="app-list-table w-full table-fixed text-left border-collapse">
                         <thead>
                           <tr class="bg-blue-50/80 border-b border-blue-100 text-blue-700 uppercase text-xs font-semibold tracking-wider">
-                            <th class="w-[20%] p-4">Dosya Numaraları</th><th class="w-[24%] p-4">Taraflar</th><th class="w-[22%] p-4">Mahkeme / Konu</th><th class="w-[18%] p-4">Sonraki Duruşma</th><th class="w-[16%] p-4 text-center">Durum / İşlemler</th>
+                            <th class="w-[20%] p-4">Dosya Numaraları</th><th class="w-[24%] p-4">Taraflar</th><th class="w-[22%] p-4">Kurum / Konu</th><th class="w-[18%] p-4">Duruşma / Açılış</th><th class="w-[16%] p-4 text-center">Durum / İşlemler</th>
                           </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -1123,6 +1130,7 @@
                                 <div class="flex items-start gap-3">
                                   <div class="w-1 self-stretch rounded-full bg-blue-500"></div>
                                   <div class="min-w-0 flex flex-col gap-1.5">
+                                    <span class="text-xs font-bold text-blue-800">{{ davaTurEtiketi(dava) }}</span>
                                     @if (dava.dosyaNumaralari && dava.dosyaNumaralari.length > 0) {
                                       @for (num of dava.dosyaNumaralari; track $index) {
                                         <div class="flex items-start gap-1.5 text-xs font-medium text-slate-700"><span class="mt-0.5 shrink-0 text-[9px] font-bold text-blue-700 uppercase bg-blue-100 px-1.5 py-0.5 rounded">{{num.tur}}</span><span class="min-w-0 break-words leading-5">{{num.no}}</span></div>
@@ -1145,14 +1153,15 @@
                               </td>
                               <td class="p-4 align-top"><div class="rounded-xl border border-sky-100 bg-sky-50/70 px-3 py-2"><div class="break-words text-sm font-medium leading-5 text-slate-800">{{ dava.mahkeme }}</div><div class="mt-1 break-words text-xs leading-5 text-slate-500">{{ dava.konu }}</div></div></td>
                               <td class="p-4 align-top text-slate-600">
-                               @if(dava.durusmaTarihi) { <span class="inline-flex max-w-full items-start gap-2 rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold leading-5 text-blue-700 shadow-sm"><svg class="mt-0.5 h-4 w-4 shrink-0 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="break-words">{{ formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati) }}</span></span> } 
+                               @if(dava.dosyaTuru === 'sorusturma') { <div class="text-xs font-semibold text-slate-700">Dosya Açılışı</div><div class="mt-1 text-sm text-slate-900">{{ dava.takipTarihi ? formatTarihSaat(dava.takipTarihi) : '-' }}</div> }
+                               @else if(dava.durusmaTarihi) { <span class="inline-flex max-w-full items-start gap-2 rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold leading-5 text-blue-700 shadow-sm"><svg class="mt-0.5 h-4 w-4 shrink-0 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="break-words">{{ formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati) }}</span></span> }
                                @else { <span class="text-slate-400 text-sm">-</span> }
                               </td>
                               <td class="p-4 align-top text-center">
                                 <div class="flex flex-col items-center gap-2">
                                   <div class="relative w-full max-w-[150px]">
                                     <select [ngModel]="dava.durum" (ngModelChange)="durumGuncelle(dava, $event)" [class]="getDurumClass(dava.durum)" class="w-full appearance-none rounded-full border py-1.5 pl-3 pr-7 text-xs font-bold outline-none transition-all hover:shadow-md cursor-pointer">
-                                      <option value="Derdest" class="text-slate-700 bg-white">Derdest</option><option value="İstinaf/Temyiz" class="text-slate-700 bg-white">İstinaf/Temyiz</option><option value="Kapalı" class="text-slate-700 bg-white">Kapalı</option>
+                                      @for (durum of davaDurumlari(dava); track durum) { <option [value]="durum" class="text-slate-700 bg-white">{{ durum }}</option> }
                                     </select>
                                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 opacity-60"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
                                   </div>
@@ -1778,7 +1787,7 @@
                             <label class="block text-xs font-black text-slate-900 mb-1">Dosya Türü</label>
                             <select [(ngModel)]="yeniOfisGoreviBagliDosyaTuru" (ngModelChange)="ofisGoreviBagliDosyaTuruDegisti('yeni')" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                               <option value="">Bağlantı yok</option>
-                              <option value="dava">Dava</option>
+                              <option value="dava">Dava ve Soruşturma</option>
                               <option value="icra">İcra</option>
                               <option value="arabuluculuk">Arabuluculuk</option>
                             </select>
@@ -1832,7 +1841,7 @@
                                   </select>
                                   <select [(ngModel)]="duzenlenenOfisGoreviBagliDosyaTuru" (ngModelChange)="ofisGoreviBagliDosyaTuruDegisti('duzenleme')" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
                                     <option value="">Bağlantı yok</option>
-                                    <option value="dava">Dava</option>
+                                    <option value="dava">Dava ve Soruşturma</option>
                                     <option value="icra">İcra</option>
                                     <option value="arabuluculuk">Arabuluculuk</option>
                                   </select>
@@ -2034,7 +2043,7 @@
                                 <strong>{{ kayit.baslik }}</strong>
                                 <small>{{ kayit.taraflar }}</small>
                               </span>
-                              <span class="app-calendar-selected-source">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
+                              <span class="app-calendar-selected-source">{{ getAjandaKaynakEtiketi(kayit.kaynak, kayit.dosya) }}</span>
                             </button>
                           } @empty {
                             <div class="app-calendar-selected-empty">Bu güne ait bir kayıt bulunmuyor. Başka bir güne dokunarak ayrıntıları görebilirsiniz.</div>
@@ -2066,14 +2075,14 @@
                                 </div>
                                 <div class="hidden sm:flex flex-col gap-2 min-w-[120px]">
                                   <span [class]="getAjandaTurClass(kayit.tur)" class="app-agenda-pill px-2.5 py-1 rounded-full text-[10px] text-center">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
-                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="app-agenda-pill px-2.5 py-1 rounded-full text-[10px] text-center">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
+                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="app-agenda-pill px-2.5 py-1 rounded-full text-[10px] text-center">{{ getAjandaKaynakEtiketi(kayit.kaynak, kayit.dosya) }}</span>
                                 </div>
                               </div>
 
                               <div class="min-w-0 flex-1">
                                 <div class="flex flex-wrap items-center gap-2 mb-2">
                                   <span [class]="getAjandaTurClass(kayit.tur)" class="app-agenda-pill sm:hidden px-2 py-1 rounded-full text-[10px]">{{ getAjandaTurEtiketi(kayit.tur) }}</span>
-                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="app-agenda-pill sm:hidden px-2 py-1 rounded-full text-[10px]">{{ getAjandaKaynakEtiketi(kayit.kaynak) }}</span>
+                                  <span [class]="getAjandaKaynakClass(kayit.kaynak)" class="app-agenda-pill sm:hidden px-2 py-1 rounded-full text-[10px]">{{ getAjandaKaynakEtiketi(kayit.kaynak, kayit.dosya) }}</span>
                                   <span [class]="getAjandaDurumClass(kayit)" class="app-agenda-pill px-2.5 py-1 rounded-full border text-[10px]">{{ getAjandaDurumMetni(kayit) }}</span>
                                   @if (kayit.saat) {
                                     <span class="app-agenda-pill px-2.5 py-1 rounded-full bg-white border border-slate-200 text-[10px] text-slate-600">Saat {{ formatSaat(kayit.saat) }}</span>
@@ -2485,7 +2494,7 @@
                         <label class="flex flex-col gap-1.5">
                           <span class="text-sm font-black text-slate-950">Dosya Türü</span>
                           <select [(ngModel)]="belgeCiktiKaynakTuru" (ngModelChange)="belgeCiktiKaynakTuruDegisti()" class="min-h-[44px] w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500">
-                            <option [ngValue]="'dava'">Dava Dosyası</option>
+                            <option [ngValue]="'dava'">Dava / Soruşturma Dosyası</option>
                             <option [ngValue]="'icra'">İcra Takibi</option>
                             <option [ngValue]="'arabuluculuk'">Arabuluculuk</option>
                           </select>
@@ -2964,12 +2973,12 @@
                 <div class="app-page app-detail-page space-y-4 sm:space-y-6 max-w-7xl mx-auto pb-8 sm:pb-10">
                   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                     <div class="flex items-center gap-3">
-                      <h3 class="text-lg font-bold tracking-tight text-slate-800 sm:text-2xl">{{ aktifSayfa === 'detay' ? 'Dava Dosyası Detayı' : (aktifSayfa === 'icraDetay' ? 'İcra Dosyası Detayı' : 'Arabuluculuk Dosyası Detayı') }}</h3>
+                      <h3 class="text-lg font-bold tracking-tight text-slate-800 sm:text-2xl">{{ aktifSayfa === 'detay' ? davaTurEtiketi(getAktifDavaDosyasi()) + ' Detayı' : (aktifSayfa === 'icraDetay' ? 'İcra Dosyası Detayı' : 'Arabuluculuk Dosyası Detayı') }}</h3>
                     </div>
                     <div class="relative w-full sm:ml-auto sm:w-auto sm:min-w-[180px]">
                       <select [ngModel]="aktifDosya.durum" (ngModelChange)="aktifDosyaDurumGuncelle($event)" [class]="aktifSayfa === 'detay' ? getDurumClass(aktifDosya.durum) : (aktifSayfa === 'icraDetay' ? getIcraDurumClass(aktifDosya.durum) : getArabuluculukDurumClass(aktifDosya.durum))" class="w-full appearance-none rounded-full border px-3 py-2 pr-8 text-xs font-bold shadow-sm transition-all outline-none sm:text-sm">
                         @if (aktifSayfa === 'detay') {
-                          <option value="Derdest" class="text-slate-700 bg-white">Derdest</option><option value="İstinaf/Temyiz" class="text-slate-700 bg-white">İstinaf/Temyiz</option><option value="Kapalı" class="text-slate-700 bg-white">Kapalı</option>
+                          @for (durum of davaDurumlari(getAktifDavaDosyasi()); track durum) { <option [value]="durum" class="text-slate-700 bg-white">{{ durum }}</option> }
                         } @else if (aktifSayfa === 'icraDetay') {
                           <option value="Aktif" class="text-slate-700 bg-white">Aktif</option><option value="İtiraz Edildi" class="text-slate-700 bg-white">İtiraz Edildi</option><option value="Tehir-i İcra" class="text-slate-700 bg-white">Tehir-i İcra</option><option value="İnfaz/Kapalı" class="text-slate-700 bg-white">İnfaz/Kapalı</option>
                         } @else {
@@ -2990,7 +2999,7 @@
                           <span [class]="getAktifDosyaDurumSinifi()" class="rounded-full px-2.5 py-1 text-[10px] font-bold sm:px-3 sm:text-[11px]">{{ aktifDosya.durum }}</span>
                         </div>
                         <h3 class="text-xl font-black tracking-tight text-slate-900 sm:text-3xl">{{ getAktifDosyaReferansMetni() }}</h3>
-                        @if (aktifSayfa === 'detay') {
+                        @if (aktifSayfa === 'detay' && !cezaDosyasiMi(getAktifDavaDosyasi())) {
                           <div class="mt-3 space-y-2 text-xs sm:text-sm">
                             <div class="flex flex-wrap items-center gap-2">
                               <span class="font-bold text-emerald-700">Davacı</span>
@@ -3159,6 +3168,36 @@
                                 } @else { <div class="px-3 py-1.5 bg-white border border-slate-200 rounded flex items-center gap-2 shadow-sm"><span class="text-sm font-bold text-slate-800">{{aktifDosya.dosyaNo}}</span></div> }
                               </div>
                            </div>
+                           @if (cezaDosyasiMi(getAktifDavaDosyasi())) {
+                             <div class="col-span-2 grid gap-3 sm:grid-cols-2">
+                               @for (taraf of getCezaTaraflari(getAktifDavaDosyasi()); track taraf.id) {
+                                 @if (getDavaTarafGosterimBilgisi(taraf); as bilgi) {
+                                   <details class="min-w-0 rounded-xl border-2 border-slate-300 bg-white p-3" [class.border-emerald-500]="taraf.muvekkilMi">
+                                     <summary class="cursor-pointer text-sm font-bold text-slate-900">{{ taraf.rol }} · {{ bilgi.isim }} {{ taraf.muvekkilMi ? '(Müvekkil)' : '' }}</summary>
+                                     <dl class="mt-3 grid gap-3 sm:grid-cols-2 text-sm text-slate-900">
+                                       <div><dt class="font-bold">TC / VKN</dt><dd>{{ bilgi.tcKimlikVergiNo }}</dd></div>
+                                       <div><dt class="font-bold">Telefon</dt><dd>{{ bilgi.telefon }}</dd></div>
+                                       <div class="sm:col-span-2"><dt class="font-bold">E-posta</dt><dd class="break-all">{{ bilgi.eposta }}</dd></div>
+                                       <div class="sm:col-span-2"><dt class="font-bold">Adres</dt><dd>{{ bilgi.adres }}</dd></div>
+                                     </dl>
+                                   </details>
+                                 }
+                               }
+                             </div>
+                             @if (getAktifDavaDosyasi(); as cezaDosyasi) {
+                               <div><p class="text-sm font-bold text-slate-900">Karar Tarihi</p><p class="text-sm text-slate-900">{{ cezaDosyasi.kararTarihi ? (cezaDosyasi.kararTarihi | date:'dd.MM.yyyy') : '-' }}</p></div>
+                               <div><p class="text-sm font-bold text-slate-900">Karar Türü / Sonuç</p><p class="text-sm text-slate-900">{{ cezaDosyasi.kararTuru || '-' }}</p></div>
+                               <div class="col-span-2 rounded-xl border border-blue-200 bg-blue-50 p-4">
+                                 <div class="flex flex-wrap items-center justify-between gap-3">
+                                   <h4 class="font-bold text-slate-900">Bağlantılı Soruşturma / Ceza Dosyaları</h4>
+                                   @if (cezaDosyasi.dosyaTuru === 'sorusturma') { <button type="button" (click)="sorusturmadanCezaOlustur(cezaDosyasi)" class="rounded-lg border border-blue-300 bg-white px-3 py-2 text-sm font-bold text-blue-800">Bağlantılı Ceza Dosyası Oluştur</button> }
+                                 </div>
+                                 @for (bagli of getBaglantiliCezaDosyalari(cezaDosyasi); track bagli.id) {
+                                   <button type="button" (click)="detayaGit(bagli)" class="mt-3 block w-full rounded-lg border border-slate-300 bg-white p-3 text-left text-sm text-slate-900"><strong>{{ davaTurEtiketi(bagli) }} · {{ bagli.dosyaNo }}</strong><br>{{ bagli.mahkeme }}</button>
+                                 } @empty { <p class="mt-2 text-sm text-slate-700">{{ cezaDosyasi.baglantiliSorusturmaId ? 'Bağlantılı soruşturma bulunamadı. Dosyayı düzenleyerek bağlantıyı kontrol edebilirsiniz.' : 'Bağlantılı kayıt yok.' }}</p> }
+                               </div>
+                             }
+                           } @else {
                            <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Müvekkil</p><p class="font-medium text-slate-800">{{ aktifDosya.muvekkil }} @if(aktifDosya.muvekkilPozisyonu) { <span [class]="getPozisyonClass(aktifDosya.muvekkilPozisyonu)" class="text-[10px] px-1.5 py-0.5 rounded ml-1 uppercase font-bold">{{aktifDosya.muvekkilPozisyonu}}</span> }</p></div>
                            <div>
                              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Taraflar</p>
@@ -3275,7 +3314,8 @@
                                }
                              }
                            }
-                            <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Mahkeme</p><p class="font-medium text-slate-800">{{ aktifDosya.mahkeme }}</p></div>
+                           }
+                            <div class="col-span-2 sm:col-span-1"><p class="text-sm font-bold text-slate-900 mb-0.5">{{ getAktifDosyaBirincilEtiket() }}</p><p class="text-sm text-slate-900">{{ aktifDosya.mahkeme }}</p></div>
                             <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Konu</p><p class="font-medium text-slate-800">{{ aktifDosya.konu }}</p></div>
                             @if (aktifDosya.eskiMahkeme) {
                               <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Eski Mahkeme</p><p class="font-medium text-slate-800">{{ aktifDosya.eskiMahkeme }}</p></div>
@@ -3284,6 +3324,7 @@
                               <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Eski Esas / Dosya No</p><p class="font-medium text-slate-800">{{ aktifDosya.eskiEsasNo }}</p></div>
                             }
                              <div class="col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Arşiv / Klasör Konumu</p><p class="font-medium text-slate-800">{{ aktifDosya.arsivYeri || '-' }}</p></div>
+                           @if (getAktifDavaDosyasi()?.dosyaTuru !== 'sorusturma') {
                            <div class="col-span-2 mt-2 flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50/70 p-3 sm:flex-row sm:items-center sm:justify-between">
                              <div>
                                <p class="text-[10px] font-bold uppercase tracking-wider text-blue-700">Duruşma Takvimi</p>
@@ -3313,6 +3354,7 @@
                                </div>
                              }
                            </div>
+                           }
                            @if (getDavaBaglantiOzeti(getAktifDavaDosyasi())) {
                              <div class="col-span-2 mt-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3">
                                <div class="flex items-center justify-between gap-3">
@@ -4967,21 +5009,31 @@
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div class="app-file-form-modal bg-white rounded-[28px] shadow-2xl overflow-hidden animate-fade-in-up">
             <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3.5">
-              <h3 class="text-xl font-black tracking-tight text-slate-900">{{ formModu === 'ekle' ? 'Yeni dava dosyası oluştur' : 'Dava dosyasını güncelle' }}</h3>
-              <button (click)="davaFormKapat()" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100">Kapat</button>
+              <h3 class="text-xl font-bold tracking-tight text-slate-900">{{ formModu === 'ekle' ? 'Yeni dosya oluştur' : 'Dosyayı güncelle' }} · {{ davaTurEtiketi(islemGorenDava) }}</h3>
+              <button (click)="davaFormKapat()" [disabled]="davaKaydediliyor" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100">Kapat</button>
             </div>
-            <div class="bg-slate-50 p-5 space-y-4 max-h-[72vh] overflow-y-auto custom-scrollbar">
+            <div [attr.inert]="davaKaydediliyor ? '' : null" class="bg-slate-50 p-5 space-y-4 max-h-[72vh] overflow-y-auto custom-scrollbar">
               @if (formHata) { <div class="p-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium shadow-sm">{{ formHata }}</div> }
 
               <div class="flex flex-col gap-4">
 
               <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <label class="block text-sm font-bold text-slate-900 mb-3">Dosya Türü
+                  <select [ngModel]="islemGorenDava.dosyaTuru" (ngModelChange)="davaTuruDegisti($event)" class="mt-2 w-full px-3 py-2.5 border border-slate-300 rounded-lg bg-white">
+                    @if (formModu === 'duzenle') { <option [ngValue]="undefined">Mevcut kayıt (tür belirtilmemiş)</option> }
+                    @for (tur of davaDosyaTurleri; track tur.kod) { <option [ngValue]="tur.kod">{{ tur.etiket }}</option> }
+                  </select>
+                </label>
+                @if (formModu === 'duzenle') { <p class="mb-3 text-xs text-slate-700">Dosya türünü değiştirirseniz taraf rollerini kontrol edin. Mevcut kayıtlar otomatik sınıflandırılmaz.</p> }
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-3">Dosya Numaraları <span class="text-red-500">*</span></label>
                 <div class="space-y-3">
                   @for(num of islemGorenDava.dosyaNumaralari; track $index) {
-                    <div class="flex gap-2 items-center">
-                      <select [(ngModel)]="num.tur" class="w-1/3 px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-xs font-bold text-slate-700 shadow-sm"><option value="ESAS">ESAS</option><option value="KARAR">KARAR</option><option value="TALİMAT">TALİMAT</option><option value="DEÄİŞİK İŞ">DEÄİŞİK İŞ</option><option value="SORUŞTURMA">SORUŞTURMA</option><option value="HAZIRLIK">HAZIRLIK</option></select>
-                      <input [(ngModel)]="num.no" type="text" placeholder="Örn: 2024/123" class="flex-1 px-3 py-2.5 border border-slate-300 rounded-lg outline-none text-sm shadow-sm">
+                    <div class="grid grid-cols-[minmax(0,1fr)_auto] sm:grid-cols-[150px_minmax(0,1fr)_auto] gap-2 items-center">
+                      <select [(ngModel)]="num.tur" [attr.aria-label]="'Numara türü ' + ($index + 1)" class="col-span-2 sm:col-span-1 w-full min-w-0 px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm font-bold text-slate-900 shadow-sm">
+                        @for (tur of davaNumaraTurleri; track tur) { <option [value]="tur">{{ tur }}</option> }
+                        @if (!davaNumaraTurleri.includes(num.tur)) { <option [value]="num.tur">{{ num.tur }}</option> }
+                      </select>
+                      <input [(ngModel)]="num.no" [attr.aria-label]="num.tur + ' numarası'" type="text" placeholder="Örn: 2024/123" class="w-full min-w-0 px-3 py-2.5 border border-slate-300 rounded-lg outline-none text-sm shadow-sm">
                       <button (click)="dosyaNumarasiSil($index)" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg">Sil</button>
                     </div>
                   }
@@ -4989,6 +5041,7 @@
                 <button (click)="dosyaNumarasiEkle()" class="mt-4 px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg hover:bg-blue-200 transition-colors">Numara Ekle</button>
               </div>
 
+              @if (!cezaDosyasiMi(islemGorenDava)) {
               <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-700">Taraf ve İlişki Bilgisi</p>
                 <p class="mt-2 text-sm leading-6 text-slate-500">Müvekkilleri ve bağlantılı dosyaları aynı bölümde toplayarak dava kartını ilk bakışta daha rahat okuyabilirsiniz.</p>
@@ -5286,12 +5339,38 @@
                 <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-medium leading-6 text-slate-500">
                   Seçtiğiniz müvekkiller, kaydetme sırasında {{ islemGorenDava.muvekkilPozisyonu === 'Davalı' ? 'davalı' : 'davacı' }} tarafına otomatik eklenir. Diğer tarafları buradan çoğaltabilirsiniz.
                 </div>
+              </div>
+              } @else {
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <app-ceza-taraf-form [taraflar]="islemGorenDava.cezaTaraflari || []" [dosyaTuru]="islemGorenDava.dosyaTuru" [kisiler]="muvekkiller"
+                    (ekle)="cezaTarafEkle()" (kisiSecildi)="davaTarafSecimDegisti($event.taraf, $event.id)" (isimDegisti)="davaTarafMetniElleDegisti($event.taraf, $event.isim)"></app-ceza-taraf-form>
+                </div>
+              }
+              <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <h4 class="text-base font-bold text-slate-900">Kurum ve Dosya Bilgileri</h4>
                 <div class="mt-4 grid gap-3 md:grid-cols-2">
-                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mahkeme</label><input [(ngModel)]="islemGorenDava.mahkeme" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div><label class="block text-sm font-bold text-slate-900 mb-1">{{ islemGorenDava.dosyaTuru === 'sorusturma' ? 'Başsavcılık *' : islemGorenDava.dosyaTuru === 'ceza' ? 'Mahkeme *' : 'Mahkeme' }}</label><input [(ngModel)]="islemGorenDava.mahkeme" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Konu</label><input [(ngModel)]="islemGorenDava.konu" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
-                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Eski Mahkeme (Opsiyonel)</label><input [(ngModel)]="islemGorenDava.eskiMahkeme" type="text" placeholder="Örn: İstanbul 5. Asliye Ticaret Mahkemesi" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Eski Mahkeme / Başsavcılık (Opsiyonel)</label><input [(ngModel)]="islemGorenDava.eskiMahkeme" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Eski Esas / Dosya No (Opsiyonel)</label><input [(ngModel)]="islemGorenDava.eskiEsasNo" type="text" placeholder="Örn: 2023/415" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-slate-50 focus:bg-white"></div>
                 </div>
+                @if (cezaDosyasiMi(islemGorenDava)) {
+                  <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                    <label class="text-sm font-bold text-slate-900">Karar Tarihi (Opsiyonel)<input type="date" [(ngModel)]="islemGorenDava.kararTarihi" class="mt-1 w-full rounded-lg border border-slate-300 p-2 bg-white font-normal"></label>
+                    <label class="text-sm font-bold text-slate-900">Karar Türü / Sonuç (Opsiyonel)<input [(ngModel)]="islemGorenDava.kararTuru" placeholder="Karar verilmişse yazabilirsiniz" class="mt-1 w-full rounded-lg border border-slate-300 p-2 bg-white font-normal"></label>
+                  </div>
+                  @if (islemGorenDava.dosyaTuru === 'ceza') {
+                    <div class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-3">
+                      <label class="block text-sm font-bold text-slate-900">Bağlantılı Savcılık Soruşturması (Opsiyonel)</label>
+                      <input type="search" [(ngModel)]="sorusturmaArama" placeholder="Soruşturma no, başsavcılık veya taraf ara" aria-label="Bağlantılı soruşturma ara" class="mt-2 w-full rounded-lg border border-slate-300 p-2 bg-white">
+                      <select [(ngModel)]="islemGorenDava.baglantiliSorusturmaId" aria-label="Bağlantılı soruşturma seç" class="mt-2 w-full rounded-lg border border-slate-300 p-2 bg-white">
+                        <option [ngValue]="undefined">Bağlantı yok</option>
+                        @for (sorusturma of sorusturmaSecenekleri; track sorusturma.id) { <option [ngValue]="sorusturma.id">{{ sorusturma.dosyaNo }} · {{ sorusturma.mahkeme }} · {{ sorusturma.muvekkil }}</option> }
+                      </select>
+                      <p class="mt-2 text-xs text-slate-700">Bağlantı kurmak finans ve evrak kayıtlarını kopyalamaz, soruşturmayı kapatmaz.</p>
+                    </div>
+                  }
+                }
                 <div class="mt-4">
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Arşiv / Klasör Konumu (Opsiyonel)</label>
                   <select [(ngModel)]="islemGorenDava.arsivYeri" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
@@ -5315,12 +5394,13 @@
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Durum</label>
                   <select [(ngModel)]="islemGorenDava.durum" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white">
-                    <option value="Derdest">Derdest</option><option value="İstinaf/Temyiz">İstinaf/Temyiz</option><option value="Kapalı">Kapalı</option>
+                    @for (durum of davaDurumlari(islemGorenDava); track durum) { <option [value]="durum">{{ durum }}</option> }
                   </select>
                 </div>
-                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Dava Açılış Tarihi</label><input [(ngModel)]="islemGorenDava.takipTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Dosya Açılış Tarihi</label><input [(ngModel)]="islemGorenDava.takipTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                 </div>
 
+                @if (islemGorenDava.dosyaTuru !== 'sorusturma') {
                 <div class="mt-4 grid gap-4 sm:grid-cols-2">
                   <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Sonraki Duruşma Tarihi</label><input [(ngModel)]="islemGorenDava.durusmaTarihi" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"></div>
                   <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Duruşma Saati</label><input [(ngModel)]="islemGorenDava.durusmaSaati" type="time" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white"></div>
@@ -5329,16 +5409,17 @@
               @if (islemGorenDava.durum === 'İstinaf/Temyiz') {
                 <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg mt-4"><label class="block text-xs font-bold text-orange-800 uppercase mb-1">İstinaf Mahkemesi</label><input [(ngModel)]="islemGorenDava.istinafMahkemesi" type="text" class="w-full px-3 py-2 border border-orange-200 rounded-lg outline-none bg-white"></div>
               }
+                } @else { <p class="mt-3 text-sm text-slate-700">Soruşturmadaki tarihli işleri dosyanın Süreli İşler sekmesinden görev olarak ajandaya ekleyebilirsiniz.</p> }
 
-                <div class="border-t border-slate-100 pt-4 mt-4"><label class="block text-xs font-bold text-blue-600 uppercase mb-1">Anlaşılan Vekalet Ücreti (â‚º)</label><input [(ngModel)]="islemGorenDava.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-blue-200 bg-blue-50 rounded-lg outline-none"></div>
+                <div class="border-t border-slate-100 pt-4 mt-4"><label class="block text-xs font-bold text-blue-600 uppercase mb-1">Anlaşılan Vekalet Ücreti (TL)</label><input [(ngModel)]="islemGorenDava.vekaletUcreti" type="number" min="0" class="w-full px-3 py-2 border border-blue-200 bg-blue-50 rounded-lg outline-none"></div>
               </div>
               </div>
             </div>
             <div class="px-5 py-3.5 bg-white border-t border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p class="text-xs font-semibold text-slate-500">Kırmızı yıldızlı alanlar kritik kaydı tamamlar. Diğer alanlar dosya özetini güçlendirir.</p>
+              <p class="text-xs font-semibold" [class]="formHata ? 'text-red-700' : 'text-slate-600'" role="status">{{ formHata || 'Yıldızlı alanları doldurun. Karar bilgileri isteğe bağlıdır.' }}</p>
               <div class="flex justify-end gap-3">
-                <button (click)="davaFormKapat()" class="px-4 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors">İptal</button>
-                <button (click)="davaKaydet()" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all">{{ formModu === 'ekle' ? 'Kaydı Oluştur' : 'Değişiklikleri Kaydet' }}</button>
+                <button (click)="davaFormKapat()" [disabled]="davaKaydediliyor" class="px-4 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors">İptal</button>
+                <button (click)="davaKaydet()" [disabled]="davaKaydediliyor" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all">{{ davaKaydediliyor ? 'Kaydediliyor...' : (formModu === 'ekle' ? 'Kaydı Oluştur' : 'Değişiklikleri Kaydet') }}</button>
               </div>
             </div>
           </div>
