@@ -31,7 +31,7 @@ export interface IcraKapakHesabi {
   digerFeriler?: number;
   muhasebeyeDahilKalemler?: IcraKapakKalemiKodu[];
 }
-export interface EvrakGorevi { id: number; metin: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; }
+export interface EvrakGorevi { id: number; metin: string; tarih?: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; }
 export interface EvrakBaglantisi { id: number; isim: string; url: string; tarih: string; tebligTarihi?: string; sonEylemTarihi?: string; tamamlandiMi?: boolean; tamamlanmaTarihi?: string; yaziRengi?: string; ekler?: EvrakBaglantisi[]; gorevler?: EvrakGorevi[]; sablonBolumu?: string; sablonKategori?: string; portaldaGoster?: boolean; portalMuvekkilIdleri?: number[]; }
 export interface DosyaNumarasi { tur: string; no: string; }
 export interface ArabuluculukTaraf {
@@ -242,7 +242,7 @@ export interface OfisGorevi {
 }
 
 export type AjandaKaynak = 'dava' | 'icra' | 'arabuluculuk' | 'ofis';
-export type AjandaTur = 'durusma' | 'toplanti' | 'takip' | 'sureliIs' | 'ofisGorevi';
+export type AjandaTur = 'durusma' | 'toplanti' | 'takip' | 'sureliIs' | 'ofisGorevi' | 'evrakGorevi';
 
 export interface AjandaKaydi {
   id: string;
@@ -256,6 +256,7 @@ export interface AjandaKaydi {
   altBaslik: string;
   taraflar: string;
   evrakId?: number;
+  gorevId?: number;
   evrakIsmi?: string;
   anaEvrakIsmi?: string;
 }

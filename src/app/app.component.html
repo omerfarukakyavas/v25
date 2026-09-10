@@ -1735,7 +1735,7 @@
                     <div class="bg-gradient-to-br from-slate-50 via-white to-slate-100 p-5 rounded-xl shadow-sm border border-slate-200">
                       <p class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Toplam Ajanda</p>
                       <p class="app-agenda-count text-3xl text-slate-900">{{ ajandaOzet.toplam }}</p>
-                      <p class="text-xs text-slate-500 mt-2">Dava, arabuluculuk, süreli işler ve ofis görevleri tek listede.</p>
+                      <p class="text-xs text-slate-500 mt-2">Dosya etkinlikleri, evrak ve ofis görevleri. {{ ajandaOzet.tarihsiz }} tarihsiz görev dahil.</p>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-amber-100">
                       <p class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Bugün</p>
@@ -1912,9 +1912,31 @@
                         <option value="takip">İcra Takipleri</option>
                         <option value="sureliIs">Süreli İşler</option>
                         <option value="ofisGorevi">Ofis Görevleri</option>
+                        <option value="evrakGorevi">Evrak Görevleri</option>
                       </select>
                     </div>
                   </div>
+
+                  @if (tarihsizEvrakGorevleri.length > 0) {
+                    <section class="rounded-xl border border-sky-200 bg-white p-4 shadow-sm" aria-label="Tarihsiz evrak görevleri">
+                      <h2 class="text-base font-bold text-slate-900">Tarihsiz Evrak Görevleri · {{ tarihsizEvrakGorevleri.length }}</h2>
+                      <p class="mt-1 text-xs text-slate-600">Bu görevler tarih filtresinden bağımsızdır. Evrakına gidip tarih eklediğinizde takvimde de görünür.</p>
+                      <div class="mt-3 max-h-80 overflow-y-auto space-y-2">
+                        @for (kayit of tarihsizEvrakGorevleri; track kayit.id) {
+                          <div class="flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border border-slate-200 p-3">
+                            <button type="button" (click)="ajandaKaydinaGit(kayit)" class="min-w-0 flex-1 text-left" title="Evrak bağlantılarına git">
+                              <span class="block break-words text-sm font-semibold text-slate-900">{{ kayit.baslik }}</span>
+                              <span class="block mt-1 text-xs text-slate-600">{{ getAjandaKaynakEtiketi(kayit.kaynak, kayit.dosya) }} · {{ kayit.altBaslik }}</span>
+                              <span class="block mt-1 text-xs text-slate-600">{{ kayit.taraflar }}</span>
+                              @if (kayit.anaEvrakIsmi) { <span class="block text-xs text-slate-600">Bağlı evrak: {{ kayit.anaEvrakIsmi }}</span> }
+                              <span class="block mt-1 text-xs font-semibold text-blue-700">Evraka git</span>
+                            </button>
+                            <button type="button" (click)="ajandaKaydiTamamla(kayit, $event)" class="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white">Görev Bitti</button>
+                          </div>
+                        }
+                      </div>
+                    </section>
+                  }
 
                   <div class="app-agenda-view-toolbar">
                     <div class="app-agenda-view-choice">
@@ -1952,6 +1974,7 @@
                           <span><i class="app-calendar-event--deadline"></i>Süreli iş</span>
                           <span><i class="app-calendar-event--enforcement"></i>İcra</span>
                           <span><i class="app-calendar-event--office"></i>Ofis görevi</span>
+                          <span><i class="app-calendar-event--document-task"></i>Evrak görevi</span>
                         </div>
                       </header>
 
@@ -4338,9 +4361,15 @@
 
                                       @if (duzenlenenEvrakId !== evrak.id && ((evrak.gorevler && evrak.gorevler.length > 0) || acikEvrakGorevFormlari[evrak.id])) {
                                         <div class="app-document-task-panel border-t border-slate-100 bg-slate-50/70 px-3 py-2 sm:pl-[3.25rem]">
+                                          @if (acikEvrakGorevFormlari[evrak.id]) {
+                                            <p class="mb-2 text-xs text-slate-600">Tarih seçmezseniz evrakın son eylem tarihi kullanılır. O da yoksa görev ajandada tarihsiz görünür.</p>
+                                          }
                                           @if (acikEvrakGorevFormlari[evrak.id] && (!duzenlenenEvrakGorevi || duzenlenenEvrakGorevi.evrakId !== evrak.id)) {
                                             <div class="app-document-task-form flex flex-col gap-2 rounded-lg border border-sky-100 bg-sky-50/60 p-2 sm:flex-row sm:items-center">
-                                              <input [(ngModel)]="yeniEvrakGorevMetinleri[evrak.id]" (keyup.enter)="evrakGoreviEkle(evrak.id)" type="text" placeholder="Görev açıklaması yazın..." class="min-h-[34px] flex-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
+                                              <input [(ngModel)]="yeniEvrakGorevMetinleri[evrak.id]" (keyup.enter)="evrakGoreviEkle(evrak.id)" type="text" placeholder="Görev açıklaması yazın..." class="min-h-[34px] min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
+                                              <label class="app-document-task-date text-xs font-semibold text-slate-900">Ajanda tarihi (isteğe bağlı)
+                                                <input [(ngModel)]="yeniEvrakGorevTarihleri[evrak.id]" type="date" class="mt-1 w-full min-w-0 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900">
+                                              </label>
                                               <div class="flex gap-2">
                                                 <button (click)="evrakGoreviEkle(evrak.id)" class="rounded-md bg-slate-900 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-slate-700">Kaydet</button>
                                                 <button (click)="evrakGorevFormunuKapat(evrak.id)" class="rounded-md bg-white px-3 py-1.5 text-[11px] font-bold text-slate-600 ring-1 ring-slate-200 transition-colors hover:bg-slate-100">İptal</button>
@@ -4349,7 +4378,10 @@
                                           }
                                           @if (duzenlenenEvrakGorevi && duzenlenenEvrakGorevi.evrakId === evrak.id) {
                                             <div class="app-document-task-form flex flex-col gap-2 rounded-lg border border-amber-100 bg-amber-50/70 p-2 sm:flex-row sm:items-center">
-                                              <input [(ngModel)]="duzenlenenEvrakGorevi.metin" (keyup.enter)="evrakGoreviDuzenlemeKaydet()" type="text" class="min-h-[34px] flex-1 rounded-md border border-amber-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-amber-500">
+                                              <input [(ngModel)]="duzenlenenEvrakGorevi.metin" (keyup.enter)="evrakGoreviDuzenlemeKaydet()" type="text" class="min-h-[34px] min-w-0 flex-1 rounded-md border border-amber-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-amber-500">
+                                              <label class="app-document-task-date text-xs font-semibold text-slate-900">Ajanda tarihi (isteğe bağlı)
+                                                <input [(ngModel)]="duzenlenenEvrakGorevi.tarih" type="date" class="mt-1 w-full min-w-0 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900">
+                                              </label>
                                               <div class="flex gap-2">
                                                 <button (click)="evrakGoreviDuzenlemeKaydet()" class="rounded-md bg-amber-500 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-amber-600">Kaydet</button>
                                                 <button (click)="evrakGoreviDuzenlemeIptal()" class="rounded-md bg-white px-3 py-1.5 text-[11px] font-bold text-slate-600 ring-1 ring-slate-200 transition-colors hover:bg-slate-100">İptal</button>
@@ -4362,7 +4394,7 @@
                                                 <div class="app-document-task-row flex items-start justify-between gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700 transition-opacity" [class.opacity-45]="gorev.tamamlandiMi">
                                                   <label class="flex min-w-0 flex-1 items-start gap-2">
                                                     <input type="checkbox" class="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" [ngModel]="!!gorev.tamamlandiMi" (ngModelChange)="evrakGoreviDurumDegistir(evrak.id, gorev.id, $event)">
-                                                    <span class="leading-relaxed" [class.line-through]="gorev.tamamlandiMi">{{ gorev.metin }}</span>
+                                                    <span class="min-w-0 leading-relaxed"><span class="break-words" [class.line-through]="gorev.tamamlandiMi">{{ gorev.metin }}</span><small class="block mt-1 text-slate-600">{{ evrakGoreviAjandaTarihMetni(evrak.id, gorev.id) }}</small></span>
                                                   </label>
                                                   <div class="flex shrink-0 items-center gap-1">
                                                     <button type="button" (click)="evrakGoreviDuzenleBaslat(evrak.id, gorev)" class="rounded bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700 hover:bg-amber-100">Düzenle</button>
@@ -4429,9 +4461,15 @@
                                               }
                                               @if (duzenlenenEvrakId !== ek.id && ((ek.gorevler && ek.gorevler.length > 0) || acikEvrakGorevFormlari[ek.id])) {
                                                 <div class="app-document-task-panel border-t border-slate-100 pt-2 sm:w-full sm:basis-full">
+                                                  @if (acikEvrakGorevFormlari[ek.id]) {
+                                                    <p class="mb-2 text-xs text-slate-600">Tarih seçmezseniz evrakın son eylem tarihi kullanılır. O da yoksa görev ajandada tarihsiz görünür.</p>
+                                                  }
                                                   @if (acikEvrakGorevFormlari[ek.id] && (!duzenlenenEvrakGorevi || duzenlenenEvrakGorevi.evrakId !== ek.id)) {
                                                     <div class="app-document-task-form flex flex-col gap-2 rounded-lg border border-sky-100 bg-sky-50/60 p-2 sm:flex-row sm:items-center">
-                                                      <input [(ngModel)]="yeniEvrakGorevMetinleri[ek.id]" (keyup.enter)="evrakGoreviEkle(ek.id)" type="text" placeholder="Görev açıklaması yazın..." class="min-h-[32px] flex-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
+                                                      <input [(ngModel)]="yeniEvrakGorevMetinleri[ek.id]" (keyup.enter)="evrakGoreviEkle(ek.id)" type="text" placeholder="Görev açıklaması yazın..." class="min-h-[32px] min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
+                                                      <label class="app-document-task-date text-xs font-semibold text-slate-900">Ajanda tarihi (isteğe bağlı)
+                                                        <input [(ngModel)]="yeniEvrakGorevTarihleri[ek.id]" type="date" class="mt-1 w-full min-w-0 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900">
+                                                      </label>
                                                       <div class="flex gap-2">
                                                         <button (click)="evrakGoreviEkle(ek.id)" class="rounded-md bg-slate-800 px-3 py-1.5 text-[10px] font-bold text-white transition-colors hover:bg-slate-700">Kaydet</button>
                                                         <button (click)="evrakGorevFormunuKapat(ek.id)" class="rounded-md bg-white px-3 py-1.5 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200 transition-colors hover:bg-slate-100">İptal</button>
@@ -4440,7 +4478,10 @@
                                                   }
                                                   @if (duzenlenenEvrakGorevi && duzenlenenEvrakGorevi.evrakId === ek.id) {
                                                     <div class="app-document-task-form flex flex-col gap-2 rounded-lg border border-amber-100 bg-amber-50/70 p-2 sm:flex-row sm:items-center">
-                                                      <input [(ngModel)]="duzenlenenEvrakGorevi.metin" (keyup.enter)="evrakGoreviDuzenlemeKaydet()" type="text" class="min-h-[32px] flex-1 rounded-md border border-amber-300 bg-white px-2.5 py-1.5 text-[11px] text-slate-700 outline-none focus:ring-2 focus:ring-amber-500">
+                                                      <input [(ngModel)]="duzenlenenEvrakGorevi.metin" (keyup.enter)="evrakGoreviDuzenlemeKaydet()" type="text" class="min-h-[32px] min-w-0 flex-1 rounded-md border border-amber-300 bg-white px-2.5 py-1.5 text-[11px] text-slate-700 outline-none focus:ring-2 focus:ring-amber-500">
+                                                      <label class="app-document-task-date text-xs font-semibold text-slate-900">Ajanda tarihi (isteğe bağlı)
+                                                        <input [(ngModel)]="duzenlenenEvrakGorevi.tarih" type="date" class="mt-1 w-full min-w-0 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900">
+                                                      </label>
                                                       <div class="flex gap-2">
                                                         <button (click)="evrakGoreviDuzenlemeKaydet()" class="rounded-md bg-amber-500 px-3 py-1.5 text-[10px] font-bold text-white transition-colors hover:bg-amber-600">Kaydet</button>
                                                         <button (click)="evrakGoreviDuzenlemeIptal()" class="rounded-md bg-white px-3 py-1.5 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200 transition-colors hover:bg-slate-100">İptal</button>
@@ -4453,7 +4494,7 @@
                                                         <div class="app-document-task-row flex items-start justify-between gap-2 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-[11px] text-slate-700 transition-opacity" [class.opacity-45]="gorev.tamamlandiMi">
                                                           <label class="flex min-w-0 flex-1 items-start gap-2">
                                                             <input type="checkbox" class="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" [ngModel]="!!gorev.tamamlandiMi" (ngModelChange)="evrakGoreviDurumDegistir(ek.id, gorev.id, $event)">
-                                                            <span class="leading-relaxed" [class.line-through]="gorev.tamamlandiMi">{{ gorev.metin }}</span>
+                                                            <span class="min-w-0 leading-relaxed"><span class="break-words" [class.line-through]="gorev.tamamlandiMi">{{ gorev.metin }}</span><small class="block mt-1 text-slate-600">{{ evrakGoreviAjandaTarihMetni(ek.id, gorev.id) }}</small></span>
                                                           </label>
                                                           <div class="flex shrink-0 items-center gap-1">
                                                             <button type="button" (click)="evrakGoreviDuzenleBaslat(ek.id, gorev)" class="rounded bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700 hover:bg-amber-100">Düzenle</button>

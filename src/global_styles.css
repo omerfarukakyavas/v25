@@ -383,6 +383,12 @@ textarea {
   --calendar-text: #3730a3;
 }
 
+.app-calendar-event--document-task {
+  --calendar-accent: #0369a1;
+  --calendar-bg: #e0f2fe;
+  --calendar-text: #075985;
+}
+
 .app-calendar-event {
   display: grid;
   grid-template-columns: 2.4rem minmax(0, 1fr);
@@ -2018,6 +2024,7 @@ textarea {
 }
 
 .app-document-task-form {
+  flex-wrap: wrap;
   border-color: #bae6fd !important;
   background: #f0f9ff !important;
 }
@@ -2355,6 +2362,22 @@ textarea {
   background: #dbeafe;
   border-color: #93c5fd;
   color: #1d4ed8;
+}
+
+.app-document-task-date {
+  min-width: 0;
+  width: 100%;
+}
+
+.app-document-task-form button:first-child {
+  background: #0f172a !important;
+  color: #ffffff !important;
+}
+
+@media (min-width: 640px) {
+  .app-document-task-date {
+    width: 11rem;
+  }
 }
 
 .app-mobile-bottom-nav {

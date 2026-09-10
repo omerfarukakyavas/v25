@@ -10,6 +10,7 @@ import { appId, getFirebaseConfig } from '../firebase.config';
 import { GOOGLE_DOCS_CONFIG } from '../google-docs.config';
 import { MuvekkilPortalComponent } from './muvekkil-portal.component';
 import { CezaTarafFormComponent } from './ceza-taraf-form.component';
+import { evrakGoreviGecerliTarih, evrakGorevleriniListele } from './evrak-gorevleri';
 import { DAVA_DOSYA_TURLERI, cezaDosyasiMi, cezaFormHatasi, cezaTarafAlanlari, cezaTarafOzeti, davaAramaEslesir, davaDurumlari, davaTurEtiketi, sorusturmadanCezaTaslagi } from './ceza-dosyalari';
 import {
   UYAP_TOPLU_AKTARIM_SABLON_BASLIKLARI,
@@ -581,8 +582,10 @@ export class AppComponent implements OnInit {
   uyapIceriAktarYapistirilanMetin = '';
   uyapIceriAktarOnizleme: UyapEvrakIceriAktarOnizleme | null = null;
   yeniEvrakGorevMetinleri: Record<number, string> = {};
+  yeniEvrakGorevTarihleri: Record<number, string> = {};
+  private evrakGoreviKaydedilenDosyalar = new Set<string>();
   acikEvrakGorevFormlari: Record<number, boolean> = {};
-  duzenlenenEvrakGorevi: { evrakId: number; gorevId: number; metin: string } | null = null;
+  duzenlenenEvrakGorevi: { evrakId: number; gorevId: number; metin: string; tarih: string } | null = null;
   acikKlasorler: Record<number, boolean> = {}; 
   davetMektubuOlusturuluyor = false;
   bilgilendirmeTutanagiOlusturuluyor = false;
@@ -2318,7 +2321,7 @@ export class AppComponent implements OnInit {
     return {
       tur,
       id,
-      sekme: parametreler.get('detaySekmesi') === 'sureliIsler' ? 'sureliIsler' : 'notlar'
+      sekme: parametreler.get('detaySekmesi') === 'sureliIsler' ? 'sureliIsler' : parametreler.get('detaySekmesi') === 'evraklar' ? 'evraklar' : 'notlar'
     };
   }
 
@@ -4470,6 +4473,7 @@ export class AppComponent implements OnInit {
   }
 
   getAjandaTurEtiketi(tur: AjandaTur) {
+    if (tur === 'evrakGorevi') return 'Evrak Görevi';
     if (tur === 'durusma') return 'Duruşma';
     if (tur === 'toplanti') return 'Toplantı';
     if (tur === 'takip') return 'Takip Tarihi';
@@ -4478,6 +4482,7 @@ export class AppComponent implements OnInit {
   }
 
   getAjandaTurClass(tur: AjandaTur) {
+    if (tur === 'evrakGorevi') return 'bg-sky-100 text-sky-800';
     if (tur === 'durusma') return 'bg-blue-100 text-blue-700';
     if (tur === 'toplanti') return 'bg-purple-100 text-purple-700';
     if (tur === 'takip') return 'bg-emerald-100 text-emerald-700';
@@ -4523,6 +4528,12 @@ export class AppComponent implements OnInit {
     else this.arabuluculukDetayinaGit(kayit.dosya as ArabuluculukDosyasi);
 
     if (kayit.tur === 'sureliIs') this.aktifDetaySekmesi = 'sureliIsler';
+    if (kayit.tur === 'evrakGorevi') {
+      this.aktifDetaySekmesi = 'evraklar';
+      for (const evrak of kayit.dosya?.evraklar || []) {
+        if (evrakGorevleriniListele([evrak]).some(k => k.evrak.id === kayit.evrakId)) this.acikKlasorler[evrak.id] = true;
+      }
+    }
   }
 
   get ajandaKayitlariLegacy() {
@@ -4643,39 +4654,60 @@ export class AppComponent implements OnInit {
     });
 
     this.aktifOfisGorevleri.forEach(gorev => kayitlar.push(this.ofisGoreviAjandaKaydiOlustur(gorev)));
+    kayitlar.push(...this.evrakGoreviAjandaKayitlari.filter(kayit => !!kayit.tarih));
 
     return kayitlar.sort((a, b) => this.ajandaTarihDamgasi(a.tarih) - this.ajandaTarihDamgasi(b.tarih));
   }
 
   get filtrelenmisAjandaKayitlari() {
-    const arama = this.ajandaArama.trim().toLowerCase();
     return this.ajandaKayitlari.filter(kayit => {
       const fark = this.ajandaGunFarki(kayit.tarih);
-      const metin = [
-        kayit.baslik,
-        kayit.altBaslik,
-        kayit.taraflar,
-        kayit.evrakIsmi || '',
-        kayit.anaEvrakIsmi || '',
-        kayit.ofisGorevi?.aciklama || '',
-        kayit.ofisGorevi?.oncelik || '',
-        kayit.ofisGorevi?.bagliDosyaBaslik || '',
-        kayit.ofisGorevi?.bagliDosyaTaraflar || '',
-        this.getAjandaKaynakEtiketi(kayit.kaynak, kayit.dosya),
-        this.getAjandaTurEtiketi(kayit.tur),
-        this.getAjandaDosyaOzeti(kayit.kaynak, kayit.dosya)
-      ].join(' ').toLowerCase();
-
-      const aramaUygun = !arama || metin.includes(arama);
       const zamanUygun = this.ajandaZamanFiltresi === 'all'
         || (this.ajandaZamanFiltresi === 'today' && fark === 0)
         || (this.ajandaZamanFiltresi === '7days' && fark >= 0 && fark <= 7)
         || (this.ajandaZamanFiltresi === '30days' && fark >= 0 && fark <= 30)
         || (this.ajandaZamanFiltresi === 'overdue' && fark < 0);
-      const turUygun = this.ajandaTurFiltresi === 'all' || kayit.tur === this.ajandaTurFiltresi;
-
-      return aramaUygun && zamanUygun && turUygun;
+      return this.ajandaKaydiAramaVeTurUygun(kayit) && zamanUygun;
     });
+  }
+
+  private ajandaKaydiAramaVeTurUygun(kayit: AjandaKaydi) {
+    const arama = this.ajandaArama.trim().toLocaleLowerCase('tr-TR');
+    const metin = [kayit.baslik, kayit.altBaslik, kayit.taraflar, kayit.evrakIsmi, kayit.anaEvrakIsmi,
+      kayit.ofisGorevi?.aciklama, kayit.ofisGorevi?.oncelik, kayit.ofisGorevi?.bagliDosyaBaslik,
+      kayit.ofisGorevi?.bagliDosyaTaraflar, this.getAjandaKaynakEtiketi(kayit.kaynak, kayit.dosya),
+      this.getAjandaTurEtiketi(kayit.tur), this.getAjandaDosyaOzeti(kayit.kaynak, kayit.dosya)
+    ].join(' ').toLocaleLowerCase('tr-TR');
+    return (!arama || metin.includes(arama)) && (this.ajandaTurFiltresi === 'all' || kayit.tur === this.ajandaTurFiltresi);
+  }
+
+  get evrakGoreviAjandaKayitlari(): AjandaKaydi[] {
+    const gruplar = [
+      { kaynak: 'dava' as const, dosyalar: this.davalar },
+      { kaynak: 'icra' as const, dosyalar: this.icralar },
+      { kaynak: 'arabuluculuk' as const, dosyalar: this.arabuluculukDosyalar }
+    ];
+    // Closing a file or its document does not silently complete an unchecked task.
+    return gruplar.flatMap(({ kaynak, dosyalar }) => dosyalar.flatMap(dosya =>
+      evrakGorevleriniListele(dosya.evraklar).filter(({ gorev }) => !gorev.tamamlandiMi).map(({ evrak, gorev, tarih, anaEvrakIsmi }) => ({
+        id: `${kaynak}-evrak-gorevi-${dosya.id}-${evrak.id}-${gorev.id}`,
+        tur: 'evrakGorevi' as const, kaynak, dosya, tarih,
+        baslik: gorev.metin,
+        altBaslik: `${this.getAjandaDosyaOzeti(kaynak, dosya)} · ${evrak.isim}`,
+        taraflar: this.getTaraflarMetni({ tur: kaynak, dosya }),
+        evrakId: evrak.id, gorevId: gorev.id, evrakIsmi: evrak.isim, anaEvrakIsmi
+      }))
+    ));
+  }
+
+  get tarihsizEvrakGorevleri() {
+    return this.evrakGoreviAjandaKayitlari.filter(kayit => !kayit.tarih && this.ajandaKaydiAramaVeTurUygun(kayit));
+  }
+
+  evrakGoreviAjandaTarihMetni(evrakId: number, gorevId: number) {
+    const kayit = evrakGorevleriniListele(this.aktifDosya?.evraklar).find(k => k.evrak.id === evrakId && k.gorev.id === gorevId);
+    if (!kayit?.tarih) return 'Ajanda: Tarihsiz';
+    return `Ajanda: ${this.formatTarihKisa(kayit.tarih)}${kayit.gorev.tarih ? '' : ' (evrak tarihi)'}`;
   }
 
   ajandaTakvimGorunumunuDegistir(gorunum: AjandaGorunumTipi) {
@@ -4770,6 +4802,7 @@ export class AppComponent implements OnInit {
   }
 
   getAjandaTakvimEtkinlikClass(kayit: AjandaKaydi) {
+    if (kayit.tur === 'evrakGorevi') return 'app-calendar-event--document-task';
     if (kayit.tur === 'durusma') return 'app-calendar-event--hearing';
     if (kayit.tur === 'toplanti') return 'app-calendar-event--meeting';
     if (kayit.tur === 'sureliIs') return 'app-calendar-event--deadline';
@@ -4819,8 +4852,10 @@ export class AppComponent implements OnInit {
 
   get ajandaOzet() {
     const kayitlar = this.ajandaKayitlari;
+    const tarihsiz = this.evrakGoreviAjandaKayitlari.filter(kayit => !kayit.tarih).length;
     return {
-      toplam: kayitlar.length,
+      toplam: kayitlar.length + tarihsiz,
+      tarihsiz,
       bugun: kayitlar.filter(kayit => this.ajandaGunFarki(kayit.tarih) === 0).length,
       yakin: kayitlar.filter(kayit => {
         const fark = this.ajandaGunFarki(kayit.tarih);
@@ -6353,6 +6388,7 @@ export class AppComponent implements OnInit {
   evrakGorevFormunuKapat(evrakId: number) {
     this.acikEvrakGorevFormlari[evrakId] = false;
     this.yeniEvrakGorevMetinleri[evrakId] = '';
+    this.yeniEvrakGorevTarihleri[evrakId] = '';
     if (this.duzenlenenEvrakGorevi?.evrakId === evrakId) this.duzenlenenEvrakGorevi = null;
   }
   async evrakGoreviEkle(evrakId: number) {
@@ -6364,19 +6400,20 @@ export class AppComponent implements OnInit {
     const bulundu = this.evrakKaydiniGuncelle(k.evraklar, evrakId, (evrak) => {
       evrakIsmi = evrak.isim || evrakIsmi;
       if (!evrak.gorevler) evrak.gorevler = [];
-      evrak.gorevler.push({ id: Date.now(), metin, tamamlandiMi: false, tamamlanmaTarihi: '' });
+      evrak.gorevler.push({ id: Date.now(), metin, tarih: evrakGoreviGecerliTarih(this.yeniEvrakGorevTarihleri[evrakId]), tamamlandiMi: false, tamamlanmaTarihi: '' });
     });
     if (!bulundu) return;
     const kayitli = this.dosyayaIslemKaydiEkle(k, 'evrak', 'Evrak görevi eklendi', `${evrakIsmi}: ${metin}`);
     const kaydedildi = await this.aktifDosyaKaydet(kayitli, 'Evrak görevi eklendi.');
     if (!kaydedildi) return;
     this.yeniEvrakGorevMetinleri[evrakId] = '';
+    this.yeniEvrakGorevTarihleri[evrakId] = '';
     this.acikEvrakGorevFormlari[evrakId] = false;
   }
   evrakGoreviDuzenleBaslat(evrakId: number, gorev: EvrakGorevi) {
     this.acikEvrakGorevFormlari[evrakId] = true;
     this.yeniEvrakGorevMetinleri[evrakId] = '';
-    this.duzenlenenEvrakGorevi = { evrakId, gorevId: gorev.id, metin: gorev.metin || '' };
+    this.duzenlenenEvrakGorevi = { evrakId, gorevId: gorev.id, metin: gorev.metin || '', tarih: gorev.tarih || '' };
   }
   evrakGoreviDuzenlemeIptal() {
     this.duzenlenenEvrakGorevi = null;
@@ -6394,6 +6431,7 @@ export class AppComponent implements OnInit {
       const gorev = (evrak.gorevler || []).find((item) => item.id === duzenleme.gorevId);
       if (!gorev) return;
       gorev.metin = metin;
+      gorev.tarih = evrakGoreviGecerliTarih(duzenleme.tarih);
       gorevBulundu = true;
     });
     if (!bulundu || !gorevBulundu) return;
@@ -6434,27 +6472,41 @@ export class AppComponent implements OnInit {
       'Silinen görev tekrar evrakın altına eklendi.'
     );
   }
-  evrakGoreviDurumDegistir(evrakId: number, gorevId: number, tamamlandiMi: boolean) {
-    if (!this.aktifDosya) return;
-    const k: any = this.veriKopyala(this.aktifDosya);
+  async evrakGoreviDurumDegistir(evrakId: number, gorevId: number, tamamlandiMi: boolean,
+    dosya = this.aktifDosya,
+    kaynak: AjandaKaynak = this.aktifSayfa === 'icraDetay' ? 'icra' : this.aktifSayfa === 'arabuluculukDetay' ? 'arabuluculuk' : 'dava') {
+    if (!dosya || kaynak === 'ofis') return false;
+    const anahtar = `${kaynak}-${dosya.id}`;
+    if (this.evrakGoreviKaydedilenDosyalar.has(anahtar)) return false;
+    const liste = kaynak === 'dava' ? this.davalar : kaynak === 'icra' ? this.icralar : this.arabuluculukDosyalar;
+    const guncelDosya = liste.find(item => item.id === dosya.id);
+    if (!guncelDosya) return false;
+    const k: any = this.veriKopyala(guncelDosya);
     let evrakIsmi = 'Evrak';
     let gorevMetni = 'Görev';
+    let gorevBulundu = false;
     const bulundu = this.evrakKaydiniGuncelle(k.evraklar, evrakId, (evrak) => {
       evrakIsmi = evrak.isim || evrakIsmi;
       const gorev = (evrak.gorevler || []).find((item) => item.id === gorevId);
       if (!gorev) return;
+      gorevBulundu = true;
       gorevMetni = gorev.metin || gorevMetni;
       gorev.tamamlandiMi = tamamlandiMi;
       gorev.tamamlanmaTarihi = tamamlandiMi ? new Date().toISOString() : '';
     });
-    if (!bulundu) return;
+    if (!bulundu || !gorevBulundu) return false;
     const kayitli = this.dosyayaIslemKaydiEkle(
       k,
       'evrak',
       tamamlandiMi ? 'Evrak görevi tamamlandı' : 'Evrak görevi yeniden açıldı',
       `${evrakIsmi}: ${gorevMetni}`
     );
-    this.aktifDosyaKaydet(kayitli);
+    this.evrakGoreviKaydedilenDosyalar.add(anahtar);
+    try {
+      return await this.kaynakKaydetFonksiyonu(kaynak)(kayitli);
+    } finally {
+      this.evrakGoreviKaydedilenDosyalar.delete(anahtar);
+    }
   }
   async sureliIsiTamamlandiIsaretle(dosya: DavaDosyasi | IcraDosyasi | ArabuluculukDosyasi | null | undefined, kaynak: AjandaKaynak, evrakId: number, event?: Event) {
     event?.stopPropagation();
@@ -6481,12 +6533,19 @@ export class AppComponent implements OnInit {
     );
   }
   ajandaKaydiTamamla(kayit: AjandaKaydi, event?: Event) {
-    if (kayit.tur === 'ofisGorevi' && kayit.ofisGorevi) this.ofisGoreviTamamla(kayit.ofisGorevi, event);
-    else if (kayit.tur === 'durusma') this.durusmaTamamlandiIsaretle(kayit.dosya as DavaDosyasi, event);
-    else if (kayit.tur === 'toplanti') this.toplantiTamamlandiIsaretle(kayit.dosya as ArabuluculukDosyasi, event);
-    else if (kayit.evrakId) this.sureliIsiTamamlandiIsaretle(kayit.dosya, kayit.kaynak, kayit.evrakId, event);
+    if (kayit.tur === 'evrakGorevi') {
+      event?.stopPropagation();
+      if (kayit.evrakId === undefined || kayit.gorevId === undefined || !kayit.dosya) return;
+      return this.evrakGoreviDurumDegistir(kayit.evrakId, kayit.gorevId, true, kayit.dosya, kayit.kaynak);
+    }
+    if (kayit.tur === 'ofisGorevi' && kayit.ofisGorevi) return this.ofisGoreviTamamla(kayit.ofisGorevi, event);
+    if (kayit.tur === 'durusma') return this.durusmaTamamlandiIsaretle(kayit.dosya as DavaDosyasi, event);
+    if (kayit.tur === 'toplanti') return this.toplantiTamamlandiIsaretle(kayit.dosya as ArabuluculukDosyasi, event);
+    if (kayit.evrakId) return this.sureliIsiTamamlandiIsaretle(kayit.dosya, kayit.kaynak, kayit.evrakId, event);
+    return;
   }
   getAjandaTamamlaMetni(kayit: AjandaKaydi) {
+    if (kayit.tur === 'evrakGorevi') return 'Görev Bitti';
     if (kayit.tur === 'durusma') return 'Duruşma Yapıldı';
     if (kayit.tur === 'toplanti') return 'Toplantı Yapıldı';
     if (kayit.tur === 'ofisGorevi') return 'Görev Bitti';
@@ -7934,6 +7993,7 @@ export class AppComponent implements OnInit {
     url.searchParams.set('dosyaTuru', kayit.kaynak);
     url.searchParams.set('dosyaId', String(kayit.dosya.id));
     if (kayit.tur === 'sureliIs') url.searchParams.set('detaySekmesi', 'sureliIsler');
+    if (kayit.tur === 'evrakGorevi') url.searchParams.set('detaySekmesi', 'evraklar');
     return url.toString();
   }
 

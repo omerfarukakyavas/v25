@@ -18,6 +18,18 @@ AppComponent.prototype.ngOnInit = function () {
     ], finansalIslemler: [], evraklar: [], takipTarihi: '2026-09-07'
   }];
   document.title = 'YEREL TEST - Ceza ve Soruşturma';
+  if (new URLSearchParams(location.search).has('evrak')) {
+    this.aktifSayfa = 'ajanda';
+    const tarih = this.gunBazliIsoTarih(new Date());
+    this.davalar[0].evraklar = [
+      { id: 20, isim: 'Örnek ara karar', url: 'https://example.invalid/karar', tarih: '',
+        gorevler: [{ id: 30, metin: 'Müvekkilden bilgi iste' }, { id: 31, metin: 'İstinaf dilekçesini hazırla', tarih }],
+        ekler: [{ id: 21, isim: 'Örnek bilirkişi raporu', url: 'https://example.invalid/rapor', tarih: '', sonEylemTarihi: tarih,
+          gorevler: [{ id: 32, metin: 'Rapora itirazları incele' }] }]
+      }
+    ];
+    document.title = 'YEREL TEST - Evrak Görevleri';
+  }
   const banner = document.createElement('div');
   banner.textContent = 'YEREL TEST: Örnek veriler. Firebase bağlantısı yok. Sayfa yenilenince sıfırlanır.';
   Object.assign(banner.style, { position: 'fixed', bottom: '0', left: '0', right: '0', zIndex: '99999', background: '#fef3c7', color: '#111827', padding: '6px', textAlign: 'center', fontSize: '12px' });
