@@ -10,6 +10,8 @@ import { appId, getFirebaseConfig } from '../firebase.config';
 import { GOOGLE_DOCS_CONFIG } from '../google-docs.config';
 import { MuvekkilPortalComponent } from './muvekkil-portal.component';
 import { CezaTarafFormComponent } from './ceza-taraf-form.component';
+import { IletisimKisiSeciciComponent } from './iletisim-kisi-secici.component';
+import { iletisimKisileriniOlustur, type IletisimKisiBilgisi } from './iletisim-kisileri';
 import { evrakGoreviGecerliTarih, evrakGorevleriniListele } from './evrak-gorevleri';
 import { DAVA_DOSYA_TURLERI, cezaDosyasiMi, cezaFormHatasi, cezaTarafAlanlari, cezaTarafOzeti, davaAramaEslesir, davaDurumlari, davaTurEtiketi, sorusturmadanCezaTaslagi } from './ceza-dosyalari';
 import {
@@ -356,7 +358,7 @@ type UygulamaGezinmeDurumu = {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, MuvekkilPortalComponent, CezaTarafFormComponent],
+  imports: [CommonModule, FormsModule, MuvekkilPortalComponent, CezaTarafFormComponent, IletisimKisiSeciciComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -498,6 +500,7 @@ export class AppComponent implements OnInit {
   ajandaZamanFiltresi: 'all' | 'today' | '7days' | '30days' | 'overdue' = 'all';
   ajandaTurFiltresi: 'all' | AjandaTur = 'all';
   ajandaGorunum: AjandaGorunumTipi = 'ay';
+  ozetTakvimGorunumu: 'ay' | 'hafta' = 'ay';
   ajandaTakvimOdakTarihi = this.gunBazliIsoTarih(new Date());
   ajandaTakvimSeciliTarih = this.ajandaTakvimOdakTarihi;
   readonly ajandaHaftaGunEtiketleri = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
@@ -610,6 +613,7 @@ export class AppComponent implements OnInit {
   gunlukOzetBolumleri: GunlukOzetBolum[] = [];
   readonly iletisimNotuYontemleri = ['WhatsApp', 'E-posta', 'Telefon Araması', 'SMS', 'Yüz yüze', 'Diğer'];
   yeniIletisimNotu: Partial<IletisimNotu> = this.iletisimNotuVarsayilanFormu();
+  iletisimKisiSecimiSurumu = 0;
   acikIletisimNotlari: Record<number, boolean> = {};
   duzenlenenIletisimNotuId: number | null = null;
   duzenlenenIletisimNotu: Partial<IletisimNotu> = {};
@@ -4702,7 +4706,12 @@ export class AppComponent implements OnInit {
   }
 
   ajandaTakvimGorunumunuDegistir(gorunum: AjandaGorunumTipi) {
-    this.ajandaGorunum = gorunum;
+    if (this.aktifSayfa === 'dashboard') {
+      if (gorunum === 'liste') return;
+      this.ozetTakvimGorunumu = gorunum;
+    } else {
+      this.ajandaGorunum = gorunum;
+    }
     if (gorunum !== 'liste' && !this.gunBazliTarihOlustur(this.ajandaTakvimOdakTarihi)) {
       this.ajandaTakvimBuguneGit();
     }
@@ -4714,11 +4723,20 @@ export class AppComponent implements OnInit {
     this.ajandaTakvimSeciliTarih = bugun;
   }
 
+  get aktifTakvimGorunumu(): AjandaGorunumTipi {
+    return this.aktifSayfa === 'dashboard' ? this.ozetTakvimGorunumu : this.ajandaGorunum;
+  }
+
+  get aktifTakvimKayitlari() {
+    // Agenda filters remain local to the agenda; the overview must not silently hide appointments.
+    return this.aktifSayfa === 'dashboard' ? this.ajandaKayitlari : this.filtrelenmisAjandaKayitlari;
+  }
+
   ajandaTakvimDonemDegistir(yon: -1 | 1) {
     const odak = this.gunBazliTarihOlustur(this.ajandaTakvimOdakTarihi) || new Date();
     const yeniOdak = new Date(odak);
 
-    if (this.ajandaGorunum === 'hafta') {
+    if (this.aktifTakvimGorunumu === 'hafta') {
       yeniOdak.setDate(yeniOdak.getDate() + (yon * 7));
     } else {
       yeniOdak.setDate(1);
@@ -4754,7 +4772,7 @@ export class AppComponent implements OnInit {
 
   get ajandaTakvimDonemBasligi() {
     const odak = this.gunBazliTarihOlustur(this.ajandaTakvimOdakTarihi) || new Date();
-    if (this.ajandaGorunum === 'ay') {
+    if (this.aktifTakvimGorunumu === 'ay') {
       return odak.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
     }
 
@@ -4778,11 +4796,11 @@ export class AppComponent implements OnInit {
   }
 
   get ajandaTakvimSeciliGunKayitlari() {
-    return this.filtrelenmisAjandaKayitlari.filter(kayit => this.ajandaTakvimKayitTarihAnahtari(kayit) === this.ajandaTakvimSeciliTarih);
+    return this.aktifTakvimKayitlari.filter(kayit => this.ajandaTakvimKayitTarihAnahtari(kayit) === this.ajandaTakvimSeciliTarih);
   }
 
   get ajandaTakvimDonemKayitSayisi() {
-    const gunler = this.ajandaGorunum === 'hafta' ? this.ajandaHaftaTakvimGunleri : this.ajandaAyTakvimGunleri.filter(gun => gun.ayIciMi);
+    const gunler = this.aktifTakvimGorunumu === 'hafta' ? this.ajandaHaftaTakvimGunleri : this.ajandaAyTakvimGunleri.filter(gun => gun.ayIciMi);
     return gunler.reduce((toplam, gun) => toplam + gun.kayitlar.length, 0);
   }
 
@@ -4807,7 +4825,7 @@ export class AppComponent implements OnInit {
 
   private ajandaTakvimKayitHaritasi() {
     const harita = new Map<string, AjandaKaydi[]>();
-    this.filtrelenmisAjandaKayitlari.forEach(kayit => {
+    this.aktifTakvimKayitlari.forEach(kayit => {
       const tarih = this.ajandaTakvimKayitTarihAnahtari(kayit);
       if (!tarih) return;
       const gunKayitlari = harita.get(tarih) || [];
@@ -5104,6 +5122,17 @@ export class AppComponent implements OnInit {
   iletisimNotuVarsayilanFormu(): Partial<IletisimNotu> {
     return { kisi: '', tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon Araması', telefon: '', eposta: '', notlar: '', baglantiUrl: '' };
   }
+  get aktifDosyaIletisimKisileri() {
+    const kaynak = this.getAktifDosyaAjandaKaynak();
+    if (!this.aktifDosya || (kaynak !== 'dava' && kaynak !== 'icra' && kaynak !== 'arabuluculuk')) return [];
+    return iletisimKisileriniOlustur(kaynak, this.aktifDosya, this.muvekkiller);
+  }
+  iletisimNotuKisiSecildi(secim: IletisimKisiBilgisi, form: Partial<IletisimNotu>) {
+    if (secim.kisi !== undefined) form.kisi = secim.kisi;
+    if (secim.telefon !== undefined) form.telefon = secim.telefon;
+    if (secim.eposta !== undefined) form.eposta = secim.eposta;
+    this.cdr.detectChanges();
+  }
   get aktifDosyaIletisimNotlari() {
     return [...(this.aktifDosya?.iletisimNotlari || [])].sort((a, b) => {
       const tarihFarki = this.iletisimNotuZamanDamgasi(b) - this.iletisimNotuZamanDamgasi(a);
@@ -5140,6 +5169,7 @@ export class AppComponent implements OnInit {
   }
   iletisimNotuFormunuSifirla() {
     this.yeniIletisimNotu = this.iletisimNotuVarsayilanFormu();
+    this.iletisimKisiSecimiSurumu++;
   }
   iletisimNotuDuzenlemeBaslat(kayit: IletisimNotu) {
     this.duzenlenenIletisimNotuId = kayit.id;
@@ -5164,7 +5194,11 @@ export class AppComponent implements OnInit {
     else if (this.aktifSayfa === 'arabuluculukDetay') this.seciliArabuluculuk = dosya as ArabuluculukDosyasi;
   }
   async iletisimNotuKaydet() {
-    if (!this.aktifDosya) return;
+    if (!this.aktifDosya || this.islemYapiyor) return;
+    const sayfa = this.aktifSayfa;
+    const form = this.yeniIletisimNotu;
+    const formAnlik = JSON.stringify(form);
+    const kaydet = this.aktifDetayKaydetFonksiyonu();
 
     const kisi = this.formatMetin(this.yeniIletisimNotu.kisi) || '';
     const tarih = this.yeniIletisimNotu.tarih || new Date().toISOString().split('T')[0];
@@ -5201,14 +5235,20 @@ export class AppComponent implements OnInit {
       'İletişim notu eklendi',
       `${kisi} * ${this.formatTarihSaat(tarih, saat)} * ${yontem}${telefon ? ' * Telefon: ' + telefon : ''}${eposta ? ' * E-posta: ' + eposta : ''}${baglantiUrl ? ' * Bağlantı eklendi' : ''}`
     );
-    this.aktifDosyaYerelGuncelle(kayitli);
-    this.acikIletisimNotlari[yeniKayit.id] = false;
-    this.iletisimNotuFormunuSifirla();
-    await this.aktifDosyaKaydet(kayitli, 'İletişim notu kaydedildi.');
+    if (!await kaydet(kayitli, 'İletişim notu kaydedildi.')) return;
+    if (this.aktifSayfa === sayfa && this.aktifDosya?.id === kayitli.id) {
+      this.aktifDosyaYerelGuncelle(kayitli);
+      this.acikIletisimNotlari[yeniKayit.id] = false;
+      if (this.yeniIletisimNotu === form && JSON.stringify(form) === formAnlik) this.iletisimNotuFormunuSifirla();
+    }
     this.cdr.detectChanges();
   }
   async iletisimNotuGuncelleKaydet() {
-    if (!this.aktifDosya || !this.duzenlenenIletisimNotuId) return;
+    if (!this.aktifDosya || !this.duzenlenenIletisimNotuId || this.islemYapiyor) return;
+    const sayfa = this.aktifSayfa;
+    const form = this.duzenlenenIletisimNotu;
+    const formAnlik = JSON.stringify(form);
+    const kaydet = this.aktifDetayKaydetFonksiyonu();
 
     const kisi = this.formatMetin(this.duzenlenenIletisimNotu.kisi) || '';
     const tarih = this.duzenlenenIletisimNotu.tarih || new Date().toISOString().split('T')[0];
@@ -5237,12 +5277,15 @@ export class AppComponent implements OnInit {
     kayit.baglantiUrl = baglantiUrl;
 
     const kayitli = this.dosyayaIslemKaydiEkle(k, 'gorusme', 'İletişim notu güncellendi', this.getIletisimNotuKayitOzetMetni(kayit));
-    this.aktifDosyaYerelGuncelle(kayitli);
-    this.duzenlenenIletisimNotuId = null;
-    this.duzenlenenIletisimNotu = {};
-    this.silinecekIletisimNotuId = null;
-    this.acikIletisimNotlari[kayit.id] = false;
-    await this.aktifDosyaKaydet(kayitli, 'İletişim notu güncellendi.');
+    if (!await kaydet(kayitli, 'İletişim notu güncellendi.')) return;
+    if (this.aktifSayfa === sayfa && this.aktifDosya?.id === kayitli.id) {
+      this.aktifDosyaYerelGuncelle(kayitli);
+      if (this.duzenlenenIletisimNotu === form && JSON.stringify(form) === formAnlik) {
+        this.iletisimNotuDuzenlemeIptal();
+        this.silinecekIletisimNotuId = null;
+        this.acikIletisimNotlari[kayit.id] = false;
+      }
+    }
     this.cdr.detectChanges();
   }
   async iletisimNotuSil(id: number) {
