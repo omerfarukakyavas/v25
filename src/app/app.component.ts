@@ -3960,6 +3960,7 @@ export class AppComponent implements OnInit {
   }
 
   getAjandaDurumMetni(kayit: AjandaKaydi) {
+    if (kayit.tur === 'takip') return 'Takip başlangıç tarihi';
     const fark = this.ajandaGunFarki(kayit.tarih);
     if (kayit.tur !== 'sureliIs') return this.ajandaDurumMetni(kayit.tarih);
     if (!isFinite(fark)) return 'Tarih yok';
@@ -3970,6 +3971,7 @@ export class AppComponent implements OnInit {
   }
 
   getAjandaDurumClass(kayit: AjandaKaydi) {
+    if (kayit.tur === 'takip') return 'bg-slate-100 text-slate-600 border-transparent';
     const fark = this.ajandaGunFarki(kayit.tarih);
     if (kayit.tur === 'sureliIs') {
       if (fark < 0) return 'app-agenda-critical-pulse border-red-200 bg-red-600 text-white';
@@ -4608,19 +4610,8 @@ export class AppComponent implements OnInit {
       });
     });
 
-    this.icralar.forEach(icra => {
-      if ((icra.durum || '').toLowerCase().includes('kap') || !icra.takipTarihi) return;
-      kayitlar.push({
-        id: `icra-takip-${icra.id}`,
-        tarih: icra.takipTarihi,
-        tur: 'takip',
-        kaynak: 'icra',
-        dosya: icra,
-        baslik: `${icra.icraDairesi || 'İcra Takibi'} ${icra.dosyaNo || ''}`.trim(),
-        altBaslik: icra.takipTipi || 'Takip tarihi',
-        taraflar: this.getTaraflarMetni({ tur: 'icra', dosya: icra })
-      });
-    });
+    // Enforcement start dates are historical metadata, not scheduled work.
+    // Enforcement deadlines and document tasks are collected below.
 
     this.arabuluculukDosyalar.forEach(arabuluculuk => {
       if (arabuluculuk.durum.toLowerCase().includes('kap') || !arabuluculuk.toplantiTarihi || arabuluculuk.toplantiTamamlandiMi) return;

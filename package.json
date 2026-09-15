@@ -7,6 +7,7 @@
     "build": "ng build",
     "test:ceza": "node --import ./tests/typescript-loader.mjs --test tests/ceza-dosyalari.test.mjs",
     "test:evrak": "node --import ./tests/typescript-loader.mjs --test tests/evrak-gorevleri.test.mjs",
+    "test:icra-tarih": "node --import ./tests/typescript-loader.mjs --test tests/icra-takip-tarihi.test.mjs",
     "preview:ceza": "ng serve --build-target demo:build:ceza-preview --host 127.0.0.1 --port 4201",
     "test:rules": "firebase emulators:exec --only firestore \"node --test tests/firestore.rules.test.mjs\""
   },
