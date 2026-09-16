@@ -11,6 +11,8 @@ import { GOOGLE_DOCS_CONFIG } from '../google-docs.config';
 import { MuvekkilPortalComponent } from './muvekkil-portal.component';
 import { CezaTarafFormComponent } from './ceza-taraf-form.component';
 import { IletisimKisiSeciciComponent } from './iletisim-kisi-secici.component';
+import { TakvimTamamlamaComponent } from './takvim-tamamlama.component';
+import { dosyaTakvimKronolojisi, sonrakiOturumHatasi, type SonrakiOturum, type TakvimTamamlamaIstegi } from './takvim-oturumlari';
 import { iletisimKisileriniOlustur, type IletisimKisiBilgisi } from './iletisim-kisileri';
 import { evrakGoreviGecerliTarih, evrakGorevleriniListele } from './evrak-gorevleri';
 import { DAVA_DOSYA_TURLERI, cezaDosyasiMi, cezaFormHatasi, cezaTarafAlanlari, cezaTarafOzeti, davaAramaEslesir, davaDurumlari, davaTurEtiketi, sorusturmadanCezaTaslagi } from './ceza-dosyalari';
@@ -358,7 +360,7 @@ type UygulamaGezinmeDurumu = {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, MuvekkilPortalComponent, CezaTarafFormComponent, IletisimKisiSeciciComponent],
+  imports: [CommonModule, FormsModule, MuvekkilPortalComponent, CezaTarafFormComponent, IletisimKisiSeciciComponent, TakvimTamamlamaComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -501,6 +503,9 @@ export class AppComponent implements OnInit {
   ajandaTurFiltresi: 'all' | AjandaTur = 'all';
   ajandaGorunum: AjandaGorunumTipi = 'ay';
   ozetTakvimGorunumu: 'ay' | 'hafta' = 'ay';
+  takvimTamamlamaIstegi: TakvimTamamlamaIstegi | null = null;
+  takvimTamamlamaKaydediliyor = false;
+  takvimTamamlamaHatasi = '';
   ajandaTakvimOdakTarihi = this.gunBazliIsoTarih(new Date());
   ajandaTakvimSeciliTarih = this.ajandaTakvimOdakTarihi;
   readonly ajandaHaftaGunEtiketleri = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
@@ -2505,7 +2510,7 @@ export class AppComponent implements OnInit {
       gerceklesmeTarihi,
       aciklama
     };
-    kayitli.takvimGecmisi = [yeniKayit, ...(kayitli.takvimGecmisi || [])].slice(0, 80);
+    kayitli.takvimGecmisi = [yeniKayit, ...(kayitli.takvimGecmisi || [])];
     return kayitli;
   }
   ayniDegerMi(onceki: any, sonraki: any) { return (onceki ?? '') === (sonraki ?? ''); }
@@ -5119,6 +5124,11 @@ export class AppComponent implements OnInit {
   get aktifDosyaTakvimGecmisi() {
     return [...(this.aktifDosya?.takvimGecmisi || [])].sort((a, b) => new Date(b.kayitTarihi).getTime() - new Date(a.kayitTarihi).getTime());
   }
+  get aktifDosyaTakvimKronolojisi() {
+    if (this.aktifSayfa === 'detay' && this.getAktifDavaDosyasi()) return dosyaTakvimKronolojisi(this.getAktifDavaDosyasi()!, 'Duruşma');
+    if (this.aktifSayfa === 'arabuluculukDetay' && this.getAktifArabuluculukDosyasi()) return dosyaTakvimKronolojisi(this.getAktifArabuluculukDosyasi()!, 'Toplantı');
+    return [];
+  }
   iletisimNotuVarsayilanFormu(): Partial<IletisimNotu> {
     return { kisi: '', tarih: new Date().toISOString().split('T')[0], saat: '', yontem: 'Telefon Araması', telefon: '', eposta: '', notlar: '', baglantiUrl: '' };
   }
@@ -6336,22 +6346,75 @@ export class AppComponent implements OnInit {
       `${oncekiDurum} durumuna dönüldü.`
     );
   }
-  async durusmaTamamlandiIsaretle(dava: DavaDosyasi, event?: Event) {
+  durusmaTamamlandiIsaretle(dava: DavaDosyasi, event?: Event) {
     event?.stopPropagation();
-    const oncekiKayit = this.veriKopyala(dava);
+    if (!dava.durusmaTarihi || dava.durusmaTamamlandiMi || dava.dosyaTuru === 'sorusturma' || this.islemYapiyor || this.takvimTamamlamaIstegi) return;
+    this.takvimTamamlamaHatasi = '';
+    this.takvimTamamlamaIstegi = { kaynak: 'dava', dosyaId: dava.id, tur: 'Duruşma', dosyaOzeti: `${dava.mahkeme} / ${dava.dosyaNo}`, tarih: dava.durusmaTarihi, saat: dava.durusmaSaati || '' };
+  }
+  takvimTamamlamaIptal() {
+    if (this.takvimTamamlamaKaydediliyor) return;
+    this.takvimTamamlamaIstegi = null;
+    this.takvimTamamlamaHatasi = '';
+  }
+  async takvimTamamlamayiKaydet(yeni: SonrakiOturum | null) {
+    const istek = this.takvimTamamlamaIstegi;
+    if (!istek || this.takvimTamamlamaKaydediliyor || this.islemYapiyor) return false;
+    this.takvimTamamlamaHatasi = '';
+    const davaMi = istek.kaynak === 'dava';
+    const dosya = davaMi ? this.davalar.find(d => d.id === istek.dosyaId) : this.arabuluculukDosyalar.find(d => d.id === istek.dosyaId);
+    const tarih = davaMi ? dosya?.durusmaTarihi : (dosya as ArabuluculukDosyasi)?.toplantiTarihi;
+    const saat = (davaMi ? (dosya as DavaDosyasi)?.durusmaSaati : (dosya as ArabuluculukDosyasi)?.toplantiSaati) || '';
+    const tamamlandi = davaMi ? (dosya as DavaDosyasi)?.durusmaTamamlandiMi : this.arabuluculukToplantisiTamamlanmisKabulEdilir(dosya as ArabuluculukDosyasi);
+    if (!dosya || tarih !== istek.tarih || saat !== istek.saat || tamamlandi || (davaMi && (dosya as DavaDosyasi).dosyaTuru === 'sorusturma')) {
+      this.takvimTamamlamaHatasi = 'Takvim kaydı değişmiş veya kaldırılmış. Pencereyi kapatıp güncel kayıt üzerinden tekrar deneyin.';
+      return false;
+    }
+    if (yeni) {
+      if (dosya.durum === 'Kapalı') {
+        this.takvimTamamlamaHatasi = 'Yeni tarih eklemek için önce dosyayı aktif duruma alın.';
+        return false;
+      }
+      this.takvimTamamlamaHatasi = sonrakiOturumHatasi(istek, yeni);
+      if (this.takvimTamamlamaHatasi) return false;
+    }
     const tamamlanmaTarihi = new Date().toISOString();
-    let k = { ...dava, durusmaTamamlandiMi: true, durusmaTamamlanmaTarihi: tamamlanmaTarihi };
-    k = this.dosyayaTakvimKaydiEkle(k, 'Duruşma', 'Gerçekleşti', dava.durusmaTarihi, dava.durusmaSaati, 'Duruşma gerçekleşti olarak işlendi.', tamamlanmaTarihi);
-    k = this.dosyayaIslemKaydiEkle(k, 'takvim', 'Duruşma gerçekleşti olarak işlendi', this.formatTarihSaat(dava.durusmaTarihi, dava.durusmaSaati), tamamlanmaTarihi);
-    const kaydedildi = await this.davaKaydetCloud(k);
-    if (!kaydedildi) return;
-    this.geriAlinabilirBasariBildirimiGoster(
-      'Duruşma tamamlandı olarak işlendi',
-      'Ajanda kaydı kapatıldı.',
-      () => this.davaKaydetCloud(this.veriKopyala(oncekiKayit)),
-      'Duruşma kaydı geri alındı',
-      'Duruşma yeniden önceki takvim durumuna döndürüldü.'
-    );
+    let k = this.dosyayaTakvimKaydiEkle(dosya, istek.tur, 'Gerçekleşti', istek.tarih, istek.saat, `${istek.tur} gerçekleşti olarak işlendi.`, tamamlanmaTarihi);
+    k = this.dosyayaIslemKaydiEkle(k, 'takvim', `${istek.tur} gerçekleşti olarak işlendi`, this.formatTarihSaat(istek.tarih, istek.saat), tamamlanmaTarihi);
+    if (davaMi) {
+      Object.assign(k, { durusmaTarihi: yeni?.tarih || istek.tarih, durusmaSaati: yeni ? yeni.saat : istek.saat, durusmaTamamlandiMi: !yeni, durusmaTamamlanmaTarihi: yeni ? '' : tamamlanmaTarihi });
+    } else {
+      Object.assign(k, { toplantiTarihi: yeni?.tarih || istek.tarih, toplantiSaati: yeni ? yeni.saat : istek.saat, toplantiTamamlandiMi: !yeni, toplantiTamamlanmaTarihi: yeni ? '' : tamamlanmaTarihi });
+    }
+    if (yeni) {
+      k = this.dosyayaTakvimKaydiEkle(k, istek.tur, 'Planlandı', yeni.tarih, yeni.saat, 'Önceki oturum tamamlandı; yeni tarih planlandı.');
+      k = this.dosyayaIslemKaydiEkle(k, 'takvim', `Yeni ${davaMi ? 'duruşma' : 'toplantı'} tarihi planlandı`, this.formatTarihSaat(yeni.tarih, yeni.saat));
+    }
+    this.takvimTamamlamaKaydediliyor = true;
+    try {
+      // Complete the old appointment and schedule the next in one file write.
+      const kaydedildi = davaMi ? await this.davaKaydetCloud(k as DavaDosyasi) : await this.arabuluculukKaydetCloud(k as ArabuluculukDosyasi);
+      if (!kaydedildi) {
+        this.takvimTamamlamaHatasi = 'Kayıt tamamlanamadı. Girdiğiniz bilgileri koruduk; bağlantıyı kontrol edip tekrar deneyin.';
+        return false;
+      }
+      if (davaMi) {
+        this.davalar = this.davalar.map(d => d.id === k.id ? k as DavaDosyasi : d);
+        if (this.seciliDava?.id === k.id) this.seciliDava = k as DavaDosyasi;
+      } else {
+        this.arabuluculukDosyalar = this.arabuluculukDosyalar.map(d => d.id === k.id ? k as ArabuluculukDosyasi : d);
+        if (this.seciliArabuluculuk?.id === k.id) this.seciliArabuluculuk = k as ArabuluculukDosyasi;
+      }
+      this.takvimTamamlamaIstegi = null;
+      this.bildirimGoster('success', `${istek.tur} kaydedildi`, yeni ? 'Önceki tarih geçmişe, yeni tarih ajandaya eklendi.' : 'Gerçekleşen tarih geçmişte saklandı. Yeni tarih eklenmedi.');
+      return true;
+    } catch {
+      this.takvimTamamlamaHatasi = 'Kayıt tamamlanamadı. Bilgileriniz bu pencerede korunuyor; tekrar deneyebilirsiniz.';
+      return false;
+    } finally {
+      this.takvimTamamlamaKaydediliyor = false;
+      this.cdr.detectChanges();
+    }
   }
   async durusmaAjandayaGeriAl(dava: DavaDosyasi, event?: Event) {
     event?.stopPropagation();
@@ -6369,22 +6432,11 @@ export class AppComponent implements OnInit {
       'Duruşma önceki tamamlanma durumuna döndürüldü.'
     );
   }
-  async toplantiTamamlandiIsaretle(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
+  toplantiTamamlandiIsaretle(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
     event?.stopPropagation();
-    const oncekiKayit = this.veriKopyala(arabuluculuk);
-    const tamamlanmaTarihi = new Date().toISOString();
-    let k = { ...arabuluculuk, toplantiTamamlandiMi: true, toplantiTamamlanmaTarihi: tamamlanmaTarihi };
-    k = this.dosyayaTakvimKaydiEkle(k, 'Toplantı', 'Gerçekleşti', arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati, 'Toplantı gerçekleşti olarak işlendi.', tamamlanmaTarihi);
-    k = this.dosyayaIslemKaydiEkle(k, 'takvim', 'Toplantı gerçekleşti olarak işlendi', this.formatTarihSaat(arabuluculuk.toplantiTarihi, arabuluculuk.toplantiSaati), tamamlanmaTarihi);
-    const kaydedildi = await this.arabuluculukKaydetCloud(k);
-    if (!kaydedildi) return;
-    this.geriAlinabilirBasariBildirimiGoster(
-      'Toplantı tamamlandı olarak işlendi',
-      'Ajanda kaydı kapatıldı.',
-      () => this.arabuluculukKaydetCloud(this.veriKopyala(oncekiKayit)),
-      'Toplantı kaydı geri alındı',
-      'Toplantı yeniden önceki takvim durumuna döndürüldü.'
-    );
+    if (!arabuluculuk.toplantiTarihi || this.arabuluculukToplantisiTamamlanmisKabulEdilir(arabuluculuk) || this.islemYapiyor || this.takvimTamamlamaIstegi) return;
+    this.takvimTamamlamaHatasi = '';
+    this.takvimTamamlamaIstegi = { kaynak: 'arabuluculuk', dosyaId: arabuluculuk.id, tur: 'Toplantı', dosyaOzeti: `${arabuluculuk.buroNo || '-'} / ${arabuluculuk.arabuluculukNo}`, tarih: arabuluculuk.toplantiTarihi, saat: arabuluculuk.toplantiSaati || '' };
   }
   async toplantiAjandayaGeriAl(arabuluculuk: ArabuluculukDosyasi, event?: Event) {
     event?.stopPropagation();

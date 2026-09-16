@@ -10,6 +10,7 @@
     "test:icra-tarih": "node --import ./tests/typescript-loader.mjs --test tests/icra-takip-tarihi.test.mjs",
     "test:iletisim": "node --import ./tests/typescript-loader.mjs --test tests/iletisim-kisileri.test.mjs",
     "test:ozet-takvim": "node --import ./tests/typescript-loader.mjs --test tests/ozet-takvimi.test.mjs",
+    "test:oturum": "node --import ./tests/typescript-loader.mjs --test tests/takvim-oturumlari.test.mjs",
     "preview:ceza": "ng serve --build-target demo:build:ceza-preview --host 127.0.0.1 --port 4201",
     "test:rules": "firebase emulators:exec --only firestore \"node --test tests/firestore.rules.test.mjs\""
   },

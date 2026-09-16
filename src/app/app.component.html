@@ -3378,6 +3378,9 @@
                              }
                            </div>
                            }
+                           @if (getAktifDavaDosyasi()?.dosyaTuru !== 'sorusturma') {
+                             <ng-container *ngTemplateOutlet="dosyaTakvimKronolojisi"></ng-container>
+                           }
                            @if (getDavaBaglantiOzeti(getAktifDavaDosyasi())) {
                              <div class="col-span-2 mt-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3">
                                <div class="flex items-center justify-between gap-3">
@@ -3696,6 +3699,9 @@
                        </div>
                     </div>
 
+                    @if (aktifSayfa === 'arabuluculukDetay') {
+                      <div class="lg:col-span-12"><ng-container *ngTemplateOutlet="dosyaTakvimKronolojisi"></ng-container></div>
+                    }
                     <div class="space-y-4 sm:space-y-6 lg:col-span-12">
                       <div class="app-detail-tabs-card bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden min-h-[320px]">
                         <div class="app-detail-tabs-nav flex overflow-x-auto border-b border-slate-200 bg-slate-50 custom-scrollbar">
@@ -6543,4 +6549,28 @@
     @if (portalModuMu) {
       <app-muvekkil-portal></app-muvekkil-portal>
     }
+    @if (user && !portalModuMu && takvimTamamlamaIstegi; as istek) {
+      <app-takvim-tamamlama [istek]="istek" [kaydediliyor]="takvimTamamlamaKaydediliyor" [hata]="takvimTamamlamaHatasi" (kaydet)="takvimTamamlamayiKaydet($event)" (iptal)="takvimTamamlamaIptal()"></app-takvim-tamamlama>
+    }
+    <ng-template #dosyaTakvimKronolojisi>
+      <section class="col-span-2 min-w-0 rounded-xl border border-slate-300 bg-white p-3 sm:p-4" aria-label="Duruşma ve toplantı kronolojisi">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h4 class="text-sm font-bold text-slate-900">{{ aktifSayfa === 'detay' ? 'Duruşma Kronolojisi' : 'Toplantı Kronolojisi' }}</h4>
+          <span class="text-xs text-slate-600">En yeniden eskiye</span>
+        </div>
+        <div class="max-h-64 space-y-2 overflow-y-auto custom-scrollbar">
+          @for (oturum of aktifDosyaTakvimKronolojisi; track oturum.anahtar) {
+            <div class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+              <div class="text-sm font-semibold text-slate-900">
+                {{ formatTarihSaat(oturum.tarih, oturum.saat) }}
+                @if (oturum.guncel && oturum.durum === 'Planlandı') { <span class="ml-1 text-xs font-normal text-slate-600">Güncel tarih</span> }
+              </div>
+              <span class="rounded-full border px-2.5 py-1 text-xs font-semibold" [class]="oturum.durum === 'Gerçekleşti' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : (oturum.durum === 'Planlandı' ? 'border-blue-200 bg-blue-50 text-blue-800' : 'border-slate-300 bg-white text-slate-700')">{{ oturum.durum }}</span>
+            </div>
+          } @empty {
+            <p class="text-sm text-slate-600">Henüz kayıtlı tarih bulunmuyor.</p>
+          }
+        </div>
+      </section>
+    </ng-template>
 
