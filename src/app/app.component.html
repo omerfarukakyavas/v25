@@ -4750,6 +4750,7 @@
                                   <tbody class="divide-y divide-violet-100">
                                     <tr><td class="px-3 py-2 font-semibold text-slate-600">Brüt Tutar</td><td class="px-3 py-2 text-right font-bold text-slate-800">{{ formatPara(hizmetHesabi.brutTutar) }}</td></tr>
                                     <tr><td class="px-3 py-2 font-semibold text-slate-600">KDV</td><td class="px-3 py-2 text-right font-bold text-slate-800">{{ formatPara(hizmetHesabi.kdvTutari) }}</td></tr>
+                                    <tr><td class="px-3 py-2 font-semibold text-slate-600">Net Ücret <span class="text-xs font-normal">(Brüt Tutar - KDV)</span></td><td class="px-3 py-2 text-right font-bold text-slate-800">{{ formatPara(hizmetHesabi.brutTutar - hizmetHesabi.kdvTutari) }}</td></tr>
                                     <tr><td class="px-3 py-2 font-semibold text-slate-600">KDV Dahil Brüt Ücret</td><td class="px-3 py-2 text-right font-bold text-slate-800">{{ formatPara(hizmetHesabi.kdvDahilBrutTutar) }}</td></tr>
                                     <tr><td class="px-3 py-2 font-semibold text-slate-600">Stopaj</td><td class="px-3 py-2 text-right font-bold" [class]="hizmetHesabi.stopajli ? 'text-violet-700' : 'text-slate-400'">{{ formatPara(hizmetHesabi.stopajTutari) }}</td></tr>
                                     <tr><td class="px-3 py-2 font-semibold text-slate-600">Net Tahsil Edilen</td><td class="px-3 py-2 text-right font-bold text-emerald-700">{{ formatPara(getDosyaFinans(aktifDosya).toplamTahsilat) }}</td></tr>
