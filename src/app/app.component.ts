@@ -3672,9 +3672,12 @@ export class AppComponent implements OnInit {
 
       // Cash receivables and gross fees differ for receipts without withholding.
       const kalanOrani = netUcret > 0 ? Math.min(1, kalan / netUcret) : 0;
+      const netHizmetUcreti = (hizmetHesabi?.brutTutar || 0) - (hizmetHesabi?.kdvTutari || 0);
       if (kalan > 0.01) liste.push({ tip: 'Arabuluculuk', isim: (a.buroNo ? a.buroNo + ' / ' : '') + a.arabuluculukNo, muvekkil: this.muvekkiller.find(m=>m.id === a.muvekkilId)?.adSoyad || a.taraflar?.map((t:any) => t.isim).join(', ') || '-', ekBilgi: taraflarStr, toplam: netUcret, tahsilat: odenen, kalan: kalan, kalanBrut: (hizmetHesabi?.brutTutar || 0) * kalanOrani, kalanKdv: (hizmetHesabi?.kdvTutari || 0) * kalanOrani, id: a.id, detayFonk: () => this.arabuluculukDetayinaGit(a) });
+      if (kalan > 0.01) liste[liste.length - 1].netHizmetUcreti = netHizmetUcreti;
     });
-    return liste.sort((a, b) => b.kalan - a.kalan);
+    return liste.map(item => ({ ...item, netHizmetUcreti: item.netHizmetUcreti ?? item.toplam * 0.8 }))
+      .sort((a, b) => b.kalan - a.kalan);
   }
 
   get muhasebeOzet() {

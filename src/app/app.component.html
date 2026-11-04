@@ -2747,7 +2747,10 @@
                                   <div class="text-[10px] text-slate-400 mt-0.5 truncate" title="{{ islem.ekBilgi }}">({{ islem.ekBilgi }})</div>
                                 }
                               </td>
-                              <td class="p-5 text-right text-sm text-slate-500 font-medium">{{ formatPara(islem.toplam) }}</td>
+                              <td class="p-5 text-right text-sm text-slate-500 font-medium">
+                                <div>{{ formatPara(islem.toplam) }}</div>
+                                <div class="mt-1 text-xs font-normal text-slate-700" title="Brüt Tutar − KDV; dosyanın toplam hizmet ücreti üzerinden hesaplanır.">Net Ücret: {{ formatPara(islem.netHizmetUcreti) }}</div>
+                              </td>
                               <td class="p-5 text-right text-sm text-emerald-600 font-medium">{{ formatPara(islem.tahsilat) }}</td>
                               <td class="p-5 text-right text-sm text-rose-600 font-bold bg-rose-50/30">{{ formatPara(islem.kalan) }}</td>
                               <td class="p-5 text-right">
