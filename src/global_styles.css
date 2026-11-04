@@ -70,6 +70,17 @@ textarea {
   transition: width 0.18s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Keep dark navigation readable despite the global slate text overrides. */
+.app-shell .app-sidebar nav a,
+.app-shell .app-sidebar nav a .app-sidebar-label,
+.app-shell .app-sidebar nav a svg {
+  color: #ffffff !important;
+}
+
+.app-shell .app-sidebar nav a .app-sidebar-label {
+  font-weight: 600;
+}
+
 /* Ajanda calendar views */
 .app-agenda-view-toolbar {
   display: flex;
