@@ -2694,22 +2694,23 @@
                           {{ toplamBekleyenAlacakGizli ? 'Göster' : 'Gizle' }}
                         </button>
                       </div>
-                      <p [class.blur-md]="toplamBekleyenAlacakGizli" [class.select-none]="toplamBekleyenAlacakGizli" class="text-2xl font-black text-slate-900 transition duration-200">{{ formatPara(muhasebeOzet.toplam) }}</p>
+                      <p [class.blur-md]="toplamBekleyenAlacakGizli" [class.select-none]="toplamBekleyenAlacakGizli" class="text-2xl font-black text-slate-900 transition duration-200">{{ formatPara(filtrelenmisMuhasebeOzet.toplam) }}</p>
                       <p class="mt-2 text-xs font-bold text-emerald-700">
-                        Net Kar: <span [class.blur-sm]="toplamBekleyenAlacakGizli" [class.select-none]="toplamBekleyenAlacakGizli" class="inline-block text-sm font-black transition duration-200">{{ formatPara(muhasebeOzet.toplam * 0.8) }}</span>
+                        Net Kar: <span [class.blur-sm]="toplamBekleyenAlacakGizli" [class.select-none]="toplamBekleyenAlacakGizli" class="inline-block text-sm font-black transition duration-200">{{ formatPara(filtrelenmisMuhasebeOzet.netKar) }}</span>
                       </p>
+                      <p class="mt-1 text-xs text-slate-600" title="Arabuluculukta dosyanın muhasebesel dökümü kullanılır. Dava ve icrada ayrı KDV kaydı olmadığından mevcut %20 hesabı kullanılır. Kısmi tahsilatlarda kalan pay hesaplanır.">Brüt toplam / Net: Brüt − KDV</p>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-blue-100">
                       <p class="text-xs font-bold text-blue-500 uppercase tracking-wider mb-1">Avukatlık (Dava)</p>
-                      <p class="text-2xl font-black text-blue-700">{{ formatPara(muhasebeOzet.avukatlik) }}</p>
+                      <p class="text-2xl font-black text-blue-700">{{ formatPara(filtrelenmisMuhasebeOzet.avukatlik) }}</p>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-emerald-100">
                       <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-1">İcra</p>
-                      <p class="text-2xl font-black text-emerald-700">{{ formatPara(muhasebeOzet.icra) }}</p>
+                      <p class="text-2xl font-black text-emerald-700">{{ formatPara(filtrelenmisMuhasebeOzet.icra) }}</p>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-purple-100">
                       <p class="text-xs font-bold text-purple-500 uppercase tracking-wider mb-1">Arabuluculuk</p>
-                      <p class="text-2xl font-black text-purple-700">{{ formatPara(muhasebeOzet.arabuluculuk) }}</p>
+                      <p class="text-2xl font-black text-purple-700">{{ formatPara(filtrelenmisMuhasebeOzet.arabuluculuk) }}</p>
                     </div>
                   </div>
 

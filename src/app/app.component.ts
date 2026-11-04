@@ -3664,12 +3664,15 @@ export class AppComponent implements OnInit {
           odenen += hesap?.netTutar || 0;
         }
       });
-      const netUcret = this.getArabuluculukHizmetUcretiHesabi(a)?.netTutar || 0;
+      const hizmetHesabi = this.getArabuluculukHizmetUcretiHesabi(a);
+      const netUcret = hizmetHesabi?.netTutar || 0;
       const kalan = Math.max(0, Number((netUcret - odenen).toFixed(2)));
       
       const taraflarStr = a.taraflar?.map((t:any) => t.isim).join(' vs ') || '';
 
-      if (kalan > 0.01) liste.push({ tip: 'Arabuluculuk', isim: (a.buroNo ? a.buroNo + ' / ' : '') + a.arabuluculukNo, muvekkil: this.muvekkiller.find(m=>m.id === a.muvekkilId)?.adSoyad || a.taraflar?.map((t:any) => t.isim).join(', ') || '-', ekBilgi: taraflarStr, toplam: netUcret, tahsilat: odenen, kalan: kalan, id: a.id, detayFonk: () => this.arabuluculukDetayinaGit(a) });
+      // Cash receivables and gross fees differ for receipts without withholding.
+      const kalanOrani = netUcret > 0 ? Math.min(1, kalan / netUcret) : 0;
+      if (kalan > 0.01) liste.push({ tip: 'Arabuluculuk', isim: (a.buroNo ? a.buroNo + ' / ' : '') + a.arabuluculukNo, muvekkil: this.muvekkiller.find(m=>m.id === a.muvekkilId)?.adSoyad || a.taraflar?.map((t:any) => t.isim).join(', ') || '-', ekBilgi: taraflarStr, toplam: netUcret, tahsilat: odenen, kalan: kalan, kalanBrut: (hizmetHesabi?.brutTutar || 0) * kalanOrani, kalanKdv: (hizmetHesabi?.kdvTutari || 0) * kalanOrani, id: a.id, detayFonk: () => this.arabuluculukDetayinaGit(a) });
     });
     return liste.sort((a, b) => b.kalan - a.kalan);
   }
@@ -3682,6 +3685,21 @@ export class AppComponent implements OnInit {
       if (item.tip === 'İcra') o.icra += item.kalan;
       if (item.tip === 'Arabuluculuk') o.arabuluculuk += item.kalan;
     });
+    return o;
+  }
+
+  get filtrelenmisMuhasebeOzet() {
+    const o = { toplam: 0, netKar: 0, avukatlik: 0, icra: 0, arabuluculuk: 0 };
+    for (const item of this.filtrelenmisMuhasebeListesi) {
+      const brut = item.kalanBrut ?? item.kalan;
+      // Non-mediation fees have no separate VAT field; retain the existing 20% estimate.
+      const kdv = item.kalanKdv ?? brut * 0.2;
+      o.toplam += brut;
+      o.netKar += brut - kdv;
+      if (item.tip === 'Avukatlık') o.avukatlik += brut;
+      if (item.tip === 'İcra') o.icra += brut;
+      if (item.tip === 'Arabuluculuk') o.arabuluculuk += brut;
+    }
     return o;
   }
 
@@ -5023,9 +5041,9 @@ export class AppComponent implements OnInit {
   }
 
   get filtrelenmisMuhasebeListesi() {
-    const s = this.muhasebeArama.toLowerCase();
+    const s = this.muhasebeArama.trim().toLocaleLowerCase('tr-TR');
     return this.muhasebeListesi.filter(item => {
-      const mS = item.isim.toLowerCase().includes(s) || item.muvekkil.toLowerCase().includes(s);
+      const mS = [item.isim, item.muvekkil, item.ekBilgi].some(deger => String(deger || '').toLocaleLowerCase('tr-TR').includes(s));
       const mF = this.muhasebeFiltre === 'Tümü' || item.tip === this.muhasebeFiltre;
       return mS && mF;
     });
