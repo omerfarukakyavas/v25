@@ -3708,37 +3708,50 @@
                     }
                     <div class="space-y-4 sm:space-y-6 lg:col-span-12">
                       <div class="app-detail-tabs-card bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden min-h-[320px]">
+                        <ng-template #detaySekmeSimgesi let-tur>
+                          <svg aria-hidden="true" focusable="false" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            @switch (tur) {
+                              @case ('notlar') { <g stroke="#7c3aed"><path fill="#f3e8ff" d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M8 12h8M8 16h6"/></g> }
+                              @case ('evraklar') { <g stroke="#b45309"><path fill="#fef3c7" d="M3 7V5h7l2 3h9v12H3z"/><path d="M3 10h18"/></g> }
+                              @case ('iletisimNotlari') { <g stroke="#0e7490"><path fill="#cffafe" d="M3 4h18v13H9l-6 4z"/><path d="M7 9h10M7 13h7"/></g> }
+                              @case ('muvekkilGorusmeleri') { <g stroke="#4338ca"><circle fill="#e0e7ff" cx="9" cy="7" r="3"/><path d="M3 20v-3a6 6 0 0 1 12 0v3M17 4h4v8h-4l-2 2"/></g> }
+                              @case ('finans') { <g stroke="#047857"><rect fill="#d1fae5" x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9h18M8 14h3M8 17h5M17 13v4"/></g> }
+                              @case ('sureliIsler') { <g stroke="#b45309"><path fill="#fef3c7" d="M6 3h12v4l-6 5 6 5v4H6v-4l6-5-6-5z"/><path d="M5 3h14M5 21h14M9 18h6"/></g> }
+                              @case ('gecmis') { <g stroke="#2563eb"><path fill="#dbeafe" d="M4 12a8 8 0 1 1 2 5"/><path d="M4 5v7h7M12 7v5l3 2"/></g> }
+                            }
+                          </svg>
+                        </ng-template>
                         <div class="app-detail-tabs-nav flex overflow-x-auto border-b border-slate-200 bg-slate-50 custom-scrollbar">
                            @if (aktifSayfa === 'arabuluculukDetay') {
-                             <button (click)="aktifDetaySekmesi = 'notlar'" [class]="getDetayTabClass('notlar')" class="flex min-w-[110px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Notlar</button>
+                             <button (click)="aktifDetaySekmesi = 'notlar'" [class]="getDetayTabClass('notlar')" class="flex min-w-[110px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm"><ng-container *ngTemplateOutlet="detaySekmeSimgesi; context: { $implicit: 'notlar' }"></ng-container>Notlar</button>
                            } @else {
-                             <button (click)="aktifDetaySekmesi = 'evraklar'" [class]="getDetayTabClass('evraklar')" class="flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Evrak Bağlantıları</button>
+                             <button (click)="aktifDetaySekmesi = 'evraklar'" [class]="getDetayTabClass('evraklar')" class="flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm"><ng-container *ngTemplateOutlet="detaySekmeSimgesi; context: { $implicit: 'evraklar' }"></ng-container>Evrak Bağlantıları</button>
                            }
                            <button (click)="aktifDetaySekmesi = 'iletisimNotlari'" [class]="getDetayTabClass('iletisimNotlari')" class="relative flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
-                             İletişim Notları
+                             <ng-container *ngTemplateOutlet="detaySekmeSimgesi; context: { $implicit: 'iletisimNotlari' }"></ng-container>İletişim Notları
                              @if (aktifDosyaIletisimNotlari.length > 0) { <span class="absolute top-2 right-2 rounded-full bg-cyan-700 px-1.5 py-0.5 text-[9px] font-black text-white">{{ aktifDosyaIletisimNotlari.length }}</span> }
                            </button>
                            @if (aktifSayfa === 'arabuluculukDetay') {
-                             <button (click)="aktifDetaySekmesi = 'evraklar'" [class]="getDetayTabClass('evraklar')" class="flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Evrak Bağlantıları</button>
+                             <button (click)="aktifDetaySekmesi = 'evraklar'" [class]="getDetayTabClass('evraklar')" class="flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm"><ng-container *ngTemplateOutlet="detaySekmeSimgesi; context: { $implicit: 'evraklar' }"></ng-container>Evrak Bağlantıları</button>
                            } @else {
-                             <button (click)="aktifDetaySekmesi = 'notlar'" [class]="getDetayTabClass('notlar')" class="flex min-w-[110px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">Notlar</button>
+                             <button (click)="aktifDetaySekmesi = 'notlar'" [class]="getDetayTabClass('notlar')" class="flex min-w-[110px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm"><ng-container *ngTemplateOutlet="detaySekmeSimgesi; context: { $implicit: 'notlar' }"></ng-container>Notlar</button>
                            }
                             @if (aktifSayfa === 'detay') {
                               <button (click)="aktifDetaySekmesi = 'muvekkilGorusmeleri'" [class]="getDetayTabClass('muvekkilGorusmeleri')" class="relative flex min-w-[180px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
-                                Müvekkil Görüşme Notları
+                                <ng-container *ngTemplateOutlet="detaySekmeSimgesi; context: { $implicit: 'muvekkilGorusmeleri' }"></ng-container>Müvekkil Görüşme Notları
                                 @if (aktifDavaMuvekkilGorusmeNotlari.length > 0) { <span class="absolute top-2 right-2 rounded-full bg-violet-700 px-1.5 py-0.5 text-[9px] font-black text-white">{{ aktifDavaMuvekkilGorusmeNotlari.length }}</span> }
                               </button>
                             }
                             <button (click)="aktifDetaySekmesi = 'finans'" [class]="getDetayTabClass('finans')" class="relative flex min-w-[150px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
-                              Finans ve Masraf
+                              <ng-container *ngTemplateOutlet="detaySekmeSimgesi; context: { $implicit: 'finans' }"></ng-container>Finans ve Masraf
                               @if ((aktifDosya.finansalIslemler || []).length > 0) { <span class="absolute top-2 right-2 rounded-full bg-emerald-700 px-1.5 py-0.5 text-[9px] font-black text-white">{{ (aktifDosya.finansalIslemler || []).length }}</span> }
                             </button>
                             <button (click)="aktifDetaySekmesi = 'sureliIsler'" [class]="getDetayTabClass('sureliIsler')" class="relative flex min-w-[120px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
-                              Süreli İşler
+                              <ng-container *ngTemplateOutlet="detaySekmeSimgesi; context: { $implicit: 'sureliIsler' }"></ng-container>Süreli İşler
                               @if(aktifDosyaSureliIsleri.length > 0) { <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span> }
                            </button>
                            <button (click)="aktifDetaySekmesi = 'gecmis'" [class]="getDetayTabClass('gecmis')" class="relative flex min-w-[120px] flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-xs font-bold transition-colors sm:min-w-0 sm:text-sm">
-                             Geçmiş
+                             <ng-container *ngTemplateOutlet="detaySekmeSimgesi; context: { $implicit: 'gecmis' }"></ng-container>Geçmiş
                              @if(getAktifDosyaGecmisSayisi() > 0) { <span class="absolute top-2 right-2 rounded-full bg-slate-900 px-1.5 py-0.5 text-[9px] font-black text-white">{{ getAktifDosyaGecmisSayisi() }}</span> }
                           </button>
                         </div>
